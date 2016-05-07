@@ -27,7 +27,7 @@ import org.dmg.pmml.RegressionNormalizationMethodType;
 import org.dmg.pmml.RegressionTable;
 import org.jpmml.converter.ModelUtil;
 
-public class LogisticRegressionModelConverter extends PredictionModelConverter<LogisticRegressionModel> {
+public class LogisticRegressionModelConverter extends ModelConverter<LogisticRegressionModel> {
 
 	public LogisticRegressionModelConverter(LogisticRegressionModel model){
 		super(model);
@@ -35,7 +35,7 @@ public class LogisticRegressionModelConverter extends PredictionModelConverter<L
 
 	@Override
 	public RegressionModel encodeModel(FeatureSchema schema){
-		LogisticRegressionModel model = getModel();
+		LogisticRegressionModel model = getTransformer();
 
 		List<String> targetCategories = schema.getTargetCategories();
 		if(targetCategories.size() != 2){

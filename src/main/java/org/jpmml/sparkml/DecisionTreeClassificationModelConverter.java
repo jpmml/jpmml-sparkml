@@ -22,7 +22,7 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.ModelUtil;
 
-public class DecisionTreeClassificationModelConverter extends PredictionModelConverter<DecisionTreeClassificationModel> {
+public class DecisionTreeClassificationModelConverter extends ModelConverter<DecisionTreeClassificationModel> {
 
 	public DecisionTreeClassificationModelConverter(DecisionTreeClassificationModel model){
 		super(model);
@@ -30,7 +30,7 @@ public class DecisionTreeClassificationModelConverter extends PredictionModelCon
 
 	@Override
 	public TreeModel encodeModel(FeatureSchema schema){
-		DecisionTreeClassificationModel model = getModel();
+		DecisionTreeClassificationModel model = getTransformer();
 
 		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema)
 			.setOutput(ModelUtil.createProbabilityOutput(schema));

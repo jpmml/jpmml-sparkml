@@ -34,7 +34,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 
-public class GBTRegressionModelConverter extends PredictionModelConverter<GBTRegressionModel> {
+public class GBTRegressionModelConverter extends ModelConverter<GBTRegressionModel> {
 
 	public GBTRegressionModelConverter(GBTRegressionModel model){
 		super(model);
@@ -42,7 +42,7 @@ public class GBTRegressionModelConverter extends PredictionModelConverter<GBTReg
 
 	@Override
 	public MiningModel encodeModel(FeatureSchema schema){
-		GBTRegressionModel model = getModel();
+		GBTRegressionModel model = getTransformer();
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 

@@ -18,16 +18,16 @@
  */
 package org.jpmml.sparkml;
 
-import org.apache.spark.ml.Model;
+import org.apache.spark.ml.PredictionModel;
+import org.dmg.pmml.Model;
 
 abstract
-public class ModelConverter<M extends Model<M>> extends TransformerConverter<M> {
+public class ModelConverter<T extends PredictionModel<?, T>> extends TransformerConverter<T> {
 
-	public ModelConverter(M model){
-		super(model);
+	public ModelConverter(T transformer){
+		super(transformer);
 	}
 
-	public M getModel(){
-		return getTransformer();
-	}
+	abstract
+	public Model encodeModel(FeatureSchema schema);
 }

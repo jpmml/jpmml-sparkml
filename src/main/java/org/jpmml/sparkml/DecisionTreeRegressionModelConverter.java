@@ -21,7 +21,7 @@ package org.jpmml.sparkml;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.dmg.pmml.TreeModel;
 
-public class DecisionTreeRegressionModelConverter extends PredictionModelConverter<DecisionTreeRegressionModel> {
+public class DecisionTreeRegressionModelConverter extends ModelConverter<DecisionTreeRegressionModel> {
 
 	public DecisionTreeRegressionModelConverter(DecisionTreeRegressionModel model){
 		super(model);
@@ -29,7 +29,7 @@ public class DecisionTreeRegressionModelConverter extends PredictionModelConvert
 
 	@Override
 	public TreeModel encodeModel(FeatureSchema schema){
-		DecisionTreeRegressionModel model = getModel();
+		DecisionTreeRegressionModel model = getTransformer();
 
 		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema);
 

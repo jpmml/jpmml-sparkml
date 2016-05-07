@@ -29,7 +29,7 @@ import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 
-public class RandomForestClassificationModelConverter extends PredictionModelConverter<RandomForestClassificationModel> {
+public class RandomForestClassificationModelConverter extends ModelConverter<RandomForestClassificationModel> {
 
 	public RandomForestClassificationModelConverter(RandomForestClassificationModel model){
 		super(model);
@@ -37,7 +37,7 @@ public class RandomForestClassificationModelConverter extends PredictionModelCon
 
 	@Override
 	public MiningModel encodeModel(FeatureSchema schema){
-		RandomForestClassificationModel model = getModel();
+		RandomForestClassificationModel model = getTransformer();
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 

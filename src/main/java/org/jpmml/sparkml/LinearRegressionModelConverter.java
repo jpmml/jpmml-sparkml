@@ -24,7 +24,7 @@ import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionTable;
 import org.jpmml.converter.ModelUtil;
 
-public class LinearRegressionModelConverter extends PredictionModelConverter<LinearRegressionModel> {
+public class LinearRegressionModelConverter extends ModelConverter<LinearRegressionModel> {
 
 	public LinearRegressionModelConverter(LinearRegressionModel model){
 		super(model);
@@ -32,7 +32,7 @@ public class LinearRegressionModelConverter extends PredictionModelConverter<Lin
 
 	@Override
 	public RegressionModel encodeModel(FeatureSchema schema){
-		LinearRegressionModel model = getModel();
+		LinearRegressionModel model = getTransformer();
 
 		RegressionTable regressionTable = RegressionModelUtil.encodeRegressionTable(model.intercept(), model.coefficients(), schema);
 

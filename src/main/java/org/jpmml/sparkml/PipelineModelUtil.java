@@ -53,7 +53,7 @@ public class PipelineModelUtil {
 
 				FeatureSchema schema = FeatureSchemaUtil.createSchema(predictionModel, columns);
 
-				PredictionModelConverter<?> predictionModelConverter = (PredictionModelConverter<?>)ConverterUtil.createConverter(predictionModel);
+				ModelConverter<?> predictionModelConverter = (ModelConverter<?>)ConverterUtil.createConverter(predictionModel);
 
 				DataDictionary dataDictionary = schema.encodeDataDictionary();
 
