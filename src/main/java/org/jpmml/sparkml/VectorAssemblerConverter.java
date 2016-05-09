@@ -18,17 +18,30 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.feature.VectorAssembler;
 
-abstract
-public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {
+public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> {
 
-	public FeatureConverter(T transformer){
+	public VectorAssemblerConverter(VectorAssembler transformer){
 		super(transformer);
 	}
 
-	abstract
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper);
+	@Override
+	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+		VectorAssembler transformer = getTransformer();
+
+		List<Feature> result = new ArrayList<>();
+
+		String[] inputCols = transformer.getInputCols();
+		for(String inputCol : inputCols){
+			List<Feature> inputFeatures = featureMapper.getFeatures(inputCol);
+
+			result.addAll(inputFeatures);
+		}
+
+		return result;
+	}
 }

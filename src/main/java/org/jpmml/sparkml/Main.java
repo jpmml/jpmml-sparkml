@@ -21,6 +21,7 @@ package org.jpmml.sparkml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
@@ -29,6 +30,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.MetroJAXBUtil;
 
@@ -42,11 +44,18 @@ public class Main {
 	private boolean help = false;
 
 	@Parameter (
-		names = {"--pipeline-ser-input", "--ser-input"},
+		names = "--ser-schema-input",
+		description = "Schema SER input file",
+		required = true
+	)
+	private File schemaInput = null;
+
+	@Parameter (
+		names = "--ser-pipeline-input",
 		description = "Pipeline SER input file",
 		required = true
 	)
-	private File input = null;
+	private File pipelineInput = null;
 
 	@Parameter (
 		names = "--pmml-output",
@@ -92,28 +101,31 @@ public class Main {
 	}
 
 	private void run() throws Exception {
-		PipelineModel pipelineModel;
+		StructType schema = (StructType)deserialize(this.schemaInput);
 
-		try(InputStream is = new FileInputStream(this.input)){
+		PipelineModel pipelineModel = (PipelineModel)deserialize(this.pipelineInput);
 
-			try(ObjectInputStream ois = new ObjectInputStream(is)){
-				pipelineModel = (PipelineModel)ois.readObject();
-			}
-		}
-
-		PMML pmml = PipelineModelUtil.toPMML(pipelineModel);
+		PMML pmml = PipelineModelUtil.toPMML(schema, pipelineModel);
 
 		try(OutputStream os = new FileOutputStream(this.output)){
 			MetroJAXBUtil.marshalPMML(pmml, os);
 		}
 	}
 
-	public File getInput(){
-		return this.input;
+	public File getSchemaInput(){
+		return this.schemaInput;
 	}
 
-	public void setInput(File input){
-		this.input = input;
+	public void setSchemaInput(File schemaInput){
+		this.schemaInput = schemaInput;
+	}
+
+	public File getPipelineInput(){
+		return this.pipelineInput;
+	}
+
+	public void setPipelineInput(File pipelineInput){
+		this.pipelineInput = pipelineInput;
 	}
 
 	public File getOutput(){
@@ -122,5 +134,16 @@ public class Main {
 
 	public void setOutput(File output){
 		this.output = output;
+	}
+
+	static
+	private Object deserialize(File file) throws ClassNotFoundException, IOException {
+
+		try(InputStream is = new FileInputStream(file)){
+
+			try(ObjectInputStream ois = new ObjectInputStream(is)){
+				return ois.readObject();
+			}
+		}
 	}
 }

@@ -79,9 +79,9 @@ Pipeline pipeline = new Pipeline()
 PipelineModel pipelineModel = pipeline.fit(irisData);
 ```
 
-Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.PipelineModelUtil#toPMML(PipelineModel)` utility method:
+Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.PipelineModelUtil#toPMML(StructType, PipelineModel)` utility method:
 ```java
-PMML pmml = PipelineModelUtil.toPMML(pipelineModel);
+PMML pmml = PipelineModelUtil.toPMML(irisData.schema(), pipelineModel);
 
 // Viewing the result
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
@@ -103,9 +103,9 @@ The example application JAR file contains an executable class `org.jpmml.sparkml
 
 The example application JAR file does not include Apache Spark runtime libraries. Therefore, this executable class must be executed using Apache Spark's `spark-submit` helper script.
 
-Converting the Spark ML pipeline serialization file `pipeline.ser` to a PMML file `pipeline.pmml`:
+Converting Spark ML schema and pipeline serialization files `schema.ser` and `pipeline.ser`, respectively, to a PMML file `pipeline.pmml`:
 ```
-spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-executable-1.0-SNAPSHOT.jar --ser-input pipeline.ser --pmml-output pipeline.pmml
+spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-executable-1.0-SNAPSHOT.jar --ser-schema-input schema.ser --ser-pipeline-input pipeline.ser --pmml-output pipeline.pmml
 ```
 
 Getting help:

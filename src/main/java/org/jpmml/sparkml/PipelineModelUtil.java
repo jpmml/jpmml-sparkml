@@ -18,13 +18,12 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.param.shared.HasOutputCol;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
@@ -36,33 +35,49 @@ public class PipelineModelUtil {
 	}
 
 	static
-	public PMML toPMML(PipelineModel pipelineModel) throws Exception {
-		Map<String, Transformer> columns = new LinkedHashMap<>();
+	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
+		FeatureMapper featureMapper = new FeatureMapper(schema);
 
 		Transformer[] transformers = pipelineModel.stages();
 		for(Transformer transformer : transformers){
+			TransformerConverter converter;
 
-			if(transformer instanceof HasOutputCol){
-				HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+			try {
+				converter = ConverterUtil.createConverter(transformer);
+			} catch(Exception e){
+				throw new IllegalArgumentException(e);
+			}
 
-				columns.put(hasOutputCol.getOutputCol(), transformer);
-			} // End if
+			if(converter instanceof FeatureConverter){
+				FeatureConverter featureConverter = (FeatureConverter)converter;
 
-			if(transformer instanceof PredictionModel){
+				featureMapper.append(featureConverter);
+			} else
+
+			if(converter instanceof ModelConverter){
+				ModelConverter modelConverter = (ModelConverter)converter;
+
 				PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)transformer;
 
-				FeatureSchema schema = FeatureSchemaUtil.createSchema(predictionModel, columns);
+				FeatureSchema featureSchema = featureMapper.createSchema(predictionModel);
 
-				ModelConverter<?> predictionModelConverter = (ModelConverter<?>)ConverterUtil.createConverter(predictionModel);
+				List<Feature> features = featureSchema.getFeatures();
+				if(features.size() != predictionModel.numFeatures()){
+					throw new IllegalArgumentException();
+				}
 
-				DataDictionary dataDictionary = schema.encodeDataDictionary();
+				DataDictionary dataDictionary = featureSchema.encodeDataDictionary();
 
-				Model model = predictionModelConverter.encodeModel(schema);
+				Model model = modelConverter.encodeModel(featureSchema);
 
 				PMML pmml = new PMML("4.2", PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"), dataDictionary)
 					.addModels(model);
 
 				return pmml;
+			} else
+
+			{
+				throw new IllegalArgumentException();
 			}
 		}
 

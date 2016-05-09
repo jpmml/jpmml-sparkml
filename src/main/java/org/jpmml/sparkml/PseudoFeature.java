@@ -18,17 +18,11 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.List;
+import org.dmg.pmml.FieldName;
 
-import org.apache.spark.ml.Transformer;
+public class PseudoFeature extends Feature {
 
-abstract
-public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {
-
-	public FeatureConverter(T transformer){
-		super(transformer);
+	public PseudoFeature(FieldName name){
+		super(name);
 	}
-
-	abstract
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper);
 }

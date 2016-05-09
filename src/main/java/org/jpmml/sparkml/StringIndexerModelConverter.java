@@ -18,17 +18,26 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.feature.StringIndexerModel;
 
-abstract
-public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {
+public class StringIndexerModelConverter extends FeatureConverter<StringIndexerModel> {
 
-	public FeatureConverter(T transformer){
+	public StringIndexerModelConverter(StringIndexerModel transformer){
 		super(transformer);
 	}
 
-	abstract
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper);
+	@Override
+	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+		StringIndexerModel transformer = getTransformer();
+
+		Feature inputFeature = featureMapper.getOnlyFeature(transformer.getInputCol());
+
+		Feature feature = new CategoricalFeature<>(inputFeature.getName(), Arrays.asList(transformer.labels()));
+
+		return Collections.singletonList(feature);
+	}
 }
