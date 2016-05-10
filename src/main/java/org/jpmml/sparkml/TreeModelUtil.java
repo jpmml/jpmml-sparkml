@@ -188,7 +188,12 @@ public class TreeModelUtil {
 	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, FeatureSchema schema){
 		ContinuousFeature feature = (ContinuousFeature)schema.getFeature(continuousSplit.featureIndex());
 
-		String value = ValueUtil.formatValue(continuousSplit.threshold());
+		double threshold = continuousSplit.threshold();
+
+		// XXX
+		threshold += 1e-15;
+
+		String value = ValueUtil.formatValue(threshold);
 
 		SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.LESS_OR_EQUAL)
 			.setValue(value);
