@@ -23,6 +23,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.StringIndexerModel;
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.OpType;
+import org.dmg.pmml.Value;
+import org.jpmml.converter.PMMLUtil;
 
 public class StringIndexerModelConverter extends FeatureConverter<StringIndexerModel> {
 
@@ -36,7 +40,21 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		Feature inputFeature = featureMapper.getOnlyFeature(transformer.getInputCol());
 
-		Feature feature = new CategoricalFeature<>(inputFeature.getName(), Arrays.asList(transformer.labels()));
+		List<String> categories = Arrays.asList(transformer.labels());
+
+		DataField dataField = featureMapper.getDataField(inputFeature.getName());
+		if(dataField != null){
+			dataField.setOpType(OpType.CATEGORICAL);
+
+			List<Value> values = dataField.getValues();
+			if(values.size() > 0){
+				throw new IllegalArgumentException();
+			}
+
+			values.addAll(PMMLUtil.createValues(categories));
+		}
+
+		Feature feature = new CategoricalFeature<>(inputFeature.getName(), categories);
 
 		return Collections.singletonList(feature);
 	}

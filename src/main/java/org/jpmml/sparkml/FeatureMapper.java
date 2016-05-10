@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,11 +29,20 @@ import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.param.shared.HasOutputCol;
-import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.IntegerType;
+import org.apache.spark.sql.types.NumericType;
+import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.DataDictionary;
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMML;
+import org.dmg.pmml.TransformationDictionary;
+import org.jpmml.converter.PMMLUtil;
 
 public class FeatureMapper {
 
@@ -40,9 +50,32 @@ public class FeatureMapper {
 
 	private Map<String, List<Feature>> columnFeatures = new LinkedHashMap<>();
 
+	private Map<FieldName, DataField> dataFields = new LinkedHashMap<>();
+
+	private Map<FieldName, DerivedField> derivedFields = new LinkedHashMap<>();
+
 
 	public FeatureMapper(StructType schema){
-		setSchema(schema);
+		this.schema = schema;
+	}
+
+	public PMML encodePMML(){
+		List<DataField> dataFields = new ArrayList<>(this.dataFields.values());
+		List<DerivedField> derivedFields = new ArrayList<>(this.derivedFields.values());
+
+		DataDictionary dataDictionary = new DataDictionary();
+		(dataDictionary.getDataFields()).addAll(dataFields);
+
+		TransformationDictionary transformationDictionary = null;
+		if(derivedFields.size() > 0){
+			transformationDictionary = new TransformationDictionary();
+			(transformationDictionary.getDerivedFields()).addAll(derivedFields);
+		}
+
+		PMML pmml = new PMML("4.2", PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"), dataDictionary)
+			.setTransformationDictionary(transformationDictionary);
+
+		return pmml;
 	}
 
 	public void append(FeatureConverter<?> converter){
@@ -76,9 +109,15 @@ public class FeatureMapper {
 			targetField = targetFeature.getName();
 		}
 
-		List<Feature> features = getFeatures(predictionModel.getFeaturesCol());
+		List<FieldName> activeFields = new ArrayList<>(this.dataFields.keySet());
+		activeFields.remove(targetField);
 
-		FeatureSchema result = new FeatureSchema(targetField, targetCategories, features);
+		List<Feature> features = getFeatures(predictionModel.getFeaturesCol());
+		if(features.size() != predictionModel.numFeatures()){
+			throw new IllegalArgumentException();
+		}
+
+		FeatureSchema result = new FeatureSchema(targetField, targetCategories, activeFields, features);
 
 		return result;
 	}
@@ -93,19 +132,25 @@ public class FeatureMapper {
 		List<Feature> features = this.columnFeatures.get(column);
 
 		if(features == null){
-			StructField field = this.schema.apply(column);
-
 			FieldName name = FieldName.create(column);
+
+			DataField dataField = this.dataFields.get(name);
+			if(dataField == null){
+				dataField = createDataField(name);
+			}
 
 			Feature feature;
 
-			DataType dataType = field.dataType();
-			if((DataTypes.IntegerType).sameType(dataType) || (DataTypes.FloatType).sameType(dataType) || (DataTypes.DoubleType).sameType(dataType)){
-				feature = new ContinuousFeature(name);
-			} else
-
-			{
-				feature = new PseudoFeature(name);
+			DataType dataType = dataField.getDataType();
+			switch(dataType){
+				case INTEGER:
+				case FLOAT:
+				case DOUBLE:
+					feature = new ContinuousFeature(name);
+					break;
+				default:
+					feature = new PseudoFeature(name);
+					break;
 			}
 
 			return Collections.singletonList(feature);
@@ -114,11 +159,47 @@ public class FeatureMapper {
 		return features;
 	}
 
-	public StructType getSchema(){
-		return this.schema;
+	private DataField createDataField(FieldName name){
+		StructField field = this.schema.apply(name.getValue());
+
+		OpType opType;
+		DataType dataType;
+
+		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
+		if(sparkDataType instanceof NumericType){
+			opType = OpType.CONTINUOUS;
+			dataType = (sparkDataType instanceof IntegerType ? DataType.INTEGER : DataType.DOUBLE);
+		} else
+
+		if(sparkDataType instanceof StringType){
+			opType = OpType.CATEGORICAL;
+			dataType = DataType.STRING;
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
+
+		DataField dataField = new DataField(name, opType, dataType);
+
+		putDataField(dataField);
+
+		return dataField;
 	}
 
-	private void setSchema(StructType schema){
-		this.schema = schema;
+	public DataField getDataField(FieldName name){
+		return this.dataFields.get(name);
+	}
+
+	void putDataField(DataField dataField){
+		this.dataFields.put(dataField.getName(), dataField);
+	}
+
+	public DerivedField getDerivedField(FieldName name){
+		return this.derivedFields.get(name);
+	}
+
+	void putDerivedField(DerivedField derivedField){
+		this.derivedFields.put(derivedField.getName(), derivedField);
 	}
 }

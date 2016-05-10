@@ -67,7 +67,7 @@ public class TreeModelUtil {
 	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel model, final FeatureSchema schema){
 		Function<DecisionTreeModel, TreeModel> function = new Function<DecisionTreeModel, TreeModel>(){
 
-			private FeatureSchema segmentSchema = new FeatureSchema(null, schema.getTargetCategories(), schema.getFeatures());
+			private FeatureSchema segmentSchema = new FeatureSchema(null, schema.getTargetCategories(), schema.getActiveFields(), schema.getFeatures());
 
 
 			@Override

@@ -18,16 +18,18 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.sql.types.StructType;
-import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
-import org.jpmml.converter.PMMLUtil;
+import org.dmg.pmml.Visitor;
+import org.jpmml.model.visitors.DictionaryCleaner;
+import org.jpmml.model.visitors.MiningSchemaCleaner;
 
 public class PipelineModelUtil {
 
@@ -61,17 +63,15 @@ public class PipelineModelUtil {
 
 				FeatureSchema featureSchema = featureMapper.createSchema(predictionModel);
 
-				List<Feature> features = featureSchema.getFeatures();
-				if(features.size() != predictionModel.numFeatures()){
-					throw new IllegalArgumentException();
-				}
-
-				DataDictionary dataDictionary = featureSchema.encodeDataDictionary();
-
 				Model model = modelConverter.encodeModel(featureSchema);
 
-				PMML pmml = new PMML("4.2", PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"), dataDictionary)
+				PMML pmml = featureMapper.encodePMML()
 					.addModels(model);
+
+				List<? extends Visitor> visitors = Arrays.asList(new MiningSchemaCleaner(), new DictionaryCleaner());
+				for(Visitor visitor : visitors){
+					visitor.applyTo(pmml);
+				}
 
 				return pmml;
 			} else
