@@ -206,7 +206,7 @@ public class TreeModelUtil {
 
 	static
 	private Predicate[] encodeCategoricalSplit(CategoricalSplit categoricalSplit, FeatureSchema schema){
-		CategoricalFeature<?> feature = (CategoricalFeature<?>)schema.getFeature(categoricalSplit.featureIndex());
+		BinaryFeature feature = (BinaryFeature)schema.getFeature(categoricalSplit.featureIndex());
 
 		SimplePredicate.Operator leftOperator;
 		SimplePredicate.Operator rightOperator;

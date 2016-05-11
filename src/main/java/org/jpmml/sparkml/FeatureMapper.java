@@ -97,10 +97,10 @@ public class FeatureMapper {
 		List<String> targetCategories = null;
 
 		if(predictionModel instanceof ClassificationModel){
-			CategoricalFeature targetFeature = (CategoricalFeature)getOnlyFeature(predictionModel.getLabelCol());
+			ListFeature targetFeature = (ListFeature)getOnlyFeature(predictionModel.getLabelCol());
 
 			targetField = targetFeature.getName();
-			targetCategories = (List)targetFeature.getValue();
+			targetCategories = targetFeature.getValues();
 		} else
 
 		{

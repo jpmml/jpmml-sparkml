@@ -53,13 +53,13 @@ public class RegressionModelUtil {
 				regressionTable.addNumericPredictors(numericPredictor);
 			} else
 
-			if(feature instanceof CategoricalFeature){
-				CategoricalFeature<?> categoricalFeature = (CategoricalFeature<?>)feature;
+			if(feature instanceof BinaryFeature){
+				BinaryFeature binaryFeature = (BinaryFeature)feature;
 
-				String value = ValueUtil.formatValue(categoricalFeature.getValue());
+				String value = ValueUtil.formatValue(binaryFeature.getValue());
 
 				CategoricalPredictor categoricalPredictor = new CategoricalPredictor()
-					.setName(categoricalFeature.getName())
+					.setName(binaryFeature.getName())
 					.setCoefficient(coefficients.apply(i))
 					.setValue(value);
 

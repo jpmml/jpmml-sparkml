@@ -54,7 +54,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			values.addAll(PMMLUtil.createValues(categories));
 		}
 
-		Feature feature = new CategoricalFeature<>(inputFeature.getName(), categories);
+		Feature feature = new ListFeature(inputFeature.getName(), categories);
 
 		return Collections.singletonList(feature);
 	}

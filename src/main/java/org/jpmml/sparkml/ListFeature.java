@@ -18,24 +18,26 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.List;
+
 import org.dmg.pmml.FieldName;
 
-public class CategoricalFeature<V> extends Feature {
+public class ListFeature extends ContinuousFeature {
 
-	private V value = null;
+	private List<String> values = null;
 
 
-	public CategoricalFeature(FieldName name, V value){
+	public ListFeature(FieldName name, List<String> values){
 		super(name);
 
-		setValue(value);
+		setValues(values);
 	}
 
-	public V getValue(){
-		return this.value;
+	public List<String> getValues(){
+		return this.values;
 	}
 
-	private void setValue(V value){
-		this.value = value;
+	private void setValues(List<String> values){
+		this.values = values;
 	}
 }

@@ -33,9 +33,9 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
 		OneHotEncoder transformer = getTransformer();
 
-		CategoricalFeature<?> inputFeature = (CategoricalFeature<?>)featureMapper.getOnlyFeature(transformer.getInputCol());
+		ListFeature inputFeature = (ListFeature)featureMapper.getOnlyFeature(transformer.getInputCol());
 
-		List<String> values = (List)inputFeature.getValue();
+		List<String> values = inputFeature.getValues();
 
 		Boolean dropLast = (Boolean)transformer.get(transformer.dropLast()).get();
 		if(dropLast){
@@ -45,7 +45,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			Feature feature = new CategoricalFeature<>(inputFeature.getName(), value);
+			Feature feature = new BinaryFeature(inputFeature.getName(), value);
 
 			result.add(feature);
 		}
