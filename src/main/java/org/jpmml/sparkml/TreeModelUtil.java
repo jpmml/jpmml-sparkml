@@ -222,9 +222,9 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			SimpleSetPredicate leftPredicate = createSimpleSetPredicate(listFeature, leftCategories);
+			Predicate leftPredicate = createCategoricalPredicate(listFeature, leftCategories);
 
-			SimpleSetPredicate rightPredicate = createSimpleSetPredicate(listFeature, rightCategories);
+			Predicate rightPredicate = createCategoricalPredicate(listFeature, rightCategories);
 
 			return new Predicate[]{leftPredicate, rightPredicate};
 		} else
@@ -264,7 +264,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private SimpleSetPredicate createSimpleSetPredicate(ListFeature listFeature, double[] categories){
+	private Predicate createCategoricalPredicate(ListFeature listFeature, double[] categories){
 		List<String> values = new ArrayList<>();
 
 		for(int i = 0; i < categories.length; i++){
@@ -275,14 +275,27 @@ public class TreeModelUtil {
 			values.add(value);
 		}
 
-		Array array = new Array(Array.Type.INT, ValueUtil.formatArrayValue(values));
+		if(values.size() == 1){
+			String value = values.get(0);
 
-		SimpleSetPredicate simpleSetPredicate = new SimpleSetPredicate()
-			.setField(listFeature.getName())
-			.setBooleanOperator(SimpleSetPredicate.BooleanOperator.IS_IN)
-			.setArray(array);
+			SimplePredicate simplePredicate = new SimplePredicate()
+				.setField(listFeature.getName())
+				.setOperator(SimplePredicate.Operator.EQUAL)
+				.setValue(value);
 
-		return simpleSetPredicate;
+			return simplePredicate;
+		} else
+
+		{
+			Array array = new Array(Array.Type.INT, ValueUtil.formatArrayValue(values));
+
+			SimpleSetPredicate simpleSetPredicate = new SimpleSetPredicate()
+				.setField(listFeature.getName())
+				.setBooleanOperator(SimpleSetPredicate.BooleanOperator.IS_IN)
+				.setArray(array);
+
+			return simpleSetPredicate;
+		}
 	}
 
 	private static final double[] TRUE = {1.0d};
