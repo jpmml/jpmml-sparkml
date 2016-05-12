@@ -30,7 +30,7 @@ public class ConverterTest extends IntegrationTest {
 
 				PipelineModel pipelineModel = (PipelineModel)deserialize(getName() + getDataset() + ".ser");
 
-				return PipelineModelUtil.toPMML(schema, pipelineModel);
+				return ConverterUtil.toPMML(schema, pipelineModel);
 			}
 
 			private Object deserialize(String name) throws IOException, ClassNotFoundException {

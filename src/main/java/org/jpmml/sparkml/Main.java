@@ -105,7 +105,7 @@ public class Main {
 
 		PipelineModel pipelineModel = (PipelineModel)deserialize(this.pipelineInput);
 
-		PMML pmml = PipelineModelUtil.toPMML(schema, pipelineModel);
+		PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
 
 		try(OutputStream os = new FileOutputStream(this.output)){
 			MetroJAXBUtil.marshalPMML(pmml, os);

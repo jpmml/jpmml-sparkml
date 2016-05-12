@@ -19,9 +19,13 @@
 package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
@@ -37,6 +41,12 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
+import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.Model;
+import org.dmg.pmml.PMML;
+import org.dmg.pmml.Visitor;
+import org.jpmml.model.visitors.DictionaryCleaner;
+import org.jpmml.model.visitors.MiningSchemaCleaner;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
 import org.jpmml.sparkml.feature.OneHotEncoderConverter;
@@ -55,6 +65,54 @@ import org.jpmml.sparkml.model.RandomForestRegressionModelConverter;
 public class ConverterUtil {
 
 	private ConverterUtil(){
+	}
+
+	static
+	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
+		FeatureMapper featureMapper = new FeatureMapper(schema);
+
+		Transformer[] transformers = pipelineModel.stages();
+		for(Transformer transformer : transformers){
+			TransformerConverter converter;
+
+			try {
+				converter = ConverterUtil.createConverter(transformer);
+			} catch(Exception e){
+				throw new IllegalArgumentException(e);
+			}
+
+			if(converter instanceof FeatureConverter){
+				FeatureConverter featureConverter = (FeatureConverter)converter;
+
+				featureMapper.append(featureConverter);
+			} else
+
+			if(converter instanceof ModelConverter){
+				ModelConverter modelConverter = (ModelConverter)converter;
+
+				PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)transformer;
+
+				FeatureSchema featureSchema = featureMapper.createSchema(predictionModel);
+
+				Model model = modelConverter.encodeModel(featureSchema);
+
+				PMML pmml = featureMapper.encodePMML()
+					.addModels(model);
+
+				List<? extends Visitor> visitors = Arrays.asList(new MiningSchemaCleaner(), new DictionaryCleaner());
+				for(Visitor visitor : visitors){
+					visitor.applyTo(pmml);
+				}
+
+				return pmml;
+			} else
+
+			{
+				throw new IllegalArgumentException();
+			}
+		}
+
+		throw new IllegalArgumentException();
 	}
 
 	static
