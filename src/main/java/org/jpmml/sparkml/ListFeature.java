@@ -33,6 +33,12 @@ public class ListFeature extends ContinuousFeature {
 		setValues(values);
 	}
 
+	public String getValue(int index){
+		List<String> values = getValues();
+
+		return values.get(index);
+	}
+
 	public List<String> getValues(){
 		return this.values;
 	}

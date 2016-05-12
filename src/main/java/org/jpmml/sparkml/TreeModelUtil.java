@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,11 +34,13 @@ import org.apache.spark.ml.tree.LeafNode;
 import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
+import org.dmg.pmml.Array;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.Node;
 import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
+import org.dmg.pmml.SimpleSetPredicate;
 import org.dmg.pmml.TreeModel;
 import org.dmg.pmml.True;
 import org.jpmml.converter.ModelUtil;
@@ -206,34 +209,80 @@ public class TreeModelUtil {
 
 	static
 	private Predicate[] encodeCategoricalSplit(CategoricalSplit categoricalSplit, FeatureSchema schema){
-		BinaryFeature feature = (BinaryFeature)schema.getFeature(categoricalSplit.featureIndex());
+		Feature feature = schema.getFeature(categoricalSplit.featureIndex());
 
-		SimplePredicate.Operator leftOperator;
-		SimplePredicate.Operator rightOperator;
+		double[] leftCategories = categoricalSplit.leftCategories();
+		double[] rightCategories = categoricalSplit.rightCategories();
 
-		if(Arrays.equals(TRUE, categoricalSplit.leftCategories()) && Arrays.equals(FALSE, categoricalSplit.rightCategories())){
-			leftOperator = SimplePredicate.Operator.EQUAL;
-			rightOperator = SimplePredicate.Operator.NOT_EQUAL;
+		if(feature instanceof ListFeature){
+			ListFeature listFeature = (ListFeature)feature;
+
+			List<String> values = listFeature.getValues();
+			if(values.size() != (leftCategories.length + rightCategories.length)){
+				throw new IllegalArgumentException();
+			}
+
+			SimpleSetPredicate leftPredicate = createSimpleSetPredicate(listFeature, leftCategories);
+
+			SimpleSetPredicate rightPredicate = createSimpleSetPredicate(listFeature, rightCategories);
+
+			return new Predicate[]{leftPredicate, rightPredicate};
 		} else
 
-		if(Arrays.equals(FALSE, categoricalSplit.leftCategories()) && Arrays.equals(TRUE, categoricalSplit.rightCategories())){
-			leftOperator = SimplePredicate.Operator.NOT_EQUAL;
-			rightOperator = SimplePredicate.Operator.EQUAL;
-		} else
+		if(feature instanceof BinaryFeature){
+			BinaryFeature binaryFeature = (BinaryFeature)feature;
 
-		{
-			throw new IllegalArgumentException();
+			SimplePredicate.Operator leftOperator;
+			SimplePredicate.Operator rightOperator;
+
+			if(Arrays.equals(TRUE, leftCategories) && Arrays.equals(FALSE, rightCategories)){
+				leftOperator = SimplePredicate.Operator.EQUAL;
+				rightOperator = SimplePredicate.Operator.NOT_EQUAL;
+			} else
+
+			if(Arrays.equals(FALSE, leftCategories) && Arrays.equals(TRUE, rightCategories)){
+				leftOperator = SimplePredicate.Operator.NOT_EQUAL;
+				rightOperator = SimplePredicate.Operator.EQUAL;
+			} else
+
+			{
+				throw new IllegalArgumentException();
+			}
+
+			String value = ValueUtil.formatValue(binaryFeature.getValue());
+
+			SimplePredicate leftPredicate = new SimplePredicate(binaryFeature.getName(), leftOperator)
+				.setValue(value);
+
+			SimplePredicate rightPredicate = new SimplePredicate(binaryFeature.getName(), rightOperator)
+				.setValue(value);
+
+			return new Predicate[]{leftPredicate, rightPredicate};
 		}
 
-		String value = ValueUtil.formatValue(feature.getValue());
+		throw new IllegalArgumentException();
+	}
 
-		SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), leftOperator)
-			.setValue(value);
+	static
+	private SimpleSetPredicate createSimpleSetPredicate(ListFeature listFeature, double[] categories){
+		List<String> values = new ArrayList<>();
 
-		SimplePredicate rightPredicate = new SimplePredicate(feature.getName(), rightOperator)
-			.setValue(value);
+		for(int i = 0; i < categories.length; i++){
+			int index = ValueUtil.asInt(categories[i]);
 
-		return new Predicate[]{leftPredicate, rightPredicate};
+			String value = listFeature.getValue(index);
+
+			values.add(value);
+		}
+
+		Array array = new Array(Array.Type.INT, ValueUtil.formatArrayValue(values));
+
+		SimpleSetPredicate simpleSetPredicate = new SimpleSetPredicate()
+			.setField(listFeature.getName())
+			.setBooleanOperator(SimpleSetPredicate.BooleanOperator.IS_IN)
+			.setArray(array);
+
+		return simpleSetPredicate;
 	}
 
 	private static final double[] TRUE = {1.0d};
