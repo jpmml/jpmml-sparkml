@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.feature;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +27,10 @@ import org.dmg.pmml.DataField;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Value;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.sparkml.Feature;
+import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.ListFeature;
 
 public class StringIndexerModelConverter extends FeatureConverter<StringIndexerModel> {
 

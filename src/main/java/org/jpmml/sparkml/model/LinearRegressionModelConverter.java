@@ -16,13 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionTable;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.sparkml.FeatureSchema;
+import org.jpmml.sparkml.ModelConverter;
 
 public class LinearRegressionModelConverter extends ModelConverter<LinearRegressionModel> {
 

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.model;
 
 import java.util.List;
 
@@ -26,6 +26,8 @@ import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionNormalizationMethodType;
 import org.dmg.pmml.RegressionTable;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.sparkml.FeatureSchema;
+import org.jpmml.sparkml.ModelConverter;
 
 public class LogisticRegressionModelConverter extends ModelConverter<LogisticRegressionModel> {
 

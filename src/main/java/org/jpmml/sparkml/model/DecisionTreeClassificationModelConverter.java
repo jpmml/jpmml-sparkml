@@ -16,32 +16,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.dmg.pmml.TreeModel;
+import org.jpmml.converter.ModelUtil;
+import org.jpmml.sparkml.FeatureSchema;
+import org.jpmml.sparkml.ModelConverter;
 
-import org.apache.spark.ml.feature.VectorAssembler;
+public class DecisionTreeClassificationModelConverter extends ModelConverter<DecisionTreeClassificationModel> {
 
-public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> {
-
-	public VectorAssemblerConverter(VectorAssembler transformer){
-		super(transformer);
+	public DecisionTreeClassificationModelConverter(DecisionTreeClassificationModel model){
+		super(model);
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
-		VectorAssembler transformer = getTransformer();
+	public TreeModel encodeModel(FeatureSchema schema){
+		DecisionTreeClassificationModel model = getTransformer();
 
-		List<Feature> result = new ArrayList<>();
+		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema)
+			.setOutput(ModelUtil.createProbabilityOutput(schema));
 
-		String[] inputCols = transformer.getInputCols();
-		for(String inputCol : inputCols){
-			List<Feature> inputFeatures = featureMapper.getFeatures(inputCol);
-
-			result.addAll(inputFeatures);
-		}
-
-		return result;
+		return treeModel;
 	}
 }

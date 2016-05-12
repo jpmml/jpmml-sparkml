@@ -16,38 +16,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.spark.ml.feature.OneHotEncoder;
+import org.apache.spark.ml.feature.VectorAssembler;
+import org.jpmml.sparkml.Feature;
+import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.FeatureMapper;
 
-public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
+public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> {
 
-	public OneHotEncoderConverter(OneHotEncoder transformer){
+	public VectorAssemblerConverter(VectorAssembler transformer){
 		super(transformer);
 	}
 
 	@Override
 	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
-		OneHotEncoder transformer = getTransformer();
-
-		ListFeature inputFeature = (ListFeature)featureMapper.getOnlyFeature(transformer.getInputCol());
-
-		List<String> values = inputFeature.getValues();
-
-		Boolean dropLast = (Boolean)transformer.get(transformer.dropLast()).get();
-		if(dropLast){
-			values = values.subList(0, values.size() - 1);
-		}
+		VectorAssembler transformer = getTransformer();
 
 		List<Feature> result = new ArrayList<>();
 
-		for(String value : values){
-			Feature feature = new BinaryFeature(inputFeature.getName(), value);
+		String[] inputCols = transformer.getInputCols();
+		for(String inputCol : inputCols){
+			List<Feature> inputFeatures = featureMapper.getFeatures(inputCol);
 
-			result.add(feature);
+			result.addAll(inputFeatures);
 		}
 
 		return result;

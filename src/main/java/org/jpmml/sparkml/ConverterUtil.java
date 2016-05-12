@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
 
+import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 
 public class ConverterUtil {
@@ -31,7 +32,15 @@ public class ConverterUtil {
 	public <T extends Transformer> TransformerConverter<T> createConverter(T transformer) throws Exception {
 		Class<? extends Transformer> clazz = transformer.getClass();
 
-		Class<?> transformerClazz = Class.forName("org.jpmml.sparkml." + clazz.getSimpleName() + "Converter");
+		Class<?> transformerClazz;
+
+		if(transformer instanceof PredictionModel){
+			transformerClazz = Class.forName("org.jpmml.sparkml.model." + clazz.getSimpleName() + "Converter");
+		} else
+
+		{
+			transformerClazz = Class.forName("org.jpmml.sparkml.feature." + clazz.getSimpleName() + "Converter");
+		}
 
 		Constructor<?> constructor = transformerClazz.getDeclaredConstructor(clazz);
 

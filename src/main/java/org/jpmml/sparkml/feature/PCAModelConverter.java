@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +32,10 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
+import org.jpmml.sparkml.ContinuousFeature;
+import org.jpmml.sparkml.Feature;
+import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.FeatureMapper;
 
 public class PCAModelConverter extends FeatureConverter<PCAModel> {
 

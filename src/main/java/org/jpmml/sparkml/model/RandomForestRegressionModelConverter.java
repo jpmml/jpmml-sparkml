@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.model;
 
 import java.util.List;
 
-import org.apache.spark.ml.classification.RandomForestClassificationModel;
+import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MultipleModelMethodType;
@@ -28,24 +28,25 @@ import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.sparkml.FeatureSchema;
+import org.jpmml.sparkml.ModelConverter;
 
-public class RandomForestClassificationModelConverter extends ModelConverter<RandomForestClassificationModel> {
+public class RandomForestRegressionModelConverter extends ModelConverter<RandomForestRegressionModel> {
 
-	public RandomForestClassificationModelConverter(RandomForestClassificationModel model){
+	public RandomForestRegressionModelConverter(RandomForestRegressionModel model){
 		super(model);
 	}
 
 	@Override
 	public MiningModel encodeModel(FeatureSchema schema){
-		RandomForestClassificationModel model = getTransformer();
+		RandomForestRegressionModel model = getTransformer();
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 
 		Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.AVERAGE, treeModels);
 
-		MiningModel miningModel = new MiningModel(MiningFunctionType.CLASSIFICATION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(segmentation)
-			.setOutput(ModelUtil.createProbabilityOutput(schema));
+		MiningModel miningModel = new MiningModel(MiningFunctionType.REGRESSION, ModelUtil.createMiningSchema(schema))
+			.setSegmentation(segmentation);
 
 		return miningModel;
 	}

@@ -191,7 +191,7 @@ public class FeatureMapper {
 		return this.dataFields.get(name);
 	}
 
-	void putDataField(DataField dataField){
+	public void putDataField(DataField dataField){
 		this.dataFields.put(dataField.getName(), dataField);
 	}
 
@@ -199,7 +199,7 @@ public class FeatureMapper {
 		return this.derivedFields.get(name);
 	}
 
-	void putDerivedField(DerivedField derivedField){
+	public void putDerivedField(DerivedField derivedField){
 		this.derivedFields.put(derivedField.getName(), derivedField);
 	}
 }
