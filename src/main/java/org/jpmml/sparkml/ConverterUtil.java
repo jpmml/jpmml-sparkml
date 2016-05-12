@@ -19,9 +19,38 @@
 package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.apache.spark.ml.classification.LogisticRegressionModel;
+import org.apache.spark.ml.classification.RandomForestClassificationModel;
+import org.apache.spark.ml.feature.Binarizer;
+import org.apache.spark.ml.feature.Bucketizer;
+import org.apache.spark.ml.feature.OneHotEncoder;
+import org.apache.spark.ml.feature.PCAModel;
+import org.apache.spark.ml.feature.StandardScalerModel;
+import org.apache.spark.ml.feature.StringIndexerModel;
+import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
+import org.apache.spark.ml.regression.GBTRegressionModel;
+import org.apache.spark.ml.regression.LinearRegressionModel;
+import org.apache.spark.ml.regression.RandomForestRegressionModel;
+import org.jpmml.sparkml.feature.BinarizerConverter;
+import org.jpmml.sparkml.feature.BucketizerConverter;
+import org.jpmml.sparkml.feature.OneHotEncoderConverter;
+import org.jpmml.sparkml.feature.PCAModelConverter;
+import org.jpmml.sparkml.feature.StandardScalerModelConverter;
+import org.jpmml.sparkml.feature.StringIndexerModelConverter;
+import org.jpmml.sparkml.feature.VectorAssemblerConverter;
+import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
+import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
+import org.jpmml.sparkml.model.GBTRegressionModelConverter;
+import org.jpmml.sparkml.model.LinearRegressionModelConverter;
+import org.jpmml.sparkml.model.LogisticRegressionModelConverter;
+import org.jpmml.sparkml.model.RandomForestClassificationModelConverter;
+import org.jpmml.sparkml.model.RandomForestRegressionModelConverter;
 
 public class ConverterUtil {
 
@@ -32,18 +61,45 @@ public class ConverterUtil {
 	public <T extends Transformer> TransformerConverter<T> createConverter(T transformer) throws Exception {
 		Class<? extends Transformer> clazz = transformer.getClass();
 
-		Class<?> transformerClazz;
-
-		if(transformer instanceof PredictionModel){
-			transformerClazz = Class.forName("org.jpmml.sparkml.model." + clazz.getSimpleName() + "Converter");
-		} else
-
-		{
-			transformerClazz = Class.forName("org.jpmml.sparkml.feature." + clazz.getSimpleName() + "Converter");
+		Class<? extends TransformerConverter> converterClazz = getConverterClazz(clazz);
+		if(converterClazz == null){
+			throw new IllegalArgumentException("Transformer class " + clazz + " is not supported");
 		}
 
-		Constructor<?> constructor = transformerClazz.getDeclaredConstructor(clazz);
+		Constructor<?> constructor = converterClazz.getDeclaredConstructor(clazz);
 
 		return (TransformerConverter)constructor.newInstance(transformer);
+	}
+
+	static
+	public Class<? extends TransformerConverter> getConverterClazz(Class<? extends Transformer> clazz){
+		return ConverterUtil.converters.get(clazz);
+	}
+
+	static
+	public void putConverterClazz(Class<? extends Transformer> clazz, Class<? extends TransformerConverter> converterClazz){
+		ConverterUtil.converters.put(clazz, converterClazz);
+	}
+
+	private static final Map<Class<? extends Transformer>, Class<? extends TransformerConverter>> converters = new LinkedHashMap<>();
+
+	static {
+		// Features
+		converters.put(Binarizer.class, BinarizerConverter.class);
+		converters.put(Bucketizer.class, BucketizerConverter.class);
+		converters.put(OneHotEncoder.class, OneHotEncoderConverter.class);
+		converters.put(PCAModel.class, PCAModelConverter.class);
+		converters.put(StandardScalerModel.class, StandardScalerModelConverter.class);
+		converters.put(StringIndexerModel.class, StringIndexerModelConverter.class);
+		converters.put(VectorAssembler.class, VectorAssemblerConverter.class);
+
+		// Models
+		converters.put(DecisionTreeClassificationModel.class, DecisionTreeClassificationModelConverter.class);
+		converters.put(DecisionTreeRegressionModel.class, DecisionTreeRegressionModelConverter.class);
+		converters.put(GBTRegressionModel.class, GBTRegressionModelConverter.class);
+		converters.put(LinearRegressionModel.class, LinearRegressionModelConverter.class);
+		converters.put(LogisticRegressionModel.class, LogisticRegressionModelConverter.class);
+		converters.put(RandomForestClassificationModel.class, RandomForestClassificationModelConverter.class);
+		converters.put(RandomForestRegressionModel.class, RandomForestRegressionModelConverter.class);
 	}
 }
