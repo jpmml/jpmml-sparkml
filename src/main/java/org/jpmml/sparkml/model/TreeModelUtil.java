@@ -43,8 +43,11 @@ import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.SimpleSetPredicate;
 import org.dmg.pmml.TreeModel;
 import org.dmg.pmml.True;
+import org.dmg.pmml.Visitor;
+import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ValueUtil;
+import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.BinaryFeature;
 import org.jpmml.sparkml.ContinuousFeature;
 import org.jpmml.sparkml.Feature;
@@ -96,6 +99,27 @@ public class TreeModelUtil {
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
 
 		return treeModel;
+	}
+
+	static
+	public void scalePredictions(final TreeModel treeModel, final double weight){
+
+		if(ValueUtil.isOne(weight)){
+			return;
+		}
+
+		Visitor visitor = new AbstractVisitor(){
+
+			@Override
+			public VisitorAction visit(Node node){
+				double score = Double.parseDouble(node.getScore());
+
+				node.setScore(ValueUtil.formatValue(score * weight));
+
+				return super.visit(node);
+			}
+		};
+		visitor.applyTo(treeModel);
 	}
 
 	static

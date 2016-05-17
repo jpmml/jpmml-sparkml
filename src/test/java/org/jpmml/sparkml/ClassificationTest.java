@@ -10,6 +10,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateGBTAudit() throws Exception {
+		evaluate("GBT", "Audit");
+	}
+
+	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
 		evaluate("LogisticRegression", "Audit");
 	}

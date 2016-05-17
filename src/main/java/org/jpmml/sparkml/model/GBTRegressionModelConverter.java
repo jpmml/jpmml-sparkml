@@ -24,15 +24,10 @@ import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MultipleModelMethodType;
-import org.dmg.pmml.Node;
 import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
-import org.dmg.pmml.Visitor;
-import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.ValueUtil;
-import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.FeatureSchema;
 import org.jpmml.sparkml.ModelConverter;
 
@@ -50,7 +45,7 @@ public class GBTRegressionModelConverter extends ModelConverter<GBTRegressionMod
 
 		double[] weights = model.treeWeights();
 		for(int i = 0; i < weights.length; i++){
-			scalePredictions(treeModels.get(i), weights[i]);
+			TreeModelUtil.scalePredictions(treeModels.get(i), weights[i]);
 		}
 
 		Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels);
@@ -59,26 +54,5 @@ public class GBTRegressionModelConverter extends ModelConverter<GBTRegressionMod
 			.setSegmentation(segmentation);
 
 		return miningModel;
-	}
-
-	static
-	private void scalePredictions(final TreeModel treeModel, final double weight){
-
-		if(ValueUtil.isOne(weight)){
-			return;
-		}
-
-		Visitor visitor = new AbstractVisitor(){
-
-			@Override
-			public VisitorAction visit(Node node){
-				double score = Double.parseDouble(node.getScore());
-
-				node.setScore(ValueUtil.formatValue(score * weight));
-
-				return super.visit(node);
-			}
-		};
-		visitor.applyTo(treeModel);
 	}
 }

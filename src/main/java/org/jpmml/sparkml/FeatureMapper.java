@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.ClassificationModel;
+import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.sql.types.IntegerType;
 import org.apache.spark.sql.types.NumericType;
@@ -96,7 +97,7 @@ public class FeatureMapper {
 		FieldName targetField;
 		List<String> targetCategories = null;
 
-		if(predictionModel instanceof ClassificationModel){
+		if((predictionModel instanceof ClassificationModel) || (predictionModel instanceof GBTClassificationModel)){
 			ListFeature targetFeature = (ListFeature)getOnlyFeature(predictionModel.getLabelCol());
 
 			targetField = targetFeature.getName();

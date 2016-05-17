@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.ml.classification.RandomForestClassificationModel;
 import org.apache.spark.ml.feature.Binarizer;
@@ -43,6 +45,10 @@ import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.FieldName;
+import org.dmg.pmml.MiningField;
+import org.dmg.pmml.MiningModel;
+import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.Visitor;
@@ -58,6 +64,7 @@ import org.jpmml.sparkml.feature.StringIndexerModelConverter;
 import org.jpmml.sparkml.feature.VectorAssemblerConverter;
 import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
 import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
+import org.jpmml.sparkml.model.GBTClassificationModelConverter;
 import org.jpmml.sparkml.model.GBTRegressionModelConverter;
 import org.jpmml.sparkml.model.LinearRegressionModelConverter;
 import org.jpmml.sparkml.model.LogisticRegressionModelConverter;
@@ -104,6 +111,21 @@ public class ConverterUtil {
 				List<? extends Visitor> visitors = Arrays.asList(new MiningSchemaCleaner(), new DictionaryCleaner());
 				for(Visitor visitor : visitors){
 					visitor.applyTo(pmml);
+				}
+
+				// XXX
+				if(model instanceof MiningModel){
+					MiningSchema miningSchema = model.getMiningSchema();
+
+					List<MiningField> miningFields = miningSchema.getMiningFields();
+					for(Iterator<MiningField> it = miningFields.iterator(); it.hasNext(); ){
+						MiningField miningField = it.next();
+
+						FieldName name = miningField.getName();
+						if(("binarizedGbtValue").equals(name.getValue())){
+							it.remove();
+						}
+					}
 				}
 
 				return pmml;
@@ -157,6 +179,7 @@ public class ConverterUtil {
 		// Models
 		converters.put(DecisionTreeClassificationModel.class, DecisionTreeClassificationModelConverter.class);
 		converters.put(DecisionTreeRegressionModel.class, DecisionTreeRegressionModelConverter.class);
+		converters.put(GBTClassificationModel.class, GBTClassificationModelConverter.class);
 		converters.put(GBTRegressionModel.class, GBTRegressionModelConverter.class);
 		converters.put(LinearRegressionModel.class, LinearRegressionModelConverter.class);
 		converters.put(LogisticRegressionModel.class, LogisticRegressionModelConverter.class);

@@ -18,6 +18,7 @@ Java library and command-line application for converting Spark ML pipelines to P
     * [`feature.StringIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html)
   * Prediction models:
     * [`classification.DecisionTreeClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
+    * [`classification.GBTClassificationModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/GBTClassificationModel.html)
     * [`classification.LogisticRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/LogisticRegressionModel.html)
     * [`classification.RandomForestClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/RandomForestClassificationModel.html)
     * [`regression.DecisionTreeRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/DecisionTreeRegressionModel.html)
