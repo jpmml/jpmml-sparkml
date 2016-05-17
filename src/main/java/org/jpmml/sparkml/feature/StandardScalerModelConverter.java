@@ -77,7 +77,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				double stdValue = std.apply(i);
 
 				if(!ValueUtil.isOne(stdValue)){
-					expression = PMMLUtil.createApply("/", expression, PMMLUtil.createConstant(stdValue));
+					expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(1d / stdValue));
 				}
 			}
 
