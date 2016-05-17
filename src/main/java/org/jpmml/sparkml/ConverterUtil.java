@@ -32,6 +32,7 @@ import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.ml.classification.RandomForestClassificationModel;
 import org.apache.spark.ml.feature.Binarizer;
 import org.apache.spark.ml.feature.Bucketizer;
+import org.apache.spark.ml.feature.MinMaxScalerModel;
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.PCAModel;
 import org.apache.spark.ml.feature.StandardScalerModel;
@@ -49,6 +50,7 @@ import org.jpmml.model.visitors.DictionaryCleaner;
 import org.jpmml.model.visitors.MiningSchemaCleaner;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
+import org.jpmml.sparkml.feature.MinMaxScalerModelConverter;
 import org.jpmml.sparkml.feature.OneHotEncoderConverter;
 import org.jpmml.sparkml.feature.PCAModelConverter;
 import org.jpmml.sparkml.feature.StandardScalerModelConverter;
@@ -145,6 +147,7 @@ public class ConverterUtil {
 		// Features
 		converters.put(Binarizer.class, BinarizerConverter.class);
 		converters.put(Bucketizer.class, BucketizerConverter.class);
+		converters.put(MinMaxScalerModel.class, MinMaxScalerModelConverter.class);
 		converters.put(OneHotEncoder.class, OneHotEncoderConverter.class);
 		converters.put(PCAModel.class, PCAModelConverter.class);
 		converters.put(StandardScalerModel.class, StandardScalerModelConverter.class);
