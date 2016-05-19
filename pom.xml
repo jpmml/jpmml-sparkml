@@ -76,6 +76,10 @@
 					<artifactId>jaxb-api</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>org.jpmml</groupId>
+					<artifactId>pmml-model-metro</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>org.glassfish.jaxb</groupId>
 					<artifactId>txw2</artifactId>
 				</exclusion>
@@ -84,6 +88,12 @@
 					<artifactId>stax-ex</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jpmml</groupId>
+			<artifactId>pmml-model-metro</artifactId>
+			<version>1.2.15</version>
 		</dependency>
 
 		<dependency>

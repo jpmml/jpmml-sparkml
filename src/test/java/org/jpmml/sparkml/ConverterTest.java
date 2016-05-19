@@ -2,13 +2,13 @@ package org.jpmml.sparkml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.IntegrationTest;
+import org.jpmml.model.SerializationUtil;
 
 abstract
 public class ConverterTest extends IntegrationTest {
@@ -36,10 +36,7 @@ public class ConverterTest extends IntegrationTest {
 			private Object deserialize(String name) throws IOException, ClassNotFoundException {
 
 				try(InputStream is = open("/ser/" + name)){
-
-					try(ObjectInputStream ois = new ObjectInputStream(is)){
-						return ois.readObject();
-					}
+					return SerializationUtil.deserialize(is);
 				}
 			}
 		};

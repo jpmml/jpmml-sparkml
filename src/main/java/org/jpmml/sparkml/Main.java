@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 
 import com.beust.jcommander.JCommander;
@@ -33,6 +32,7 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.MetroJAXBUtil;
+import org.jpmml.model.SerializationUtil;
 
 public class Main {
 
@@ -140,10 +140,7 @@ public class Main {
 	private Object deserialize(File file) throws ClassNotFoundException, IOException {
 
 		try(InputStream is = new FileInputStream(file)){
-
-			try(ObjectInputStream ois = new ObjectInputStream(is)){
-				return ois.readObject();
-			}
+			return SerializationUtil.deserialize(is);
 		}
 	}
 }
