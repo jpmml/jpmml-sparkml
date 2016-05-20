@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.spark.ml.feature.MinMaxScalerModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
@@ -83,13 +82,9 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 
 			FieldName name = FieldName.create(transformer.getOutputCol() + "[" + String.valueOf(i) + "]");
 
-			DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.DOUBLE)
-				.setName(name)
-				.setExpression(expression);
+			featureMapper.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
-			featureMapper.putDerivedField(derivedField);
-
-			ContinuousFeature feature = new ContinuousFeature(name);
+			Feature feature = new ContinuousFeature(name);
 
 			result.add(feature);
 		}

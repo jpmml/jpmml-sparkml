@@ -25,7 +25,6 @@ import org.apache.spark.ml.feature.PCAModel;
 import org.apache.spark.mllib.linalg.DenseMatrix;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
@@ -74,13 +73,9 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
 			FieldName name = new FieldName(transformer.getOutputCol() + "[" + String.valueOf(i) + "]");
 
-			DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.DOUBLE)
-				.setName(name)
-				.setExpression(apply);
+			featureMapper.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
-			featureMapper.putDerivedField(derivedField);
-
-			ContinuousFeature feature = new ContinuousFeature(name);
+			Feature feature = new ContinuousFeature(name);
 
 			result.add(feature);
 		}

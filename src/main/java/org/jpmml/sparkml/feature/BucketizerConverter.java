@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.Bucketizer;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
 import org.dmg.pmml.FieldName;
@@ -69,11 +68,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
 		FieldName name = FieldName.create(transformer.getOutputCol());
 
-		DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.INTEGER)
-			.setName(name)
-			.setExpression(discretize);
-
-		featureMapper.putDerivedField(derivedField);
+		featureMapper.createDerivedField(name, OpType.CONTINUOUS, DataType.INTEGER, discretize);
 
 		Feature feature = new ListFeature(name, categories);
 

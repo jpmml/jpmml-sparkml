@@ -39,6 +39,7 @@ import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
+import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
@@ -61,6 +62,11 @@ public class FeatureMapper {
 	}
 
 	public PMML encodePMML(){
+
+		if(!Collections.disjoint(this.dataFields.keySet(), this.derivedFields.keySet())){
+			throw new IllegalArgumentException();
+		}
+
 		List<DataField> dataFields = new ArrayList<>(this.dataFields.values());
 		List<DerivedField> derivedFields = new ArrayList<>(this.derivedFields.values());
 
@@ -160,7 +166,11 @@ public class FeatureMapper {
 		return features;
 	}
 
-	private DataField createDataField(FieldName name){
+	public DataField getDataField(FieldName name){
+		return this.dataFields.get(name);
+	}
+
+	public DataField createDataField(FieldName name){
 		StructField field = this.schema.apply(name.getValue());
 
 		OpType opType;
@@ -181,26 +191,28 @@ public class FeatureMapper {
 			throw new IllegalArgumentException();
 		}
 
+		return createDataField(name, opType, dataType);
+	}
+
+	public DataField createDataField(FieldName name, OpType opType, DataType dataType){
 		DataField dataField = new DataField(name, opType, dataType);
 
-		putDataField(dataField);
+		this.dataFields.put(dataField.getName(), dataField);
 
 		return dataField;
-	}
-
-	public DataField getDataField(FieldName name){
-		return this.dataFields.get(name);
-	}
-
-	public void putDataField(DataField dataField){
-		this.dataFields.put(dataField.getName(), dataField);
 	}
 
 	public DerivedField getDerivedField(FieldName name){
 		return this.derivedFields.get(name);
 	}
 
-	public void putDerivedField(DerivedField derivedField){
+	public DerivedField createDerivedField(FieldName name, OpType opType, DataType dataType, Expression expression){
+		DerivedField derivedField = new DerivedField(opType, dataType)
+			.setName(name)
+			.setExpression(expression);
+
 		this.derivedFields.put(derivedField.getName(), derivedField);
+
+		return derivedField;
 	}
 }
