@@ -24,11 +24,11 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.dmg.pmml.CategoricalPredictor;
 import org.dmg.pmml.NumericPredictor;
 import org.dmg.pmml.RegressionTable;
+import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ValueUtil;
-import org.jpmml.sparkml.BinaryFeature;
-import org.jpmml.sparkml.ContinuousFeature;
-import org.jpmml.sparkml.Feature;
-import org.jpmml.sparkml.FeatureSchema;
 
 public class RegressionModelUtil {
 

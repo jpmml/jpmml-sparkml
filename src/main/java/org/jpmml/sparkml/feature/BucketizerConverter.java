@@ -24,16 +24,17 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.Bucketizer;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
-import org.jpmml.sparkml.ContinuousFeature;
-import org.jpmml.sparkml.Feature;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.ListFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
-import org.jpmml.sparkml.ListFeature;
 
 public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
@@ -66,11 +67,9 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 			discretize.addDiscretizeBins(discretizeBin);
 		}
 
-		FieldName name = FieldName.create(transformer.getOutputCol());
+		DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol()), OpType.CONTINUOUS, DataType.INTEGER, discretize);
 
-		featureMapper.createDerivedField(name, OpType.CONTINUOUS, DataType.INTEGER, discretize);
-
-		Feature feature = new ListFeature(name, categories);
+		Feature feature = new ListFeature(derivedField, categories);
 
 		return Collections.singletonList(feature);
 	}

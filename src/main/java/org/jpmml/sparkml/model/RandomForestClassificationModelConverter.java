@@ -26,9 +26,9 @@ import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MultipleModelMethodType;
 import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
+import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.sparkml.FeatureSchema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class RandomForestClassificationModelConverter extends ModelConverter<RandomForestClassificationModel> {

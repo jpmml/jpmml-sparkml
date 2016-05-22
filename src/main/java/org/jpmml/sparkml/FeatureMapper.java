@@ -44,7 +44,12 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.TransformationDictionary;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.FeatureSchema;
+import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.PseudoFeature;
 
 public class FeatureMapper {
 
@@ -153,10 +158,10 @@ public class FeatureMapper {
 				case INTEGER:
 				case FLOAT:
 				case DOUBLE:
-					feature = new ContinuousFeature(name);
+					feature = new ContinuousFeature(dataField);
 					break;
 				default:
-					feature = new PseudoFeature(name);
+					feature = new PseudoFeature(dataField);
 					break;
 			}
 

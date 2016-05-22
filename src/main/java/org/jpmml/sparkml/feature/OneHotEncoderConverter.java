@@ -22,11 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.feature.OneHotEncoder;
-import org.jpmml.sparkml.BinaryFeature;
-import org.jpmml.sparkml.Feature;
+import org.dmg.pmml.DataType;
+import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.ListFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
-import org.jpmml.sparkml.ListFeature;
 
 public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 
@@ -50,7 +51,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			Feature feature = new BinaryFeature(inputFeature.getName(), value);
+			Feature feature = new BinaryFeature(inputFeature.getName(), DataType.STRING, value);
 
 			result.add(feature);
 		}

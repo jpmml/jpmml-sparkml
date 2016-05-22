@@ -45,14 +45,14 @@ import org.dmg.pmml.TreeModel;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
+import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.FeatureSchema;
+import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
-import org.jpmml.sparkml.BinaryFeature;
-import org.jpmml.sparkml.ContinuousFeature;
-import org.jpmml.sparkml.Feature;
-import org.jpmml.sparkml.FeatureSchema;
-import org.jpmml.sparkml.ListFeature;
 
 public class TreeModelUtil {
 

@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import org.apache.spark.ml.PredictionModel;
 import org.dmg.pmml.Model;
+import org.jpmml.converter.FeatureSchema;
 
 abstract
 public class ModelConverter<T extends PredictionModel<?, T>> extends TransformerConverter<T> {

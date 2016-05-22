@@ -24,14 +24,15 @@ import java.util.List;
 import org.apache.spark.ml.feature.StandardScalerModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
-import org.jpmml.sparkml.ContinuousFeature;
-import org.jpmml.sparkml.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
 
@@ -80,11 +81,9 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				}
 			}
 
-			FieldName name = FieldName.create(transformer.getOutputCol() + "[" + String.valueOf(i) + "]");
+			DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol() + "[" + String.valueOf(i) + "]"), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
-			featureMapper.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
-
-			Feature feature = new ContinuousFeature(name);
+			Feature feature = new ContinuousFeature(derivedField);
 
 			result.add(feature);
 		}

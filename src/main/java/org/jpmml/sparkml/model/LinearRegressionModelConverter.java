@@ -22,8 +22,8 @@ import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionTable;
+import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.sparkml.FeatureSchema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class LinearRegressionModelConverter extends ModelConverter<LinearRegressionModel> {

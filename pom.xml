@@ -65,35 +65,13 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>jpmml-converter</artifactId>
-			<version>1.0.4</version>
+			<version>1.0.6</version>
 			<exclusions>
 				<exclusion>
-					<groupId>com.sun.xml.fastinfoset</groupId>
-					<artifactId>FastInfoset</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jpmml</groupId>
-					<artifactId>pmml-model-metro</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>txw2</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jvnet.staxex</groupId>
-					<artifactId>stax-ex</artifactId>
+					<artifactId>jaxb-runtime</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-model-metro</artifactId>
-			<version>1.2.15</version>
 		</dependency>
 
 		<dependency>
@@ -106,13 +84,13 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-evaluator</artifactId>
-			<version>1.2.13</version>
+			<version>1.2.14</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-evaluator</artifactId>
-			<version>1.2.13</version>
+			<version>1.2.14</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

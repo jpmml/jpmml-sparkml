@@ -52,6 +52,7 @@ import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.Visitor;
+import org.jpmml.converter.FeatureSchema;
 import org.jpmml.model.visitors.DictionaryCleaner;
 import org.jpmml.model.visitors.MiningSchemaCleaner;
 import org.jpmml.sparkml.feature.BinarizerConverter;

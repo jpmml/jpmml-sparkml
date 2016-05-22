@@ -21,6 +21,7 @@ package org.jpmml.sparkml;
 import java.util.List;
 
 import org.apache.spark.ml.Transformer;
+import org.jpmml.converter.Feature;
 
 abstract
 public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {

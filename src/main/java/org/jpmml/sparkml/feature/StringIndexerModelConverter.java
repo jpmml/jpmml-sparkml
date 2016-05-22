@@ -26,11 +26,11 @@ import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Value;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.sparkml.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
-import org.jpmml.sparkml.ListFeature;
 
 public class StringIndexerModelConverter extends FeatureConverter<StringIndexerModel> {
 
@@ -58,7 +58,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			values.addAll(PMMLUtil.createValues(categories));
 		}
 
-		Feature feature = new ListFeature(inputFeature.getName(), categories);
+		Feature feature = new ListFeature(dataField, categories);
 
 		return Collections.singletonList(feature);
 	}

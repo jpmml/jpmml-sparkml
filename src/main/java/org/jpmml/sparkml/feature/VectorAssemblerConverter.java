@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.feature.VectorAssembler;
-import org.jpmml.sparkml.Feature;
+import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
 

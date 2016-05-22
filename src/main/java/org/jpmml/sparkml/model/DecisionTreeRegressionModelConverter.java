@@ -20,7 +20,7 @@ package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.dmg.pmml.TreeModel;
-import org.jpmml.sparkml.FeatureSchema;
+import org.jpmml.converter.FeatureSchema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class DecisionTreeRegressionModelConverter extends ModelConverter<DecisionTreeRegressionModel> {

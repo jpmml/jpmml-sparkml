@@ -25,15 +25,16 @@ import java.util.List;
 import org.apache.spark.ml.feature.Binarizer;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.sparkml.ContinuousFeature;
-import org.jpmml.sparkml.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
-import org.jpmml.sparkml.ListFeature;
 
 public class BinarizerConverter extends FeatureConverter<Binarizer> {
 
@@ -53,11 +54,9 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 			.addExpressions(PMMLUtil.createApply("lessOrEqual", new FieldRef(inputFeature.getName()), PMMLUtil.createConstant(threshold)))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
-		FieldName name = FieldName.create(transformer.getOutputCol());
+		DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol()), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
-		featureMapper.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, apply);
-
-		Feature feature = new ListFeature(name, Arrays.asList("0", "1"));
+		Feature feature = new ListFeature(derivedField, Arrays.asList("0", "1"));
 
 		return Collections.singletonList(feature);
 	}
