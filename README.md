@@ -35,6 +35,40 @@ Java library and command-line application for converting Spark ML pipelines to P
 
 # Installation #
 
+## Library ##
+
+JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository] (http://repo1.maven.org/maven2/org/jpmml/).
+
+The current version is **1.0.0** (23 May, 2016).
+
+```xml
+<dependency>
+	<groupId>org.jpmml</groupId>
+	<artifactId>jpmml-sparkml</artifactId>
+	<version>1.0.0</version>
+</dependency>
+```
+
+JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model] (https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
+
+Excluding the legacy version of JPMML-Model library from the application classpath:
+```xml
+<dependency>
+	<groupId>org.apache.spark</groupId>
+	<artifactId>spark-mllib_2.10</artifactId>
+	<version>${spark.version}</version>
+	<scope>provided</scope>
+	<exclusions>
+		<exclusion>
+			<groupId>org.jpmml</groupId>
+			<artifactId>pmml-model</artifactId>
+		</exclusion>
+	</exclusions>
+</dependency>
+```
+
+## Example application ##
+
 Enter the project root directory and build using [Apache Maven] (http://maven.apache.org/):
 ```
 mvn clean install
@@ -47,15 +81,6 @@ The build produces two JAR files:
 # Usage #
 
 ## Library ##
-
-Adding the JPMML-SparkML dependency to the project:
-```xml
-<dependency>
-	<groupId>org.jpmml</groupId>
-	<artifactId>jpmml-sparkml</artifactId>
-	<version>1.0-SNAPSHOT</version>
-</dependency>
-```
 
 Fitting a Spark ML pipeline that only makes use of supported Transformer types:
 ```java
@@ -101,9 +126,9 @@ The example application JAR file contains an executable class `org.jpmml.sparkml
 
 The example application JAR file does not include Apache Spark runtime libraries. Therefore, this executable class must be executed using Apache Spark's `spark-submit` helper script.
 
-Converting a pair of Spark ML schema and pipeline serialization files `schema.ser` and `pipeline.ser`, respectively, to a PMML file `pipeline.pmml`:
+For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/ser/Iris.ser` and `src/test/resources/ser/DecisionTreeIris.ser`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-executable-1.0-SNAPSHOT.jar --ser-schema-input schema.ser --ser-pipeline-input pipeline.ser --pmml-output pipeline.pmml
+spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-executable-1.0-SNAPSHOT.jar --ser-schema-input src/test/resources/ser/Iris.ser --ser-pipeline-input src/test/resources/ser/DecisionTreeIris.ser --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
