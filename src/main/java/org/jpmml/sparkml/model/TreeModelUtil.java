@@ -87,7 +87,9 @@ public class TreeModelUtil {
 			}
 		};
 
-		return Lists.newArrayList(Lists.transform(Arrays.asList(model.trees()), function));
+		List<TreeModel> treeModels = new ArrayList<>(Lists.transform(Arrays.asList(model.trees()), function));
+
+		return treeModels;
 	}
 
 	static

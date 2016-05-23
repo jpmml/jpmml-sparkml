@@ -43,6 +43,14 @@
 			<version>1.48</version>
 		</dependency>
 
+		<!-- Required for Apache Hadoop compatibility -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>11.0.2</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
@@ -67,6 +75,10 @@
 			<artifactId>jpmml-converter</artifactId>
 			<version>1.0.6</version>
 			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>org.glassfish.jaxb</groupId>
 					<artifactId>jaxb-runtime</artifactId>
@@ -130,10 +142,6 @@
 								</filter>
 							</filters>
 							<relocations>
-								<relocation>
-									<pattern>com.google.common</pattern>
-									<shadedPattern>com.shaded.google.common</shadedPattern>
-								</relocation>
 								<relocation>
 									<pattern>org.dmg.pmml</pattern>
 									<shadedPattern>org.shaded.dmg.pmml</shadedPattern>
