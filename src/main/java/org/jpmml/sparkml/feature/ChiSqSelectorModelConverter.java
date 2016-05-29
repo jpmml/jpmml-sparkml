@@ -20,26 +20,21 @@ package org.jpmml.sparkml.feature;
 
 import java.util.List;
 
-import org.apache.spark.ml.feature.VectorSlicer;
+import org.apache.spark.ml.feature.ChiSqSelectorModel;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
 
-public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
+public class ChiSqSelectorModelConverter extends FeatureConverter<ChiSqSelectorModel> {
 
-	public VectorSlicerConverter(VectorSlicer transformer){
+	public ChiSqSelectorModelConverter(ChiSqSelectorModel transformer){
 		super(transformer);
 	}
 
 	@Override
 	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
-		VectorSlicer transformer = getTransformer();
+		ChiSqSelectorModel transformer = getTransformer();
 
-		String[] names = transformer.getNames();
-		if(names != null && names.length > 0){
-			throw new IllegalArgumentException();
-		}
-
-		return featureMapper.getFeatures(transformer.getInputCol(), transformer.getIndices());
+		return featureMapper.getFeatures(transformer.getFeaturesCol(), transformer.selectedFeatures());
 	}
 }

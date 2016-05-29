@@ -171,6 +171,22 @@ public class FeatureMapper {
 		return features;
 	}
 
+	public List<Feature> getFeatures(String column, int[] indices){
+		List<Feature> features = getFeatures(column);
+
+		List<Feature> result = new ArrayList<>();
+
+		for(int i = 0; i < indices.length; i++){
+			int index = indices[i];
+
+			Feature feature = features.get(index);
+
+			result.add(feature);
+		}
+
+		return result;
+	}
+
 	public DataField getDataField(FieldName name){
 		return this.dataFields.get(name);
 	}
