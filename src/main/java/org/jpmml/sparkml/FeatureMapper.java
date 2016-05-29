@@ -25,10 +25,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Iterables;
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.classification.GBTClassificationModel;
+import org.apache.spark.ml.clustering.KMeansModel;
+import org.apache.spark.ml.param.shared.HasFeaturesCol;
+import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.sql.types.IntegerType;
 import org.apache.spark.sql.types.NumericType;
@@ -104,29 +108,45 @@ public class FeatureMapper {
 		}
 	}
 
-	public FeatureSchema createSchema(PredictionModel<?, ?> predictionModel){
+	public FeatureSchema createSchema(Model<?> model){
 		FieldName targetField;
 		List<String> targetCategories = null;
 
-		if((predictionModel instanceof ClassificationModel) || (predictionModel instanceof GBTClassificationModel)){
-			ListFeature targetFeature = (ListFeature)getOnlyFeature(predictionModel.getLabelCol());
+		if(model instanceof PredictionModel){
+			HasLabelCol hasLabelCol = (HasLabelCol)model;
 
-			targetField = targetFeature.getName();
-			targetCategories = targetFeature.getValues();
+			Feature feature = getOnlyFeature(hasLabelCol.getLabelCol());
+
+			targetField = feature.getName();
+
+			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel)){
+				ListFeature listFeature = (ListFeature)feature;
+
+				targetCategories = listFeature.getValues();
+			}
+		} else
+
+		if(model instanceof KMeansModel){
+			targetField = null;
 		} else
 
 		{
-			Feature targetFeature = getOnlyFeature(predictionModel.getLabelCol());
-
-			targetField = targetFeature.getName();
+			throw new IllegalArgumentException();
 		}
 
 		List<FieldName> activeFields = new ArrayList<>(this.dataFields.keySet());
 		activeFields.remove(targetField);
 
-		List<Feature> features = getFeatures(predictionModel.getFeaturesCol());
-		if(features.size() != predictionModel.numFeatures()){
-			throw new IllegalArgumentException();
+		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
+
+		List<Feature> features = getFeatures(hasFeaturesCol.getFeaturesCol());
+
+		if(model instanceof PredictionModel){
+			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
+
+			if(features.size() != predictionModel.numFeatures()){
+				throw new IllegalArgumentException();
+			}
 		}
 
 		FeatureSchema result = new FeatureSchema(targetField, targetCategories, activeFields, features);

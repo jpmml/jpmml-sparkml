@@ -18,17 +18,18 @@
  */
 package org.jpmml.sparkml;
 
-import org.apache.spark.ml.PredictionModel;
-import org.dmg.pmml.Model;
+import org.apache.spark.ml.Model;
+import org.apache.spark.ml.param.shared.HasFeaturesCol;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.jpmml.converter.FeatureSchema;
 
 abstract
-public class ModelConverter<T extends PredictionModel<?, T>> extends TransformerConverter<T> {
+public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends TransformerConverter<T> {
 
 	public ModelConverter(T transformer){
 		super(transformer);
 	}
 
 	abstract
-	public Model encodeModel(FeatureSchema schema);
+	public org.dmg.pmml.Model encodeModel(FeatureSchema schema);
 }

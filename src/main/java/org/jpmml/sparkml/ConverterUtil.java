@@ -25,13 +25,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.ml.classification.RandomForestClassificationModel;
+import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.feature.Binarizer;
 import org.apache.spark.ml.feature.Bucketizer;
 import org.apache.spark.ml.feature.ChiSqSelectorModel;
@@ -51,7 +52,6 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MiningSchema;
-import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.Visitor;
 import org.jpmml.converter.FeatureSchema;
@@ -71,6 +71,7 @@ import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
 import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
 import org.jpmml.sparkml.model.GBTClassificationModelConverter;
 import org.jpmml.sparkml.model.GBTRegressionModelConverter;
+import org.jpmml.sparkml.model.KMeansModelConverter;
 import org.jpmml.sparkml.model.LinearRegressionModelConverter;
 import org.jpmml.sparkml.model.LogisticRegressionModelConverter;
 import org.jpmml.sparkml.model.RandomForestClassificationModelConverter;
@@ -104,11 +105,9 @@ public class ConverterUtil {
 			if(converter instanceof ModelConverter){
 				ModelConverter modelConverter = (ModelConverter)converter;
 
-				PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)transformer;
+				FeatureSchema featureSchema = featureMapper.createSchema((Model<?>)transformer);
 
-				FeatureSchema featureSchema = featureMapper.createSchema(predictionModel);
-
-				Model model = modelConverter.encodeModel(featureSchema);
+				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
 				PMML pmml = featureMapper.encodePMML()
 					.addModels(model);
@@ -150,7 +149,7 @@ public class ConverterUtil {
 
 		Class<? extends TransformerConverter> converterClazz = getConverterClazz(clazz);
 		if(converterClazz == null){
-			throw new IllegalArgumentException("Transformer class " + clazz + " is not supported");
+			throw new IllegalArgumentException("Transformer class " + clazz.getName() + " is not supported");
 		}
 
 		Constructor<?> constructor = converterClazz.getDeclaredConstructor(clazz);
@@ -188,6 +187,7 @@ public class ConverterUtil {
 		converters.put(DecisionTreeRegressionModel.class, DecisionTreeRegressionModelConverter.class);
 		converters.put(GBTClassificationModel.class, GBTClassificationModelConverter.class);
 		converters.put(GBTRegressionModel.class, GBTRegressionModelConverter.class);
+		converters.put(KMeansModel.class, KMeansModelConverter.class);
 		converters.put(LinearRegressionModel.class, LinearRegressionModelConverter.class);
 		converters.put(LogisticRegressionModel.class, LogisticRegressionModelConverter.class);
 		converters.put(RandomForestClassificationModel.class, RandomForestClassificationModelConverter.class);
