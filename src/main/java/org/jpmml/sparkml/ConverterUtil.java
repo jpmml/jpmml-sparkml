@@ -40,6 +40,7 @@ import org.apache.spark.ml.feature.PCAModel;
 import org.apache.spark.ml.feature.StandardScalerModel;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.feature.VectorSlicer;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
@@ -63,6 +64,7 @@ import org.jpmml.sparkml.feature.PCAModelConverter;
 import org.jpmml.sparkml.feature.StandardScalerModelConverter;
 import org.jpmml.sparkml.feature.StringIndexerModelConverter;
 import org.jpmml.sparkml.feature.VectorAssemblerConverter;
+import org.jpmml.sparkml.feature.VectorSlicerConverter;
 import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
 import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
 import org.jpmml.sparkml.model.GBTClassificationModelConverter;
@@ -176,6 +178,7 @@ public class ConverterUtil {
 		converters.put(StandardScalerModel.class, StandardScalerModelConverter.class);
 		converters.put(StringIndexerModel.class, StringIndexerModelConverter.class);
 		converters.put(VectorAssembler.class, VectorAssemblerConverter.class);
+		converters.put(VectorSlicer.class, VectorSlicerConverter.class);
 
 		// Models
 		converters.put(DecisionTreeClassificationModel.class, DecisionTreeClassificationModelConverter.class);

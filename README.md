@@ -16,6 +16,7 @@ Java library and command-line application for converting Spark ML pipelines to P
     * [`feature.StandardScalerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
     * [`feature.StringIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
     * [`feature.VectorAssembler`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAssembler.html)
+    * [`feature.VectorSlicer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorSlicer.html)
   * Prediction models:
     * [`classification.DecisionTreeClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
     * [`classification.GBTClassificationModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/GBTClassificationModel.html)
