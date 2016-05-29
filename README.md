@@ -5,18 +5,17 @@ Java library and command-line application for converting Spark ML pipelines to P
 
 # Features #
 
-* Supported Transformer types:
-  * Feature transformers:
+* Supported Spark ML `PipelineStage` types:
+  * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
+    * [`feature.MinMaxScalerModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
     * [`feature.OneHotEncoder`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
+    * [`feature.PCAModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)
     * [`feature.QuantileDiscretizer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
+    * [`feature.StandardScalerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
+    * [`feature.StringIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
     * [`feature.VectorAssembler`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAssembler.html)
-  * Fitted feature transformers:
-    * [`feature.MinMaxScalerModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html)
-    * [`feature.PCAModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html)
-    * [`feature.StandardScalerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html)
-    * [`feature.StringIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html)
   * Prediction models:
     * [`classification.DecisionTreeClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
     * [`classification.GBTClassificationModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/GBTClassificationModel.html)
@@ -66,6 +65,35 @@ Excluding the legacy version of JPMML-Model library from the application classpa
 		</exclusion>
 	</exclusions>
 </dependency>
+```
+
+Using the [Maven Shade Plugin] (https://maven.apache.org/plugins/maven-shade-plugin/) for "shading" all the affected `org.dmg.pmml.*` and `org.jpmml.*` classes during the packaging of the application:
+```xml
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-shade-plugin</artifactId>
+	<version>${maven.shade.version}</version>
+	<executions>
+		<execution>
+			<phase>package</phase>
+			<goals>
+				<goal>shade</goal>
+			</goals>
+			<configuration>
+				<relocations>
+					<relocation>
+						<pattern>org.dmg.pmml</pattern>
+						<shadedPattern>org.shaded.dmg.pmml</shadedPattern>
+					</relocation>
+					<relocation>
+						<pattern>org.jpmml</pattern>
+						<shadedPattern>org.shaded.jpmml</shadedPattern>
+					</relocation>
+				</relocations>
+			</configuration>
+		</execution>
+	</executions>
+</plugin>
 ```
 
 ## Example application ##
