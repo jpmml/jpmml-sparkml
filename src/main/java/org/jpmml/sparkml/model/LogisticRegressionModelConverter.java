@@ -25,8 +25,8 @@ import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionNormalizationMethodType;
 import org.dmg.pmml.RegressionTable;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class LogisticRegressionModelConverter extends ModelConverter<LogisticRegressionModel> {
@@ -36,7 +36,7 @@ public class LogisticRegressionModelConverter extends ModelConverter<LogisticReg
 	}
 
 	@Override
-	public RegressionModel encodeModel(FeatureSchema schema){
+	public RegressionModel encodeModel(Schema schema){
 		LogisticRegressionModel model = getTransformer();
 
 		List<String> targetCategories = schema.getTargetCategories();

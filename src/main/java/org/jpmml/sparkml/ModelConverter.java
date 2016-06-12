@@ -21,7 +21,7 @@ package org.jpmml.sparkml;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.jpmml.converter.FeatureSchema;
+import org.jpmml.converter.Schema;
 
 abstract
 public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends TransformerConverter<T> {
@@ -31,5 +31,5 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 	}
 
 	abstract
-	public org.dmg.pmml.Model encodeModel(FeatureSchema schema);
+	public org.dmg.pmml.Model encodeModel(Schema schema);
 }

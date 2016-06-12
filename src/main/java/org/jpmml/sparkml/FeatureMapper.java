@@ -39,59 +39,26 @@ import org.apache.spark.sql.types.NumericType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.PMML;
-import org.dmg.pmml.TransformationDictionary;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ListFeature;
-import org.jpmml.converter.PMMLUtil;
-import org.jpmml.converter.PseudoFeature;
+import org.jpmml.converter.PMMLMapper;
+import org.jpmml.converter.Schema;
+import org.jpmml.converter.WildcardFeature;
 
-public class FeatureMapper {
+public class FeatureMapper extends PMMLMapper {
 
 	private StructType schema = null;
 
 	private Map<String, List<Feature>> columnFeatures = new LinkedHashMap<>();
 
-	private Map<FieldName, DataField> dataFields = new LinkedHashMap<>();
-
-	private Map<FieldName, DerivedField> derivedFields = new LinkedHashMap<>();
-
 
 	public FeatureMapper(StructType schema){
 		this.schema = schema;
-	}
-
-	public PMML encodePMML(){
-
-		if(!Collections.disjoint(this.dataFields.keySet(), this.derivedFields.keySet())){
-			throw new IllegalArgumentException();
-		}
-
-		List<DataField> dataFields = new ArrayList<>(this.dataFields.values());
-		List<DerivedField> derivedFields = new ArrayList<>(this.derivedFields.values());
-
-		DataDictionary dataDictionary = new DataDictionary();
-		(dataDictionary.getDataFields()).addAll(dataFields);
-
-		TransformationDictionary transformationDictionary = null;
-		if(derivedFields.size() > 0){
-			transformationDictionary = new TransformationDictionary();
-			(transformationDictionary.getDerivedFields()).addAll(derivedFields);
-		}
-
-		PMML pmml = new PMML("4.2", PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"), dataDictionary)
-			.setTransformationDictionary(transformationDictionary);
-
-		return pmml;
 	}
 
 	public void append(FeatureConverter<?> converter){
@@ -108,7 +75,7 @@ public class FeatureMapper {
 		}
 	}
 
-	public FeatureSchema createSchema(Model<?> model){
+	public Schema createSchema(Model<?> model){
 		FieldName targetField;
 		List<String> targetCategories = null;
 
@@ -134,7 +101,7 @@ public class FeatureMapper {
 			throw new IllegalArgumentException();
 		}
 
-		List<FieldName> activeFields = new ArrayList<>(this.dataFields.keySet());
+		List<FieldName> activeFields = new ArrayList<>(getDataFields().keySet());
 		activeFields.remove(targetField);
 
 		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
@@ -149,7 +116,7 @@ public class FeatureMapper {
 			}
 		}
 
-		FeatureSchema result = new FeatureSchema(targetField, targetCategories, activeFields, features);
+		Schema result = new Schema(targetField, targetCategories, activeFields, features);
 
 		return result;
 	}
@@ -166,7 +133,7 @@ public class FeatureMapper {
 		if(features == null){
 			FieldName name = FieldName.create(column);
 
-			DataField dataField = this.dataFields.get(name);
+			DataField dataField = getDataField(name);
 			if(dataField == null){
 				dataField = createDataField(name);
 			}
@@ -181,7 +148,7 @@ public class FeatureMapper {
 					feature = new ContinuousFeature(dataField);
 					break;
 				default:
-					feature = new PseudoFeature(dataField);
+					feature = new WildcardFeature(dataField);
 					break;
 			}
 
@@ -207,10 +174,6 @@ public class FeatureMapper {
 		return result;
 	}
 
-	public DataField getDataField(FieldName name){
-		return this.dataFields.get(name);
-	}
-
 	public DataField createDataField(FieldName name){
 		StructField field = this.schema.apply(name.getValue());
 
@@ -233,27 +196,5 @@ public class FeatureMapper {
 		}
 
 		return createDataField(name, opType, dataType);
-	}
-
-	public DataField createDataField(FieldName name, OpType opType, DataType dataType){
-		DataField dataField = new DataField(name, opType, dataType);
-
-		this.dataFields.put(dataField.getName(), dataField);
-
-		return dataField;
-	}
-
-	public DerivedField getDerivedField(FieldName name){
-		return this.derivedFields.get(name);
-	}
-
-	public DerivedField createDerivedField(FieldName name, OpType opType, DataType dataType, Expression expression){
-		DerivedField derivedField = new DerivedField(opType, dataType)
-			.setName(name)
-			.setExpression(expression);
-
-		this.derivedFields.put(derivedField.getName(), derivedField);
-
-		return derivedField;
 	}
 }

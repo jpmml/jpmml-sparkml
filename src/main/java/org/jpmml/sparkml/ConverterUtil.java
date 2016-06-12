@@ -19,10 +19,7 @@
 package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.spark.ml.Model;
@@ -48,15 +45,9 @@ import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
-import org.dmg.pmml.FieldName;
-import org.dmg.pmml.MiningField;
-import org.dmg.pmml.MiningModel;
-import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.PMML;
-import org.dmg.pmml.Visitor;
-import org.jpmml.converter.FeatureSchema;
-import org.jpmml.model.visitors.DictionaryCleaner;
-import org.jpmml.model.visitors.MiningSchemaCleaner;
+import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
 import org.jpmml.sparkml.feature.ChiSqSelectorModelConverter;
@@ -105,32 +96,12 @@ public class ConverterUtil {
 			if(converter instanceof ModelConverter){
 				ModelConverter modelConverter = (ModelConverter)converter;
 
-				FeatureSchema featureSchema = featureMapper.createSchema((Model<?>)transformer);
+				Schema featureSchema = featureMapper.createSchema((Model<?>)transformer);
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
-				PMML pmml = featureMapper.encodePMML()
-					.addModels(model);
-
-				List<? extends Visitor> visitors = Arrays.asList(new MiningSchemaCleaner(), new DictionaryCleaner());
-				for(Visitor visitor : visitors){
-					visitor.applyTo(pmml);
-				}
-
-				// XXX
-				if(model instanceof MiningModel){
-					MiningSchema miningSchema = model.getMiningSchema();
-
-					List<MiningField> miningFields = miningSchema.getMiningFields();
-					for(Iterator<MiningField> it = miningFields.iterator(); it.hasNext(); ){
-						MiningField miningField = it.next();
-
-						FieldName name = miningField.getName();
-						if(("binarizedGbtValue").equals(name.getValue())){
-							it.remove();
-						}
-					}
-				}
+				PMML pmml = featureMapper.encodePMML(model)
+					.setHeader(PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"));
 
 				return pmml;
 			} else

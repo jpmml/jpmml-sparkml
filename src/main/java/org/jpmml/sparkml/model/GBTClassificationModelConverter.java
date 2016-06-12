@@ -33,10 +33,10 @@ import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class GBTClassificationModelConverter extends ModelConverter<GBTClassificationModel> {
@@ -46,10 +46,10 @@ public class GBTClassificationModelConverter extends ModelConverter<GBTClassific
 	}
 
 	@Override
-	public MiningModel encodeModel(FeatureSchema schema){
+	public MiningModel encodeModel(Schema schema){
 		GBTClassificationModel model = getTransformer();
 
-		FeatureSchema segmentSchema = new FeatureSchema(null, schema.getTargetCategories(), schema.getActiveFields(), schema.getFeatures());
+		Schema segmentSchema = schema.toAnonymousSchema();
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, segmentSchema);
 

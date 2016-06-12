@@ -22,8 +22,8 @@ import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionTable;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class LinearRegressionModelConverter extends ModelConverter<LinearRegressionModel> {
@@ -33,7 +33,7 @@ public class LinearRegressionModelConverter extends ModelConverter<LinearRegress
 	}
 
 	@Override
-	public RegressionModel encodeModel(FeatureSchema schema){
+	public RegressionModel encodeModel(Schema schema){
 		LinearRegressionModel model = getTransformer();
 
 		RegressionTable regressionTable = RegressionModelUtil.encodeRegressionTable(model.intercept(), model.coefficients(), schema);

@@ -26,9 +26,9 @@ import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MultipleModelMethodType;
 import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class RandomForestRegressionModelConverter extends ModelConverter<RandomForestRegressionModel> {
@@ -38,7 +38,7 @@ public class RandomForestRegressionModelConverter extends ModelConverter<RandomF
 	}
 
 	@Override
-	public MiningModel encodeModel(FeatureSchema schema){
+	public MiningModel encodeModel(Schema schema){
 		RandomForestRegressionModel model = getTransformer();
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);

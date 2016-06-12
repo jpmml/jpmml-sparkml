@@ -20,7 +20,7 @@ package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.FeatureSchema;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class DecisionTreeRegressionModelConverter extends ModelConverter<DecisionTreeRegressionModel> {
@@ -30,7 +30,7 @@ public class DecisionTreeRegressionModelConverter extends ModelConverter<Decisio
 	}
 
 	@Override
-	public TreeModel encodeModel(FeatureSchema schema){
+	public TreeModel encodeModel(Schema schema){
 		DecisionTreeRegressionModel model = getTransformer();
 
 		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema);

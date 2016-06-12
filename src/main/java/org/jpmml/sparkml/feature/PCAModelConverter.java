@@ -28,7 +28,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -62,7 +61,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 			for(int j = 0; j < inputFeatures.size(); j++){
 				ContinuousFeature inputFeature = (ContinuousFeature)inputFeatures.get(j);
 
-				Expression expression = new FieldRef(inputFeature.getName());
+				Expression expression = inputFeature.ref();
 
 				double coefficient = pc.apply(j, i);
 				if(!ValueUtil.isOne(coefficient)){

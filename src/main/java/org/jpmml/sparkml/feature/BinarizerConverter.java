@@ -27,7 +27,6 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -51,7 +50,7 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 		double threshold = transformer.getThreshold();
 
 		Apply apply = new Apply("if")
-			.addExpressions(PMMLUtil.createApply("lessOrEqual", new FieldRef(inputFeature.getName()), PMMLUtil.createConstant(threshold)))
+			.addExpressions(PMMLUtil.createApply("lessOrEqual", inputFeature.ref(), PMMLUtil.createConstant(threshold)))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
 		DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol()), OpType.CONTINUOUS, DataType.DOUBLE, apply);

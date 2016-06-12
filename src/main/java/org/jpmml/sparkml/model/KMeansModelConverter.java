@@ -31,7 +31,6 @@ import org.dmg.pmml.ClusteringField;
 import org.dmg.pmml.ClusteringModel;
 import org.dmg.pmml.CompareFunctionType;
 import org.dmg.pmml.ComparisonMeasure;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.MiningSchema;
@@ -39,9 +38,9 @@ import org.dmg.pmml.Output;
 import org.dmg.pmml.SquaredEuclidean;
 import org.jpmml.converter.ClusteringModelUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class KMeansModelConverter extends ModelConverter<KMeansModel> {
@@ -51,7 +50,7 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 	}
 
 	@Override
-	public ClusteringModel encodeModel(FeatureSchema schema){
+	public ClusteringModel encodeModel(Schema schema){
 		KMeansModel model = getTransformer();
 
 		List<Cluster> clusters = new ArrayList<>();
@@ -69,22 +68,9 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 			clusters.add(cluster);
 		}
 
-		List<ClusteringField> clusteringFields = new ArrayList<>();
-
 		List<Feature> features = schema.getFeatures();
-		for(Feature feature : features){
-			DataType dataType = feature.getDataType();
-			switch(dataType){
-				case DOUBLE:
-					break;
-				default:
-					throw new IllegalArgumentException();
-			}
 
-			ClusteringField clusteringField = new ClusteringField(feature.getName());
-
-			clusteringFields.add(clusteringField);
-		}
+		List<ClusteringField> clusteringFields = ClusteringModelUtil.createClusteringFields(features);
 
 		ComparisonMeasure comparisonMeasure = new ComparisonMeasure(ComparisonMeasure.Kind.DISTANCE)
 			.setCompareFunction(CompareFunctionType.ABS_DIFF)

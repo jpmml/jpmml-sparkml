@@ -48,9 +48,9 @@ import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 
@@ -60,7 +60,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	public TreeModel encodeDecisionTree(DecisionTreeModel model, FeatureSchema schema){
+	public TreeModel encodeDecisionTree(DecisionTreeModel model, Schema schema){
 		org.apache.spark.ml.tree.Node node = model.rootNode();
 
 		if(model instanceof DecisionTreeRegressionModel){
@@ -75,10 +75,10 @@ public class TreeModelUtil {
 	}
 
 	static
-	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel model, final FeatureSchema schema){
+	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel model, final Schema schema){
 		Function<DecisionTreeModel, TreeModel> function = new Function<DecisionTreeModel, TreeModel>(){
 
-			private FeatureSchema segmentSchema = new FeatureSchema(null, schema.getTargetCategories(), schema.getActiveFields(), schema.getFeatures());
+			private Schema segmentSchema = schema.toAnonymousSchema();
 
 
 			@Override
@@ -93,7 +93,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	public TreeModel encodeTreeModel(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, FeatureSchema schema){
+	public TreeModel encodeTreeModel(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 		Node root = encodeNode(miningFunction, node, schema)
 			.setPredicate(new True());
 
@@ -125,7 +125,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	public Node encodeNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, FeatureSchema schema){
+	public Node encodeNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 
 		if(node instanceof InternalNode){
 			return encodeInternalNode(miningFunction, (InternalNode)node, schema);
@@ -139,7 +139,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeInternalNode(MiningFunctionType miningFunction, InternalNode internalNode, FeatureSchema schema){
+	private Node encodeInternalNode(MiningFunctionType miningFunction, InternalNode internalNode, Schema schema){
 		Node result = createNode(miningFunction, internalNode, schema);
 
 		Predicate[] predicates = encodeSplit(internalNode.split(), schema);
@@ -156,14 +156,14 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeLeafNode(MiningFunctionType miningFunction, LeafNode leafNode, FeatureSchema schema){
+	private Node encodeLeafNode(MiningFunctionType miningFunction, LeafNode leafNode, Schema schema){
 		Node result = createNode(miningFunction, leafNode, schema);
 
 		return result;
 	}
 
 	static
-	private Node createNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, FeatureSchema schema){
+	private Node createNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 		Node result = new Node();
 
 		switch(miningFunction){
@@ -205,7 +205,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Predicate[] encodeSplit(Split split, FeatureSchema schema){
+	private Predicate[] encodeSplit(Split split, Schema schema){
 
 		if(split instanceof ContinuousSplit){
 			return encodeContinuousSplit((ContinuousSplit)split, schema);
@@ -219,7 +219,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, FeatureSchema schema){
+	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, Schema schema){
 		ContinuousFeature feature = (ContinuousFeature)schema.getFeature(continuousSplit.featureIndex());
 
 		String value = ValueUtil.formatValue(continuousSplit.threshold());
@@ -234,7 +234,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Predicate[] encodeCategoricalSplit(CategoricalSplit categoricalSplit, FeatureSchema schema){
+	private Predicate[] encodeCategoricalSplit(CategoricalSplit categoricalSplit, Schema schema){
 		Feature feature = schema.getFeature(categoricalSplit.featureIndex());
 
 		double[] leftCategories = categoricalSplit.leftCategories();

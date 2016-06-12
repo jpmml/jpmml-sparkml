@@ -27,7 +27,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -63,7 +62,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 		for(int i = 0; i < inputFeatures.size(); i++){
 			ContinuousFeature inputFeature = (ContinuousFeature)inputFeatures.get(i);
 
-			Expression expression = new FieldRef(inputFeature.getName());
+			Expression expression = inputFeature.ref();
 
 			if(transformer.getWithMean()){
 				double meanValue = mean.apply(i);

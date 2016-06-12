@@ -20,8 +20,8 @@ package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.FeatureSchema;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 
 public class DecisionTreeClassificationModelConverter extends ModelConverter<DecisionTreeClassificationModel> {
@@ -31,7 +31,7 @@ public class DecisionTreeClassificationModelConverter extends ModelConverter<Dec
 	}
 
 	@Override
-	public TreeModel encodeModel(FeatureSchema schema){
+	public TreeModel encodeModel(Schema schema){
 		DecisionTreeClassificationModel model = getTransformer();
 
 		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema)

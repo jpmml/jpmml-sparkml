@@ -27,7 +27,7 @@ import org.dmg.pmml.RegressionTable;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FeatureSchema;
+import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
 
 public class RegressionModelUtil {
@@ -36,7 +36,7 @@ public class RegressionModelUtil {
 	}
 
 	static
-	public RegressionTable encodeRegressionTable(double intercept, Vector coefficients, FeatureSchema schema){
+	public RegressionTable encodeRegressionTable(double intercept, Vector coefficients, Schema schema){
 		RegressionTable regressionTable = new RegressionTable(intercept);
 
 		List<Feature> features = schema.getFeatures();
