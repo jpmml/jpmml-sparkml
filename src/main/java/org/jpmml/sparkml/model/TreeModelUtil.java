@@ -191,6 +191,11 @@ public class TreeModelUtil {
 
 					double[] stats = impurityCalculator.stats();
 					for(int i = 0; i < stats.length; i++){
+
+						if(stats[i] == 0d){
+							continue;
+						}
+
 						ScoreDistribution scoreDistribution = new ScoreDistribution(targetCategories.get(i), stats[i]);
 
 						result.addScoreDistributions(scoreDistribution);
