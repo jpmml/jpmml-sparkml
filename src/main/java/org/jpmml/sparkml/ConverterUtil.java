@@ -33,12 +33,15 @@ import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.feature.Binarizer;
 import org.apache.spark.ml.feature.Bucketizer;
 import org.apache.spark.ml.feature.ChiSqSelectorModel;
+import org.apache.spark.ml.feature.ColumnPruner;
 import org.apache.spark.ml.feature.MinMaxScalerModel;
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.PCAModel;
+import org.apache.spark.ml.feature.RFormulaModel;
 import org.apache.spark.ml.feature.StandardScalerModel;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.feature.VectorAttributeRewriter;
 import org.apache.spark.ml.feature.VectorSlicer;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.GBTRegressionModel;
@@ -51,12 +54,15 @@ import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
 import org.jpmml.sparkml.feature.ChiSqSelectorModelConverter;
+import org.jpmml.sparkml.feature.ColumnPrunerConverter;
 import org.jpmml.sparkml.feature.MinMaxScalerModelConverter;
 import org.jpmml.sparkml.feature.OneHotEncoderConverter;
 import org.jpmml.sparkml.feature.PCAModelConverter;
+import org.jpmml.sparkml.feature.RFormulaModelConverter;
 import org.jpmml.sparkml.feature.StandardScalerModelConverter;
 import org.jpmml.sparkml.feature.StringIndexerModelConverter;
 import org.jpmml.sparkml.feature.VectorAssemblerConverter;
+import org.jpmml.sparkml.feature.VectorAttributeRewriterConverter;
 import org.jpmml.sparkml.feature.VectorSlicerConverter;
 import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
 import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
@@ -77,26 +83,20 @@ public class ConverterUtil {
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
 		FeatureMapper featureMapper = new FeatureMapper(schema);
 
-		Transformer[] transformers = pipelineModel.stages();
-		for(Transformer transformer : transformers){
-			TransformerConverter converter;
-
-			try {
-				converter = ConverterUtil.createConverter(transformer);
-			} catch(Exception e){
-				throw new IllegalArgumentException(e);
-			}
+		Transformer[] stages = pipelineModel.stages();
+		for(Transformer stage : stages){
+			TransformerConverter<?> converter = ConverterUtil.createConverter(stage);
 
 			if(converter instanceof FeatureConverter){
-				FeatureConverter featureConverter = (FeatureConverter)converter;
+				FeatureConverter<?> featureConverter = (FeatureConverter<?>)converter;
 
 				featureMapper.append(featureConverter);
 			} else
 
 			if(converter instanceof ModelConverter){
-				ModelConverter modelConverter = (ModelConverter)converter;
+				ModelConverter<?> modelConverter = (ModelConverter<?>)converter;
 
-				Schema featureSchema = featureMapper.createSchema((Model<?>)transformer);
+				Schema featureSchema = featureMapper.createSchema((Model<?>)stage);
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
@@ -115,7 +115,17 @@ public class ConverterUtil {
 	}
 
 	static
-	public <T extends Transformer> TransformerConverter<T> createConverter(T transformer) throws Exception {
+	public FeatureConverter<?> createFeatureConverter(Transformer transformer){
+		return (FeatureConverter<?>)createConverter(transformer);
+	}
+
+	static
+	public ModelConverter<?> createModelConverter(Transformer transformer){
+		return (ModelConverter<?>)createConverter(transformer);
+	}
+
+	static
+	public <T extends Transformer> TransformerConverter<T> createConverter(T transformer){
 		Class<? extends Transformer> clazz = transformer.getClass();
 
 		Class<? extends TransformerConverter> converterClazz = getConverterClazz(clazz);
@@ -123,9 +133,13 @@ public class ConverterUtil {
 			throw new IllegalArgumentException("Transformer class " + clazz.getName() + " is not supported");
 		}
 
-		Constructor<?> constructor = converterClazz.getDeclaredConstructor(clazz);
+		try {
+			Constructor<?> constructor = converterClazz.getDeclaredConstructor(clazz);
 
-		return (TransformerConverter)constructor.newInstance(transformer);
+			return (TransformerConverter)constructor.newInstance(transformer);
+		} catch(Exception e){
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	static
@@ -134,7 +148,7 @@ public class ConverterUtil {
 	}
 
 	static
-	public void putConverterClazz(Class<? extends Transformer> clazz, Class<? extends TransformerConverter> converterClazz){
+	public void putConverterClazz(Class<? extends Transformer> clazz, Class<? extends TransformerConverter<?>> converterClazz){
 		ConverterUtil.converters.put(clazz, converterClazz);
 	}
 
@@ -145,12 +159,15 @@ public class ConverterUtil {
 		converters.put(Binarizer.class, BinarizerConverter.class);
 		converters.put(Bucketizer.class, BucketizerConverter.class);
 		converters.put(ChiSqSelectorModel.class, ChiSqSelectorModelConverter.class);
+		converters.put(ColumnPruner.class, ColumnPrunerConverter.class);
 		converters.put(MinMaxScalerModel.class, MinMaxScalerModelConverter.class);
 		converters.put(OneHotEncoder.class, OneHotEncoderConverter.class);
 		converters.put(PCAModel.class, PCAModelConverter.class);
+		converters.put(RFormulaModel.class, RFormulaModelConverter.class);
 		converters.put(StandardScalerModel.class, StandardScalerModelConverter.class);
 		converters.put(StringIndexerModel.class, StringIndexerModelConverter.class);
 		converters.put(VectorAssembler.class, VectorAssemblerConverter.class);
+		converters.put(VectorAttributeRewriter.class, VectorAttributeRewriterConverter.class);
 		converters.put(VectorSlicer.class, VectorSlicerConverter.class);
 
 		// Models

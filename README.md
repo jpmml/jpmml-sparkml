@@ -10,13 +10,16 @@ Java library and command-line application for converting Spark ML pipelines to P
     * [`feature.Binarizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
     * [`feature.ChiSqSelectorModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ChiSqSelectorModel.html) (the result of fitting a `feature.ChiSqSelector`)
+    * [`feature.ColumnPruner`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ColumnPruner.html)
     * [`feature.MinMaxScalerModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
     * [`feature.OneHotEncoder`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
     * [`feature.PCAModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)
     * [`feature.QuantileDiscretizer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
+    * [`feature.RFormulaModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
     * [`feature.StandardScalerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
     * [`feature.StringIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
     * [`feature.VectorAssembler`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAssembler.html)
+    * [`feature.VectorAttributeRewriter`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAttributeRewriter.html)
     * [`feature.VectorSlicer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorSlicer.html)
   * Prediction models:
     * [`classification.DecisionTreeClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
@@ -120,26 +123,15 @@ DataFrame irisData = ...;
 
 StructType schema = irisData.schema();
 
-StringIndexerModel speciesIndexer = new StringIndexer()
-	.setInputCol("Species")
-	.setOutputCol("speciesIndex")
-	.fit(irisData);
-
-VectorAssembler vectorAssembler = new VectorAssembler()
-	.setInputCols(new String[]{"Sepal_Length", "Sepal_Width", "Petal_Length", "Petal_Width"})
-	.setOutputCol("featureVector");
+RFormula formula = new RFormula()
+	.setFormula("Species ~ .");
 
 DecisionTreeClassifier classifier = new DecisionTreeClassifier()
-	.setLabelCol(speciesIndexer.getOutputCol())
-	.setFeaturesCol(vectorAssembler.getOutputCol());
-
-IndexToString labelConverter = new IndexToString()
-	.setInputCol(classifier.getPredictionCol())
-	.setOutputCol("predictedSpecies")
-	.setLabels(speciesIndexer.labels());
+	.setLabelCol(formula.getLabelCol())
+	.setFeaturesCol(formula.getFeaturesCol());
 
 Pipeline pipeline = new Pipeline()
-	.setStages(new PipelineStage[]{speciesIndexer, vectorAssembler, classifier, labelConverter});
+	.setStages(new PipelineStage[]{formula, classifier});
 
 PipelineModel pipelineModel = pipeline.fit(irisData);
 ```
