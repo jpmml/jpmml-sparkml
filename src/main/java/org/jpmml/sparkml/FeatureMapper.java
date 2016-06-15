@@ -112,7 +112,7 @@ public class FeatureMapper extends PMMLMapper {
 			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
 
 			if(features.size() != predictionModel.numFeatures()){
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Expected " + predictionModel.numFeatures() + " features, got " + features.size() + " features");
 			}
 		}
 

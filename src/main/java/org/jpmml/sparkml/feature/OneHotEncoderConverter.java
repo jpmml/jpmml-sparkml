@@ -28,6 +28,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ListFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
+import scala.Option;
 
 public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 
@@ -43,7 +44,13 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 
 		List<String> values = inputFeature.getValues();
 
-		Boolean dropLast = (Boolean)transformer.get(transformer.dropLast()).get();
+		boolean dropLast = true;
+
+		Option<Object> dropLastOption = transformer.get(transformer.dropLast());
+		if(dropLastOption.isDefined()){
+			dropLast = (Boolean)dropLastOption.get();
+		} // End if
+
 		if(dropLast){
 			values = values.subList(0, values.size() - 1);
 		}
