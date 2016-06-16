@@ -37,6 +37,8 @@ public class DecisionTreeClassificationModelConverter extends ModelConverter<Dec
 		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema)
 			.setOutput(ModelUtil.createProbabilityOutput(schema));
 
+		TreeModelUtil.indexNodes(treeModel);
+
 		return treeModel;
 	}
 }
