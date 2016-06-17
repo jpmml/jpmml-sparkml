@@ -20,9 +20,12 @@ package org.jpmml.sparkml;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Model;
@@ -39,10 +42,15 @@ import org.apache.spark.sql.types.NumericType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.FieldUsageType;
+import org.dmg.pmml.MiningField;
+import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMML;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ListFeature;
@@ -59,6 +67,50 @@ public class FeatureMapper extends PMMLMapper {
 
 	public FeatureMapper(StructType schema){
 		this.schema = schema;
+	}
+
+	@Override
+	public PMML encodePMML(org.dmg.pmml.Model model){
+		PMML pmml = super.encodePMML(model);
+
+		Set<FieldName> names = new HashSet<>();
+
+		MiningSchema miningSchema = model.getMiningSchema();
+
+		List<MiningField> miningFields = miningSchema.getMiningFields();
+		for(ListIterator<MiningField> miningFieldIt = miningFields.listIterator(); miningFieldIt.hasNext(); ){
+			MiningField miningField = miningFieldIt.next();
+
+			FieldUsageType fieldUsage = miningField.getUsageType();
+			switch(fieldUsage){
+				case ACTIVE:
+				case PREDICTED:
+				case TARGET:
+					{
+						FieldName name = miningField.getName();
+
+						names.add(name);
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
+		DataDictionary dataDictionary = pmml.getDataDictionary();
+
+		List<DataField> dataFields = dataDictionary.getDataFields();
+		for(ListIterator<DataField> dataFieldIt = dataFields.listIterator(); dataFieldIt.hasNext(); ){
+			DataField dataField = dataFieldIt.next();
+
+			FieldName name = dataField.getName();
+
+			if(!(names).contains(name)){
+				dataFieldIt.remove();
+			}
+		}
+
+		return pmml;
 	}
 
 	public void append(FeatureConverter<?> converter){
