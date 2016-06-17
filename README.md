@@ -32,6 +32,7 @@ Java library and command-line application for converting Spark ML pipelines to P
     * [`regression.GBTRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GBTRegressionModel.html)
     * [`regression.LinearRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/LinearRegressionModel.html)
     * [`regression.RandomForestRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/RandomForestRegressionModel.html)
+  * Prediction model chains
 * Production quality:
   * Complete test coverage.
   * Fully compliant with the [JPMML-Evaluator] (https://github.com/jpmml/jpmml-evaluator) library.

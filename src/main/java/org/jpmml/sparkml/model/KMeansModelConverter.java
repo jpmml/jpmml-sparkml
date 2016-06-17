@@ -41,12 +41,21 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.sparkml.FeatureMapper;
 import org.jpmml.sparkml.ModelConverter;
 
 public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 
 	public KMeansModelConverter(KMeansModel model){
 		super(model);
+	}
+
+	@Override
+	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+		KMeansModel model = getTransformer();
+
+		// XXX
+		return Collections.emptyList();
 	}
 
 	@Override

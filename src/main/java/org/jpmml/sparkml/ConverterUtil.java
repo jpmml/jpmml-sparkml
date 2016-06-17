@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,12 +48,24 @@ import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.ml.feature.VectorAttributeRewriter;
 import org.apache.spark.ml.feature.VectorSlicer;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.FieldName;
+import org.dmg.pmml.FieldUsageType;
+import org.dmg.pmml.MiningField;
+import org.dmg.pmml.MiningModel;
+import org.dmg.pmml.MiningSchema;
+import org.dmg.pmml.MultipleModelMethodType;
+import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.Segmentation;
+import org.jpmml.converter.MiningModelUtil;
+import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.feature.BinarizerConverter;
@@ -88,7 +101,7 @@ public class ConverterUtil {
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
 		FeatureMapper featureMapper = new FeatureMapper(schema);
 
-		List<org.dmg.pmml.Model> models = new ArrayList<>();
+		Map<String, org.dmg.pmml.Model> models = new LinkedHashMap<>();
 
 		Transformer[] stages = pipelineModel.stages();
 		for(Transformer stage : stages){
@@ -107,7 +120,9 @@ public class ConverterUtil {
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
-				models.add(model);
+				featureMapper.append(modelConverter);
+
+				models.put(((HasPredictionCol)stage).getPredictionCol(), model);
 			} else
 
 			{
@@ -115,9 +130,78 @@ public class ConverterUtil {
 			}
 		}
 
-		org.dmg.pmml.Model model = Iterables.getOnlyElement(models);
+		org.dmg.pmml.Model rootModel;
 
-		PMML pmml = featureMapper.encodePMML(model)
+		if(models.size() == 1){
+			rootModel = Iterables.getOnlyElement(models.values());
+		} else
+
+		if(models.size() >= 2){
+			List<MiningField> targetMiningFields = new ArrayList<>();
+
+			List<Map.Entry<String, org.dmg.pmml.Model>> entries = new ArrayList<>(models.entrySet());
+			for(Iterator<Map.Entry<String, org.dmg.pmml.Model>> entryIt = entries.iterator(); entryIt.hasNext(); ){
+				Map.Entry<String, org.dmg.pmml.Model> entry = entryIt.next();
+
+				String predictionCol = entry.getKey();
+				org.dmg.pmml.Model model = entry.getValue();
+
+				MiningSchema miningSchema = model.getMiningSchema();
+
+				List<MiningField> miningFields = miningSchema.getMiningFields();
+				for(Iterator<MiningField> miningFieldIt = miningFields.iterator(); miningFieldIt.hasNext(); ){
+					MiningField miningField = miningFieldIt.next();
+
+					FieldUsageType fieldUsage = miningField.getUsageType();
+					switch(fieldUsage){
+						case PREDICTED:
+						case TARGET:
+							targetMiningFields.add(miningField);
+							break;
+						default:
+							break;
+					}
+				}
+
+				if(!entryIt.hasNext()){
+					break;
+				}
+
+				FieldName name = FieldName.create(predictionCol);
+
+				featureMapper.removeDataField(name);
+
+				Output output = model.getOutput();
+				if(output == null){
+					output = new Output();
+
+					model.setOutput(output);
+				}
+
+				OutputField outputField = ModelUtil.createPredictedField(name);
+
+				output.addOutputFields(outputField);
+			}
+
+			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
+
+			Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.MODEL_CHAIN, memberModels);
+
+			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
+
+			org.dmg.pmml.Model lastMemberModel = Iterables.getLast(memberModels);
+
+			MiningModel miningModel = new MiningModel(lastMemberModel.getFunctionName(), miningSchema)
+				.setSegmentation(segmentation);
+
+			rootModel = miningModel;
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
+
+		PMML pmml = featureMapper.encodePMML(rootModel)
 			.setHeader(PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"));
 
 		return pmml;

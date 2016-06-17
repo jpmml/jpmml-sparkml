@@ -38,6 +38,11 @@ public class RegressionTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateModelChainAuto() throws Exception {
+		evaluate("ModelChain", "Auto");
+	}
+
+	@Test
 	public void evaluateRandomForestAuto() throws Exception {
 		evaluate("RandomForest", "Auto");
 	}

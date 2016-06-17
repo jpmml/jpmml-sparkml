@@ -18,14 +18,34 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.DataType;
+import org.dmg.pmml.FieldName;
+import org.dmg.pmml.OpType;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
 
 abstract
 public class RegressionModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
 
 	public RegressionModelConverter(T transformer){
 		super(transformer);
+	}
+
+	@Override
+	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+		T model = getTransformer();
+
+		DataField dataField = featureMapper.createDataField(FieldName.create(model.getPredictionCol()), OpType.CONTINUOUS, DataType.DOUBLE);
+
+		Feature feature = new ContinuousFeature(dataField);
+
+		return Collections.singletonList(feature);
 	}
 }

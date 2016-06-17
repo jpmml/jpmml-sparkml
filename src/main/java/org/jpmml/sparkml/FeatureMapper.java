@@ -37,6 +37,7 @@ import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasOutputCol;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.sql.types.IntegerType;
 import org.apache.spark.sql.types.NumericType;
 import org.apache.spark.sql.types.StringType;
@@ -124,6 +125,20 @@ public class FeatureMapper extends PMMLMapper {
 			String outputCol = hasOutputCol.getOutputCol();
 
 			this.columnFeatures.put(outputCol, features);
+		}
+	}
+
+	public void append(ModelConverter<?> converter){
+		Transformer transformer = converter.getTransformer();
+
+		List<Feature> features = converter.encodeFeatures(this);
+
+		if(transformer instanceof HasPredictionCol){
+			HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
+
+			String predictionCol = hasPredictionCol.getPredictionCol();
+
+			this.columnFeatures.put(predictionCol, features);
 		}
 	}
 
@@ -248,5 +263,14 @@ public class FeatureMapper extends PMMLMapper {
 		}
 
 		return createDataField(name, opType, dataType);
+	}
+
+	public void removeDataField(FieldName name){
+		Map<FieldName, DataField> dataFields = getDataFields();
+
+		DataField dataField = dataFields.remove(name);
+		if(dataField == null){
+			throw new IllegalArgumentException();
+		}
 	}
 }

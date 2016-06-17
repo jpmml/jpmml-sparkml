@@ -18,7 +18,10 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.List;
+
 import org.apache.spark.ml.Transformer;
+import org.jpmml.converter.Feature;
 
 abstract
 public class TransformerConverter<T extends Transformer> {
@@ -29,6 +32,9 @@ public class TransformerConverter<T extends Transformer> {
 	public TransformerConverter(T transformer){
 		setTransformer(transformer);
 	}
+
+	abstract
+	public List<Feature> encodeFeatures(FeatureMapper featureMapper);
 
 	public T getTransformer(){
 		return this.transformer;
