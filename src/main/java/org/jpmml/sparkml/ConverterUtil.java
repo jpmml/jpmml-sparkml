@@ -19,9 +19,12 @@
 package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
@@ -34,6 +37,7 @@ import org.apache.spark.ml.feature.Binarizer;
 import org.apache.spark.ml.feature.Bucketizer;
 import org.apache.spark.ml.feature.ChiSqSelectorModel;
 import org.apache.spark.ml.feature.ColumnPruner;
+import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.MinMaxScalerModel;
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.PCAModel;
@@ -55,6 +59,7 @@ import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
 import org.jpmml.sparkml.feature.ChiSqSelectorModelConverter;
 import org.jpmml.sparkml.feature.ColumnPrunerConverter;
+import org.jpmml.sparkml.feature.IndexToStringConverter;
 import org.jpmml.sparkml.feature.MinMaxScalerModelConverter;
 import org.jpmml.sparkml.feature.OneHotEncoderConverter;
 import org.jpmml.sparkml.feature.PCAModelConverter;
@@ -83,6 +88,8 @@ public class ConverterUtil {
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
 		FeatureMapper featureMapper = new FeatureMapper(schema);
 
+		List<org.dmg.pmml.Model> models = new ArrayList<>();
+
 		Transformer[] stages = pipelineModel.stages();
 		for(Transformer stage : stages){
 			TransformerConverter<?> converter = ConverterUtil.createConverter(stage);
@@ -100,10 +107,7 @@ public class ConverterUtil {
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
-				PMML pmml = featureMapper.encodePMML(model)
-					.setHeader(PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"));
-
-				return pmml;
+				models.add(model);
 			} else
 
 			{
@@ -111,7 +115,12 @@ public class ConverterUtil {
 			}
 		}
 
-		throw new IllegalArgumentException();
+		org.dmg.pmml.Model model = Iterables.getOnlyElement(models);
+
+		PMML pmml = featureMapper.encodePMML(model)
+			.setHeader(PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"));
+
+		return pmml;
 	}
 
 	static
@@ -160,6 +169,7 @@ public class ConverterUtil {
 		converters.put(Bucketizer.class, BucketizerConverter.class);
 		converters.put(ChiSqSelectorModel.class, ChiSqSelectorModelConverter.class);
 		converters.put(ColumnPruner.class, ColumnPrunerConverter.class);
+		converters.put(IndexToString.class, IndexToStringConverter.class);
 		converters.put(MinMaxScalerModel.class, MinMaxScalerModelConverter.class);
 		converters.put(OneHotEncoder.class, OneHotEncoderConverter.class);
 		converters.put(PCAModel.class, PCAModelConverter.class);
