@@ -37,9 +37,9 @@ import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class GBTClassificationModelConverter extends ModelConverter<GBTClassificationModel> {
+public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> {
 
 	public GBTClassificationModelConverter(GBTClassificationModel model){
 		super(model);

@@ -29,9 +29,9 @@ import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.RegressionModelConverter;
 
-public class GBTRegressionModelConverter extends ModelConverter<GBTRegressionModel> {
+public class GBTRegressionModelConverter extends RegressionModelConverter<GBTRegressionModel> {
 
 	public GBTRegressionModelConverter(GBTRegressionModel model){
 		super(model);

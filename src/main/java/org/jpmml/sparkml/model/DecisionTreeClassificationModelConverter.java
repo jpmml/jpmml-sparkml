@@ -22,9 +22,9 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class DecisionTreeClassificationModelConverter extends ModelConverter<DecisionTreeClassificationModel> {
+public class DecisionTreeClassificationModelConverter extends ClassificationModelConverter<DecisionTreeClassificationModel> {
 
 	public DecisionTreeClassificationModelConverter(DecisionTreeClassificationModel model){
 		super(model);

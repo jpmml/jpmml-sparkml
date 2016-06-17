@@ -29,9 +29,9 @@ import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.RegressionModelConverter;
 
-public class RandomForestRegressionModelConverter extends ModelConverter<RandomForestRegressionModel> {
+public class RandomForestRegressionModelConverter extends RegressionModelConverter<RandomForestRegressionModel> {
 
 	public RandomForestRegressionModelConverter(RandomForestRegressionModel model){
 		super(model);

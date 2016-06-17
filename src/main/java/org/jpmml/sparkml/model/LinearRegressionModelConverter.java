@@ -24,9 +24,9 @@ import org.dmg.pmml.RegressionModel;
 import org.dmg.pmml.RegressionTable;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.RegressionModelConverter;
 
-public class LinearRegressionModelConverter extends ModelConverter<LinearRegressionModel> {
+public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> {
 
 	public LinearRegressionModelConverter(LinearRegressionModel model){
 		super(model);

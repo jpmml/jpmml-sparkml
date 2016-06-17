@@ -16,25 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.model;
+package org.jpmml.sparkml;
 
-import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
-import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.RegressionModelConverter;
+import org.apache.spark.ml.Model;
+import org.apache.spark.ml.param.shared.HasFeaturesCol;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 
-public class DecisionTreeRegressionModelConverter extends RegressionModelConverter<DecisionTreeRegressionModel> {
+abstract
+public class RegressionModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
 
-	public DecisionTreeRegressionModelConverter(DecisionTreeRegressionModel model){
-		super(model);
-	}
-
-	@Override
-	public TreeModel encodeModel(Schema schema){
-		DecisionTreeRegressionModel model = getTransformer();
-
-		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema);
-
-		return treeModel;
+	public RegressionModelConverter(T transformer){
+		super(transformer);
 	}
 }
