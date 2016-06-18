@@ -124,7 +124,7 @@ public class FeatureMapper extends PMMLMapper {
 
 			String outputCol = hasOutputCol.getOutputCol();
 
-			this.columnFeatures.put(outputCol, features);
+			putFeatures(outputCol, features);
 		}
 	}
 
@@ -138,7 +138,7 @@ public class FeatureMapper extends PMMLMapper {
 
 			String predictionCol = hasPredictionCol.getPredictionCol();
 
-			this.columnFeatures.put(predictionCol, features);
+			putFeatures(predictionCol, features);
 		}
 	}
 
@@ -186,6 +186,10 @@ public class FeatureMapper extends PMMLMapper {
 		Schema result = new Schema(targetField, targetCategories, activeFields, features);
 
 		return result;
+	}
+
+	public boolean hasFeatures(String column){
+		return this.columnFeatures.containsKey(column);
 	}
 
 	public Feature getOnlyFeature(String column){
@@ -241,6 +245,12 @@ public class FeatureMapper extends PMMLMapper {
 		return result;
 	}
 
+	public void putFeatures(String column, List<Feature> features){
+		checkColumn(column);
+
+		this.columnFeatures.put(column, features);
+	}
+
 	public DataField createDataField(FieldName name){
 		StructField field = this.schema.apply(name.getValue());
 
@@ -271,6 +281,18 @@ public class FeatureMapper extends PMMLMapper {
 		DataField dataField = dataFields.remove(name);
 		if(dataField == null){
 			throw new IllegalArgumentException();
+		}
+	}
+
+	private void checkColumn(String column){
+		List<Feature> features = this.columnFeatures.get(column);
+
+		if(features != null && features.size() > 0){
+			Feature feature = Iterables.getOnlyElement(features);
+
+			if(!(feature instanceof WildcardFeature)){
+				throw new IllegalArgumentException(column);
+			}
 		}
 	}
 }

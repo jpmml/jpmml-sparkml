@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.feature.RFormulaModel;
+import org.apache.spark.ml.feature.ResolvedRFormula;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.ConverterUtil;
 import org.jpmml.sparkml.FeatureConverter;
@@ -38,6 +39,17 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 	@Override
 	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
 		RFormulaModel transformer = getTransformer();
+
+		ResolvedRFormula resolvedFormula = (ResolvedRFormula)TransformerUtil.getParam(transformer, "resolvedFormula");
+
+		String targetCol = resolvedFormula.label();
+
+		String labelCol = transformer.getLabelCol();
+		if(!(targetCol).equals(labelCol) && !featureMapper.hasFeatures(labelCol)){
+			List<Feature> features = featureMapper.getFeatures(targetCol);
+
+			featureMapper.putFeatures(labelCol, features);
+		}
 
 		PipelineModel pipelineModel = (PipelineModel)TransformerUtil.getParam(transformer, "pipelineModel");
 

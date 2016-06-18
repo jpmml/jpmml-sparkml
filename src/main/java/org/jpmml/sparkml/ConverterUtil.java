@@ -54,12 +54,15 @@ import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.MultipleModelMethodType;
+import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
@@ -117,6 +120,16 @@ public class ConverterUtil {
 				ModelConverter<?> modelConverter = (ModelConverter<?>)converter;
 
 				Schema featureSchema = featureMapper.createSchema((Model<?>)stage);
+
+				if(converter instanceof RegressionModelConverter){
+					FieldName targetField = featureSchema.getTargetField();
+
+					DataField dataField = featureMapper.getDataField(targetField);
+
+					dataField
+						.setOpType(OpType.CONTINUOUS)
+						.setDataType(DataType.DOUBLE);
+				}
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
