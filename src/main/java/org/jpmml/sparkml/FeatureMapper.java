@@ -19,6 +19,7 @@
 package org.jpmml.sparkml;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -52,10 +53,12 @@ import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.Value;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.PMMLMapper;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.WildcardFeature;
 
@@ -154,9 +157,25 @@ public class FeatureMapper extends PMMLMapper {
 			targetField = feature.getName();
 
 			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel)){
-				ListFeature listFeature = (ListFeature)feature;
 
-				targetCategories = listFeature.getValues();
+				if(feature instanceof ListFeature){
+					ListFeature listFeature = (ListFeature)feature;
+
+					targetCategories = listFeature.getValues();
+				} else
+
+				{
+					ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+					// XXX
+					targetCategories = Arrays.asList("0", "1");
+
+					DataField dataField = toCategorical(targetField, targetCategories);
+
+					ListFeature listFeature = new ListFeature(dataField, targetCategories);
+
+					this.columnFeatures.put(hasLabelCol.getLabelCol(), Collections.<Feature>singletonList(listFeature));
+				}
 			}
 		} else
 
@@ -186,6 +205,25 @@ public class FeatureMapper extends PMMLMapper {
 		Schema result = new Schema(targetField, targetCategories, activeFields, features);
 
 		return result;
+	}
+
+	public DataField toCategorical(FieldName name, List<String> categories){
+		DataField dataField = getDataField(name);
+
+		if(dataField == null){
+			throw new IllegalArgumentException();
+		}
+
+		dataField.setOpType(OpType.CATEGORICAL);
+
+		List<Value> values = dataField.getValues();
+		if(values.size() > 0){
+			throw new IllegalArgumentException();
+		}
+
+		values.addAll(PMMLUtil.createValues(categories));
+
+		return dataField;
 	}
 
 	public boolean hasFeatures(String column){
