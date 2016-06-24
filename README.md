@@ -104,6 +104,8 @@ Using the [Maven Shade Plugin] (https://maven.apache.org/plugins/maven-shade-plu
 </plugin>
 ```
 
+For a complete example, please see the [JPMML-SparkML-Bootstrap] (https://github.com/jpmml/jpmml-sparkml-bootstrap) project.
+
 ## Example application ##
 
 Enter the project root directory and build using [Apache Maven] (http://maven.apache.org/):
