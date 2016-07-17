@@ -32,6 +32,7 @@ import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
+import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.classification.RandomForestClassificationModel;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.feature.Binarizer;
@@ -92,6 +93,7 @@ import org.jpmml.sparkml.model.GBTRegressionModelConverter;
 import org.jpmml.sparkml.model.KMeansModelConverter;
 import org.jpmml.sparkml.model.LinearRegressionModelConverter;
 import org.jpmml.sparkml.model.LogisticRegressionModelConverter;
+import org.jpmml.sparkml.model.MultilayerPerceptronClassificationModelConverter;
 import org.jpmml.sparkml.model.RandomForestClassificationModelConverter;
 import org.jpmml.sparkml.model.RandomForestRegressionModelConverter;
 
@@ -285,6 +287,7 @@ public class ConverterUtil {
 		converters.put(KMeansModel.class, KMeansModelConverter.class);
 		converters.put(LinearRegressionModel.class, LinearRegressionModelConverter.class);
 		converters.put(LogisticRegressionModel.class, LogisticRegressionModelConverter.class);
+		converters.put(MultilayerPerceptronClassificationModel.class, MultilayerPerceptronClassificationModelConverter.class);
 		converters.put(RandomForestClassificationModel.class, RandomForestClassificationModelConverter.class);
 		converters.put(RandomForestRegressionModel.class, RandomForestRegressionModelConverter.class);
 	}

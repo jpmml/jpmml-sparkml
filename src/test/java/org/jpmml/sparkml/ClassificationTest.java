@@ -38,6 +38,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateNeuralNetworkAudit() throws Exception {
+		evaluate("NeuralNetwork", "Audit");
+	}
+
+	@Test
 	public void evaluateRandomForestAudit() throws Exception {
 		evaluate("RandomForest", "Audit");
 	}
@@ -45,6 +50,11 @@ public class ClassificationTest extends ConverterTest {
 	@Test
 	public void evaluateDecisionTreeIris() throws Exception {
 		evaluate("DecisionTree", "Iris");
+	}
+
+	@Test
+	public void evaluateNeuralNetworkIris() throws Exception {
+		evaluate("NeuralNetwork", "Iris");
 	}
 
 	@Test

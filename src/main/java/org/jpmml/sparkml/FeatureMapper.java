@@ -34,6 +34,7 @@ import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.classification.GBTClassificationModel;
+import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
@@ -156,7 +157,7 @@ public class FeatureMapper extends PMMLMapper {
 
 			targetField = feature.getName();
 
-			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel)){
+			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel) || (model instanceof MultilayerPerceptronClassificationModel)){
 
 				if(feature instanceof ListFeature){
 					ListFeature listFeature = (ListFeature)feature;
