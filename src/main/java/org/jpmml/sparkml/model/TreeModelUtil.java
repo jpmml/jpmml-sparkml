@@ -125,6 +125,23 @@ public class TreeModelUtil {
 	}
 
 	static
+	public void indexNodes(final TreeModel treeModel) {
+		Visitor treeNodeIndexer = new AbstractVisitor() {
+			int currentIndex = 1;
+
+			@Override
+			public VisitorAction visit(Node node) {
+				node.setId((new Integer(currentIndex)).toString());
+				++currentIndex;
+
+				return super.visit(node);
+			}
+		};
+
+		treeNodeIndexer.applyTo(treeModel);
+	}
+
+	static
 	public Node encodeNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 
 		if(node instanceof InternalNode){
