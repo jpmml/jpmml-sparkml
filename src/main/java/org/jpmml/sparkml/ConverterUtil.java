@@ -70,7 +70,6 @@ import org.dmg.pmml.PMML;
 import org.dmg.pmml.Segmentation;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
@@ -216,8 +215,7 @@ public class ConverterUtil {
 			throw new IllegalArgumentException();
 		}
 
-		PMML pmml = featureMapper.encodePMML(rootModel)
-			.setHeader(PMMLUtil.createHeader("JPMML-SparkML", "1.0-SNAPSHOT"));
+		PMML pmml = featureMapper.encodePMML(rootModel);
 
 		return pmml;
 	}
