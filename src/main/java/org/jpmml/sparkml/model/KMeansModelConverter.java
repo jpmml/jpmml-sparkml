@@ -33,7 +33,6 @@ import org.dmg.pmml.CompareFunctionType;
 import org.dmg.pmml.ComparisonMeasure;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.SquaredEuclidean;
 import org.jpmml.converter.ClusteringModelUtil;
@@ -85,11 +84,9 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 			.setCompareFunction(CompareFunctionType.ABS_DIFF)
 			.setMeasure(new SquaredEuclidean());
 
-		MiningSchema miningSchema = ModelUtil.createMiningSchema(null, schema.getActiveFields());
-
 		Output output = ClusteringModelUtil.createOutput(FieldName.create("cluster"), Collections.<Cluster>emptyList());
 
-		ClusteringModel clusteringModel = new ClusteringModel(MiningFunctionType.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), miningSchema, comparisonMeasure, clusteringFields, clusters)
+		ClusteringModel clusteringModel = new ClusteringModel(MiningFunctionType.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(null, schema.getActiveFields()), comparisonMeasure, clusteringFields, clusters)
 			.setOutput(output);
 
 		return clusteringModel;

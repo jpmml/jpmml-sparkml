@@ -24,7 +24,6 @@ import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MultipleModelMethodType;
-import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
@@ -48,10 +47,8 @@ public class GBTRegressionModelConverter extends RegressionModelConverter<GBTReg
 			TreeModelUtil.scalePredictions(treeModels.get(i), weights[i]);
 		}
 
-		Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels);
-
 		MiningModel miningModel = new MiningModel(MiningFunctionType.REGRESSION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(segmentation);
+			.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels));
 
 		return miningModel;
 	}

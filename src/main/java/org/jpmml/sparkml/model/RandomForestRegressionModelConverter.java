@@ -24,7 +24,6 @@ import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MultipleModelMethodType;
-import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
@@ -43,10 +42,8 @@ public class RandomForestRegressionModelConverter extends RegressionModelConvert
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 
-		Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.AVERAGE, treeModels);
-
 		MiningModel miningModel = new MiningModel(MiningFunctionType.REGRESSION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(segmentation);
+			.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.AVERAGE, treeModels));
 
 		return miningModel;
 	}

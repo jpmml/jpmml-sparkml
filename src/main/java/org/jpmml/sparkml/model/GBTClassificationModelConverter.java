@@ -31,7 +31,6 @@ import org.dmg.pmml.MultipleModelMethodType;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.Segmentation;
 import org.dmg.pmml.TreeModel;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
@@ -69,10 +68,8 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 		Output output = new Output()
 			.addOutputFields(gbtValue, binarizedGbtValue);
 
-		Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels);
-
 		MiningModel miningModel = new MiningModel(MiningFunctionType.REGRESSION, ModelUtil.createMiningSchema(segmentSchema))
-			.setSegmentation(segmentation)
+			.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels))
 			.setOutput(output);
 
 		return MiningModelUtil.createBinaryLogisticClassification(schema, miningModel, 1000d, false);

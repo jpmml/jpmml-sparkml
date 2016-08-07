@@ -65,9 +65,7 @@ import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.MultipleModelMethodType;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
-import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
-import org.dmg.pmml.Segmentation;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
@@ -192,21 +190,17 @@ public class ConverterUtil {
 					model.setOutput(output);
 				}
 
-				OutputField outputField = ModelUtil.createPredictedField(name);
-
-				output.addOutputFields(outputField);
+				output.addOutputFields(ModelUtil.createPredictedField(name));
 			}
 
 			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
-
-			Segmentation segmentation = MiningModelUtil.createSegmentation(MultipleModelMethodType.MODEL_CHAIN, memberModels);
 
 			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
 
 			org.dmg.pmml.Model lastMemberModel = Iterables.getLast(memberModels);
 
 			MiningModel miningModel = new MiningModel(lastMemberModel.getFunctionName(), miningSchema)
-				.setSegmentation(segmentation);
+				.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.MODEL_CHAIN, memberModels));
 
 			rootModel = miningModel;
 		} else
