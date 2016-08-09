@@ -46,4 +46,19 @@ public class RegressionTest extends ConverterTest {
 	public void evaluateRandomForestAuto() throws Exception {
 		evaluate("RandomForest", "Auto");
 	}
+
+	@Test
+	public void evaluateDecisionTreeHousing() throws Exception {
+		evaluate("DecisionTree", "Housing");
+	}
+
+	@Test
+	public void evaluateLinearRegressionHousing() throws Exception {
+		evaluate("LinearRegression", "Housing");
+	}
+
+	@Test
+	public void evaluateRandomForestHousing() throws Exception {
+		evaluate("RandomForest", "Housing");
+	}
 }

@@ -48,6 +48,7 @@ import org.apache.spark.ml.feature.StandardScalerModel;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.ml.feature.VectorAttributeRewriter;
+import org.apache.spark.ml.feature.VectorIndexerModel;
 import org.apache.spark.ml.feature.VectorSlicer;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
@@ -82,6 +83,7 @@ import org.jpmml.sparkml.feature.StandardScalerModelConverter;
 import org.jpmml.sparkml.feature.StringIndexerModelConverter;
 import org.jpmml.sparkml.feature.VectorAssemblerConverter;
 import org.jpmml.sparkml.feature.VectorAttributeRewriterConverter;
+import org.jpmml.sparkml.feature.VectorIndexerModelConverter;
 import org.jpmml.sparkml.feature.VectorSlicerConverter;
 import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
 import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
@@ -269,6 +271,7 @@ public class ConverterUtil {
 		converters.put(StringIndexerModel.class, StringIndexerModelConverter.class);
 		converters.put(VectorAssembler.class, VectorAssemblerConverter.class);
 		converters.put(VectorAttributeRewriter.class, VectorAttributeRewriterConverter.class);
+		converters.put(VectorIndexerModel.class, VectorIndexerModelConverter.class);
 		converters.put(VectorSlicer.class, VectorSlicerConverter.class);
 
 		// Models
