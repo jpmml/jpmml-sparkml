@@ -26,7 +26,6 @@ import org.apache.spark.ml.feature.Binarizer;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -53,7 +52,7 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 			.addExpressions(PMMLUtil.createApply("lessOrEqual", inputFeature.ref(), PMMLUtil.createConstant(threshold)))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
-		DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol()), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+		DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
 		Feature feature = new ListFeature(derivedField, Arrays.asList("0", "1"));
 

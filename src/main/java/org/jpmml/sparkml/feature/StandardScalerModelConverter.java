@@ -26,7 +26,6 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -80,7 +79,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				}
 			}
 
-			DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol() + "[" + String.valueOf(i) + "]"), OpType.CONTINUOUS, DataType.DOUBLE, expression);
+			DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
 			Feature feature = new ContinuousFeature(derivedField);
 

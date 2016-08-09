@@ -19,11 +19,23 @@
 package org.jpmml.sparkml;
 
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.param.shared.HasOutputCol;
+import org.dmg.pmml.FieldName;
 
 abstract
 public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {
 
 	public FeatureConverter(T transformer){
 		super(transformer);
+	}
+
+	static
+	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer){
+		return FieldName.create(transformer.getOutputCol());
+	}
+
+	static
+	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer, int index){
+		return FieldName.create(transformer.getOutputCol() + "[" + index + "]");
 	}
 }

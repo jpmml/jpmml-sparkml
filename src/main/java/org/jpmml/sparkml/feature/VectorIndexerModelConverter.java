@@ -31,7 +31,6 @@ import org.apache.spark.ml.feature.VectorIndexerModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldColumnPair;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
@@ -105,7 +104,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 					.setOutputColumn(columns.get(1))
 					.setInlineTable(inlineTable);
 
-				DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol() + "[" + String.valueOf(i) + "]"), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
+				DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 
 				feature = new ListFeature(derivedField, values);
 			} else

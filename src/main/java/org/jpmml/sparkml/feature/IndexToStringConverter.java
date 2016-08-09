@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.spark.ml.feature.IndexToString;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Value;
 import org.jpmml.converter.Feature;
@@ -44,7 +43,7 @@ public class IndexToStringConverter extends FeatureConverter<IndexToString> {
 	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
 		IndexToString transformer = getTransformer();
 
-		DataField dataField = featureMapper.createDataField(FieldName.create(transformer.getOutputCol()), OpType.CATEGORICAL, DataType.STRING);
+		DataField dataField = featureMapper.createDataField(formatName(transformer), OpType.CATEGORICAL, DataType.STRING);
 
 		String[] labels = transformer.getLabels();
 		if(labels != null && labels.length > 0){

@@ -27,7 +27,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
@@ -67,7 +66,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 			discretize.addDiscretizeBins(discretizeBin);
 		}
 
-		DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(transformer.getOutputCol()), OpType.CONTINUOUS, DataType.INTEGER, discretize);
+		DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.INTEGER, discretize);
 
 		Feature feature = new ListFeature(derivedField, categories);
 
