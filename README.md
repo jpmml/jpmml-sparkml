@@ -49,13 +49,13 @@ Java library and command-line application for converting Spark ML pipelines to P
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository] (http://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **1.0.4** (17 July, 2016).
+The current version is **1.0.5** (10 August, 2016).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 </dependency>
 ```
 
@@ -116,8 +116,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-1.0-SNAPSHOT.jar` - Library JAR file.
-* `target/converter-executable-1.0-SNAPSHOT.jar` - Example application JAR file.
+* `target/jpmml-sparkml-1.1-SNAPSHOT.jar` - Library JAR file.
+* `target/converter-executable-1.1-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -158,12 +158,12 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/ser/Iris.ser` and `src/test/resources/ser/DecisionTreeIris.ser`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-executable-1.0-SNAPSHOT.jar --ser-schema-input src/test/resources/ser/Iris.ser --ser-pipeline-input src/test/resources/ser/DecisionTreeIris.ser --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.1-SNAPSHOT.jar --ser-schema-input src/test/resources/ser/Iris.ser --ser-pipeline-input src/test/resources/ser/DecisionTreeIris.ser --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-executable-1.0-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.1-SNAPSHOT.jar --help
 ```
 
 # License #
