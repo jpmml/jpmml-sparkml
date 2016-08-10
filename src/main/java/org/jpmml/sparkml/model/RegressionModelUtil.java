@@ -20,7 +20,7 @@ package org.jpmml.sparkml.model;
 
 import java.util.List;
 
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.CategoricalPredictor;
 import org.dmg.pmml.NumericPredictor;
 import org.dmg.pmml.RegressionTable;

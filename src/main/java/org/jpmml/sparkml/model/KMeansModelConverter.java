@@ -24,7 +24,7 @@ import java.util.List;
 
 import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.clustering.KMeansModel;
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.Array;
 import org.dmg.pmml.Cluster;
 import org.dmg.pmml.ClusteringField;

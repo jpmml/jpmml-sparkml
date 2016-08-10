@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.feature.PCAModel;
-import org.apache.spark.mllib.linalg.DenseMatrix;
+import org.apache.spark.ml.linalg.DenseMatrix;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;

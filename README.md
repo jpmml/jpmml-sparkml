@@ -41,7 +41,7 @@ Java library and command-line application for converting Spark ML pipelines to P
 
 # Prerequisites #
 
-* Apache Spark version 1.6.0 or newer.
+* Apache Spark version 1.5.X, 1.6.X or 2.0.X.
 
 # Installation #
 
@@ -65,7 +65,7 @@ Excluding the legacy version of JPMML-Model library from the application classpa
 ```xml
 <dependency>
 	<groupId>org.apache.spark</groupId>
-	<artifactId>spark-mllib_2.10</artifactId>
+	<artifactId>spark-mllib_2.11</artifactId>
 	<version>${spark.version}</version>
 	<scope>provided</scope>
 	<exclusions>

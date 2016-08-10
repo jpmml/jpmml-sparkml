@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.ActivationFunctionType;
 import org.dmg.pmml.Connection;
 import org.dmg.pmml.DataType;
