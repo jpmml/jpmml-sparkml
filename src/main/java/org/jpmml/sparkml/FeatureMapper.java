@@ -37,8 +37,9 @@ import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.apache.spark.sql.types.IntegerType;
-import org.apache.spark.sql.types.NumericType;
+import org.apache.spark.sql.types.BooleanType;
+import org.apache.spark.sql.types.DoubleType;
+import org.apache.spark.sql.types.IntegralType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
@@ -200,14 +201,18 @@ public class FeatureMapper extends PMMLMapper {
 
 			DataType dataType = dataField.getDataType();
 			switch(dataType){
+				case STRING:
+					feature = new WildcardFeature(dataField);
+					break;
 				case INTEGER:
-				case FLOAT:
 				case DOUBLE:
 					feature = new ContinuousFeature(dataField);
 					break;
-				default:
-					feature = new WildcardFeature(dataField);
+				case BOOLEAN:
+					feature = new BooleanFeature(dataField);
 					break;
+				default:
+					throw new IllegalArgumentException();
 			}
 
 			return Collections.singletonList(feature);
@@ -241,25 +246,27 @@ public class FeatureMapper extends PMMLMapper {
 	public DataField createDataField(FieldName name){
 		StructField field = this.schema.apply(name.getValue());
 
-		OpType opType;
-		DataType dataType;
-
 		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
-		if(sparkDataType instanceof NumericType){
-			opType = OpType.CONTINUOUS;
-			dataType = (sparkDataType instanceof IntegerType ? DataType.INTEGER : DataType.DOUBLE);
-		} else
 
 		if(sparkDataType instanceof StringType){
-			opType = OpType.CATEGORICAL;
-			dataType = DataType.STRING;
+			return createDataField(name, OpType.CATEGORICAL, DataType.STRING);
+		} else
+
+		if(sparkDataType instanceof IntegralType){
+			return createDataField(name, OpType.CONTINUOUS, DataType.INTEGER);
+		} else
+
+		if(sparkDataType instanceof DoubleType){
+			return createDataField(name, OpType.CONTINUOUS, DataType.DOUBLE);
+		} else
+
+		if(sparkDataType instanceof BooleanType){
+			return createDataField(name, OpType.CATEGORICAL, DataType.BOOLEAN);
 		} else
 
 		{
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
 		}
-
-		return createDataField(name, opType, dataType);
 	}
 
 	public void removeDataField(FieldName name){

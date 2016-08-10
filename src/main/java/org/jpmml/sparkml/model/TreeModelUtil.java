@@ -53,6 +53,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
+import org.jpmml.sparkml.BooleanFeature;
 
 public class TreeModelUtil {
 
@@ -227,15 +228,35 @@ public class TreeModelUtil {
 	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, Schema schema){
 		ContinuousFeature feature = (ContinuousFeature)schema.getFeature(continuousSplit.featureIndex());
 
-		String value = ValueUtil.formatValue(continuousSplit.threshold());
+		double threshold = continuousSplit.threshold();
 
-		SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.LESS_OR_EQUAL)
-			.setValue(value);
+		if(feature instanceof BooleanFeature){
+			BooleanFeature booleanFeature = (BooleanFeature)feature;
 
-		SimplePredicate rightPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.GREATER_THAN)
-			.setValue(value);
+			if(threshold != 0d){
+				throw new IllegalArgumentException();
+			}
 
-		return new Predicate[]{leftPredicate, rightPredicate};
+			SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.EQUAL)
+				.setValue(booleanFeature.getValue(0));
+
+			SimplePredicate rightPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.EQUAL)
+				.setValue(booleanFeature.getValue(1));
+
+			return new Predicate[]{leftPredicate, rightPredicate};
+		} else
+
+		{
+			String value = ValueUtil.formatValue(threshold);
+
+			SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.LESS_OR_EQUAL)
+				.setValue(value);
+
+			SimplePredicate rightPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.GREATER_THAN)
+				.setValue(value);
+
+			return new Predicate[]{leftPredicate, rightPredicate};
+		}
 	}
 
 	static
