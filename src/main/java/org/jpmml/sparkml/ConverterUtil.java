@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,17 +60,15 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
-import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MiningSchema;
-import org.dmg.pmml.MultipleModelMethodType;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.PMML;
-import org.jpmml.converter.MiningModelUtil;
+import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
 import org.jpmml.sparkml.feature.ChiSqSelectorModelConverter;
@@ -166,7 +165,7 @@ public class ConverterUtil {
 				for(Iterator<MiningField> miningFieldIt = miningFields.iterator(); miningFieldIt.hasNext(); ){
 					MiningField miningField = miningFieldIt.next();
 
-					FieldUsageType fieldUsage = miningField.getUsageType();
+					MiningField.FieldUsage fieldUsage = miningField.getFieldUsage();
 					switch(fieldUsage){
 						case PREDICTED:
 						case TARGET:
@@ -183,6 +182,11 @@ public class ConverterUtil {
 
 				FieldName name = FieldName.create(predictionCol);
 
+				DataField dataField = featureMapper.getDataField(name);
+				if(dataField == null){
+					throw new IllegalArgumentException();
+				}
+
 				featureMapper.removeDataField(name);
 
 				Output output = model.getOutput();
@@ -192,17 +196,15 @@ public class ConverterUtil {
 					model.setOutput(output);
 				}
 
-				output.addOutputFields(ModelUtil.createPredictedField(name));
+				output.addOutputFields(ModelUtil.createPredictedField(name, dataField.getDataType()));
 			}
-
-			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
 
 			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
 
-			org.dmg.pmml.Model lastMemberModel = Iterables.getLast(memberModels);
+			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
 
-			MiningModel miningModel = new MiningModel(lastMemberModel.getFunctionName(), miningSchema)
-				.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.MODEL_CHAIN, memberModels));
+			MiningModel miningModel = MiningModelUtil.createModelChain(null, Collections.<FieldName>emptyList(), memberModels)
+				.setMiningSchema(miningSchema);
 
 			rootModel = miningModel;
 		} else

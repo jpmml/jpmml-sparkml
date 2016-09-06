@@ -21,13 +21,13 @@ package org.jpmml.sparkml.model;
 import java.util.List;
 
 import org.apache.spark.ml.regression.GBTRegressionModel;
-import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.MiningModel;
-import org.dmg.pmml.MultipleModelMethodType;
-import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.MiningModelUtil;
+import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.mining.MiningModel;
+import org.dmg.pmml.mining.Segmentation;
+import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
 
 public class GBTRegressionModelConverter extends RegressionModelConverter<GBTRegressionModel> {
@@ -47,8 +47,8 @@ public class GBTRegressionModelConverter extends RegressionModelConverter<GBTReg
 			TreeModelUtil.scalePredictions(treeModels.get(i), weights[i]);
 		}
 
-		MiningModel miningModel = new MiningModel(MiningFunctionType.REGRESSION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels));
+		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(schema))
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.SUM, treeModels));
 
 		return miningModel;
 	}

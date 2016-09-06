@@ -47,6 +47,7 @@ import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMML;
 import org.dmg.pmml.Value;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -65,6 +66,14 @@ public class FeatureMapper extends PMMLMapper {
 
 	public FeatureMapper(StructType schema){
 		this.schema = schema;
+	}
+
+	@Override
+	public PMML encodePMML(org.dmg.pmml.Model model){
+		PMML pmml = super.encodePMML(model)
+			.setVersion("4.3");
+
+		return pmml;
 	}
 
 	public void append(FeatureConverter<?> converter){

@@ -21,10 +21,9 @@ package org.jpmml.sparkml.model;
 import java.util.List;
 
 import org.apache.spark.ml.classification.LogisticRegressionModel;
-import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.RegressionModel;
-import org.dmg.pmml.RegressionNormalizationMethodType;
-import org.dmg.pmml.RegressionTable;
+import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.regression.RegressionTable;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
@@ -50,8 +49,8 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 		RegressionTable passiveRegressionTable = new RegressionTable(0d)
 			.setTargetCategory(targetCategories.get(0));
 
-		RegressionModel regressionModel = new RegressionModel(MiningFunctionType.CLASSIFICATION, ModelUtil.createMiningSchema(schema), null)
-			.setNormalizationMethod(RegressionNormalizationMethodType.SOFTMAX)
+		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema), null)
+			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX)
 			.addRegressionTables(activeRegressionTable, passiveRegressionTable)
 			.setOutput(ModelUtil.createProbabilityOutput(schema));
 

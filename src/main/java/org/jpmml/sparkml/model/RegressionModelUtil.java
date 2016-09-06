@@ -21,9 +21,9 @@ package org.jpmml.sparkml.model;
 import java.util.List;
 
 import org.apache.spark.ml.linalg.Vector;
-import org.dmg.pmml.CategoricalPredictor;
-import org.dmg.pmml.NumericPredictor;
-import org.dmg.pmml.RegressionTable;
+import org.dmg.pmml.regression.CategoricalPredictor;
+import org.dmg.pmml.regression.NumericPredictor;
+import org.dmg.pmml.regression.RegressionTable;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;

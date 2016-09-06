@@ -26,20 +26,20 @@ import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.Array;
-import org.dmg.pmml.Cluster;
-import org.dmg.pmml.ClusteringField;
-import org.dmg.pmml.ClusteringModel;
-import org.dmg.pmml.CompareFunctionType;
+import org.dmg.pmml.CompareFunction;
 import org.dmg.pmml.ComparisonMeasure;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.MiningFunctionType;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.SquaredEuclidean;
-import org.jpmml.converter.ClusteringModelUtil;
+import org.dmg.pmml.clustering.Cluster;
+import org.dmg.pmml.clustering.ClusteringField;
+import org.dmg.pmml.clustering.ClusteringModel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.clustering.ClusteringModelUtil;
 import org.jpmml.sparkml.FeatureMapper;
 import org.jpmml.sparkml.ModelConverter;
 
@@ -81,12 +81,12 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 		List<ClusteringField> clusteringFields = ClusteringModelUtil.createClusteringFields(features);
 
 		ComparisonMeasure comparisonMeasure = new ComparisonMeasure(ComparisonMeasure.Kind.DISTANCE)
-			.setCompareFunction(CompareFunctionType.ABS_DIFF)
+			.setCompareFunction(CompareFunction.ABS_DIFF)
 			.setMeasure(new SquaredEuclidean());
 
 		Output output = ClusteringModelUtil.createOutput(FieldName.create("cluster"), Collections.<Cluster>emptyList());
 
-		ClusteringModel clusteringModel = new ClusteringModel(MiningFunctionType.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(null, schema.getActiveFields()), comparisonMeasure, clusteringFields, clusters)
+		ClusteringModel clusteringModel = new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(null, schema.getActiveFields()), comparisonMeasure, clusteringFields, clusters)
 			.setOutput(output);
 
 		return clusteringModel;

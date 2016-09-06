@@ -22,20 +22,20 @@ import java.util.List;
 
 import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FeatureType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
-import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.MiningModel;
-import org.dmg.pmml.MultipleModelMethodType;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.MiningModelUtil;
+import org.dmg.pmml.ResultFeature;
+import org.dmg.pmml.mining.MiningModel;
+import org.dmg.pmml.mining.Segmentation;
+import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
 public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> {
@@ -57,19 +57,18 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 			TreeModelUtil.scalePredictions(treeModels.get(i), weights[i]);
 		}
 
-		OutputField gbtValue = ModelUtil.createPredictedField(FieldName.create("gbtValue"));
+		OutputField gbtValue = ModelUtil.createPredictedField(FieldName.create("gbtValue"), DataType.DOUBLE);
 
-		OutputField binarizedGbtValue = new OutputField(FieldName.create("binarizedGbtValue"))
-			.setFeature(FeatureType.TRANSFORMED_VALUE)
-			.setDataType(DataType.DOUBLE)
+		OutputField binarizedGbtValue = new OutputField(FieldName.create("binarizedGbtValue"), DataType.DOUBLE)
 			.setOpType(OpType.CONTINUOUS)
+			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", new FieldRef(gbtValue.getName()), PMMLUtil.createConstant(0d)), PMMLUtil.createConstant(-1d), PMMLUtil.createConstant(1d)));
 
 		Output output = new Output()
 			.addOutputFields(gbtValue, binarizedGbtValue);
 
-		MiningModel miningModel = new MiningModel(MiningFunctionType.REGRESSION, ModelUtil.createMiningSchema(segmentSchema))
-			.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.SUM, treeModels))
+		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema))
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.SUM, treeModels))
 			.setOutput(output);
 
 		return MiningModelUtil.createBinaryLogisticClassification(schema, miningModel, 1000d, false);

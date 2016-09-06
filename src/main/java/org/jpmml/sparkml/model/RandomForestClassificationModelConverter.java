@@ -21,13 +21,13 @@ package org.jpmml.sparkml.model;
 import java.util.List;
 
 import org.apache.spark.ml.classification.RandomForestClassificationModel;
-import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.MiningModel;
-import org.dmg.pmml.MultipleModelMethodType;
-import org.dmg.pmml.TreeModel;
-import org.jpmml.converter.MiningModelUtil;
+import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.mining.MiningModel;
+import org.dmg.pmml.mining.Segmentation;
+import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
 public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> {
@@ -42,8 +42,8 @@ public class RandomForestClassificationModelConverter extends ClassificationMode
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 
-		MiningModel miningModel = new MiningModel(MiningFunctionType.CLASSIFICATION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(MiningModelUtil.createSegmentation(MultipleModelMethodType.AVERAGE, treeModels))
+		MiningModel miningModel = new MiningModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema))
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, treeModels))
 			.setOutput(ModelUtil.createProbabilityOutput(schema));
 
 		return miningModel;

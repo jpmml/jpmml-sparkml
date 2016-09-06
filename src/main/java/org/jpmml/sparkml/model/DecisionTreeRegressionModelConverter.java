@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
-import org.dmg.pmml.TreeModel;
+import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.RegressionModelConverter;
 

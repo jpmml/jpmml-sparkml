@@ -23,24 +23,22 @@ import java.util.List;
 
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.dmg.pmml.ActivationFunctionType;
-import org.dmg.pmml.Connection;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Entity;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
-import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.NeuralInput;
-import org.dmg.pmml.NeuralInputs;
-import org.dmg.pmml.NeuralLayer;
-import org.dmg.pmml.NeuralNetwork;
-import org.dmg.pmml.NeuralOutput;
-import org.dmg.pmml.NeuralOutputs;
-import org.dmg.pmml.Neuron;
-import org.dmg.pmml.NnNormalizationMethodType;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.NormDiscrete;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.neural_network.Connection;
+import org.dmg.pmml.neural_network.NeuralInput;
+import org.dmg.pmml.neural_network.NeuralInputs;
+import org.dmg.pmml.neural_network.NeuralLayer;
+import org.dmg.pmml.neural_network.NeuralNetwork;
+import org.dmg.pmml.neural_network.NeuralOutput;
+import org.dmg.pmml.neural_network.NeuralOutputs;
+import org.dmg.pmml.neural_network.Neuron;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -144,8 +142,8 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 			if(i == (layers.length - 1)){
 				neuralLayer
-					.setActivationFunction(ActivationFunctionType.IDENTITY)
-					.setNormalizationMethod(NnNormalizationMethodType.SOFTMAX);
+					.setActivationFunction(NeuralNetwork.ActivationFunction.IDENTITY)
+					.setNormalizationMethod(NeuralNetwork.NormalizationMethod.SOFTMAX);
 			}
 
 			neuralLayers.add(neuralLayer);
@@ -174,7 +172,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 			neuralOutputs.addNeuralOutputs(neuralOutput);
 		}
 
-		NeuralNetwork neuralNetwork = new NeuralNetwork(MiningFunctionType.CLASSIFICATION, ActivationFunctionType.LOGISTIC, ModelUtil.createMiningSchema(schema), neuralInputs, neuralLayers)
+		NeuralNetwork neuralNetwork = new NeuralNetwork(MiningFunction.CLASSIFICATION, NeuralNetwork.ActivationFunction.LOGISTIC, ModelUtil.createMiningSchema(schema), neuralInputs, neuralLayers)
 			.setNeuralOutputs(neuralOutputs)
 			.setOutput(ModelUtil.createProbabilityOutput(schema));
 

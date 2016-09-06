@@ -35,16 +35,16 @@ import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
 import org.dmg.pmml.Array;
-import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.Node;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.SimpleSetPredicate;
-import org.dmg.pmml.TreeModel;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
+import org.dmg.pmml.tree.Node;
+import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -65,11 +65,11 @@ public class TreeModelUtil {
 		org.apache.spark.ml.tree.Node node = model.rootNode();
 
 		if(model instanceof DecisionTreeRegressionModel){
-			return encodeTreeModel(MiningFunctionType.REGRESSION, node, schema);
+			return encodeTreeModel(MiningFunction.REGRESSION, node, schema);
 		} else
 
 		if(model instanceof DecisionTreeClassificationModel){
-			return encodeTreeModel(MiningFunctionType.CLASSIFICATION, node, schema);
+			return encodeTreeModel(MiningFunction.CLASSIFICATION, node, schema);
 		}
 
 		throw new IllegalArgumentException();
@@ -94,7 +94,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	public TreeModel encodeTreeModel(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
+	public TreeModel encodeTreeModel(MiningFunction miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 		Node root = encodeNode(miningFunction, node, schema)
 			.setPredicate(new True());
 
@@ -126,7 +126,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	public Node encodeNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
+	public Node encodeNode(MiningFunction miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 
 		if(node instanceof InternalNode){
 			return encodeInternalNode(miningFunction, (InternalNode)node, schema);
@@ -140,7 +140,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeInternalNode(MiningFunctionType miningFunction, InternalNode internalNode, Schema schema){
+	private Node encodeInternalNode(MiningFunction miningFunction, InternalNode internalNode, Schema schema){
 		Node result = createNode(miningFunction, internalNode, schema);
 
 		Predicate[] predicates = encodeSplit(internalNode.split(), schema);
@@ -157,14 +157,14 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeLeafNode(MiningFunctionType miningFunction, LeafNode leafNode, Schema schema){
+	private Node encodeLeafNode(MiningFunction miningFunction, LeafNode leafNode, Schema schema){
 		Node result = createNode(miningFunction, leafNode, schema);
 
 		return result;
 	}
 
 	static
-	private Node createNode(MiningFunctionType miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
+	private Node createNode(MiningFunction miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
 		Node result = new Node();
 
 		switch(miningFunction){
