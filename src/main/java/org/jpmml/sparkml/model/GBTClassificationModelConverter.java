@@ -52,20 +52,31 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, model.treeWeights(), segmentSchema);
 
-		OutputField gbtValue = ModelUtil.createPredictedField(FieldName.create("gbtValue"), DataType.DOUBLE);
-
-		OutputField binarizedGbtValue = new OutputField(FieldName.create("binarizedGbtValue"), DataType.DOUBLE)
-			.setOpType(OpType.CONTINUOUS)
-			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
-			.setExpression(PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", new FieldRef(gbtValue.getName()), PMMLUtil.createConstant(0d)), PMMLUtil.createConstant(-1d), PMMLUtil.createConstant(1d)));
-
-		Output output = new Output()
-			.addOutputFields(gbtValue, binarizedGbtValue);
+		Output output = encodeOutput();
 
 		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.SUM, treeModels))
 			.setOutput(output);
 
 		return MiningModelUtil.createBinaryLogisticClassification(schema, miningModel, 1000d, false);
+	}
+
+	static
+	private Output encodeOutput(){
+		OutputField gbtValue = new OutputField(FieldName.create("gbtValue"), DataType.DOUBLE)
+			.setOpType(OpType.CONTINUOUS)
+			.setResultFeature(ResultFeature.PREDICTED_VALUE)
+			.setFinalResult(false);
+
+		OutputField binarizedGbtValue = new OutputField(FieldName.create("binarizedGbtValue"), DataType.DOUBLE)
+			.setOpType(OpType.CONTINUOUS)
+			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
+			.setFinalResult(false)
+			.setExpression(PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", new FieldRef(gbtValue.getName()), PMMLUtil.createConstant(0d)), PMMLUtil.createConstant(-1d), PMMLUtil.createConstant(1d)));
+
+		Output output = new Output()
+			.addOutputFields(gbtValue, binarizedGbtValue);
+
+		return output;
 	}
 }

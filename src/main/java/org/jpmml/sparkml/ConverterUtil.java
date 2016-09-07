@@ -64,9 +64,10 @@ import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
-import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.feature.BinarizerConverter;
@@ -196,7 +197,11 @@ public class ConverterUtil {
 					model.setOutput(output);
 				}
 
-				output.addOutputFields(ModelUtil.createPredictedField(name, dataField.getDataType()));
+				OutputField outputField = new OutputField(name, dataField.getDataType())
+					.setOpType(dataField.getOpType())
+					.setResultFeature(ResultFeature.PREDICTED_VALUE);
+
+				output.addOutputFields(outputField);
 			}
 
 			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
