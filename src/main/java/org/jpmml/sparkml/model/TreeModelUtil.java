@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.tree.CategoricalSplit;
@@ -40,9 +38,8 @@ import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.SimpleSetPredicate;
+import org.dmg.pmml.Targets;
 import org.dmg.pmml.True;
-import org.dmg.pmml.Visitor;
-import org.dmg.pmml.VisitorAction;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
@@ -52,7 +49,6 @@ import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
-import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.BooleanFeature;
 
 public class TreeModelUtil {
@@ -76,19 +72,32 @@ public class TreeModelUtil {
 	}
 
 	static
-	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel model, final Schema schema){
-		Function<DecisionTreeModel, TreeModel> function = new Function<DecisionTreeModel, TreeModel>(){
+	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, Schema schema){
+		return encodeDecisionTreeEnsemble(model, null, schema);
+	}
 
-			private Schema segmentSchema = schema.toAnonymousSchema();
+	static
+	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, double[] weights, Schema schema){
+		Schema segmentSchema = schema.toAnonymousSchema();
 
+		List<TreeModel> treeModels = new ArrayList<>();
 
-			@Override
-			public TreeModel apply(DecisionTreeModel model){
-				return encodeDecisionTree(model, this.segmentSchema);
+		DecisionTreeModel[] trees = model.trees();
+		for(int i = 0; i < trees.length; i++){
+			DecisionTreeModel tree = trees[i];
+			Double weight = (weights != null ? weights[i] : null);
+
+			TreeModel treeModel = encodeDecisionTree(tree, segmentSchema);
+
+			if(weight != null && !ValueUtil.isOne(weight)){
+				Targets targets = new Targets()
+					.addTargets(ModelUtil.createRescaleTarget(segmentSchema.getTargetField(), weight, null));
+
+				treeModel.setTargets(targets);
 			}
-		};
 
-		List<TreeModel> treeModels = new ArrayList<>(Lists.transform(Arrays.asList(model.trees()), function));
+			treeModels.add(treeModel);
+		}
 
 		return treeModels;
 	}
@@ -102,27 +111,6 @@ public class TreeModelUtil {
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
 
 		return treeModel;
-	}
-
-	static
-	public void scalePredictions(final TreeModel treeModel, final double weight){
-
-		if(ValueUtil.isOne(weight)){
-			return;
-		}
-
-		Visitor visitor = new AbstractVisitor(){
-
-			@Override
-			public VisitorAction visit(Node node){
-				double score = Double.parseDouble(node.getScore());
-
-				node.setScore(ValueUtil.formatValue(score * weight));
-
-				return super.visit(node);
-			}
-		};
-		visitor.applyTo(treeModel);
 	}
 
 	static

@@ -50,12 +50,7 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 
 		Schema segmentSchema = schema.toAnonymousSchema();
 
-		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, segmentSchema);
-
-		double[] weights = model.treeWeights();
-		for(int i = 0; i < weights.length; i++){
-			TreeModelUtil.scalePredictions(treeModels.get(i), weights[i]);
-		}
+		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, model.treeWeights(), segmentSchema);
 
 		OutputField gbtValue = ModelUtil.createPredictedField(FieldName.create("gbtValue"), DataType.DOUBLE);
 
