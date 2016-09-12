@@ -59,6 +59,14 @@ The current version is **1.1.1** (7 September, 2016).
 </dependency>
 ```
 
+Compatibility matrix:
+
+| JPMML-SparkML version | Apache Spark version | PMML version |
+|-----------------------|----------------------|--------------|
+| 1.0.0 through 1.0.5 | 1.5.X and 1.6.X | 4.2 |
+| 1.1.0 | 2.0.X | 4.2 |
+| 1.1.1 | 2.0.X | 4.3 |
+
 JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model] (https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
 
 Excluding the legacy version of JPMML-Model library from the application classpath:
