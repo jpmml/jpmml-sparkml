@@ -25,7 +25,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBException;
+
 import com.google.common.collect.Iterables;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
@@ -70,6 +73,7 @@ import org.dmg.pmml.PMML;
 import org.jpmml.converter.MiningModelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.model.MetroJAXBUtil;
 import org.jpmml.sparkml.feature.BinarizerConverter;
 import org.jpmml.sparkml.feature.BucketizerConverter;
 import org.jpmml.sparkml.feature.ChiSqSelectorModelConverter;
@@ -214,6 +218,21 @@ public class ConverterUtil {
 		PMML pmml = featureMapper.encodePMML(rootModel);
 
 		return pmml;
+	}
+
+	static
+	public byte[] toPMMLByteArray(StructType schema, PipelineModel pipelineModel){
+		PMML pmml = toPMML(schema, pipelineModel);
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream(1024 * 1024);
+
+		try {
+			MetroJAXBUtil.marshalPMML(pmml, os);
+		} catch(JAXBException je){
+			throw new RuntimeException(je);
+		}
+
+		return os.toByteArray();
 	}
 
 	static
