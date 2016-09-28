@@ -170,8 +170,8 @@ public class ConverterUtil {
 				for(Iterator<MiningField> miningFieldIt = miningFields.iterator(); miningFieldIt.hasNext(); ){
 					MiningField miningField = miningFieldIt.next();
 
-					MiningField.FieldUsage fieldUsage = miningField.getFieldUsage();
-					switch(fieldUsage){
+					MiningField.UsageType usageType = miningField.getUsageType();
+					switch(usageType){
 						case PREDICTED:
 						case TARGET:
 							targetMiningFields.add(miningField);
