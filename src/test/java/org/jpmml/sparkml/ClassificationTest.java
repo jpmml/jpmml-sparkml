@@ -33,6 +33,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateGLMAudit() throws Exception {
+		evaluate("GLM", "Audit");
+	}
+
+	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
 		evaluate("LogisticRegression", "Audit");
 	}

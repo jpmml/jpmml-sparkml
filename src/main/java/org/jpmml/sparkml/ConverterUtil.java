@@ -57,6 +57,7 @@ import org.apache.spark.ml.feature.VectorSlicer;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.GBTRegressionModel;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
@@ -93,6 +94,7 @@ import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
 import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
 import org.jpmml.sparkml.model.GBTClassificationModelConverter;
 import org.jpmml.sparkml.model.GBTRegressionModelConverter;
+import org.jpmml.sparkml.model.GeneralizedLinearRegressionModelConverter;
 import org.jpmml.sparkml.model.KMeansModelConverter;
 import org.jpmml.sparkml.model.LinearRegressionModelConverter;
 import org.jpmml.sparkml.model.LogisticRegressionModelConverter;
@@ -126,7 +128,17 @@ public class ConverterUtil {
 
 				Schema featureSchema = featureMapper.createSchema((Model<?>)stage);
 
+				dataType:
 				if(converter instanceof RegressionModelConverter){
+
+					if(stage instanceof GeneralizedLinearRegressionModel){
+						GeneralizedLinearRegressionModel generalizedLinearRegressionModel = (GeneralizedLinearRegressionModel)stage;
+
+						if(("binomial").equals(generalizedLinearRegressionModel.getFamily())){
+							break dataType;
+						}
+					}
+
 					FieldName targetField = featureSchema.getTargetField();
 
 					DataField dataField = featureMapper.getDataField(targetField);
@@ -305,6 +317,7 @@ public class ConverterUtil {
 		converters.put(DecisionTreeRegressionModel.class, DecisionTreeRegressionModelConverter.class);
 		converters.put(GBTClassificationModel.class, GBTClassificationModelConverter.class);
 		converters.put(GBTRegressionModel.class, GBTRegressionModelConverter.class);
+		converters.put(GeneralizedLinearRegressionModel.class, GeneralizedLinearRegressionModelConverter.class);
 		converters.put(KMeansModel.class, KMeansModelConverter.class);
 		converters.put(LinearRegressionModel.class, LinearRegressionModelConverter.class);
 		converters.put(LogisticRegressionModel.class, LogisticRegressionModelConverter.class);

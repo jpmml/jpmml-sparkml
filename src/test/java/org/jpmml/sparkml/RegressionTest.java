@@ -33,6 +33,11 @@ public class RegressionTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateGLMAuto() throws Exception {
+		evaluate("GLM", "Auto");
+	}
+
+	@Test
 	public void evaluateLinearRegressionAuto() throws Exception {
 		evaluate("LinearRegression", "Auto");
 	}
@@ -50,6 +55,11 @@ public class RegressionTest extends ConverterTest {
 	@Test
 	public void evaluateDecisionTreeHousing() throws Exception {
 		evaluate("DecisionTree", "Housing");
+	}
+
+	@Test
+	public void evaluateGLMHousing() throws Exception {
+		evaluate("GLM", "Housing");
 	}
 
 	@Test

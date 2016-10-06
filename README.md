@@ -32,6 +32,7 @@ Java library and command-line application for converting Spark ML pipelines to P
     * [`clustering.KMeansModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/clustering/KMeansModel.html)
     * [`regression.DecisionTreeRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/DecisionTreeRegressionModel.html)
     * [`regression.GBTRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GBTRegressionModel.html)
+    * [`regression.GeneralizedLinearRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GeneralizedLinearRegressionModel.html)
     * [`regression.LinearRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/LinearRegressionModel.html)
     * [`regression.RandomForestRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/RandomForestRegressionModel.html)
   * Prediction model chains

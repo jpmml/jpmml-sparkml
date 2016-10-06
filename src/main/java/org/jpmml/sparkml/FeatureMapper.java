@@ -37,6 +37,7 @@ import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DoubleType;
 import org.apache.spark.sql.types.IntegralType;
@@ -106,10 +107,21 @@ public class FeatureMapper extends PMMLMapper {
 
 			targetField = feature.getName();
 
-			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel) || (model instanceof MultilayerPerceptronClassificationModel)){
+			categories:
+			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel) || (model instanceof GeneralizedLinearRegressionModel) || (model instanceof MultilayerPerceptronClassificationModel)){
+
+				if(model instanceof GeneralizedLinearRegressionModel){
+					GeneralizedLinearRegressionModel generalizedLinearRegressionModel = (GeneralizedLinearRegressionModel)model;
+
+					if(!("binomial").equals(generalizedLinearRegressionModel.getFamily())){
+						break categories;
+					}
+				} // End if
 
 				if(feature instanceof ListFeature){
 					ListFeature listFeature = (ListFeature)feature;
+
+					DataField dataField = getDataField(targetField);
 
 					targetCategories = listFeature.getValues();
 				} else
@@ -147,8 +159,9 @@ public class FeatureMapper extends PMMLMapper {
 		if(model instanceof PredictionModel){
 			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
 
-			if(features.size() != predictionModel.numFeatures()){
-				throw new IllegalArgumentException("Expected " + predictionModel.numFeatures() + " features, got " + features.size() + " features");
+			int numFeatures = predictionModel.numFeatures();
+			if(numFeatures != -1 && features.size() != numFeatures){
+				throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
 			}
 		}
 
