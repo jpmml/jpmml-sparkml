@@ -58,6 +58,11 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 	}
 
 	@Override
+	public MiningFunctionType getMiningFunction(){
+		return MiningFunctionType.CLUSTERING;
+	}
+
+	@Override
 	public ClusteringModel encodeModel(Schema schema){
 		KMeansModel model = getTransformer();
 

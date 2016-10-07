@@ -64,6 +64,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
+import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.MiningModel;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.MultipleModelMethodType;
@@ -126,14 +127,21 @@ public class ConverterUtil {
 
 				Schema featureSchema = featureMapper.createSchema((Model<?>)stage);
 
-				if(converter instanceof RegressionModelConverter){
-					FieldName targetField = featureSchema.getTargetField();
+				MiningFunctionType miningFunction = modelConverter.getMiningFunction();
+				switch(miningFunction){
+					case REGRESSION:
+						{
+							FieldName targetField = featureSchema.getTargetField();
 
-					DataField dataField = featureMapper.getDataField(targetField);
+							DataField dataField = featureMapper.getDataField(targetField);
 
-					dataField
-						.setOpType(OpType.CONTINUOUS)
-						.setDataType(DataType.DOUBLE);
+							dataField
+								.setOpType(OpType.CONTINUOUS)
+								.setDataType(DataType.DOUBLE);
+						}
+						break;
+					default:
+						break;
 				}
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);

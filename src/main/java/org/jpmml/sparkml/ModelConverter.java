@@ -21,6 +21,7 @@ package org.jpmml.sparkml;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.MiningFunctionType;
 import org.jpmml.converter.Schema;
 
 abstract
@@ -29,6 +30,9 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 	public ModelConverter(T transformer){
 		super(transformer);
 	}
+
+	abstract
+	public MiningFunctionType getMiningFunction();
 
 	abstract
 	public org.dmg.pmml.Model encodeModel(Schema schema);

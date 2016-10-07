@@ -27,6 +27,7 @@ import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.MiningFunctionType;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.WildcardFeature;
@@ -47,5 +48,10 @@ public class ClassificationModelConverter<T extends Model<T> & HasFeaturesCol & 
 		Feature feature = new WildcardFeature(dataField);
 
 		return Collections.singletonList(feature);
+	}
+
+	@Override
+	public MiningFunctionType getMiningFunction(){
+		return MiningFunctionType.CLASSIFICATION;
 	}
 }
