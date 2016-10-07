@@ -65,10 +65,10 @@ public class FeatureMapper extends PMMLMapper {
 		this.schema = schema;
 	}
 
-	public void append(FeatureConverter<?> converter){
-		Transformer transformer = converter.getTransformer();
+	public void append(FeatureConverter<?> featureConverter){
+		Transformer transformer = featureConverter.getTransformer();
 
-		List<Feature> features = converter.encodeFeatures(this);
+		List<Feature> features = featureConverter.encodeFeatures(this);
 
 		if(transformer instanceof HasOutputCol){
 			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
@@ -79,13 +79,13 @@ public class FeatureMapper extends PMMLMapper {
 		}
 	}
 
-	public void append(ModelConverter<?> converter){
-		Transformer transformer = converter.getTransformer();
+	public void append(ModelConverter<?> modelConverter){
+		Model<?> model = modelConverter.getTransformer();
 
-		List<Feature> features = converter.encodeFeatures(this);
+		List<Feature> features = modelConverter.encodeFeatures(this);
 
-		if(transformer instanceof HasPredictionCol){
-			HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
+		if(model instanceof HasPredictionCol){
+			HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
 
 			String predictionCol = hasPredictionCol.getPredictionCol();
 
