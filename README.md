@@ -64,7 +64,7 @@ Compatibility matrix:
 
 | JPMML-SparkML version | Apache Spark version | PMML version |
 |-----------------------|----------------------|--------------|
-| 1.0.0 through 1.0.6 | 1.5.X and 1.6.X | 4.2 |
+| 1.0.0 through 1.0.7 | 1.5.X and 1.6.X | 4.2 |
 | 1.1.0 | 2.0.X | 4.2 |
 | 1.1.1 through 1.1.2 | 2.0.X | 4.3 |
 

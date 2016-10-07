@@ -86,8 +86,20 @@
 					<artifactId>guava</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>com.sun.xml.fastinfoset</groupId>
+					<artifactId>FastInfoset</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>jaxb-runtime</artifactId>
+					<artifactId>txw2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jvnet.staxex</groupId>
+					<artifactId>stax-ex</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

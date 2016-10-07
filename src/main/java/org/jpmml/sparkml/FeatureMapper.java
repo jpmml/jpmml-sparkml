@@ -29,15 +29,11 @@ import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.classification.ClassificationModel;
-import org.apache.spark.ml.classification.GBTClassificationModel;
-import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DoubleType;
 import org.apache.spark.sql.types.IntegralType;
@@ -47,6 +43,7 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Value;
 import org.jpmml.converter.ContinuousFeature;
@@ -68,10 +65,10 @@ public class FeatureMapper extends PMMLMapper {
 		this.schema = schema;
 	}
 
-	public void append(FeatureConverter<?> converter){
-		Transformer transformer = converter.getTransformer();
+	public void append(FeatureConverter<?> featureConverter){
+		Transformer transformer = featureConverter.getTransformer();
 
-		List<Feature> features = converter.encodeFeatures(this);
+		List<Feature> features = featureConverter.encodeFeatures(this);
 
 		if(transformer instanceof HasOutputCol){
 			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
@@ -82,13 +79,13 @@ public class FeatureMapper extends PMMLMapper {
 		}
 	}
 
-	public void append(ModelConverter<?> converter){
-		Transformer transformer = converter.getTransformer();
+	public void append(ModelConverter<?> modelConverter){
+		Model<?> model = modelConverter.getTransformer();
 
-		List<Feature> features = converter.encodeFeatures(this);
+		List<Feature> features = modelConverter.encodeFeatures(this);
 
-		if(transformer instanceof HasPredictionCol){
-			HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
+		if(model instanceof HasPredictionCol){
+			HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
 
 			String predictionCol = hasPredictionCol.getPredictionCol();
 
@@ -96,9 +93,11 @@ public class FeatureMapper extends PMMLMapper {
 		}
 	}
 
-	public Schema createSchema(Model<?> model){
+	public Schema createSchema(ModelConverter<?> modelConverter){
 		FieldName targetField;
 		List<String> targetCategories = null;
+
+		Model<?> model = modelConverter.getTransformer();
 
 		if(model instanceof PredictionModel){
 			HasLabelCol hasLabelCol = (HasLabelCol)model;
@@ -107,37 +106,39 @@ public class FeatureMapper extends PMMLMapper {
 
 			targetField = feature.getName();
 
-			categories:
-			if((model instanceof ClassificationModel) || (model instanceof GBTClassificationModel) || (model instanceof GeneralizedLinearRegressionModel) || (model instanceof MultilayerPerceptronClassificationModel)){
+			MiningFunction miningFunction = modelConverter.getMiningFunction();
+			switch(miningFunction){
+				case CLASSIFICATION:
+					{
+						if(feature instanceof ListFeature){
+							ListFeature listFeature = (ListFeature)feature;
 
-				if(model instanceof GeneralizedLinearRegressionModel){
-					GeneralizedLinearRegressionModel generalizedLinearRegressionModel = (GeneralizedLinearRegressionModel)model;
+							targetCategories = listFeature.getValues();
+						} else
 
-					if(!("binomial").equals(generalizedLinearRegressionModel.getFamily())){
-						break categories;
+						{
+							ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+							// XXX
+							targetCategories = Arrays.asList("0", "1");
+
+							DataField dataField = toCategorical(targetField, targetCategories);
+
+							ListFeature listFeature = new ListFeature(dataField, targetCategories);
+
+							this.columnFeatures.put(hasLabelCol.getLabelCol(), Collections.<Feature>singletonList(listFeature));
+						}
 					}
-				} // End if
+					break;
+				case REGRESSION:
+					{
+						DataField dataField = toContinuous(targetField);
 
-				if(feature instanceof ListFeature){
-					ListFeature listFeature = (ListFeature)feature;
-
-					DataField dataField = getDataField(targetField);
-
-					targetCategories = listFeature.getValues();
-				} else
-
-				{
-					ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-					// XXX
-					targetCategories = Arrays.asList("0", "1");
-
-					DataField dataField = toCategorical(targetField, targetCategories);
-
-					ListFeature listFeature = new ListFeature(dataField, targetCategories);
-
-					this.columnFeatures.put(hasLabelCol.getLabelCol(), Collections.<Feature>singletonList(listFeature));
-				}
+						dataField.setDataType(DataType.DOUBLE);
+					}
+					break;
+				default:
+					break;
 			}
 		} else
 
@@ -149,8 +150,13 @@ public class FeatureMapper extends PMMLMapper {
 			throw new IllegalArgumentException();
 		}
 
-		List<FieldName> activeFields = new ArrayList<>(getDataFields().keySet());
-		activeFields.remove(targetField);
+		Map<FieldName, DataField> dataFields = getDataFields();
+
+		List<FieldName> activeFields = new ArrayList<>(dataFields.keySet());
+
+		if(targetField != null){
+			activeFields.remove(targetField);
+		}
 
 		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
 
@@ -168,6 +174,18 @@ public class FeatureMapper extends PMMLMapper {
 		Schema result = new Schema(targetField, targetCategories, activeFields, features);
 
 		return result;
+	}
+
+	public DataField toContinuous(FieldName name){
+		DataField dataField = getDataField(name);
+
+		if(dataField == null){
+			throw new IllegalArgumentException();
+		}
+
+		dataField.setOpType(OpType.CONTINUOUS);
+
+		return dataField;
 	}
 
 	public DataField toCategorical(FieldName name, List<String> categories){

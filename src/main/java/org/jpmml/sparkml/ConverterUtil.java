@@ -30,7 +30,6 @@ import javax.xml.bind.JAXBException;
 
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
@@ -62,11 +61,9 @@ import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
-import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
@@ -126,33 +123,15 @@ public class ConverterUtil {
 			if(converter instanceof ModelConverter){
 				ModelConverter<?> modelConverter = (ModelConverter<?>)converter;
 
-				Schema featureSchema = featureMapper.createSchema((Model<?>)stage);
-
-				dataType:
-				if(converter instanceof RegressionModelConverter){
-
-					if(stage instanceof GeneralizedLinearRegressionModel){
-						GeneralizedLinearRegressionModel generalizedLinearRegressionModel = (GeneralizedLinearRegressionModel)stage;
-
-						if(("binomial").equals(generalizedLinearRegressionModel.getFamily())){
-							break dataType;
-						}
-					}
-
-					FieldName targetField = featureSchema.getTargetField();
-
-					DataField dataField = featureMapper.getDataField(targetField);
-
-					dataField
-						.setOpType(OpType.CONTINUOUS)
-						.setDataType(DataType.DOUBLE);
-				}
+				Schema featureSchema = featureMapper.createSchema(modelConverter);
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
 
 				featureMapper.append(modelConverter);
 
-				models.put(((HasPredictionCol)stage).getPredictionCol(), model);
+				HasPredictionCol hasPredictionCol = (HasPredictionCol)stage;
+
+				models.put(hasPredictionCol.getPredictionCol(), model);
 			} else
 
 			{

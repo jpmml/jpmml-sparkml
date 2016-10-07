@@ -52,6 +52,19 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	}
 
 	@Override
+	public MiningFunction getMiningFunction(){
+		GeneralizedLinearRegressionModel model = getTransformer();
+
+		String family = model.getFamily();
+		switch(family){
+			case "binomial":
+				return MiningFunction.CLASSIFICATION;
+			default:
+				return MiningFunction.REGRESSION;
+		}
+	}
+
+	@Override
 	public GeneralRegressionModel encodeModel(Schema schema){
 		GeneralizedLinearRegressionModel model = getTransformer();
 

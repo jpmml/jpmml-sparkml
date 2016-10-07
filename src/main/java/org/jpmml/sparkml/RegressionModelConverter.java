@@ -27,6 +27,7 @@ import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -47,5 +48,10 @@ public class RegressionModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 		Feature feature = new ContinuousFeature(dataField);
 
 		return Collections.singletonList(feature);
+	}
+
+	@Override
+	public MiningFunction getMiningFunction(){
+		return MiningFunction.REGRESSION;
 	}
 }
