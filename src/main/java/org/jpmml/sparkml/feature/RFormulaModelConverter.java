@@ -28,7 +28,6 @@ import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.ConverterUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
-import org.jpmml.sparkml.TransformerUtil;
 
 public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 
@@ -40,7 +39,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
 		RFormulaModel transformer = getTransformer();
 
-		ResolvedRFormula resolvedFormula = (ResolvedRFormula)TransformerUtil.getParam(transformer, "resolvedFormula");
+		ResolvedRFormula resolvedFormula = transformer.resolvedFormula();
 
 		String targetCol = resolvedFormula.label();
 
@@ -51,7 +50,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 			featureMapper.putFeatures(labelCol, features);
 		}
 
-		PipelineModel pipelineModel = (PipelineModel)TransformerUtil.getParam(transformer, "pipelineModel");
+		PipelineModel pipelineModel = transformer.pipelineModel();
 
 		Transformer[] stages = pipelineModel.stages();
 		for(Transformer stage : stages){
