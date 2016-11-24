@@ -110,9 +110,9 @@ public class ConverterUtil {
 
 		Map<String, org.dmg.pmml.Model> models = new LinkedHashMap<>();
 
-		Transformer[] stages = pipelineModel.stages();
-		for(Transformer stage : stages){
-			TransformerConverter<?> converter = ConverterUtil.createConverter(stage);
+		List<Transformer> transformers = getTransformers(pipelineModel);
+		for(Transformer transformer : transformers){
+			TransformerConverter<?> converter = ConverterUtil.createConverter(transformer);
 
 			if(converter instanceof FeatureConverter){
 				FeatureConverter<?> featureConverter = (FeatureConverter<?>)converter;
@@ -129,7 +129,7 @@ public class ConverterUtil {
 
 				featureMapper.append(modelConverter);
 
-				HasPredictionCol hasPredictionCol = (HasPredictionCol)stage;
+				HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
 
 				models.put(hasPredictionCol.getPredictionCol(), model);
 			} else
@@ -269,6 +269,27 @@ public class ConverterUtil {
 	static
 	public void putConverterClazz(Class<? extends Transformer> clazz, Class<? extends TransformerConverter<?>> converterClazz){
 		ConverterUtil.converters.put(clazz, converterClazz);
+	}
+
+	static
+	private List<Transformer> getTransformers(PipelineModel pipelineModel){
+		List<Transformer> result = new ArrayList<>();
+
+		Transformer[] stages = pipelineModel.stages();
+		for(Transformer stage : stages){
+
+			if(stage instanceof PipelineModel){
+				PipelineModel nestedPipelineModel = (PipelineModel)stage;
+
+				result.addAll(getTransformers(nestedPipelineModel));
+			} else
+
+			{
+				result.add(stage);
+			}
+		}
+
+		return result;
 	}
 
 	private static final Map<Class<? extends Transformer>, Class<? extends TransformerConverter>> converters = new LinkedHashMap<>();

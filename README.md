@@ -6,6 +6,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 # Features #
 
 * Supported Spark ML `PipelineStage` types:
+  * Estimators:
+    * [`PipelineModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/PipelineModel.html) (the result of fitting a `Pipeline`)
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
@@ -15,6 +17,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.MinMaxScalerModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
     * [`feature.OneHotEncoder`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
     * [`feature.PCAModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)
+    * [``]
     * [`feature.QuantileDiscretizer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
     * [`feature.RFormulaModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
     * [`feature.StandardScalerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
