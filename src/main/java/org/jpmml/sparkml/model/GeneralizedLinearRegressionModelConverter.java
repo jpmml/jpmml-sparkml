@@ -18,6 +18,8 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +45,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
+import org.jpmml.sparkml.InteractionFeature;
 import org.jpmml.sparkml.RegressionModelConverter;
 
 public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> {
@@ -117,29 +120,9 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 			parameterList.addParameters(parameter);
 
-			PPCell ppCell;
+			List<PPCell> ppCells = createPPCells(parameter, feature, covariates, factors);
 
-			if(feature instanceof ContinuousFeature){
-				ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-				covariates.add(continuousFeature.getName());
-
-				ppCell = new PPCell("1", continuousFeature.getName(), parameter.getName());
-			} else
-
-			if(feature instanceof BinaryFeature){
-				BinaryFeature binaryFeature = (BinaryFeature)feature;
-
-				factors.add(binaryFeature.getName());
-
-				ppCell = new PPCell(binaryFeature.getValue(), binaryFeature.getName(), parameter.getName());
-			} else
-
-			{
-				throw new IllegalArgumentException();
-			}
-
-			ppMatrix.addPPCells(ppCell);
+			ppMatrix.addPPCells(ppCells.toArray(new PPCell[ppCells.size()]));
 
 			PCell pCell = new PCell(parameter.getName(), coefficients.apply(i))
 				.setTargetCategory(targetCategory);
@@ -164,6 +147,47 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		}
 
 		return generalRegressionModel;
+	}
+
+	static
+	private List<PPCell> createPPCells(Parameter parameter, Feature feature, Set<FieldName> covariates, Set<FieldName> factors){
+
+		if(feature instanceof InteractionFeature){
+			InteractionFeature interactionFeature = (InteractionFeature)feature;
+
+			List<PPCell> ppCells = new ArrayList<>();
+
+			List<Feature> inputFeatures = interactionFeature.getFeatures();
+			for(Feature inputFeature : inputFeatures){
+				ppCells.addAll(createPPCells(parameter, inputFeature, covariates, factors));
+			}
+
+			return ppCells;
+		} else
+
+		if(feature instanceof ContinuousFeature){
+			ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+			covariates.add(continuousFeature.getName());
+
+			PPCell ppCell = new PPCell("1", continuousFeature.getName(), parameter.getName());
+
+			return Collections.singletonList(ppCell);
+		} else
+
+		if(feature instanceof BinaryFeature){
+			BinaryFeature binaryFeature = (BinaryFeature)feature;
+
+			factors.add(binaryFeature.getName());
+
+			PPCell ppCell = new PPCell(binaryFeature.getValue(), binaryFeature.getName(), parameter.getName());
+
+			return Collections.singletonList(ppCell);
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	static

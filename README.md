@@ -14,6 +14,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.ChiSqSelectorModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ChiSqSelectorModel.html) (the result of fitting a `feature.ChiSqSelector`)
     * [`feature.ColumnPruner`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ColumnPruner.html)
     * [`feature.IndexToString`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/IndexToString.html)
+    * [`feature.Interaction`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Interaction.html)
     * [`feature.MinMaxScalerModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
     * [`feature.OneHotEncoder`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
     * [`feature.PCAModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)

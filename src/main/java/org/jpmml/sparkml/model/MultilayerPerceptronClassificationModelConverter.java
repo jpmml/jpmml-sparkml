@@ -26,6 +26,7 @@ import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Entity;
+import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.MiningFunction;
@@ -76,23 +77,26 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 		for(int column = 0; column < features.size(); column++){
 			Feature feature = features.get(column);
 
-			DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.DOUBLE);
+			Expression expression;
 
 			if(feature instanceof ContinuousFeature){
 				ContinuousFeature continuousFeature = (ContinuousFeature)feature;
 
-				derivedField.setExpression(new FieldRef(continuousFeature.getName()));
+				expression = new FieldRef(continuousFeature.getName());
 			} else
 
 			if(feature instanceof BinaryFeature){
 				BinaryFeature binaryFeature = (BinaryFeature)feature;
 
-				derivedField.setExpression(new NormDiscrete(binaryFeature.getName(), binaryFeature.getValue()));
+				expression = new NormDiscrete(binaryFeature.getName(), binaryFeature.getValue());
 			} else
 
 			{
 				throw new IllegalArgumentException();
 			}
+
+			DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.DOUBLE)
+				.setExpression(expression);
 
 			NeuralInput neuralInput = new NeuralInput()
 				.setId("0/" + String.valueOf(column + 1))

@@ -18,17 +18,22 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.linalg.Vector;
+import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.regression.CategoricalPredictor;
 import org.dmg.pmml.regression.NumericPredictor;
+import org.dmg.pmml.regression.PredictorTerm;
 import org.dmg.pmml.regression.RegressionTable;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
+import org.jpmml.sparkml.FeatureUtil;
+import org.jpmml.sparkml.InteractionFeature;
 
 public class RegressionModelUtil {
 
@@ -46,6 +51,19 @@ public class RegressionModelUtil {
 
 		for(int i = 0; i < features.size(); i++){
 			Feature feature = features.get(i);
+
+			if(feature instanceof InteractionFeature){
+				InteractionFeature interactionFeature = (InteractionFeature)feature;
+
+				PredictorTerm predictorTerm = new PredictorTerm()
+					.setCoefficient(coefficients.apply(i));
+
+				List<FieldRef> fieldRefs = createFieldRefs(interactionFeature);
+
+				predictorTerm.addFieldRefs(fieldRefs.toArray(new FieldRef[fieldRefs.size()]));
+
+				regressionTable.addPredictorTerms(predictorTerm);
+			} else
 
 			if(feature instanceof ContinuousFeature){
 				ContinuousFeature continuousFeature = (ContinuousFeature)feature;
@@ -76,5 +94,28 @@ public class RegressionModelUtil {
 		}
 
 		return regressionTable;
+	}
+
+	static
+	private List<FieldRef> createFieldRefs(InteractionFeature feature){
+		List<FieldRef> fieldRefs = new ArrayList<>();
+
+		List<Feature> inputFeatures = feature.getFeatures();
+		for(Feature inputFeature : inputFeatures){
+
+			if(inputFeature instanceof InteractionFeature){
+				InteractionFeature interactionFeature = (InteractionFeature)inputFeature;
+
+				fieldRefs.addAll(createFieldRefs(interactionFeature));
+			} else
+
+			{
+				inputFeature = FeatureUtil.toContinuousFeature(inputFeature);
+
+				fieldRefs.add(inputFeature.ref());
+			}
+		}
+
+		return fieldRefs;
 	}
 }

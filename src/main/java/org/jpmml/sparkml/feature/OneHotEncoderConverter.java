@@ -23,9 +23,14 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.dmg.pmml.DataType;
-import org.jpmml.converter.BinaryFeature;
+import org.dmg.pmml.DerivedField;
+import org.dmg.pmml.FieldName;
+import org.dmg.pmml.NormDiscrete;
+import org.dmg.pmml.OpType;
+import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ListFeature;
+import org.jpmml.sparkml.ConvertibleBinaryFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
 import scala.Option;
@@ -37,7 +42,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(final FeatureMapper featureMapper){
 		OneHotEncoder transformer = getTransformer();
 
 		ListFeature inputFeature = (ListFeature)featureMapper.getOnlyFeature(transformer.getInputCol());
@@ -58,7 +63,31 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			Feature feature = new BinaryFeature(inputFeature.getName(), DataType.STRING, value);
+			Feature feature = new ConvertibleBinaryFeature(inputFeature.getName(), DataType.STRING, value){
+
+				private ContinuousFeature continuousFeature = null;
+
+
+				@Override
+				public ContinuousFeature toContinuousFeature(){
+
+					if(this.continuousFeature == null){
+						this.continuousFeature = createContinuousFeature();
+					}
+
+					return this.continuousFeature;
+				}
+
+				private ContinuousFeature createContinuousFeature(){
+					NormDiscrete normDiscrete = new NormDiscrete(getName(), getValue());
+
+					DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(getName().getValue() + "=" + getValue()), OpType.CONTINUOUS, DataType.DOUBLE, normDiscrete);
+
+					ContinuousFeature feature = new ContinuousFeature(derivedField);
+
+					return feature;
+				}
+			};
 
 			result.add(feature);
 		}
