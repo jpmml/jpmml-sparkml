@@ -18,35 +18,16 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.general_regression.CovariateList;
-import org.dmg.pmml.general_regression.FactorList;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
-import org.dmg.pmml.general_regression.PCell;
-import org.dmg.pmml.general_regression.PPCell;
-import org.dmg.pmml.general_regression.PPMatrix;
-import org.dmg.pmml.general_regression.ParamMatrix;
-import org.dmg.pmml.general_regression.Parameter;
-import org.dmg.pmml.general_regression.ParameterList;
-import org.dmg.pmml.general_regression.Predictor;
-import org.dmg.pmml.general_regression.PredictorList;
-import org.jpmml.converter.BinaryFeature;
-import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.ValueUtil;
-import org.jpmml.sparkml.InteractionFeature;
+import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.VectorUtil;
 
 public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> {
 
@@ -71,14 +52,6 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	public GeneralRegressionModel encodeModel(Schema schema){
 		GeneralizedLinearRegressionModel model = getTransformer();
 
-		double intercept = model.intercept();
-		Vector coefficients = model.coefficients();
-
-		List<Feature> features = schema.getFeatures();
-		if(features.size() != coefficients.size()){
-			throw new IllegalArgumentException();
-		}
-
 		String targetCategory = null;
 
 		List<String> targetCategories = schema.getTargetCategories();
@@ -91,52 +64,13 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			targetCategory = targetCategories.get(1);
 		}
 
-		ParameterList parameterList = new ParameterList();
-
-		PPMatrix ppMatrix = new PPMatrix();
-
-		ParamMatrix paramMatrix = new ParamMatrix();
-
-		if(!ValueUtil.isZero(intercept)){
-			Parameter parameter = new Parameter("p0")
-				.setLabel("(intercept)");
-
-			parameterList.addParameters(parameter);
-
-			PCell pCell = new PCell(parameter.getName(), intercept)
-				.setTargetCategory(targetCategory);
-
-			paramMatrix.addPCells(pCell);
-		}
-
-		Set<FieldName> covariates = new LinkedHashSet<>();
-
-		Set<FieldName> factors = new LinkedHashSet<>();
-
-		for(int i = 0; i < features.size(); i++){
-			Feature feature = features.get(i);
-
-			Parameter parameter = new Parameter("p" + String.valueOf(i + 1));
-
-			parameterList.addParameters(parameter);
-
-			List<PPCell> ppCells = createPPCells(parameter, feature, covariates, factors);
-
-			ppMatrix.addPPCells(ppCells.toArray(new PPCell[ppCells.size()]));
-
-			PCell pCell = new PCell(parameter.getName(), coefficients.apply(i))
-				.setTargetCategory(targetCategory);
-
-			paramMatrix.addPCells(pCell);
-		}
-
 		MiningFunction miningFunction = (targetCategory != null ? MiningFunction.CLASSIFICATION : MiningFunction.REGRESSION);
 
-		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), parameterList, ppMatrix, paramMatrix)
+		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
-			.setLinkFunction(parseLink(model.getLink()))
-			.setCovariateList(createPredictorList(new CovariateList(), covariates))
-			.setFactorList(createPredictorList(new FactorList(), factors));
+			.setLinkFunction(parseLink(model.getLink()));
+
+		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
 
 		switch(miningFunction){
 			case CLASSIFICATION:
@@ -147,47 +81,6 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		}
 
 		return generalRegressionModel;
-	}
-
-	static
-	private List<PPCell> createPPCells(Parameter parameter, Feature feature, Set<FieldName> covariates, Set<FieldName> factors){
-
-		if(feature instanceof InteractionFeature){
-			InteractionFeature interactionFeature = (InteractionFeature)feature;
-
-			List<PPCell> ppCells = new ArrayList<>();
-
-			List<Feature> inputFeatures = interactionFeature.getFeatures();
-			for(Feature inputFeature : inputFeatures){
-				ppCells.addAll(createPPCells(parameter, inputFeature, covariates, factors));
-			}
-
-			return ppCells;
-		} else
-
-		if(feature instanceof ContinuousFeature){
-			ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-			covariates.add(continuousFeature.getName());
-
-			PPCell ppCell = new PPCell("1", continuousFeature.getName(), parameter.getName());
-
-			return Collections.singletonList(ppCell);
-		} else
-
-		if(feature instanceof BinaryFeature){
-			BinaryFeature binaryFeature = (BinaryFeature)feature;
-
-			factors.add(binaryFeature.getName());
-
-			PPCell ppCell = new PPCell(binaryFeature.getValue(), binaryFeature.getName(), parameter.getName());
-
-			return Collections.singletonList(ppCell);
-		} else
-
-		{
-			throw new IllegalArgumentException();
-		}
 	}
 
 	static
@@ -224,23 +117,5 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			default:
 				throw new IllegalArgumentException(link);
 		}
-	}
-
-	static
-	private <L extends PredictorList> L createPredictorList(L predictorList, Set<FieldName> names){
-
-		if(names.isEmpty()){
-			return null;
-		}
-
-		List<Predictor> predictors = predictorList.getPredictors();
-
-		for(FieldName name : names){
-			Predictor predictor = new Predictor(name);
-
-			predictors.add(predictor);
-		}
-
-		return predictorList;
 	}
 }

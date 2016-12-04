@@ -18,32 +18,23 @@
  */
 package org.jpmml.sparkml;
 
-import org.jpmml.converter.BinaryFeature;
-import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.Feature;
+import java.util.List;
 
-public class FeatureUtil {
+import com.google.common.primitives.Doubles;
+import org.apache.spark.ml.linalg.DenseVector;
+import org.apache.spark.ml.linalg.Vector;
 
-	private FeatureUtil(){
+public class VectorUtil {
+
+	private VectorUtil(){
 	}
 
 	static
-	public ContinuousFeature toContinuousFeature(Feature feature){
+	public List<Double> toList(Vector vector){
+		DenseVector denseVector = vector.toDense();
 
-		if(feature instanceof BinaryFeature){
-			ConvertibleBinaryFeature binaryFeature = (ConvertibleBinaryFeature)feature;
+		double[] values = denseVector.values();
 
-			return binaryFeature.toContinuousFeature();
-		} else
-
-		if(feature instanceof ContinuousFeature){
-			ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-			return continuousFeature;
-		} else
-
-		{
-			throw new IllegalArgumentException();
-		}
+		return Doubles.asList(values);
 	}
 }

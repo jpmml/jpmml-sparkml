@@ -29,10 +29,9 @@ import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.InteractionFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
-import org.jpmml.sparkml.FeatureUtil;
-import org.jpmml.sparkml.InteractionFeature;
 
 public class InteractionConverter extends FeatureConverter<Interaction> {
 
@@ -72,7 +71,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 					for(Feature inputFeature : inputFeatures){
 
 						Apply apply = new Apply("*")
-							.addExpressions((FeatureUtil.toContinuousFeature(feature)).ref(), (FeatureUtil.toContinuousFeature(inputFeature)).ref());
+							.addExpressions((feature.toContinuousFeature()).ref(), (inputFeature.toContinuousFeature()).ref());
 
 						DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(name + "[" + index + "]"), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 

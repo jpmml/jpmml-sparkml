@@ -26,7 +26,9 @@ import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.regression.RegressionTable;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.VectorUtil;
 
 public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> {
 
@@ -43,7 +45,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			throw new IllegalArgumentException();
 		}
 
-		RegressionTable activeRegressionTable = RegressionModelUtil.encodeRegressionTable(model.intercept(), model.coefficients(), schema)
+		RegressionTable activeRegressionTable = RegressionModelUtil.createRegressionTable(schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()))
 			.setTargetCategory(targetCategories.get(1));
 
 		RegressionTable passiveRegressionTable = new RegressionTable(0d)

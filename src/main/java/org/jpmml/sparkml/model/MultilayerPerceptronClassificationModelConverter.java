@@ -79,16 +79,16 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 			Expression expression;
 
-			if(feature instanceof ContinuousFeature){
-				ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-				expression = new FieldRef(continuousFeature.getName());
-			} else
-
 			if(feature instanceof BinaryFeature){
 				BinaryFeature binaryFeature = (BinaryFeature)feature;
 
 				expression = new NormDiscrete(binaryFeature.getName(), binaryFeature.getValue());
+			} else
+
+			if(feature instanceof ContinuousFeature){
+				ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+				expression = new FieldRef(continuousFeature.getName());
 			} else
 
 			{

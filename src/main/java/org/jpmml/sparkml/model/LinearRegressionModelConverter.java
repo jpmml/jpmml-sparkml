@@ -24,7 +24,9 @@ import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.regression.RegressionTable;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.VectorUtil;
 
 public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> {
 
@@ -36,7 +38,7 @@ public class LinearRegressionModelConverter extends RegressionModelConverter<Lin
 	public RegressionModel encodeModel(Schema schema){
 		LinearRegressionModel model = getTransformer();
 
-		RegressionTable regressionTable = RegressionModelUtil.encodeRegressionTable(model.intercept(), model.coefficients(), schema);
+		RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()));
 
 		RegressionModel regressionModel = new RegressionModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(schema), null)
 			.addRegressionTables(regressionTable);

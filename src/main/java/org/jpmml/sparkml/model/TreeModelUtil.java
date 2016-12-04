@@ -43,13 +43,13 @@ import org.dmg.pmml.True;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
-import org.jpmml.sparkml.BooleanFeature;
 
 public class TreeModelUtil {
 
@@ -254,21 +254,6 @@ public class TreeModelUtil {
 		double[] leftCategories = categoricalSplit.leftCategories();
 		double[] rightCategories = categoricalSplit.rightCategories();
 
-		if(feature instanceof ListFeature){
-			ListFeature listFeature = (ListFeature)feature;
-
-			List<String> values = listFeature.getValues();
-			if(values.size() != (leftCategories.length + rightCategories.length)){
-				throw new IllegalArgumentException();
-			}
-
-			Predicate leftPredicate = createCategoricalPredicate(listFeature, leftCategories);
-
-			Predicate rightPredicate = createCategoricalPredicate(listFeature, rightCategories);
-
-			return new Predicate[]{leftPredicate, rightPredicate};
-		} else
-
 		if(feature instanceof BinaryFeature){
 			BinaryFeature binaryFeature = (BinaryFeature)feature;
 
@@ -296,6 +281,21 @@ public class TreeModelUtil {
 
 			SimplePredicate rightPredicate = new SimplePredicate(binaryFeature.getName(), rightOperator)
 				.setValue(value);
+
+			return new Predicate[]{leftPredicate, rightPredicate};
+		} else
+
+		if(feature instanceof ListFeature){
+			ListFeature listFeature = (ListFeature)feature;
+
+			List<String> values = listFeature.getValues();
+			if(values.size() != (leftCategories.length + rightCategories.length)){
+				throw new IllegalArgumentException();
+			}
+
+			Predicate leftPredicate = createCategoricalPredicate(listFeature, leftCategories);
+
+			Predicate rightPredicate = createCategoricalPredicate(listFeature, rightCategories);
 
 			return new Predicate[]{leftPredicate, rightPredicate};
 		}

@@ -23,14 +23,9 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldName;
-import org.dmg.pmml.NormDiscrete;
-import org.dmg.pmml.OpType;
-import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ConvertibleBinaryFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ListFeature;
-import org.jpmml.sparkml.ConvertibleBinaryFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.FeatureMapper;
 import scala.Option;
@@ -63,31 +58,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			Feature feature = new ConvertibleBinaryFeature(inputFeature.getName(), DataType.STRING, value){
-
-				private ContinuousFeature continuousFeature = null;
-
-
-				@Override
-				public ContinuousFeature toContinuousFeature(){
-
-					if(this.continuousFeature == null){
-						this.continuousFeature = createContinuousFeature();
-					}
-
-					return this.continuousFeature;
-				}
-
-				private ContinuousFeature createContinuousFeature(){
-					NormDiscrete normDiscrete = new NormDiscrete(getName(), getValue());
-
-					DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(getName().getValue() + "=" + getValue()), OpType.CONTINUOUS, DataType.DOUBLE, normDiscrete);
-
-					ContinuousFeature feature = new ContinuousFeature(derivedField);
-
-					return feature;
-				}
-			};
+			Feature feature = new ConvertibleBinaryFeature(featureMapper, inputFeature.getName(), DataType.STRING, value);
 
 			result.add(feature);
 		}
