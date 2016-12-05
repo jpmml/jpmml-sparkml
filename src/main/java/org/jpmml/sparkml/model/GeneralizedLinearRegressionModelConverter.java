@@ -68,7 +68,8 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
-			.setLinkFunction(parseLink(model.getLink()));
+			.setLinkFunction(parseLinkFunction(model.getLink()))
+			.setLinkParameter(parseLinkParameter(model.getLink()));
 
 		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
 
@@ -101,21 +102,38 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	}
 
 	static
-	private GeneralRegressionModel.LinkFunction parseLink(String link){
+	private GeneralRegressionModel.LinkFunction parseLinkFunction(String link){
 
 		switch(link){
 			case "cloglog":
 				return GeneralRegressionModel.LinkFunction.CLOGLOG;
 			case "identity":
 				return GeneralRegressionModel.LinkFunction.IDENTITY;
+			case "inverse":
+				return GeneralRegressionModel.LinkFunction.POWER;
 			case "log":
 				return GeneralRegressionModel.LinkFunction.LOG;
 			case "logit":
 				return GeneralRegressionModel.LinkFunction.LOGIT;
 			case "probit":
 				return GeneralRegressionModel.LinkFunction.PROBIT;
+			case "sqrt":
+				return GeneralRegressionModel.LinkFunction.POWER;
 			default:
 				throw new IllegalArgumentException(link);
+		}
+	}
+
+	static
+	private Double parseLinkParameter(String link){
+
+		switch(link){
+			case "inverse":
+				return -1d;
+			case "sqrt":
+				return (1d / 2d);
+			default:
+				return null;
 		}
 	}
 }

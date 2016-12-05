@@ -71,4 +71,9 @@ public class RegressionTest extends ConverterTest {
 	public void evaluateRandomForestHousing() throws Exception {
 		evaluate("RandomForest", "Housing");
 	}
+
+	@Test
+	public void evaluateGLMFormulaVisit() throws Exception {
+		evaluate("GLM", "Visit");
+	}
 }
