@@ -40,8 +40,8 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.clustering.ClusteringModelUtil;
-import org.jpmml.sparkml.FeatureMapper;
 import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 
@@ -50,7 +50,7 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		KMeansModel model = getTransformer();
 
 		// XXX
@@ -91,7 +91,7 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 
 		Output output = ClusteringModelUtil.createOutput(FieldName.create("cluster"), Collections.<Cluster>emptyList());
 
-		ClusteringModel clusteringModel = new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(null, schema.getActiveFields()), comparisonMeasure, clusteringFields, clusters)
+		ClusteringModel clusteringModel = new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(schema), comparisonMeasure, clusteringFields, clusters)
 			.setOutput(output);
 
 		return clusteringModel;

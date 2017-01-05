@@ -34,7 +34,7 @@ public class TransformerConverter<T extends Transformer> {
 	}
 
 	abstract
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper);
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder);
 
 	public T getTransformer(){
 		return this.transformer;

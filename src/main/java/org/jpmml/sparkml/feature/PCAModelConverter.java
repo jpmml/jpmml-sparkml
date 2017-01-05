@@ -33,7 +33,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
@@ -42,10 +42,10 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		PCAModel transformer = getTransformer();
 
-		List<Feature> inputFeatures = featureMapper.getFeatures(transformer.getInputCol());
+		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
 
 		DenseMatrix pc = transformer.pc();
 		if(pc.numRows() != inputFeatures.size()){
@@ -70,9 +70,9 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 				apply.addExpressions(expression);
 			}
 
-			DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
-			Feature feature = new ContinuousFeature(derivedField);
+			Feature feature = new ContinuousFeature(encoder, derivedField);
 
 			result.add(feature);
 		}

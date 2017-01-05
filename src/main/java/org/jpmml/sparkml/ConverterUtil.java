@@ -70,6 +70,7 @@ import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.MetroJAXBUtil;
@@ -108,7 +109,7 @@ public class ConverterUtil {
 
 	static
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
-		FeatureMapper featureMapper = new FeatureMapper(schema);
+		SparkMLEncoder encoder = new SparkMLEncoder(schema);
 
 		Map<String, org.dmg.pmml.Model> models = new LinkedHashMap<>();
 
@@ -119,17 +120,17 @@ public class ConverterUtil {
 			if(converter instanceof FeatureConverter){
 				FeatureConverter<?> featureConverter = (FeatureConverter<?>)converter;
 
-				featureMapper.append(featureConverter);
+				encoder.append(featureConverter);
 			} else
 
 			if(converter instanceof ModelConverter){
 				ModelConverter<?> modelConverter = (ModelConverter<?>)converter;
 
-				Schema featureSchema = featureMapper.createSchema(modelConverter);
+				Schema modelSchema = encoder.createSchema(modelConverter);
 
-				org.dmg.pmml.Model model = modelConverter.encodeModel(featureSchema);
+				org.dmg.pmml.Model model = modelConverter.encodeModel(modelSchema);
 
-				featureMapper.append(modelConverter);
+				encoder.append(modelConverter);
 
 				HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
 
@@ -180,12 +181,12 @@ public class ConverterUtil {
 
 				FieldName name = FieldName.create(predictionCol);
 
-				DataField dataField = featureMapper.getDataField(name);
+				DataField dataField = encoder.getDataField(name);
 				if(dataField == null){
 					throw new IllegalArgumentException();
 				}
 
-				featureMapper.removeDataField(name);
+				encoder.removeDataField(name);
 
 				Output output = model.getOutput();
 				if(output == null){
@@ -205,7 +206,7 @@ public class ConverterUtil {
 
 			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
 
-			MiningModel miningModel = MiningModelUtil.createModelChain(null, Collections.<FieldName>emptyList(), memberModels)
+			MiningModel miningModel = MiningModelUtil.createModelChain(new Schema(null, Collections.<Feature>emptyList()), memberModels)
 				.setMiningSchema(miningSchema);
 
 			rootModel = miningModel;
@@ -215,7 +216,7 @@ public class ConverterUtil {
 			throw new IllegalArgumentException();
 		}
 
-		PMML pmml = featureMapper.encodePMML(rootModel);
+		PMML pmml = encoder.encodePMML(rootModel);
 
 		return pmml;
 	}

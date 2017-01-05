@@ -35,13 +35,13 @@ import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Row;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DOMUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerModel> {
 
@@ -50,10 +50,10 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		VectorIndexerModel transformer = getTransformer();
 
-		List<Feature> inputFeatures = featureMapper.getFeatures(transformer.getInputCol());
+		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
 
 		int numFeatures = transformer.numFeatures();
 		if(numFeatures != inputFeatures.size()){
@@ -67,7 +67,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 		for(int i = 0; i < numFeatures; i++){
 			Feature inputFeature = inputFeatures.get(i);
 
-			ContinuousFeature feature;
+			Feature feature;
 
 			Map<Double, Integer> categoryMap = categoryMaps.get(i);
 			if(categoryMap != null){
@@ -97,16 +97,16 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 					inlineTable.addRows(row);
 				}
 
-				featureMapper.toCategorical(inputFeature.getName(), categories);
+				encoder.toCategorical(inputFeature.getName(), categories);
 
 				MapValues mapValues = new MapValues()
 					.addFieldColumnPairs(new FieldColumnPair(inputFeature.getName(), columns.get(0)))
 					.setOutputColumn(columns.get(1))
 					.setInlineTable(inlineTable);
 
-				DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
+				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 
-				feature = new ListFeature(derivedField, values);
+				feature = new CategoricalFeature(encoder, derivedField, values);
 			} else
 
 			{

@@ -32,7 +32,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class StandardScalerModelConverter extends FeatureConverter<StandardScalerModel> {
 
@@ -41,10 +41,10 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StandardScalerModel transformer = getTransformer();
 
-		List<Feature> inputFeatures = featureMapper.getFeatures(transformer.getInputCol());
+		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
 
 		Vector mean = transformer.mean();
 		if(transformer.getWithMean() && mean.size() != inputFeatures.size()){
@@ -79,9 +79,9 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				}
 			}
 
-			DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
-			Feature feature = new ContinuousFeature(derivedField);
+			Feature feature = new ContinuousFeature(encoder, derivedField);
 
 			result.add(feature);
 		}

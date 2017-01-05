@@ -40,12 +40,12 @@ public class RegressionModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		T model = getTransformer();
 
-		DataField dataField = featureMapper.createDataField(FieldName.create(model.getPredictionCol()), OpType.CONTINUOUS, DataType.DOUBLE);
+		DataField dataField = encoder.createDataField(FieldName.create(model.getPredictionCol()), OpType.CONTINUOUS, DataType.DOUBLE);
 
-		Feature feature = new ContinuousFeature(dataField);
+		Feature feature = new ContinuousFeature(encoder, dataField);
 
 		return Collections.singletonList(feature);
 	}

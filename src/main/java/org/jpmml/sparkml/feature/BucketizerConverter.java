@@ -29,11 +29,11 @@ import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
 import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
@@ -42,10 +42,10 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Bucketizer transformer = getTransformer();
 
-		ContinuousFeature inputFeature = (ContinuousFeature)featureMapper.getOnlyFeature(transformer.getInputCol());
+		ContinuousFeature inputFeature = (ContinuousFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
 		Discretize discretize = new Discretize(inputFeature.getName());
 
@@ -66,9 +66,9 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 			discretize.addDiscretizeBins(discretizeBin);
 		}
 
-		DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.INTEGER, discretize);
+		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.INTEGER, discretize);
 
-		Feature feature = new ListFeature(derivedField, categories);
+		Feature feature = new CategoricalFeature(encoder, derivedField, categories);
 
 		return Collections.singletonList(feature);
 	}

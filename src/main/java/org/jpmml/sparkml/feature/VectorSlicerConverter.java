@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.spark.ml.feature.VectorSlicer;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 
@@ -32,7 +32,7 @@ public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		VectorSlicer transformer = getTransformer();
 
 		String[] names = transformer.getNames();
@@ -40,6 +40,6 @@ public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 			throw new IllegalArgumentException();
 		}
 
-		return featureMapper.getFeatures(transformer.getInputCol(), transformer.getIndices());
+		return encoder.getFeatures(transformer.getInputCol(), transformer.getIndices());
 	}
 }

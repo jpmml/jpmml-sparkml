@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.spark.ml.feature.VectorAttributeRewriter;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorAttributeRewriterConverter extends FeatureConverter<VectorAttributeRewriter> {
 
@@ -32,7 +32,7 @@ public class VectorAttributeRewriterConverter extends FeatureConverter<VectorAtt
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		return null;
 	}
 }

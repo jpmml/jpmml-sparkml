@@ -27,7 +27,7 @@ import org.apache.spark.ml.feature.ResolvedRFormula;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.ConverterUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 
@@ -36,7 +36,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		RFormulaModel transformer = getTransformer();
 
 		ResolvedRFormula resolvedFormula = transformer.resolvedFormula();
@@ -44,10 +44,10 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 		String targetCol = resolvedFormula.label();
 
 		String labelCol = transformer.getLabelCol();
-		if(!(targetCol).equals(labelCol) && !featureMapper.hasFeatures(labelCol)){
-			List<Feature> features = featureMapper.getFeatures(targetCol);
+		if(!(targetCol).equals(labelCol) && !encoder.hasFeatures(labelCol)){
+			List<Feature> features = encoder.getFeatures(targetCol);
 
-			featureMapper.putFeatures(labelCol, features);
+			encoder.putFeatures(labelCol, features);
 		}
 
 		PipelineModel pipelineModel = transformer.pipelineModel();
@@ -56,7 +56,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 		for(Transformer stage : stages){
 			FeatureConverter<?> featureConverter = ConverterUtil.createFeatureConverter(stage);
 
-			featureMapper.append(featureConverter);
+			encoder.append(featureConverter);
 		}
 
 		return null;

@@ -44,9 +44,10 @@ import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.BooleanFeature;
+import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
@@ -91,7 +92,7 @@ public class TreeModelUtil {
 
 			if(weight != null && !ValueUtil.isOne(weight)){
 				Targets targets = new Targets()
-					.addTargets(ModelUtil.createRescaleTarget(segmentSchema.getTargetField(), weight, null));
+					.addTargets(ModelUtil.createRescaleTarget(segmentSchema, weight, null));
 
 				treeModel.setTargets(targets);
 			}
@@ -165,14 +166,11 @@ public class TreeModelUtil {
 				break;
 			case CLASSIFICATION:
 				{
-					List<String> targetCategories = schema.getTargetCategories();
-					if(targetCategories == null){
-						throw new IllegalArgumentException();
-					}
+					CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
 					int index = ValueUtil.asInt(node.prediction());
 
-					result.setScore(targetCategories.get(index));
+					result.setScore(categoricalLabel.getValue(index));
 
 					ImpurityCalculator impurityCalculator = node.impurityStats();
 
@@ -185,7 +183,7 @@ public class TreeModelUtil {
 							continue;
 						}
 
-						ScoreDistribution scoreDistribution = new ScoreDistribution(targetCategories.get(i), stats[i]);
+						ScoreDistribution scoreDistribution = new ScoreDistribution(categoricalLabel.getValue(i), stats[i]);
 
 						result.addScoreDistributions(scoreDistribution);
 					}
@@ -214,7 +212,7 @@ public class TreeModelUtil {
 
 	static
 	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, Schema schema){
-		ContinuousFeature feature = (ContinuousFeature)schema.getFeature(continuousSplit.featureIndex());
+		Feature feature = schema.getFeature(continuousSplit.featureIndex());
 
 		double threshold = continuousSplit.threshold();
 
@@ -235,12 +233,14 @@ public class TreeModelUtil {
 		} else
 
 		{
+			ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
 			String value = ValueUtil.formatValue(threshold);
 
-			SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.LESS_OR_EQUAL)
+			SimplePredicate leftPredicate = new SimplePredicate(continuousFeature.getName(), SimplePredicate.Operator.LESS_OR_EQUAL)
 				.setValue(value);
 
-			SimplePredicate rightPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.GREATER_THAN)
+			SimplePredicate rightPredicate = new SimplePredicate(continuousFeature.getName(), SimplePredicate.Operator.GREATER_THAN)
 				.setValue(value);
 
 			return new Predicate[]{leftPredicate, rightPredicate};
@@ -285,17 +285,17 @@ public class TreeModelUtil {
 			return new Predicate[]{leftPredicate, rightPredicate};
 		} else
 
-		if(feature instanceof ListFeature){
-			ListFeature listFeature = (ListFeature)feature;
+		if(feature instanceof CategoricalFeature){
+			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
-			List<String> values = listFeature.getValues();
+			List<String> values = categoricalFeature.getValues();
 			if(values.size() != (leftCategories.length + rightCategories.length)){
 				throw new IllegalArgumentException();
 			}
 
-			Predicate leftPredicate = createCategoricalPredicate(listFeature, leftCategories);
+			Predicate leftPredicate = createCategoricalPredicate(categoricalFeature, leftCategories);
 
-			Predicate rightPredicate = createCategoricalPredicate(listFeature, rightCategories);
+			Predicate rightPredicate = createCategoricalPredicate(categoricalFeature, rightCategories);
 
 			return new Predicate[]{leftPredicate, rightPredicate};
 		}
@@ -304,13 +304,13 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Predicate createCategoricalPredicate(ListFeature listFeature, double[] categories){
+	private Predicate createCategoricalPredicate(CategoricalFeature categoricalFeature, double[] categories){
 		List<String> values = new ArrayList<>();
 
 		for(int i = 0; i < categories.length; i++){
 			int index = ValueUtil.asInt(categories[i]);
 
-			String value = listFeature.getValue(index);
+			String value = categoricalFeature.getValue(index);
 
 			values.add(value);
 		}
@@ -319,7 +319,7 @@ public class TreeModelUtil {
 			String value = values.get(0);
 
 			SimplePredicate simplePredicate = new SimplePredicate()
-				.setField(listFeature.getName())
+				.setField(categoricalFeature.getName())
 				.setOperator(SimplePredicate.Operator.EQUAL)
 				.setValue(value);
 
@@ -330,7 +330,7 @@ public class TreeModelUtil {
 			Array array = new Array(Array.Type.INT, ValueUtil.formatArrayValue(values));
 
 			SimpleSetPredicate simpleSetPredicate = new SimpleSetPredicate()
-				.setField(listFeature.getName())
+				.setField(categoricalFeature.getName())
 				.setBooleanOperator(SimpleSetPredicate.BooleanOperator.IS_IN)
 				.setArray(array);
 

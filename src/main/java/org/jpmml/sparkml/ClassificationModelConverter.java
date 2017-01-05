@@ -40,12 +40,12 @@ public class ClassificationModelConverter<T extends Model<T> & HasFeaturesCol & 
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		T model = getTransformer();
 
-		DataField dataField = featureMapper.createDataField(FieldName.create(model.getPredictionCol()), OpType.CATEGORICAL, DataType.DOUBLE);
+		DataField dataField = encoder.createDataField(FieldName.create(model.getPredictionCol()), OpType.CATEGORICAL, DataType.DOUBLE);
 
-		Feature feature = new WildcardFeature(dataField);
+		Feature feature = new WildcardFeature(encoder, dataField);
 
 		return Collections.singletonList(feature);
 	}

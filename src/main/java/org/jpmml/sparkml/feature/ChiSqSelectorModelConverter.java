@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.spark.ml.feature.ChiSqSelectorModel;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class ChiSqSelectorModelConverter extends FeatureConverter<ChiSqSelectorModel> {
 
@@ -32,9 +32,9 @@ public class ChiSqSelectorModelConverter extends FeatureConverter<ChiSqSelectorM
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		ChiSqSelectorModel transformer = getTransformer();
 
-		return featureMapper.getFeatures(transformer.getFeaturesCol(), transformer.selectedFeatures());
+		return encoder.getFeatures(transformer.getFeaturesCol(), transformer.selectedFeatures());
 	}
 }

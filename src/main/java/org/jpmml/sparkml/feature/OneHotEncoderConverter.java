@@ -23,11 +23,11 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.dmg.pmml.DataType;
-import org.jpmml.converter.ConvertibleBinaryFeature;
+import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 import scala.Option;
 
 public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
@@ -37,10 +37,10 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(final FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoder transformer = getTransformer();
 
-		ListFeature inputFeature = (ListFeature)featureMapper.getOnlyFeature(transformer.getInputCol());
+		CategoricalFeature inputFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
 		List<String> values = inputFeature.getValues();
 
@@ -58,7 +58,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			Feature feature = new ConvertibleBinaryFeature(featureMapper, inputFeature.getName(), DataType.STRING, value);
+			Feature feature = new BinaryFeature(encoder, inputFeature.getName(), DataType.STRING, value);
 
 			result.add(feature);
 		}

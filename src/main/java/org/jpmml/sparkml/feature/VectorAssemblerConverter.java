@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.spark.ml.feature.VectorAssembler;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> {
 
@@ -33,14 +33,14 @@ public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> 
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		VectorAssembler transformer = getTransformer();
 
 		List<Feature> result = new ArrayList<>();
 
 		String[] inputCols = transformer.getInputCols();
 		for(String inputCol : inputCols){
-			List<Feature> inputFeatures = featureMapper.getFeatures(inputCol);
+			List<Feature> inputFeatures = encoder.getFeatures(inputCol);
 
 			result.addAll(inputFeatures);
 		}

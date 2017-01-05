@@ -24,10 +24,10 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.DataField;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class StringIndexerModelConverter extends FeatureConverter<StringIndexerModel> {
 
@@ -36,16 +36,16 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StringIndexerModel transformer = getTransformer();
 
-		Feature inputFeature = featureMapper.getOnlyFeature(transformer.getInputCol());
+		Feature inputFeature = encoder.getOnlyFeature(transformer.getInputCol());
 
 		List<String> categories = Arrays.asList(transformer.labels());
 
-		DataField dataField = featureMapper.toCategorical(inputFeature.getName(), categories);
+		DataField dataField = encoder.toCategorical(inputFeature.getName(), categories);
 
-		Feature feature = new ListFeature(dataField, categories);
+		Feature feature = new CategoricalFeature(encoder, dataField);
 
 		return Collections.singletonList(feature);
 	}

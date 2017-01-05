@@ -27,8 +27,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Entity;
 import org.dmg.pmml.Expression;
-import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.NormDiscrete;
 import org.dmg.pmml.OpType;
@@ -41,6 +39,7 @@ import org.dmg.pmml.neural_network.NeuralOutput;
 import org.dmg.pmml.neural_network.NeuralOutputs;
 import org.dmg.pmml.neural_network.Neuron;
 import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
@@ -65,10 +64,8 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 			throw new IllegalArgumentException();
 		}
 
-		FieldName targetField = schema.getTargetField();
-
-		List<String> targetCategories = schema.getTargetCategories();
-		if(targetCategories.size() != layers[layers.length - 1]){
+		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		if(categoricalLabel.size() != layers[layers.length - 1]){
 			throw new IllegalArgumentException();
 		}
 
@@ -85,14 +82,10 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 				expression = new NormDiscrete(binaryFeature.getName(), binaryFeature.getValue());
 			} else
 
-			if(feature instanceof ContinuousFeature){
-				ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-				expression = new FieldRef(continuousFeature.getName());
-			} else
-
 			{
-				throw new IllegalArgumentException();
+				ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+				expression = continuousFeature.ref();
 			}
 
 			DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.DOUBLE)
@@ -161,13 +154,11 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 		NeuralOutputs neuralOutputs = new NeuralOutputs();
 
-		for(int column = 0; column < targetCategories.size(); column++){
-			String targetCategory = targetCategories.get(column);
-
+		for(int column = 0; column < categoricalLabel.size(); column++){
 			Entity entity = entities.get(column);
 
 			DerivedField derivedField = new DerivedField(OpType.CATEGORICAL, DataType.STRING)
-				.setExpression(new NormDiscrete(targetField, targetCategory));
+				.setExpression(new NormDiscrete(categoricalLabel.getName(), categoricalLabel.getValue(column)));
 
 			NeuralOutput neuralOutput = new NeuralOutput()
 				.setOutputNeuron(entity.getId())

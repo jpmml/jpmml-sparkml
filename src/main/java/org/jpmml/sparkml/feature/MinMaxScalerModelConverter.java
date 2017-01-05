@@ -32,7 +32,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerModel> {
 
@@ -41,13 +41,13 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		MinMaxScalerModel transformer = getTransformer();
 
 		double rescaleFactor = (transformer.getMax() - transformer.getMin());
 		double rescaleConstant = transformer.getMin();
 
-		List<Feature> inputFeatures = featureMapper.getFeatures(transformer.getInputCol());
+		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
 
 		Vector originalMax = transformer.originalMax();
 		if(originalMax.size() != inputFeatures.size()){
@@ -77,9 +77,9 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 				expression = PMMLUtil.createApply("+", expression, PMMLUtil.createConstant(rescaleConstant));
 			}
 
-			DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
-			Feature feature = new ContinuousFeature(derivedField);
+			Feature feature = new ContinuousFeature(encoder, derivedField);
 
 			result.add(feature);
 		}

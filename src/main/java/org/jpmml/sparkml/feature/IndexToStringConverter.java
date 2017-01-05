@@ -26,12 +26,11 @@ import org.apache.spark.ml.feature.IndexToString;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Value;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.WildcardFeature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class IndexToStringConverter extends FeatureConverter<IndexToString> {
 
@@ -40,19 +39,17 @@ public class IndexToStringConverter extends FeatureConverter<IndexToString> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		IndexToString transformer = getTransformer();
 
-		DataField dataField = featureMapper.createDataField(formatName(transformer), OpType.CATEGORICAL, DataType.STRING);
+		DataField dataField = encoder.createDataField(formatName(transformer), OpType.CATEGORICAL, DataType.STRING);
 
 		String[] labels = transformer.getLabels();
 		if(labels != null && labels.length > 0){
-			List<Value> values = dataField.getValues();
-
-			values.addAll(PMMLUtil.createValues(Arrays.asList(labels)));
+			PMMLUtil.addValues(dataField, Arrays.asList(labels));
 		}
 
-		Feature feature = new WildcardFeature(dataField);
+		Feature feature = new WildcardFeature(encoder, dataField);
 
 		return Collections.singletonList(feature);
 	}

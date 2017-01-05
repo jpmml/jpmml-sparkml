@@ -23,15 +23,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.spark.ml.feature.Interaction;
-import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.OpType;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InteractionFeature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class InteractionConverter extends FeatureConverter<Interaction> {
 
@@ -40,7 +37,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Interaction transformer = getTransformer();
 
 		String name = "";
@@ -51,7 +48,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 		for(int i = 0; i < inputCols.length; i++){
 			String inputCol = inputCols[i];
 
-			List<Feature> inputFeatures = featureMapper.getFeatures(inputCol);
+			List<Feature> inputFeatures = encoder.getFeatures(inputCol);
 
 			if(i == 0){
 				name = inputCol;
@@ -69,13 +66,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				for(Feature feature : features){
 
 					for(Feature inputFeature : inputFeatures){
-
-						Apply apply = new Apply("*")
-							.addExpressions((feature.toContinuousFeature()).ref(), (inputFeature.toContinuousFeature()).ref());
-
-						DerivedField derivedField = featureMapper.createDerivedField(FieldName.create(name + "[" + index + "]"), OpType.CONTINUOUS, DataType.DOUBLE, apply);
-
-						InteractionFeature interactionFeature = new InteractionFeature(derivedField, Arrays.asList(feature, inputFeature));
+						InteractionFeature interactionFeature = new InteractionFeature(encoder, FieldName.create(name + "[" + index + "]"), DataType.DOUBLE, Arrays.asList(feature, inputFeature));
 
 						interactionFeatures.add(interactionFeature);
 

@@ -18,12 +18,11 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.List;
-
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.regression.RegressionTable;
+import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
@@ -40,16 +39,16 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 	public RegressionModel encodeModel(Schema schema){
 		LogisticRegressionModel model = getTransformer();
 
-		List<String> targetCategories = schema.getTargetCategories();
-		if(targetCategories.size() != 2){
+		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		if(categoricalLabel.size() != 2){
 			throw new IllegalArgumentException();
 		}
 
 		RegressionTable activeRegressionTable = RegressionModelUtil.createRegressionTable(schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()))
-			.setTargetCategory(targetCategories.get(1));
+			.setTargetCategory(categoricalLabel.getValue(1));
 
 		RegressionTable passiveRegressionTable = new RegressionTable(0d)
-			.setTargetCategory(targetCategories.get(0));
+			.setTargetCategory(categoricalLabel.getValue(0));
 
 		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema), null)
 			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX)

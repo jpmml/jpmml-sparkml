@@ -45,24 +45,26 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Value;
 import org.jpmml.converter.BooleanFeature;
+import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
-import org.jpmml.converter.PMMLMapper;
+import org.jpmml.converter.Label;
+import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.WildcardFeature;
 
-public class FeatureMapper extends PMMLMapper {
+public class SparkMLEncoder extends ModelEncoder {
 
 	private StructType schema = null;
 
 	private Map<String, List<Feature>> columnFeatures = new LinkedHashMap<>();
 
 
-	public FeatureMapper(StructType schema){
+	public SparkMLEncoder(StructType schema){
 		this.schema = schema;
 	}
 
@@ -95,68 +97,64 @@ public class FeatureMapper extends PMMLMapper {
 	}
 
 	public Schema createSchema(ModelConverter<?> modelConverter){
-		FieldName targetField;
-		List<String> targetCategories = null;
+		Label label;
 
 		Model<?> model = modelConverter.getTransformer();
-
 		if(model instanceof PredictionModel){
 			HasLabelCol hasLabelCol = (HasLabelCol)model;
 
 			Feature feature = getOnlyFeature(hasLabelCol.getLabelCol());
 
-			targetField = feature.getName();
-
 			MiningFunction miningFunction = modelConverter.getMiningFunction();
 			switch(miningFunction){
 				case CLASSIFICATION:
 					{
-						if(feature instanceof ListFeature){
-							ListFeature listFeature = (ListFeature)feature;
+						DataField dataField;
 
-							targetCategories = listFeature.getValues();
+						if(feature instanceof CategoricalFeature){
+							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+
+							dataField = getDataField(categoricalFeature.getName());
 						} else
 
-						{
+						if(feature instanceof ContinuousFeature){
 							ContinuousFeature continuousFeature = (ContinuousFeature)feature;
 
 							// XXX
-							targetCategories = Arrays.asList("0", "1");
+							dataField = toCategorical(continuousFeature.getName(), Arrays.asList("0", "1"));
 
-							DataField dataField = toCategorical(targetField, targetCategories);
+							CategoricalFeature categoricalFeature = new CategoricalFeature(this, dataField);
 
-							ListFeature listFeature = new ListFeature(dataField, targetCategories);
+							this.columnFeatures.put(hasLabelCol.getLabelCol(), Collections.<Feature>singletonList(categoricalFeature));
+						} else
 
-							this.columnFeatures.put(hasLabelCol.getLabelCol(), Collections.<Feature>singletonList(listFeature));
+						{
+							throw new IllegalArgumentException();
 						}
+
+						label = new CategoricalLabel(dataField);
 					}
 					break;
 				case REGRESSION:
 					{
-						DataField dataField = toContinuous(targetField);
+						DataField dataField = toContinuous(feature.getName());
 
 						dataField.setDataType(DataType.DOUBLE);
+
+						label = new ContinuousLabel(dataField);
 					}
 					break;
 				default:
-					break;
+					throw new IllegalArgumentException();
 			}
 		} else
 
 		if(model instanceof KMeansModel){
-			targetField = null;
+			label = null;
 		} else
 
 		{
 			throw new IllegalArgumentException();
-		}
-
-		Map<FieldName, DataField> dataFields = getDataFields();
-
-		List<FieldName> activeFields = new ArrayList<>(dataFields.keySet());
-
-		if(targetField != null){
-			activeFields.remove(targetField);
 		}
 
 		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
@@ -172,7 +170,7 @@ public class FeatureMapper extends PMMLMapper {
 			}
 		}
 
-		Schema result = new Schema(targetField, targetCategories, activeFields, features);
+		Schema result = new Schema(label, features);
 
 		return result;
 	}
@@ -198,12 +196,17 @@ public class FeatureMapper extends PMMLMapper {
 
 		dataField.setOpType(OpType.CATEGORICAL);
 
-		List<Value> values = dataField.getValues();
-		if(values.size() > 0){
+		List<String> existingCategories = PMMLUtil.getValues(dataField);
+		if(existingCategories != null && existingCategories.size() > 0){
+
+			if((existingCategories).equals(categories)){
+				return dataField;
+			}
+
 			throw new IllegalArgumentException();
 		}
 
-		values.addAll(PMMLUtil.createValues(categories));
+		PMMLUtil.addValues(dataField, categories);
 
 		return dataField;
 	}
@@ -234,14 +237,14 @@ public class FeatureMapper extends PMMLMapper {
 			DataType dataType = dataField.getDataType();
 			switch(dataType){
 				case STRING:
-					feature = new WildcardFeature(dataField);
+					feature = new WildcardFeature(this, dataField);
 					break;
 				case INTEGER:
 				case DOUBLE:
-					feature = new ContinuousFeature(dataField);
+					feature = new ContinuousFeature(this, dataField);
 					break;
 				case BOOLEAN:
-					feature = new BooleanFeature(dataField);
+					feature = new BooleanFeature(this, dataField);
 					break;
 				default:
 					throw new IllegalArgumentException();

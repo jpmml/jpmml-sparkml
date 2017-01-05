@@ -18,11 +18,11 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.List;
-
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
+import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
@@ -54,14 +54,15 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 		String targetCategory = null;
 
-		List<String> targetCategories = schema.getTargetCategories();
-		if(targetCategories != null && targetCategories.size() > 0){
+		Label label = schema.getLabel();
+		if(label instanceof CategoricalLabel){
+			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
-			if(targetCategories.size() != 2){
+			if(categoricalLabel.size() != 2){
 				throw new IllegalArgumentException();
 			}
 
-			targetCategory = targetCategories.get(1);
+			targetCategory = categoricalLabel.getValue(1);
 		}
 
 		MiningFunction miningFunction = (targetCategory != null ? MiningFunction.CLASSIFICATION : MiningFunction.REGRESSION);

@@ -27,12 +27,12 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.OpType;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.ListFeature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.FeatureMapper;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class BinarizerConverter extends FeatureConverter<Binarizer> {
 
@@ -41,10 +41,10 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(FeatureMapper featureMapper){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Binarizer transformer = getTransformer();
 
-		ContinuousFeature inputFeature = (ContinuousFeature)featureMapper.getOnlyFeature(transformer.getInputCol());
+		ContinuousFeature inputFeature = (ContinuousFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
 		double threshold = transformer.getThreshold();
 
@@ -52,9 +52,9 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 			.addExpressions(PMMLUtil.createApply("lessOrEqual", inputFeature.ref(), PMMLUtil.createConstant(threshold)))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
-		DerivedField derivedField = featureMapper.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
-		Feature feature = new ListFeature(derivedField, Arrays.asList("0", "1"));
+		Feature feature = new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1"));
 
 		return Collections.singletonList(feature);
 	}
