@@ -39,6 +39,7 @@ import org.dmg.pmml.neural_network.NeuralOutput;
 import org.dmg.pmml.neural_network.NeuralOutputs;
 import org.dmg.pmml.neural_network.Neuron;
 import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -80,6 +81,12 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 				BinaryFeature binaryFeature = (BinaryFeature)feature;
 
 				expression = new NormDiscrete(binaryFeature.getName(), binaryFeature.getValue());
+			} else
+
+			if(feature instanceof BooleanFeature){
+				BooleanFeature booleanFeature = (BooleanFeature)feature;
+
+				expression = new NormDiscrete(booleanFeature.getName(), "true");
 			} else
 
 			{

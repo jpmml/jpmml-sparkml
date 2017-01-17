@@ -20,6 +20,7 @@ package org.jpmml.sparkml.model;
 
 import java.util.List;
 
+import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.mining.MiningModel;
@@ -40,10 +41,10 @@ public class GBTRegressionModelConverter extends RegressionModelConverter<GBTReg
 	public MiningModel encodeModel(Schema schema){
 		GBTRegressionModel model = getTransformer();
 
-		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, model.treeWeights(), schema);
+		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 
 		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.SUM, treeModels));
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, treeModels, Doubles.asList(model.treeWeights())));
 
 		return miningModel;
 	}

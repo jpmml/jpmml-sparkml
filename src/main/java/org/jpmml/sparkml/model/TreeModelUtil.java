@@ -38,7 +38,6 @@ import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.SimpleSetPredicate;
-import org.dmg.pmml.Targets;
 import org.dmg.pmml.True;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
@@ -74,28 +73,13 @@ public class TreeModelUtil {
 
 	static
 	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, Schema schema){
-		return encodeDecisionTreeEnsemble(model, null, schema);
-	}
-
-	static
-	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, double[] weights, Schema schema){
 		Schema segmentSchema = schema.toAnonymousSchema();
 
 		List<TreeModel> treeModels = new ArrayList<>();
 
 		DecisionTreeModel[] trees = model.trees();
-		for(int i = 0; i < trees.length; i++){
-			DecisionTreeModel tree = trees[i];
-			Double weight = (weights != null ? weights[i] : null);
-
+		for(DecisionTreeModel tree : trees){
 			TreeModel treeModel = encodeDecisionTree(tree, segmentSchema);
-
-			if(weight != null && !ValueUtil.isOne(weight)){
-				Targets targets = new Targets()
-					.addTargets(ModelUtil.createRescaleTarget(segmentSchema, weight, null));
-
-				treeModel.setTargets(targets);
-			}
 
 			treeModels.add(treeModel);
 		}

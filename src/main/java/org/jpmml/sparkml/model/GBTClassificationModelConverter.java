@@ -20,21 +20,24 @@ package org.jpmml.sparkml.model;
 
 import java.util.List;
 
+import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Output;
-import org.dmg.pmml.OutputField;
-import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segmentation;
+import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.tree.TreeModel;
+import org.jpmml.converter.AbstractTransformation;
+import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
@@ -48,35 +51,28 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 	public MiningModel encodeModel(Schema schema){
 		GBTClassificationModel model = getTransformer();
 
-		Schema segmentSchema = schema.toAnonymousSchema();
+		Schema segmentSchema = new Schema(new ContinuousLabel(null, DataType.DOUBLE), schema.getFeatures());
 
-		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, model.treeWeights(), segmentSchema);
+		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, segmentSchema);
 
-		Output output = encodeOutput();
+		// "(y > 0) ? -1 : 1"
+		Transformation binarizedGbtValue = new AbstractTransformation(){
+
+			@Override
+			public FieldName getName(FieldName name){
+				return withPrefix(name, "binarized");
+			}
+
+			@Override
+			public Expression createExpression(FieldRef fieldRef){
+				return PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", fieldRef, PMMLUtil.createConstant(0d)), PMMLUtil.createConstant(-1d), PMMLUtil.createConstant(1d));
+			}
+		};
 
 		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema))
-			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.SUM, treeModels))
-			.setOutput(output);
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, treeModels, Doubles.asList(model.treeWeights())))
+			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("gbtValue"), OpType.CONTINUOUS, DataType.DOUBLE, binarizedGbtValue));
 
-		return MiningModelUtil.createBinaryLogisticClassification(schema, miningModel, 1000d, false);
-	}
-
-	static
-	private Output encodeOutput(){
-		OutputField gbtValue = new OutputField(FieldName.create("gbtValue"), DataType.DOUBLE)
-			.setOpType(OpType.CONTINUOUS)
-			.setResultFeature(ResultFeature.PREDICTED_VALUE)
-			.setFinalResult(false);
-
-		OutputField binarizedGbtValue = new OutputField(FieldName.create("binarizedGbtValue"), DataType.DOUBLE)
-			.setOpType(OpType.CONTINUOUS)
-			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
-			.setFinalResult(false)
-			.setExpression(PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", new FieldRef(gbtValue.getName()), PMMLUtil.createConstant(0d)), PMMLUtil.createConstant(-1d), PMMLUtil.createConstant(1d)));
-
-		Output output = new Output()
-			.addOutputFields(gbtValue, binarizedGbtValue);
-
-		return output;
+		return MiningModelUtil.createBinaryLogisticClassification(schema, miningModel, RegressionModel.NormalizationMethod.SOFTMAX, 0d, -1000d, false);
 	}
 }
