@@ -40,18 +40,16 @@ public class RegressionModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	}
 
 	@Override
+	public MiningFunction getMiningFunction(){
+		return MiningFunction.REGRESSION;
+	}
+
+	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		DataField dataField = encoder.createDataField(FieldName.create(model.getPredictionCol()), OpType.CONTINUOUS, DataType.DOUBLE);
 
-		Feature feature = new ContinuousFeature(encoder, dataField);
-
-		return Collections.singletonList(feature);
-	}
-
-	@Override
-	public MiningFunction getMiningFunction(){
-		return MiningFunction.REGRESSION;
+		return Collections.<Feature>singletonList(new ContinuousFeature(encoder, dataField));
 	}
 }

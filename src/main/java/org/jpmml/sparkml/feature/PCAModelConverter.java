@@ -45,10 +45,10 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		PCAModel transformer = getTransformer();
 
-		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
+		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
 		DenseMatrix pc = transformer.pc();
-		if(pc.numRows() != inputFeatures.size()){
+		if(pc.numRows() != features.size()){
 			throw new IllegalArgumentException();
 		}
 
@@ -57,10 +57,10 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 		for(int i = 0; i < transformer.getK(); i++){
 			Apply apply = new Apply("sum");
 
-			for(int j = 0; j < inputFeatures.size(); j++){
-				ContinuousFeature inputFeature = (ContinuousFeature)inputFeatures.get(j);
+			for(int j = 0; j < features.size(); j++){
+				ContinuousFeature feature = (ContinuousFeature)features.get(j);
 
-				Expression expression = inputFeature.ref();
+				Expression expression = feature.ref();
 
 				double coefficient = pc.apply(j, i);
 				if(!ValueUtil.isOne(coefficient)){
@@ -72,9 +72,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
 			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
-			Feature feature = new ContinuousFeature(encoder, derivedField);
-
-			result.add(feature);
+			result.add(new ContinuousFeature(encoder, derivedField));
 		}
 
 		return result;

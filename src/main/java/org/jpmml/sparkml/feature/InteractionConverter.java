@@ -42,42 +42,40 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 
 		String name = "";
 
-		List<Feature> features = new ArrayList<>();
+		List<Feature> result = new ArrayList<>();
 
 		String[] inputCols = transformer.getInputCols();
 		for(int i = 0; i < inputCols.length; i++){
 			String inputCol = inputCols[i];
 
-			List<Feature> inputFeatures = encoder.getFeatures(inputCol);
+			List<Feature> features = encoder.getFeatures(inputCol);
 
 			if(i == 0){
 				name = inputCol;
 
-				features = inputFeatures;
+				result = features;
 			} else
 
 			{
 				name += (":" + inputCol);
 
-				List<InteractionFeature> interactionFeatures = new ArrayList<>();
+				List<Feature> interactionFeatures = new ArrayList<>();
 
 				int index = 0;
 
-				for(Feature feature : features){
+				for(Feature left : result){
 
-					for(Feature inputFeature : inputFeatures){
-						InteractionFeature interactionFeature = new InteractionFeature(encoder, FieldName.create(name + "[" + index + "]"), DataType.DOUBLE, Arrays.asList(feature, inputFeature));
-
-						interactionFeatures.add(interactionFeature);
+					for(Feature right : features){
+						interactionFeatures.add(new InteractionFeature(encoder, FieldName.create(name + "[" + index + "]"), DataType.DOUBLE, Arrays.asList(left, right)));
 
 						index++;
 					}
 				}
 
-				features = (List)interactionFeatures;
+				result = interactionFeatures;
 			}
 		}
 
-		return features;
+		return result;
 	}
 }

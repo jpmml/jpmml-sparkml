@@ -40,18 +40,16 @@ public class ClassificationModelConverter<T extends Model<T> & HasFeaturesCol & 
 	}
 
 	@Override
+	public MiningFunction getMiningFunction(){
+		return MiningFunction.CLASSIFICATION;
+	}
+
+	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		DataField dataField = encoder.createDataField(FieldName.create(model.getPredictionCol()), OpType.CATEGORICAL, DataType.DOUBLE);
 
-		Feature feature = new WildcardFeature(encoder, dataField);
-
-		return Collections.singletonList(feature);
-	}
-
-	@Override
-	public MiningFunction getMiningFunction(){
-		return MiningFunction.CLASSIFICATION;
+		return Collections.<Feature>singletonList(new WildcardFeature(encoder, dataField));
 	}
 }

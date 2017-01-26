@@ -40,9 +40,9 @@ public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> 
 
 		String[] inputCols = transformer.getInputCols();
 		for(String inputCol : inputCols){
-			List<Feature> inputFeatures = encoder.getFeatures(inputCol);
+			List<Feature> features = encoder.getFeatures(inputCol);
 
-			result.addAll(inputFeatures);
+			result.addAll(features);
 		}
 
 		return result;

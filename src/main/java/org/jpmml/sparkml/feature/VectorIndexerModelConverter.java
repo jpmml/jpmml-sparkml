@@ -53,10 +53,10 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		VectorIndexerModel transformer = getTransformer();
 
-		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
+		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
 		int numFeatures = transformer.numFeatures();
-		if(numFeatures != inputFeatures.size()){
+		if(numFeatures != features.size()){
 			throw new IllegalArgumentException();
 		}
 
@@ -65,9 +65,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0; i < numFeatures; i++){
-			Feature inputFeature = inputFeatures.get(i);
-
-			Feature feature;
+			Feature feature = features.get(i);
 
 			Map<Double, Integer> categoryMap = categoryMaps.get(i);
 			if(categoryMap != null){
@@ -97,23 +95,21 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 					inlineTable.addRows(row);
 				}
 
-				encoder.toCategorical(inputFeature.getName(), categories);
+				encoder.toCategorical(feature.getName(), categories);
 
 				MapValues mapValues = new MapValues()
-					.addFieldColumnPairs(new FieldColumnPair(inputFeature.getName(), columns.get(0)))
+					.addFieldColumnPairs(new FieldColumnPair(feature.getName(), columns.get(0)))
 					.setOutputColumn(columns.get(1))
 					.setInlineTable(inlineTable);
 
 				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 
-				feature = new CategoricalFeature(encoder, derivedField, values);
+				result.add(new CategoricalFeature(encoder, derivedField, values));
 			} else
 
 			{
-				feature = (ContinuousFeature)inputFeature;
+				result.add((ContinuousFeature)feature);
 			}
-
-			result.add(feature);
 		}
 
 		return result;

@@ -44,18 +44,16 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Binarizer transformer = getTransformer();
 
-		ContinuousFeature inputFeature = (ContinuousFeature)encoder.getOnlyFeature(transformer.getInputCol());
+		ContinuousFeature feature = (ContinuousFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
 		double threshold = transformer.getThreshold();
 
 		Apply apply = new Apply("if")
-			.addExpressions(PMMLUtil.createApply("lessOrEqual", inputFeature.ref(), PMMLUtil.createConstant(threshold)))
+			.addExpressions(PMMLUtil.createApply("lessOrEqual", feature.ref(), PMMLUtil.createConstant(threshold)))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
-		Feature feature = new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1"));
-
-		return Collections.singletonList(feature);
+		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1")));
 	}
 }

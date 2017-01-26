@@ -49,8 +49,6 @@ public class IndexToStringConverter extends FeatureConverter<IndexToString> {
 			PMMLUtil.addValues(dataField, Arrays.asList(labels));
 		}
 
-		Feature feature = new WildcardFeature(encoder, dataField);
-
-		return Collections.singletonList(feature);
+		return Collections.<Feature>singletonList(new WildcardFeature(encoder, dataField));
 	}
 }

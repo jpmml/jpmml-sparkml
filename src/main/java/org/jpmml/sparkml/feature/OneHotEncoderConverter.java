@@ -40,9 +40,9 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoder transformer = getTransformer();
 
-		CategoricalFeature inputFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
+		CategoricalFeature feature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
-		List<String> values = inputFeature.getValues();
+		List<String> values = feature.getValues();
 
 		boolean dropLast = true;
 
@@ -58,9 +58,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			Feature feature = new BinaryFeature(encoder, inputFeature.getName(), DataType.STRING, value);
-
-			result.add(feature);
+			result.add(new BinaryFeature(encoder, feature.getName(), DataType.STRING, value));
 		}
 
 		return result;

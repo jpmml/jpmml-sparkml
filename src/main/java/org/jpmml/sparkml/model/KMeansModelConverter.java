@@ -49,16 +49,16 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 	}
 
 	@Override
+	public MiningFunction getMiningFunction(){
+		return MiningFunction.CLUSTERING;
+	}
+
+	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		KMeansModel model = getTransformer();
 
 		// XXX
 		return Collections.emptyList();
-	}
-
-	@Override
-	public MiningFunction getMiningFunction(){
-		return MiningFunction.CLUSTERING;
 	}
 
 	@Override

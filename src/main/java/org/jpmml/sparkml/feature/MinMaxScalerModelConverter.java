@@ -47,27 +47,27 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 		double rescaleFactor = (transformer.getMax() - transformer.getMin());
 		double rescaleConstant = transformer.getMin();
 
-		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
+		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
 		Vector originalMax = transformer.originalMax();
-		if(originalMax.size() != inputFeatures.size()){
+		if(originalMax.size() != features.size()){
 			throw new IllegalArgumentException();
 		}
 
 		Vector originalMin = transformer.originalMin();
-		if(originalMin.size() != inputFeatures.size()){
+		if(originalMin.size() != features.size()){
 			throw new IllegalArgumentException();
 		}
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < inputFeatures.size(); i++){
-			ContinuousFeature inputFeature = (ContinuousFeature)inputFeatures.get(i);
+		for(int i = 0; i < features.size(); i++){
+			ContinuousFeature feature = (ContinuousFeature)features.get(i);
 
 			double max = originalMax.apply(i);
 			double min = originalMin.apply(i);
 
-			Expression expression = PMMLUtil.createApply("/", PMMLUtil.createApply("-", inputFeature.ref(), PMMLUtil.createConstant(min)), PMMLUtil.createConstant(max - min));
+			Expression expression = PMMLUtil.createApply("/", PMMLUtil.createApply("-", feature.ref(), PMMLUtil.createConstant(min)), PMMLUtil.createConstant(max - min));
 
 			if(!ValueUtil.isOne(rescaleFactor)){
 				expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(rescaleFactor));
@@ -79,9 +79,7 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 
 			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
-			Feature feature = new ContinuousFeature(encoder, derivedField);
-
-			result.add(feature);
+			result.add(new ContinuousFeature(encoder, derivedField));
 		}
 
 		return result;

@@ -44,24 +44,24 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StandardScalerModel transformer = getTransformer();
 
-		List<Feature> inputFeatures = encoder.getFeatures(transformer.getInputCol());
+		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
 		Vector mean = transformer.mean();
-		if(transformer.getWithMean() && mean.size() != inputFeatures.size()){
+		if(transformer.getWithMean() && mean.size() != features.size()){
 			throw new IllegalArgumentException();
 		}
 
 		Vector std = transformer.std();
-		if(transformer.getWithStd() && std.size() != inputFeatures.size()){
+		if(transformer.getWithStd() && std.size() != features.size()){
 			throw new IllegalArgumentException();
 		}
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < inputFeatures.size(); i++){
-			ContinuousFeature inputFeature = (ContinuousFeature)inputFeatures.get(i);
+		for(int i = 0; i < features.size(); i++){
+			ContinuousFeature feature = (ContinuousFeature)features.get(i);
 
-			Expression expression = inputFeature.ref();
+			Expression expression = feature.ref();
 
 			if(transformer.getWithMean()){
 				double meanValue = mean.apply(i);
@@ -81,9 +81,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 
 			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
-			Feature feature = new ContinuousFeature(encoder, derivedField);
-
-			result.add(feature);
+			result.add(new ContinuousFeature(encoder, derivedField));
 		}
 
 		return result;

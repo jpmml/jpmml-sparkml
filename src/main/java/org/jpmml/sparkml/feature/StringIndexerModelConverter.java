@@ -39,14 +39,12 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StringIndexerModel transformer = getTransformer();
 
-		Feature inputFeature = encoder.getOnlyFeature(transformer.getInputCol());
+		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
 		List<String> categories = Arrays.asList(transformer.labels());
 
-		DataField dataField = encoder.toCategorical(inputFeature.getName(), categories);
+		DataField dataField = encoder.toCategorical(feature.getName(), categories);
 
-		Feature feature = new CategoricalFeature(encoder, dataField);
-
-		return Collections.singletonList(feature);
+		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, dataField));
 	}
 }
