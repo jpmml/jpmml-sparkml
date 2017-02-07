@@ -29,6 +29,7 @@ import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.Batch;
 import org.jpmml.evaluator.IntegrationTest;
+import org.jpmml.evaluator.IntegrationTestBatch;
 import org.jpmml.model.SerializationUtil;
 
 abstract
@@ -36,13 +37,11 @@ public class ConverterTest extends IntegrationTest {
 
 	@Override
 	protected ArchiveBatch createBatch(String name, String dataset){
-		ArchiveBatch result = new ArchiveBatch(name, dataset){
+		ArchiveBatch result = new IntegrationTestBatch(name, dataset){
 
 			@Override
-			public InputStream open(String path){
-				Class<? extends ConverterTest> clazz = ConverterTest.this.getClass();
-
-				return clazz.getResourceAsStream(path);
+			public IntegrationTest getIntegrationTest(){
+				return ConverterTest.this;
 			}
 
 			@Override
@@ -51,7 +50,11 @@ public class ConverterTest extends IntegrationTest {
 
 				PipelineModel pipelineModel = (PipelineModel)deserialize(getName() + getDataset() + ".ser");
 
-				return ConverterUtil.toPMML(schema, pipelineModel);
+				PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
+
+				ensureValidity(pmml);
+
+				return pmml;
 			}
 
 			private Object deserialize(String name) throws IOException, ClassNotFoundException {
