@@ -7,39 +7,39 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 * Supported Spark ML `PipelineStage` types:
   * Estimators:
-    * [`PipelineModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/PipelineModel.html) (the result of fitting a `Pipeline`)
+    * [`PipelineModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/PipelineModel.html) (the result of fitting a `Pipeline`)
   * Feature extractors, transformers and selectors:
-    * [`feature.Binarizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
-    * [`feature.Bucketizer`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
-    * [`feature.ChiSqSelectorModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ChiSqSelectorModel.html) (the result of fitting a `feature.ChiSqSelector`)
-    * [`feature.ColumnPruner`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ColumnPruner.html)
-    * [`feature.IndexToString`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/IndexToString.html)
-    * [`feature.MinMaxScalerModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
-    * [`feature.OneHotEncoder`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
-    * [`feature.PCAModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)
-    * [`feature.QuantileDiscretizer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
-    * [`feature.RFormulaModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
-    * [`feature.StandardScalerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
-    * [`feature.StringIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
-    * [`feature.VectorAssembler`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAssembler.html)
-    * [`feature.VectorAttributeRewriter`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAttributeRewriter.html)
-    * [`feature.VectorIndexerModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorIndexerModel.html) (the result of fitting a `feature.VectorIndexer`)
-    * [`feature.VectorSlicer`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorSlicer.html)
+    * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
+    * [`feature.Bucketizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
+    * [`feature.ChiSqSelectorModel`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ChiSqSelectorModel.html) (the result of fitting a `feature.ChiSqSelector`)
+    * [`feature.ColumnPruner`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/ColumnPruner.html)
+    * [`feature.IndexToString`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/IndexToString.html)
+    * [`feature.MinMaxScalerModel`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
+    * [`feature.OneHotEncoder`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
+    * [`feature.PCAModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)
+    * [`feature.QuantileDiscretizer`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
+    * [`feature.RFormulaModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
+    * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
+    * [`feature.StringIndexerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
+    * [`feature.VectorAssembler`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAssembler.html)
+    * [`feature.VectorAttributeRewriter`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorAttributeRewriter.html)
+    * [`feature.VectorIndexerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorIndexerModel.html) (the result of fitting a `feature.VectorIndexer`)
+    * [`feature.VectorSlicer`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/VectorSlicer.html)
   * Prediction models:
-    * [`classification.DecisionTreeClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
-    * [`classification.GBTClassificationModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/GBTClassificationModel.html)
-    * [`classification.LogisticRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/LogisticRegressionModel.html)
-    * [`classification.MultilayerPerceptronClassificationModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/MultilayerPerceptronClassificationModel.html)
-    * [`classification.RandomForestClassificationModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/RandomForestClassificationModel.html)
-    * [`clustering.KMeansModel`] (http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/clustering/KMeansModel.html)
-    * [`regression.DecisionTreeRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/DecisionTreeRegressionModel.html)
-    * [`regression.GBTRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GBTRegressionModel.html)
-    * [`regression.LinearRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/LinearRegressionModel.html)
-    * [`regression.RandomForestRegressionModel`] (https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/RandomForestRegressionModel.html)
+    * [`classification.DecisionTreeClassificationModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
+    * [`classification.GBTClassificationModel`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/GBTClassificationModel.html)
+    * [`classification.LogisticRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/LogisticRegressionModel.html)
+    * [`classification.MultilayerPerceptronClassificationModel`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/MultilayerPerceptronClassificationModel.html)
+    * [`classification.RandomForestClassificationModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/RandomForestClassificationModel.html)
+    * [`clustering.KMeansModel`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/clustering/KMeansModel.html)
+    * [`regression.DecisionTreeRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/DecisionTreeRegressionModel.html)
+    * [`regression.GBTRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GBTRegressionModel.html)
+    * [`regression.LinearRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/LinearRegressionModel.html)
+    * [`regression.RandomForestRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/RandomForestRegressionModel.html)
   * Prediction model chains
 * Production quality:
   * Complete test coverage.
-  * Fully compliant with the [JPMML-Evaluator] (https://github.com/jpmml/jpmml-evaluator) library.
+  * Fully compliant with the [JPMML-Evaluator](https://github.com/jpmml/jpmml-evaluator) library.
 
 # Prerequisites #
 
@@ -49,7 +49,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 ## Library ##
 
-JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository] (http://repo1.maven.org/maven2/org/jpmml/).
+JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](http://repo1.maven.org/maven2/org/jpmml/).
 
 The current version is **1.0.8** (24 November, 2016).
 
@@ -61,7 +61,7 @@ The current version is **1.0.8** (24 November, 2016).
 </dependency>
 ```
 
-JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model] (https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
+JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
 
 Excluding the legacy version of JPMML-Model library from the application classpath:
 ```xml
@@ -79,7 +79,7 @@ Excluding the legacy version of JPMML-Model library from the application classpa
 </dependency>
 ```
 
-Using the [Maven Shade Plugin] (https://maven.apache.org/plugins/maven-shade-plugin/) for "shading" all the affected `org.dmg.pmml.*` and `org.jpmml.*` classes during the packaging of the application:
+Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/) for "shading" all the affected `org.dmg.pmml.*` and `org.jpmml.*` classes during the packaging of the application:
 ```xml
 <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
@@ -108,11 +108,11 @@ Using the [Maven Shade Plugin] (https://maven.apache.org/plugins/maven-shade-plu
 </plugin>
 ```
 
-For a complete example, please see the [JPMML-SparkML-Bootstrap] (https://github.com/jpmml/jpmml-sparkml-bootstrap) project.
+For a complete example, please see the [JPMML-SparkML-Bootstrap](https://github.com/jpmml/jpmml-sparkml-bootstrap) project.
 
 ## Example application ##
 
-Enter the project root directory and build using [Apache Maven] (http://maven.apache.org/):
+Enter the project root directory and build using [Apache Maven](http://maven.apache.org/):
 ```
 mvn clean install
 ```
@@ -170,8 +170,8 @@ spark-submit --master local[1] --class org.jpmml.sparkml.Main target/converter-e
 
 # License #
 
-JPMML-SparkML is licensed under the [GNU Affero General Public License (AGPL) version 3.0] (http://www.gnu.org/licenses/agpl-3.0.html). Other licenses are available on request.
+JPMML-SparkML is licensed under the [GNU Affero General Public License (AGPL) version 3.0](http://www.gnu.org/licenses/agpl-3.0.html). Other licenses are available on request.
 
 # Additional information #
 
-Please contact [info@openscoring.io] (mailto:info@openscoring.io)
+Please contact [info@openscoring.io](mailto:info@openscoring.io)
