@@ -206,7 +206,7 @@ public class ConverterUtil {
 
 			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
 
-			MiningModel miningModel = MiningModelUtil.createModelChain(new Schema(null, Collections.<Feature>emptyList()), memberModels)
+			MiningModel miningModel = MiningModelUtil.createModelChain(memberModels, new Schema(null, Collections.<Feature>emptyList()))
 				.setMiningSchema(miningSchema);
 
 			rootModel = miningModel;

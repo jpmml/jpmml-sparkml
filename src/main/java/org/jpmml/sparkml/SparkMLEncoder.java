@@ -53,7 +53,6 @@ import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelEncoder;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.WildcardFeature;
 
@@ -173,42 +172,6 @@ public class SparkMLEncoder extends ModelEncoder {
 		Schema result = new Schema(label, features);
 
 		return result;
-	}
-
-	public DataField toContinuous(FieldName name){
-		DataField dataField = getDataField(name);
-
-		if(dataField == null){
-			throw new IllegalArgumentException();
-		}
-
-		dataField.setOpType(OpType.CONTINUOUS);
-
-		return dataField;
-	}
-
-	public DataField toCategorical(FieldName name, List<String> categories){
-		DataField dataField = getDataField(name);
-
-		if(dataField == null){
-			throw new IllegalArgumentException();
-		}
-
-		dataField.setOpType(OpType.CATEGORICAL);
-
-		List<String> existingCategories = PMMLUtil.getValues(dataField);
-		if(existingCategories != null && existingCategories.size() > 0){
-
-			if((existingCategories).equals(categories)){
-				return dataField;
-			}
-
-			throw new IllegalArgumentException();
-		}
-
-		PMMLUtil.addValues(dataField, categories);
-
-		return dataField;
 	}
 
 	public boolean hasFeatures(String column){

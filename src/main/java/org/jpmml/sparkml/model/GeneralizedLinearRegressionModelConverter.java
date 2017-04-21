@@ -18,10 +18,13 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.List;
+
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
@@ -52,9 +55,11 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	public GeneralRegressionModel encodeModel(Schema schema){
 		GeneralizedLinearRegressionModel model = getTransformer();
 
+		Label label = schema.getLabel();
+		List<Feature> features = schema.getFeatures();
+
 		String targetCategory = null;
 
-		Label label = schema.getLabel();
 		if(label instanceof CategoricalLabel){
 			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
@@ -72,7 +77,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
 
-		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
+		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
 
 		switch(miningFunction){
 			case CLASSIFICATION:

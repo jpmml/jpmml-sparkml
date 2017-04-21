@@ -22,17 +22,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.dmg.pmml.Array;
 import org.dmg.pmml.CompareFunction;
 import org.dmg.pmml.ComparisonMeasure;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.SquaredEuclidean;
 import org.dmg.pmml.clustering.Cluster;
-import org.dmg.pmml.clustering.ClusteringField;
 import org.dmg.pmml.clustering.ClusteringModel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
@@ -41,6 +38,7 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.clustering.ClusteringModelUtil;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.VectorUtil;
 
 public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 
@@ -65,30 +63,24 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 	public ClusteringModel encodeModel(Schema schema){
 		KMeansModel model = getTransformer();
 
+		List<Feature> features = schema.getFeatures();
+
 		List<Cluster> clusters = new ArrayList<>();
 
 		Vector[] clusterCenters = model.clusterCenters();
 		for(int i = 0; i < clusterCenters.length; i++){
-			Vector clusterCenter = clusterCenters[i];
-
-			Array array = PMMLUtil.createRealArray(Doubles.asList(clusterCenter.toArray()));
-
 			Cluster cluster = new Cluster()
 				.setId(String.valueOf(i))
-				.setArray(array);
+				.setArray(PMMLUtil.createRealArray(VectorUtil.toList(clusterCenters[i])));
 
 			clusters.add(cluster);
 		}
-
-		List<Feature> features = schema.getFeatures();
-
-		List<ClusteringField> clusteringFields = ClusteringModelUtil.createClusteringFields(features);
 
 		ComparisonMeasure comparisonMeasure = new ComparisonMeasure(ComparisonMeasure.Kind.DISTANCE)
 			.setCompareFunction(CompareFunction.ABS_DIFF)
 			.setMeasure(new SquaredEuclidean());
 
-		ClusteringModel clusteringModel = new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(schema), comparisonMeasure, clusteringFields, clusters)
+		ClusteringModel clusteringModel = new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(schema), comparisonMeasure, ClusteringModelUtil.createClusteringFields(features), clusters)
 			.setOutput(ClusteringModelUtil.createOutput(FieldName.create("cluster"), Collections.<Cluster>emptyList()));
 
 		return clusteringModel;

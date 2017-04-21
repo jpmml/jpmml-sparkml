@@ -60,13 +60,13 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 		int[] layers = model.layers();
 		Vector weights = model.weights();
 
-		List<Feature> features = schema.getFeatures();
-		if(features.size() != layers[0]){
+		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		if(categoricalLabel.size() != layers[layers.length - 1]){
 			throw new IllegalArgumentException();
 		}
 
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
-		if(categoricalLabel.size() != layers[layers.length - 1]){
+		List<Feature> features = schema.getFeatures();
+		if(features.size() != layers[0]){
 			throw new IllegalArgumentException();
 		}
 
