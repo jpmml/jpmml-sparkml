@@ -45,9 +45,11 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Bucketizer transformer = getTransformer();
 
-		ContinuousFeature feature = (ContinuousFeature)encoder.getOnlyFeature(transformer.getInputCol());
+		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		Discretize discretize = new Discretize(feature.getName());
+		ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+		Discretize discretize = new Discretize(continuousFeature.getName());
 
 		List<String> categories = new ArrayList<>();
 

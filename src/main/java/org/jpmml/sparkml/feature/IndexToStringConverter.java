@@ -26,8 +26,8 @@ import org.apache.spark.ml.feature.IndexToString;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.OpType;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.WildcardFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -43,6 +43,6 @@ public class IndexToStringConverter extends FeatureConverter<IndexToString> {
 
 		DataField dataField = encoder.createDataField(formatName(transformer), OpType.CATEGORICAL, DataType.STRING, Arrays.asList(transformer.getLabels()));
 
-		return Collections.<Feature>singletonList(new WildcardFeature(encoder, dataField));
+		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, dataField));
 	}
 }

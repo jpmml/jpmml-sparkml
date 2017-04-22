@@ -41,9 +41,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		List<String> categories = Arrays.asList(transformer.labels());
-
-		DataField dataField = encoder.toCategorical(feature.getName(), categories);
+		DataField dataField = encoder.toCategorical(feature.getName(), Arrays.asList(transformer.labels()));
 
 		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, dataField));
 	}

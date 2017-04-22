@@ -62,12 +62,14 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0; i < features.size(); i++){
-			ContinuousFeature feature = (ContinuousFeature)features.get(i);
+			Feature feature = features.get(i);
+
+			ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
 			double max = originalMax.apply(i);
 			double min = originalMin.apply(i);
 
-			Expression expression = PMMLUtil.createApply("/", PMMLUtil.createApply("-", feature.ref(), PMMLUtil.createConstant(min)), PMMLUtil.createConstant(max - min));
+			Expression expression = PMMLUtil.createApply("/", PMMLUtil.createApply("-", continuousFeature.ref(), PMMLUtil.createConstant(min)), PMMLUtil.createConstant(max - min));
 
 			if(!ValueUtil.isOne(rescaleFactor)){
 				expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(rescaleFactor));

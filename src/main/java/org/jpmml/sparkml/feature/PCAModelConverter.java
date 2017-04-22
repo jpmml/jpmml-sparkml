@@ -58,11 +58,13 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 			Apply apply = new Apply("sum");
 
 			for(int j = 0; j < features.size(); j++){
-				ContinuousFeature feature = (ContinuousFeature)features.get(j);
+				Feature feature = features.get(j);
 
-				Expression expression = feature.ref();
+				ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-				double coefficient = pc.apply(j, i);
+				Expression expression = continuousFeature.ref();
+
+				Double coefficient = pc.apply(j, i);
 				if(!ValueUtil.isOne(coefficient)){
 					expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(coefficient));
 				}

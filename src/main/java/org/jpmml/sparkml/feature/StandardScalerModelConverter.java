@@ -59,9 +59,11 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0; i < features.size(); i++){
-			ContinuousFeature feature = (ContinuousFeature)features.get(i);
+			Feature feature = features.get(i);
 
-			Expression expression = feature.ref();
+			ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+			Expression expression = continuousFeature.ref();
 
 			if(transformer.getWithMean()){
 				double meanValue = mean.apply(i);
