@@ -18,48 +18,29 @@
  */
 package org.jpmml.sparkml;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
-import org.apache.spark.ml.classification.GBTClassificationModel;
-import org.apache.spark.ml.classification.LogisticRegressionModel;
-import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
-import org.apache.spark.ml.classification.RandomForestClassificationModel;
-import org.apache.spark.ml.clustering.KMeansModel;
-import org.apache.spark.ml.feature.Binarizer;
-import org.apache.spark.ml.feature.Bucketizer;
-import org.apache.spark.ml.feature.ChiSqSelectorModel;
-import org.apache.spark.ml.feature.ColumnPruner;
-import org.apache.spark.ml.feature.IndexToString;
-import org.apache.spark.ml.feature.Interaction;
-import org.apache.spark.ml.feature.MinMaxScalerModel;
-import org.apache.spark.ml.feature.OneHotEncoder;
-import org.apache.spark.ml.feature.PCAModel;
-import org.apache.spark.ml.feature.RFormulaModel;
-import org.apache.spark.ml.feature.StandardScalerModel;
-import org.apache.spark.ml.feature.StringIndexerModel;
-import org.apache.spark.ml.feature.VectorAssembler;
-import org.apache.spark.ml.feature.VectorAttributeRewriter;
-import org.apache.spark.ml.feature.VectorIndexerModel;
-import org.apache.spark.ml.feature.VectorSlicer;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
-import org.apache.spark.ml.regression.GBTRegressionModel;
-import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
-import org.apache.spark.ml.regression.LinearRegressionModel;
-import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.FieldName;
@@ -74,33 +55,6 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.MetroJAXBUtil;
-import org.jpmml.sparkml.feature.BinarizerConverter;
-import org.jpmml.sparkml.feature.BucketizerConverter;
-import org.jpmml.sparkml.feature.ChiSqSelectorModelConverter;
-import org.jpmml.sparkml.feature.ColumnPrunerConverter;
-import org.jpmml.sparkml.feature.IndexToStringConverter;
-import org.jpmml.sparkml.feature.InteractionConverter;
-import org.jpmml.sparkml.feature.MinMaxScalerModelConverter;
-import org.jpmml.sparkml.feature.OneHotEncoderConverter;
-import org.jpmml.sparkml.feature.PCAModelConverter;
-import org.jpmml.sparkml.feature.RFormulaModelConverter;
-import org.jpmml.sparkml.feature.StandardScalerModelConverter;
-import org.jpmml.sparkml.feature.StringIndexerModelConverter;
-import org.jpmml.sparkml.feature.VectorAssemblerConverter;
-import org.jpmml.sparkml.feature.VectorAttributeRewriterConverter;
-import org.jpmml.sparkml.feature.VectorIndexerModelConverter;
-import org.jpmml.sparkml.feature.VectorSlicerConverter;
-import org.jpmml.sparkml.model.DecisionTreeClassificationModelConverter;
-import org.jpmml.sparkml.model.DecisionTreeRegressionModelConverter;
-import org.jpmml.sparkml.model.GBTClassificationModelConverter;
-import org.jpmml.sparkml.model.GBTRegressionModelConverter;
-import org.jpmml.sparkml.model.GeneralizedLinearRegressionModelConverter;
-import org.jpmml.sparkml.model.KMeansModelConverter;
-import org.jpmml.sparkml.model.LinearRegressionModelConverter;
-import org.jpmml.sparkml.model.LogisticRegressionModelConverter;
-import org.jpmml.sparkml.model.MultilayerPerceptronClassificationModelConverter;
-import org.jpmml.sparkml.model.RandomForestClassificationModelConverter;
-import org.jpmml.sparkml.model.RandomForestRegressionModelConverter;
 
 public class ConverterUtil {
 
@@ -259,8 +213,8 @@ public class ConverterUtil {
 			Constructor<?> constructor = converterClazz.getDeclaredConstructor(clazz);
 
 			return (TransformerConverter)constructor.newInstance(transformer);
-		} catch(Exception e){
-			throw new IllegalArgumentException(e);
+		} catch(ReflectiveOperationException roe){
+			throw new IllegalArgumentException(roe);
 		}
 	}
 
@@ -271,6 +225,15 @@ public class ConverterUtil {
 
 	static
 	public void putConverterClazz(Class<? extends Transformer> clazz, Class<? extends TransformerConverter<?>> converterClazz){
+
+		if(clazz == null || !(Transformer.class).isAssignableFrom(clazz)){
+			throw new IllegalArgumentException();
+		} // End if
+
+		if(converterClazz == null || !(TransformerConverter.class).isAssignableFrom(converterClazz)){
+			throw new IllegalArgumentException();
+		}
+
 		ConverterUtil.converters.put(clazz, converterClazz);
 	}
 
@@ -295,38 +258,83 @@ public class ConverterUtil {
 		return result;
 	}
 
+	static
+	private void init(){
+		Thread thread = Thread.currentThread();
+
+		ClassLoader classLoader = thread.getContextClassLoader();
+		if(classLoader == null){
+			classLoader = ClassLoader.getSystemClassLoader();
+		}
+
+		Enumeration<URL> urls;
+
+		try {
+			urls = classLoader.getResources("META-INF/sparkml2pmml.properties");
+		} catch(IOException ioe){
+			logger.warn("Failed to find resources", ioe);
+
+			return;
+		}
+
+		while(urls.hasMoreElements()){
+			URL url = urls.nextElement();
+
+			logger.trace("Loading resource " + url);
+
+			try(InputStream is = url.openStream()){
+				Properties properties = new Properties();
+				properties.load(is);
+
+				init(classLoader, properties);
+			} catch(IOException ioe){
+				logger.warn("Failed to load resource", ioe);
+			}
+		}
+	}
+
+	static
+	private void init(ClassLoader classLoader, Properties properties){
+
+		if(properties.isEmpty()){
+			return;
+		}
+
+		Set<String> keys = properties.stringPropertyNames();
+		for(String key : keys){
+			String value = properties.getProperty(key);
+
+			logger.trace("Mapping transformer class " + key + " to transformer converter class " + value);
+
+			Class<? extends Transformer> clazz;
+
+			try {
+				clazz = (Class)classLoader.loadClass(key);
+			} catch(ClassNotFoundException cnfe){
+				logger.warn("Failed to load transformer class", cnfe);
+
+				continue;
+			}
+
+			Class<? extends TransformerConverter<?>> converterClazz;
+
+			try {
+				converterClazz = (Class)classLoader.loadClass(value);
+			} catch(ClassNotFoundException cnfe){
+				logger.warn("Failed to load transformer converter class", cnfe);
+
+				continue;
+			}
+
+			putConverterClazz(clazz, converterClazz);
+		}
+	}
+
 	private static final Map<Class<? extends Transformer>, Class<? extends TransformerConverter>> converters = new LinkedHashMap<>();
 
-	static {
-		// Features
-		converters.put(Binarizer.class, BinarizerConverter.class);
-		converters.put(Bucketizer.class, BucketizerConverter.class);
-		converters.put(ChiSqSelectorModel.class, ChiSqSelectorModelConverter.class);
-		converters.put(ColumnPruner.class, ColumnPrunerConverter.class);
-		converters.put(IndexToString.class, IndexToStringConverter.class);
-		converters.put(Interaction.class, InteractionConverter.class);
-		converters.put(MinMaxScalerModel.class, MinMaxScalerModelConverter.class);
-		converters.put(OneHotEncoder.class, OneHotEncoderConverter.class);
-		converters.put(PCAModel.class, PCAModelConverter.class);
-		converters.put(RFormulaModel.class, RFormulaModelConverter.class);
-		converters.put(StandardScalerModel.class, StandardScalerModelConverter.class);
-		converters.put(StringIndexerModel.class, StringIndexerModelConverter.class);
-		converters.put(VectorAssembler.class, VectorAssemblerConverter.class);
-		converters.put(VectorAttributeRewriter.class, VectorAttributeRewriterConverter.class);
-		converters.put(VectorIndexerModel.class, VectorIndexerModelConverter.class);
-		converters.put(VectorSlicer.class, VectorSlicerConverter.class);
+	private static final Logger logger = LogManager.getLogger(ConverterUtil.class);
 
-		// Models
-		converters.put(DecisionTreeClassificationModel.class, DecisionTreeClassificationModelConverter.class);
-		converters.put(DecisionTreeRegressionModel.class, DecisionTreeRegressionModelConverter.class);
-		converters.put(GBTClassificationModel.class, GBTClassificationModelConverter.class);
-		converters.put(GBTRegressionModel.class, GBTRegressionModelConverter.class);
-		converters.put(GeneralizedLinearRegressionModel.class, GeneralizedLinearRegressionModelConverter.class);
-		converters.put(KMeansModel.class, KMeansModelConverter.class);
-		converters.put(LinearRegressionModel.class, LinearRegressionModelConverter.class);
-		converters.put(LogisticRegressionModel.class, LogisticRegressionModelConverter.class);
-		converters.put(MultilayerPerceptronClassificationModel.class, MultilayerPerceptronClassificationModelConverter.class);
-		converters.put(RandomForestClassificationModel.class, RandomForestClassificationModelConverter.class);
-		converters.put(RandomForestRegressionModel.class, RandomForestRegressionModelConverter.class);
+	static {
+		ConverterUtil.init();
 	}
 }
