@@ -72,7 +72,7 @@ public class ClassificationTest extends ConverterTest {
 	public void evaluateLogisticRegressionSentiment() throws Exception {
 
 		try(Batch batch = createBatch("LogisticRegression", "Sentiment")){
-			evaluate(batch, null, 1e-8, 1e-8);
+			evaluate(batch, null, 1e-10, 1e-7);
 		}
 	}
 

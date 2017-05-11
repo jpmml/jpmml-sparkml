@@ -24,37 +24,23 @@ public class TermUtil {
 	}
 
 	static
-	public String trim(String string){
-		int begin = 0;
-		int end = string.length();
+	public boolean hasPunctuation(String string){
+		String[] tokens = string.split("\\s+");
 
-		// Trim leading punctuation
-		while(begin < end){
-			char c = string.charAt(begin);
+		for(String token : tokens){
+			int length = token.length();
 
-			if(!isPunctuation(c)){
-				break;
+			if(length > 0){
+				char first = token.charAt(0);
+				char last = token.charAt(length - 1);
+
+				if(isPunctuation(first) || isPunctuation(last)){
+					return true;
+				}
 			}
-
-			begin++;
 		}
 
-		// Trim trailing punctuation
-		while(end > begin){
-			char c = string.charAt(end - 1);
-
-			if(!isPunctuation(c)){
-				break;
-			}
-
-			end--;
-		}
-
-		if(begin > 0 || end < string.length()){
-			return string.substring(begin, end);
-		}
-
-		return string;
+		return false;
 	}
 
 	static

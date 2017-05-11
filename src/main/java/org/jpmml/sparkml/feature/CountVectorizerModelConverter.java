@@ -20,6 +20,7 @@ package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.spark.ml.feature.CountVectorizerModel;
 import org.dmg.pmml.Apply;
@@ -63,7 +64,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 			.setLocalTermWeights(transformer.getBinary() ? TextIndex.LocalTermWeights.BINARY : null)
 			.setExpression(new FieldRef(termField.getName()));
 
-		DefineFunction defineFunction = new DefineFunction("tf", OpType.CONTINUOUS, null)
+		DefineFunction defineFunction = new DefineFunction("tf" + "@" + String.valueOf(CountVectorizerModelConverter.SEQUENCE.getAndIncrement()), OpType.CONTINUOUS, null)
 			.setDataType(DataType.INTEGER)
 			.addParameterFields(documentField, termField)
 			.setExpression(textIndex);
@@ -75,9 +76,8 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 		String[] vocabulary = transformer.vocabulary();
 		for(int i = 0; i < vocabulary.length; i++){
 			String term = vocabulary[i];
-			String trimmedTerm = TermUtil.trim(term);
 
-			if(!(term).equals(trimmedTerm)){
+			if(TermUtil.hasPunctuation(term)){
 				throw new IllegalArgumentException(term);
 			}
 
@@ -107,4 +107,6 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 		return result;
 	}
+
+	private static final AtomicInteger SEQUENCE = new AtomicInteger(1);
 }
