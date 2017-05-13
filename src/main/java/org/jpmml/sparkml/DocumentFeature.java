@@ -18,7 +18,9 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.common.base.Objects.ToStringHelper;
 import org.dmg.pmml.TypeDefinitionField;
@@ -28,6 +30,8 @@ import org.jpmml.converter.Feature;
 public class DocumentFeature extends Feature {
 
 	private String wordSeparatorRE = null;
+
+	private Set<StopWordSet> stopWordSets = new LinkedHashSet<>();
 
 
 	public DocumentFeature(SparkMLEncoder encoder, TypeDefinitionField field, String wordSeparatorRE){
@@ -75,5 +79,51 @@ public class DocumentFeature extends Feature {
 		}
 
 		this.wordSeparatorRE = wordSeparatorRE;
+	}
+
+	public void addStopWordSet(StopWordSet stopWordSet){
+		Set<StopWordSet> stopWordSets = getStopWordSets();
+
+		stopWordSets.add(stopWordSet);
+	}
+
+	public Set<StopWordSet> getStopWordSets(){
+		return this.stopWordSets;
+	}
+
+	static
+	public class StopWordSet extends LinkedHashSet<String> {
+
+		private boolean caseSensitive = false;
+
+
+		public StopWordSet(boolean caseSensitive){
+			setCaseSensitive(caseSensitive);
+		}
+
+		@Override
+		public int hashCode(){
+			return (31 * super.hashCode()) + Objects.hashCode(this.isCaseSensitive());
+		}
+
+		@Override
+		public boolean equals(Object object){
+
+			if(object instanceof StopWordSet){
+				StopWordSet that = (StopWordSet)object;
+
+				return super.equals(object) && Objects.equals(this.isCaseSensitive(), that.isCaseSensitive());
+			}
+
+			return false;
+		}
+
+		public boolean isCaseSensitive(){
+			return this.caseSensitive;
+		}
+
+		private void setCaseSensitive(boolean caseSensitive){
+			this.caseSensitive = caseSensitive;
+		}
 	}
 }
