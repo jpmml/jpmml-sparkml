@@ -28,11 +28,8 @@ import javax.xml.parsers.DocumentBuilder;
 
 import com.google.common.base.Joiner;
 import org.apache.spark.ml.feature.CountVectorizerModel;
-import org.dmg.pmml.Apply;
-import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.InlineTable;
@@ -40,14 +37,12 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.ParameterField;
 import org.dmg.pmml.TextIndex;
 import org.dmg.pmml.TextIndexNormalization;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DOMUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.PMMLEncoder;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.TermFeature;
 import org.jpmml.sparkml.TermUtil;
 
 public class CountVectorizerModelConverter extends FeatureConverter<CountVectorizerModel> {
@@ -122,28 +117,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 				throw new IllegalArgumentException(term);
 			}
 
-			Constant constant = PMMLUtil.createConstant(term)
-				.setDataType(DataType.STRING);
-
-			final
-			Apply apply = PMMLUtil.createApply(defineFunction.getName(), documentFeature.ref(), constant);
-
-			Feature termFeature = new Feature(encoder, FieldName.create(defineFunction.getName() + "(" + term + ")"), DataType.INTEGER){
-
-				@Override
-				public ContinuousFeature toContinuousFeature(){
-					PMMLEncoder encoder = ensureEncoder();
-
-					DerivedField derivedField = encoder.getDerivedField(getName());
-					if(derivedField == null){
-						derivedField = encoder.createDerivedField(getName(), OpType.CONTINUOUS, getDataType(), apply);
-					}
-
-					return new ContinuousFeature(encoder, derivedField);
-				}
-			};
-
-			result.add(termFeature);
+			result.add(new TermFeature(encoder, defineFunction, documentFeature, term));
 		}
 
 		return result;
