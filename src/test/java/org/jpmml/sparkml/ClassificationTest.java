@@ -18,7 +18,6 @@
  */
 package org.jpmml.sparkml;
 
-import org.jpmml.evaluator.Batch;
 import org.junit.Test;
 
 public class ClassificationTest extends ConverterTest {
@@ -69,11 +68,8 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
-	public void evaluateLogisticRegressionSentiment() throws Exception {
-
-		try(Batch batch = createBatch("LogisticRegression", "Sentiment")){
-			evaluate(batch, null, 1e-10, 1e-7);
-		}
+	public void evaluateGLMSentiment() throws Exception {
+		evaluate("GLM", "Sentiment");
 	}
 
 	@Test

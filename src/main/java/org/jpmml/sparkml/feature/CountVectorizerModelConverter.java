@@ -74,10 +74,28 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 		Set<DocumentFeature.StopWordSet> stopWordSets = documentFeature.getStopWordSets();
 		for(DocumentFeature.StopWordSet stopWordSet : stopWordSets){
+
+			if(stopWordSet.isEmpty()){
+				continue;
+			}
+
 			DocumentBuilder documentBuilder = DOMUtil.createDocumentBuilder();
 
+			String tokenRE;
+
+			switch(documentFeature.getWordSeparatorRE()){
+				case "\\s+":
+					tokenRE = "(^|\\s+)\\p{Punct}*(" + JOINER.join(stopWordSet) + ")\\p{Punct}*(\\s+|$)";
+					break;
+				case "\\W+":
+					tokenRE = "(\\W+)(" + JOINER.join(stopWordSet) + ")(\\W+)";
+					break;
+				default:
+					throw new IllegalArgumentException();
+			}
+
 			InlineTable inlineTable = new InlineTable()
-				.addRows(DOMUtil.createRow(documentBuilder, Arrays.asList("string", "stem", "regex"), Arrays.asList("(^|\\s+)\\p{Punct}*(" + JOINER.join(stopWordSet) + ")\\p{Punct}*(\\s+|$)", " ", "true")));
+				.addRows(DOMUtil.createRow(documentBuilder, Arrays.asList("string", "stem", "regex"), Arrays.asList(tokenRE, " ", "true")));
 
 			TextIndexNormalization textIndexNormalization = new TextIndexNormalization()
 				.setCaseSensitive(stopWordSet.isCaseSensitive())
