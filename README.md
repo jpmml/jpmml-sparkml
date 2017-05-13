@@ -59,13 +59,13 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](http://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **1.1.7** (24 April, 2017).
+The current version is **1.1.8** (14 May, 2017).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>1.1.7</version>
+	<version>1.1.8</version>
 </dependency>
 ```
 
@@ -75,7 +75,7 @@ Compatibility matrix:
 |-----------------------|----------------------|--------------|
 | 1.0.0 through 1.0.9 | 1.5.X and 1.6.X | 4.2 |
 | 1.1.0 | 2.0.X | 4.2 |
-| 1.1.1 through 1.1.7 | 2.0.X | 4.3 |
+| 1.1.1 through 1.1.8 | 2.0.X | 4.3 |
 
 JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
 
@@ -134,8 +134,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-1.1-SNAPSHOT.jar` - Library JAR file.
-* `target/converter-executable-1.1-SNAPSHOT.jar` - Example application JAR file.
+* `target/jpmml-sparkml-1.2-SNAPSHOT.jar` - Library JAR file.
+* `target/converter-executable-1.2-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -176,12 +176,12 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/ser/Iris.ser` and `src/test/resources/ser/DecisionTreeIris.ser`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.1-SNAPSHOT.jar --ser-schema-input src/test/resources/ser/Iris.ser --ser-pipeline-input src/test/resources/ser/DecisionTreeIris.ser --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.2-SNAPSHOT.jar --ser-schema-input src/test/resources/ser/Iris.ser --ser-pipeline-input src/test/resources/ser/DecisionTreeIris.ser --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.1-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.2-SNAPSHOT.jar --help
 ```
 
 # License #
