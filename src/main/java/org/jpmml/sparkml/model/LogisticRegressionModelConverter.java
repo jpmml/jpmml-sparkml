@@ -18,11 +18,22 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.spark.ml.classification.LogisticRegressionModel;
+import org.apache.spark.ml.linalg.Matrix;
+import org.apache.spark.ml.linalg.Vector;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.regression.RegressionTable;
+import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.Feature;
+import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.MatrixUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> {
@@ -35,6 +46,41 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 	public RegressionModel encodeModel(Schema schema){
 		LogisticRegressionModel model = getTransformer();
 
-		return RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), RegressionModel.NormalizationMethod.SOFTMAX, true, schema);
+		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+
+		List<Feature> features = schema.getFeatures();
+
+		int numClasses = model.numClasses();
+		if(numClasses != categoricalLabel.size()){
+			throw new IllegalArgumentException();
+		} // End if
+
+		if(numClasses == 2){
+			return RegressionModelUtil.createBinaryLogisticClassification(features, model.intercept(), VectorUtil.toList(model.coefficients()), RegressionModel.NormalizationMethod.SOFTMAX, true, schema);
+		} else
+
+		if(numClasses >= 3){
+			Matrix coefficientMatrix = model.coefficientMatrix();
+			Vector interceptVector = model.interceptVector();
+
+			List<RegressionTable> regressionTables = new ArrayList<>();
+
+			for(int i = 0; i < categoricalLabel.size(); i++){
+				RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, interceptVector.apply(i), MatrixUtil.getRow(coefficientMatrix, i))
+					.setTargetCategory(categoricalLabel.getValue(i));
+
+				regressionTables.add(regressionTable);
+			}
+
+			RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema), regressionTables)
+				.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX)
+				.setOutput(ModelUtil.createProbabilityOutput(categoricalLabel));
+
+			return regressionModel;
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 }

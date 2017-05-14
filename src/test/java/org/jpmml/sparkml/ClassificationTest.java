@@ -58,6 +58,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateLogisticRegressionIris() throws Exception {
+		evaluate("LogisticRegression", "Iris");
+	}
+
+	@Test
 	public void evaluateNeuralNetworkIris() throws Exception {
 		evaluate("NeuralNetwork", "Iris");
 	}
