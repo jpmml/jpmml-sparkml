@@ -51,7 +51,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark version 1.5.X, 1.6.X or 2.0.X.
+* Apache Spark version 1.5.X, 1.6.X, 2.0.X or 2.1.X.
 
 # Installation #
 

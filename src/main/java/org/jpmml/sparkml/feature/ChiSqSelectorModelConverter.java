@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.spark.ml.feature.ChiSqSelectorModel;
@@ -35,6 +36,10 @@ public class ChiSqSelectorModelConverter extends FeatureConverter<ChiSqSelectorM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		ChiSqSelectorModel transformer = getTransformer();
 
-		return encoder.getFeatures(transformer.getFeaturesCol(), transformer.selectedFeatures());
+		int[] indices = (int[])(transformer.selectedFeatures()).clone();
+
+		Arrays.sort(indices);
+
+		return encoder.getFeatures(transformer.getFeaturesCol(), indices);
 	}
 }
