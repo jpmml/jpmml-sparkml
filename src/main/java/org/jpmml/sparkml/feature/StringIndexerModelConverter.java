@@ -36,7 +36,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		StringIndexerModel transformer = getTransformer();
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

@@ -18,10 +18,13 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.List;
+
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.MiningFunction;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 
 abstract
@@ -36,4 +39,25 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 	abstract
 	public org.dmg.pmml.Model encodeModel(Schema schema);
+
+	/**
+	 * @see HasPredictionCol
+	 */
+	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
+		throw new UnsupportedOperationException();
+	}
+
+	public void registerFeatures(SparkMLEncoder encoder){
+		Model<?> model = getTransformer();
+
+		if(model instanceof HasPredictionCol){
+			HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
+
+			String predictionCol = hasPredictionCol.getPredictionCol();
+
+			List<Feature> predictionFeatures = encodePredictionFeatures(encoder);
+
+			encoder.putFeatures(predictionCol, predictionFeatures);
+		}
+	}
 }

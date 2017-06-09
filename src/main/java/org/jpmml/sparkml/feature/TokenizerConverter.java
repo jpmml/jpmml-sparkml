@@ -29,9 +29,9 @@ import org.dmg.pmml.OpType;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.DocumentFeature;
 
 public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 
@@ -40,7 +40,7 @@ public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		Tokenizer transformer = getTransformer();
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

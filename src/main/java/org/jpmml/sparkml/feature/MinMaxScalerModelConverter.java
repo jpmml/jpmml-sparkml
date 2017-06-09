@@ -41,7 +41,7 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		MinMaxScalerModel transformer = getTransformer();
 
 		double rescaleFactor = (transformer.getMax() - transformer.getMin());

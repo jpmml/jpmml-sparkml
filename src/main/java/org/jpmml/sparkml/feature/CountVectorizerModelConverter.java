@@ -52,7 +52,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		CountVectorizerModel transformer = getTransformer();
 
 		DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(transformer.getInputCol());

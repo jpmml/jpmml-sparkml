@@ -35,7 +35,7 @@ public class IDFModelConverter extends FeatureConverter<IDFModel> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		IDFModel transformer = getTransformer();
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());

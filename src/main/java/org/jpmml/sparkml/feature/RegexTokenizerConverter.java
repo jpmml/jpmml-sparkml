@@ -40,7 +40,7 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		RegexTokenizer transformer = getTransformer();
 
 		if(!transformer.getGaps()){

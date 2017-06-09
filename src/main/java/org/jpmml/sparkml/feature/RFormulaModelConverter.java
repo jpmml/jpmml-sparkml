@@ -36,7 +36,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public void registerFeatures(SparkMLEncoder encoder){
 		RFormulaModel transformer = getTransformer();
 
 		ResolvedRFormula resolvedFormula = transformer.resolvedFormula();
@@ -56,9 +56,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 		for(Transformer stage : stages){
 			FeatureConverter<?> featureConverter = ConverterUtil.createFeatureConverter(stage);
 
-			encoder.append(featureConverter);
+			featureConverter.registerFeatures(encoder);
 		}
-
-		return null;
 	}
 }

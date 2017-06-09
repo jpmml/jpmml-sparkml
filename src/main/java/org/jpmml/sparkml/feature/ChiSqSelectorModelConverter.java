@@ -32,7 +32,7 @@ public class ChiSqSelectorModelConverter extends FeatureConverter<ChiSqSelectorM
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		ChiSqSelectorModel transformer = getTransformer();
 
 		return encoder.getFeatures(transformer.getFeaturesCol(), transformer.selectedFeatures());

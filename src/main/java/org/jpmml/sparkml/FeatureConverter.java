@@ -18,15 +18,39 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.List;
+
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.dmg.pmml.FieldName;
+import org.jpmml.converter.Feature;
 
 abstract
 public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {
 
 	public FeatureConverter(T transformer){
 		super(transformer);
+	}
+
+	/**
+	 * @see HasOutputCol
+	 */
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+		throw new UnsupportedOperationException();
+	}
+
+	public void registerFeatures(SparkMLEncoder encoder){
+		Transformer transformer = getTransformer();
+
+		if(transformer instanceof HasOutputCol){
+			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+
+			String outputCol = hasOutputCol.getOutputCol();
+
+			List<Feature> outputFeatures = encodeOutputFeatures(encoder);
+
+			encoder.putFeatures(outputCol, outputFeatures);
+		}
 	}
 
 	static

@@ -32,7 +32,7 @@ public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		VectorSlicer transformer = getTransformer();
 
 		String[] names = transformer.getNames();

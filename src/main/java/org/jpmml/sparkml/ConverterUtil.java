@@ -74,7 +74,7 @@ public class ConverterUtil {
 			if(converter instanceof FeatureConverter){
 				FeatureConverter<?> featureConverter = (FeatureConverter<?>)converter;
 
-				encoder.append(featureConverter);
+				featureConverter.registerFeatures(encoder);
 			} else
 
 			if(converter instanceof ModelConverter){
@@ -84,11 +84,13 @@ public class ConverterUtil {
 
 				org.dmg.pmml.Model model = modelConverter.encodeModel(modelSchema);
 
-				encoder.append(modelConverter);
+				modelConverter.registerFeatures(encoder);
 
 				HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
 
-				models.put(hasPredictionCol.getPredictionCol(), model);
+				String predictionCol = hasPredictionCol.getPredictionCol();
+
+				models.put(predictionCol, model);
 			} else
 
 			{

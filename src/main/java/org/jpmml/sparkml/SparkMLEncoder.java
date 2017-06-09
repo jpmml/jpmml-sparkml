@@ -28,12 +28,9 @@ import java.util.Map;
 import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PredictionModel;
-import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
-import org.apache.spark.ml.param.shared.HasOutputCol;
-import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DoubleType;
 import org.apache.spark.sql.types.IntegralType;
@@ -65,34 +62,6 @@ public class SparkMLEncoder extends ModelEncoder {
 
 	public SparkMLEncoder(StructType schema){
 		this.schema = schema;
-	}
-
-	public void append(FeatureConverter<?> featureConverter){
-		Transformer transformer = featureConverter.getTransformer();
-
-		List<Feature> features = featureConverter.encodeFeatures(this);
-
-		if(transformer instanceof HasOutputCol){
-			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
-
-			String outputCol = hasOutputCol.getOutputCol();
-
-			putFeatures(outputCol, features);
-		}
-	}
-
-	public void append(ModelConverter<?> modelConverter){
-		Model<?> model = modelConverter.getTransformer();
-
-		List<Feature> features = modelConverter.encodeFeatures(this);
-
-		if(model instanceof HasPredictionCol){
-			HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
-
-			String predictionCol = hasPredictionCol.getPredictionCol();
-
-			putFeatures(predictionCol, features);
-		}
 	}
 
 	public Schema createSchema(ModelConverter<?> modelConverter){

@@ -41,7 +41,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		StandardScalerModel transformer = getTransformer();
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());

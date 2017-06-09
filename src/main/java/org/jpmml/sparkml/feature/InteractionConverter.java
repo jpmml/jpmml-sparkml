@@ -37,7 +37,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		Interaction transformer = getTransformer();
 
 		String name = "";

@@ -50,7 +50,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
 		VectorIndexerModel transformer = getTransformer();
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());

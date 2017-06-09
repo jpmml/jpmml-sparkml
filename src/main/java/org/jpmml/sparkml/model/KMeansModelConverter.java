@@ -52,7 +52,7 @@ public class KMeansModelConverter extends ModelConverter<KMeansModel> {
 	}
 
 	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
 		KMeansModel model = getTransformer();
 
 		// XXX
