@@ -19,18 +19,12 @@
 package org.jpmml.sparkml;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Iterables;
-import org.apache.spark.ml.Model;
-import org.apache.spark.ml.PredictionModel;
-import org.apache.spark.ml.clustering.KMeansModel;
-import org.apache.spark.ml.param.shared.HasFeaturesCol;
-import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DoubleType;
 import org.apache.spark.sql.types.IntegralType;
@@ -40,17 +34,11 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.BooleanFeature;
-import org.jpmml.converter.CategoricalFeature;
-import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelEncoder;
-import org.jpmml.converter.Schema;
 import org.jpmml.converter.WildcardFeature;
 
 public class SparkMLEncoder extends ModelEncoder {
@@ -62,85 +50,6 @@ public class SparkMLEncoder extends ModelEncoder {
 
 	public SparkMLEncoder(StructType schema){
 		this.schema = schema;
-	}
-
-	public Schema createSchema(ModelConverter<?> modelConverter){
-		Label label;
-
-		Model<?> model = modelConverter.getTransformer();
-		if(model instanceof PredictionModel){
-			HasLabelCol hasLabelCol = (HasLabelCol)model;
-
-			Feature feature = getOnlyFeature(hasLabelCol.getLabelCol());
-
-			MiningFunction miningFunction = modelConverter.getMiningFunction();
-			switch(miningFunction){
-				case CLASSIFICATION:
-					{
-						DataField dataField;
-
-						if(feature instanceof CategoricalFeature){
-							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
-
-							dataField = getDataField(categoricalFeature.getName());
-						} else
-
-						if(feature instanceof ContinuousFeature){
-							ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-							// XXX
-							dataField = toCategorical(continuousFeature.getName(), Arrays.asList("0", "1"));
-
-							CategoricalFeature categoricalFeature = new CategoricalFeature(this, dataField);
-
-							this.columnFeatures.put(hasLabelCol.getLabelCol(), Collections.<Feature>singletonList(categoricalFeature));
-						} else
-
-						{
-							throw new IllegalArgumentException();
-						}
-
-						label = new CategoricalLabel(dataField);
-					}
-					break;
-				case REGRESSION:
-					{
-						DataField dataField = toContinuous(feature.getName());
-
-						dataField.setDataType(DataType.DOUBLE);
-
-						label = new ContinuousLabel(dataField);
-					}
-					break;
-				default:
-					throw new IllegalArgumentException();
-			}
-		} else
-
-		if(model instanceof KMeansModel){
-			label = null;
-		} else
-
-		{
-			throw new IllegalArgumentException();
-		}
-
-		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
-
-		List<Feature> features = getFeatures(hasFeaturesCol.getFeaturesCol());
-
-		if(model instanceof PredictionModel){
-			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
-
-			int numFeatures = predictionModel.numFeatures();
-			if(numFeatures != -1 && features.size() != numFeatures){
-				throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
-			}
-		}
-
-		Schema result = new Schema(label, features);
-
-		return result;
 	}
 
 	public boolean hasFeatures(String column){

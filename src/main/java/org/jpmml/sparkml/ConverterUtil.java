@@ -80,9 +80,7 @@ public class ConverterUtil {
 			if(converter instanceof ModelConverter){
 				ModelConverter<?> modelConverter = (ModelConverter<?>)converter;
 
-				Schema modelSchema = encoder.createSchema(modelConverter);
-
-				org.dmg.pmml.Model model = modelConverter.encodeModel(modelSchema);
+				org.dmg.pmml.Model model = modelConverter.encodeModel(encoder);
 
 				modelConverter.registerFeatures(encoder);
 

@@ -18,20 +18,31 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.Model;
+import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
+import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
+import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.Label;
 import org.jpmml.converter.Schema;
 
 abstract
 public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends TransformerConverter<T> {
 
-	public ModelConverter(T transformer){
-		super(transformer);
+	public ModelConverter(T model){
+		super(model);
 	}
 
 	abstract
@@ -45,6 +56,88 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 	 */
 	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
 		throw new UnsupportedOperationException();
+	}
+
+	public Schema encodeSchema(SparkMLEncoder encoder){
+		T model = getTransformer();
+
+		Label label = null;
+
+		if(model instanceof HasLabelCol){
+			HasLabelCol hasLabelCol = (HasLabelCol)model;
+
+			String labelCol = hasLabelCol.getLabelCol();
+
+			Feature feature = encoder.getOnlyFeature(labelCol);
+
+			MiningFunction miningFunction = getMiningFunction();
+			switch(miningFunction){
+				case CLASSIFICATION:
+					{
+						DataField dataField;
+
+						if(feature instanceof CategoricalFeature){
+							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+
+							dataField = encoder.getDataField(categoricalFeature.getName());
+						} else
+
+						if(feature instanceof ContinuousFeature){
+							ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+							// XXX
+							dataField = encoder.toCategorical(continuousFeature.getName(), Arrays.asList("0", "1"));
+
+							CategoricalFeature categoricalFeature = new CategoricalFeature(encoder, dataField);
+
+							encoder.putFeatures(labelCol, Collections.<Feature>singletonList(categoricalFeature));
+						} else
+
+						{
+							throw new IllegalArgumentException();
+						}
+
+						label = new CategoricalLabel(dataField);
+					}
+					break;
+				case REGRESSION:
+					{
+						DataField dataField = encoder.toContinuous(feature.getName());
+
+						dataField.setDataType(DataType.DOUBLE);
+
+						label = new ContinuousLabel(dataField);
+					}
+					break;
+				default:
+					throw new IllegalArgumentException();
+			}
+		}
+
+		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
+
+		String featuresCol = hasFeaturesCol.getFeaturesCol();
+
+		List<Feature> features = encoder.getFeatures(featuresCol);
+
+		if(model instanceof PredictionModel){
+			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
+
+			int numFeatures = predictionModel.numFeatures();
+			if(numFeatures != -1 && features.size() != numFeatures){
+				throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
+			}
+		}
+
+		Schema result = new Schema(label, features);
+
+		return result;
+	}
+
+	public org.dmg.pmml.Model encodeModel(SparkMLEncoder encoder){
+		Schema schema = encodeSchema(encoder);
+
+		return encodeModel(schema);
 	}
 
 	public void registerFeatures(SparkMLEncoder encoder){

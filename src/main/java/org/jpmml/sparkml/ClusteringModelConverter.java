@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2017 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -21,37 +21,26 @@ package org.jpmml.sparkml;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.spark.ml.PredictionModel;
-import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
-import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.DataField;
-import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.OpType;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 
 abstract
-public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
 
-	public RegressionModelConverter(T model){
+	public ClusteringModelConverter(T model){
 		super(model);
 	}
 
 	@Override
 	public MiningFunction getMiningFunction(){
-		return MiningFunction.REGRESSION;
+		return MiningFunction.CLUSTERING;
 	}
 
 	@Override
 	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
-		T model = getTransformer();
-
-		DataField dataField = encoder.createDataField(FieldName.create(model.getPredictionCol()), OpType.CONTINUOUS, DataType.DOUBLE);
-
-		return Collections.<Feature>singletonList(new ContinuousFeature(encoder, dataField));
+		return Collections.emptyList();
 	}
 }

@@ -36,27 +36,13 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.clustering.ClusteringModelUtil;
-import org.jpmml.sparkml.ModelConverter;
-import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.ClusteringModelConverter;
 import org.jpmml.sparkml.VectorUtil;
 
-public class KMeansModelConverter extends ModelConverter<KMeansModel> {
+public class KMeansModelConverter extends ClusteringModelConverter<KMeansModel> {
 
 	public KMeansModelConverter(KMeansModel model){
 		super(model);
-	}
-
-	@Override
-	public MiningFunction getMiningFunction(){
-		return MiningFunction.CLUSTERING;
-	}
-
-	@Override
-	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
-		KMeansModel model = getTransformer();
-
-		// XXX
-		return Collections.emptyList();
 	}
 
 	@Override

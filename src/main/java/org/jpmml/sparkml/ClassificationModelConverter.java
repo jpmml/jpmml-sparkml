@@ -21,8 +21,10 @@ package org.jpmml.sparkml;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.spark.ml.Model;
+import org.apache.spark.ml.PredictionModel;
+import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
+import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
@@ -33,10 +35,10 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.WildcardFeature;
 
 abstract
-public class ClassificationModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
 
-	public ClassificationModelConverter(T transformer){
-		super(transformer);
+	public ClassificationModelConverter(T model){
+		super(model);
 	}
 
 	@Override
