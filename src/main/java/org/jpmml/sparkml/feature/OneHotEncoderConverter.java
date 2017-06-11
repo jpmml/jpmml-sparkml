@@ -37,7 +37,7 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoder transformer = getTransformer();
 
 		CategoricalFeature feature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());

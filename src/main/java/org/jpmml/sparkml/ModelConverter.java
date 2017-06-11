@@ -30,6 +30,7 @@ import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.Output;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
@@ -50,13 +51,6 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 	abstract
 	public org.dmg.pmml.Model encodeModel(Schema schema);
-
-	/**
-	 * @see HasPredictionCol
-	 */
-	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
-		throw new UnsupportedOperationException();
-	}
 
 	public Schema encodeSchema(SparkMLEncoder encoder){
 		T model = getTransformer();
@@ -134,23 +128,20 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		return result;
 	}
 
-	public org.dmg.pmml.Model encodeModel(SparkMLEncoder encoder){
-		Schema schema = encodeSchema(encoder);
-
-		return encodeModel(schema);
+	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+		return null;
 	}
 
-	public void registerFeatures(SparkMLEncoder encoder){
-		Model<?> model = getTransformer();
+	public org.dmg.pmml.Model registerModel(SparkMLEncoder encoder){
+		Schema schema = encodeSchema(encoder);
 
-		if(model instanceof HasPredictionCol){
-			HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
+		Label label = schema.getLabel();
 
-			String predictionCol = hasPredictionCol.getPredictionCol();
+		Output output = encodeOutput(label, encoder);
 
-			List<Feature> predictionFeatures = encodePredictionFeatures(encoder);
+		org.dmg.pmml.Model model = encodeModel(schema)
+			.setOutput(output);
 
-			encoder.putFeatures(predictionCol, predictionFeatures);
-		}
+		return model;
 	}
 }

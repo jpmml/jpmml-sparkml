@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Entity;
@@ -30,6 +31,8 @@ import org.dmg.pmml.Expression;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.NormDiscrete;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
 import org.dmg.pmml.neural_network.Connection;
 import org.dmg.pmml.neural_network.NeuralInput;
 import org.dmg.pmml.neural_network.NeuralInputs;
@@ -43,14 +46,35 @@ import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MultilayerPerceptronClassificationModelConverter extends ClassificationModelConverter<MultilayerPerceptronClassificationModel> {
 
 	public MultilayerPerceptronClassificationModelConverter(MultilayerPerceptronClassificationModel model){
 		super(model);
+	}
+
+	@Override
+	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+		MultilayerPerceptronClassificationModel model = getTransformer();
+
+		Output output = super.encodeOutput(label, encoder);
+
+		if(!(model instanceof HasProbabilityCol)){
+			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
+
+			for(int i = 0; i < categoricalLabel.size(); i++){
+				OutputField probabilityField = ModelUtil.createProbabilityField(categoricalLabel.getValue(i));
+
+				output.addOutputFields(probabilityField);
+			}
+		}
+
+		return output;
 	}
 
 	@Override
@@ -175,8 +199,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 		}
 
 		NeuralNetwork neuralNetwork = new NeuralNetwork(MiningFunction.CLASSIFICATION, NeuralNetwork.ActivationFunction.LOGISTIC, ModelUtil.createMiningSchema(schema), neuralInputs, neuralLayers)
-			.setNeuralOutputs(neuralOutputs)
-			.setOutput(ModelUtil.createProbabilityOutput(schema));
+			.setNeuralOutputs(neuralOutputs);
 
 		return neuralNetwork;
 	}

@@ -114,7 +114,23 @@ public class SparkMLEncoder extends ModelEncoder {
 	}
 
 	public void putFeatures(String column, List<Feature> features){
-		checkColumn(column);
+		List<Feature> existingFeatures = this.columnFeatures.get(column);
+
+		if(existingFeatures != null && existingFeatures.size() > 0){
+
+			if(features.size() != existingFeatures.size()){
+				throw new IllegalArgumentException();
+			}
+
+			for(int i = 0; i < features.size(); i++){
+				Feature feature = features.get(i);
+				Feature existingFeature = existingFeatures.get(i);
+
+				if(!(feature.getName()).equals(existingFeature.getName())){
+					throw new IllegalArgumentException();
+				}
+			}
+		}
 
 		this.columnFeatures.put(column, features);
 	}
@@ -151,18 +167,6 @@ public class SparkMLEncoder extends ModelEncoder {
 		DataField dataField = dataFields.remove(name);
 		if(dataField == null){
 			throw new IllegalArgumentException();
-		}
-	}
-
-	private void checkColumn(String column){
-		List<Feature> features = this.columnFeatures.get(column);
-
-		if(features != null && features.size() > 0){
-			Feature feature = Iterables.getOnlyElement(features);
-
-			if(!(feature instanceof WildcardFeature)){
-				throw new IllegalArgumentException(column);
-			}
 		}
 	}
 }

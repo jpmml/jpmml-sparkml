@@ -19,13 +19,20 @@
 package org.jpmml.sparkml;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataType;
+import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.OpType;
+import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
+import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.Label;
+import org.jpmml.converter.ModelUtil;
 
 abstract
 public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -40,7 +47,29 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	}
 
 	@Override
-	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
-		return Collections.emptyList();
+	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+		T model = getTransformer();
+
+		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
+
+		String predictionCol = hasPredictionCol.getPredictionCol();
+
+		final
+		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), DataType.STRING, OpType.CATEGORICAL);
+
+		Output output = new Output()
+			.addOutputFields(predictedField);
+
+		Feature feature = new Feature(encoder, predictedField.getName(), predictedField.getDataType()){
+
+			@Override
+			public ContinuousFeature toContinuousFeature(){
+				throw new UnsupportedOperationException();
+			}
+		};
+
+		encoder.putFeatures(predictionCol, Collections.singletonList(feature));
+
+		return output;
 	}
 }

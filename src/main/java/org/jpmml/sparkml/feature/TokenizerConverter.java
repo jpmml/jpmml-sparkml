@@ -40,7 +40,7 @@ public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Tokenizer transformer = getTransformer();
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

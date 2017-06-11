@@ -33,8 +33,6 @@ public class DecisionTreeRegressionModelConverter extends RegressionModelConvert
 	public TreeModel encodeModel(Schema schema){
 		DecisionTreeRegressionModel model = getTransformer();
 
-		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema);
-
-		return treeModel;
+		return TreeModelUtil.encodeDecisionTree(model, schema);
 	}
 }

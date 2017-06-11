@@ -44,7 +44,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 		String targetCol = resolvedFormula.label();
 
 		String labelCol = transformer.getLabelCol();
-		if(!(targetCol).equals(labelCol) && !encoder.hasFeatures(labelCol)){
+		if(!(targetCol).equals(labelCol)){
 			List<Feature> features = encoder.getFeatures(targetCol);
 
 			encoder.putFeatures(labelCol, features);

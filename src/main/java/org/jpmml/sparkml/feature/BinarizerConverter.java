@@ -41,7 +41,7 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Binarizer transformer = getTransformer();
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

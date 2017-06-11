@@ -42,7 +42,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Bucketizer transformer = getTransformer();
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

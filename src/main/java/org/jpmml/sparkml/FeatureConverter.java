@@ -32,10 +32,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 		super(transformer);
 	}
 
-	/**
-	 * @see HasOutputCol
-	 */
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		throw new UnsupportedOperationException();
 	}
 
@@ -47,9 +44,9 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 			String outputCol = hasOutputCol.getOutputCol();
 
-			List<Feature> outputFeatures = encodeOutputFeatures(encoder);
+			List<Feature> features = encodeFeatures(encoder);
 
-			encoder.putFeatures(outputCol, outputFeatures);
+			encoder.putFeatures(outputCol, features);
 		}
 	}
 

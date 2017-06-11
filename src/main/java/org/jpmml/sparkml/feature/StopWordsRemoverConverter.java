@@ -35,7 +35,7 @@ public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StopWordsRemover transformer = getTransformer();
 
 		DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(transformer.getInputCol());

@@ -19,20 +19,21 @@
 package org.jpmml.sparkml;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.DataField;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.Label;
+import org.jpmml.converter.ModelUtil;
 
 abstract
 public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -47,11 +48,20 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 	}
 
 	@Override
-	public List<Feature> encodePredictionFeatures(SparkMLEncoder encoder){
+	public Output encodeOutput(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
-		DataField dataField = encoder.createDataField(FieldName.create(model.getPredictionCol()), OpType.CONTINUOUS, DataType.DOUBLE);
+		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
 
-		return Collections.<Feature>singletonList(new ContinuousFeature(encoder, dataField));
+		String predictionCol = hasPredictionCol.getPredictionCol();
+
+		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), label.getDataType(), OpType.CONTINUOUS);
+
+		Output output = new Output()
+			.addOutputFields(predictedField);
+
+		encoder.putFeatures(predictionCol, Collections.<Feature>singletonList(new ContinuousFeature(encoder, predictedField.getName(), predictedField.getDataType())));
+
+		return output;
 	}
 }

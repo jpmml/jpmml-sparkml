@@ -19,19 +19,16 @@
 package org.jpmml.sparkml.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.CompareFunction;
 import org.dmg.pmml.ComparisonMeasure;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.SquaredEuclidean;
 import org.dmg.pmml.clustering.Cluster;
 import org.dmg.pmml.clustering.ClusteringModel;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
@@ -49,8 +46,6 @@ public class KMeansModelConverter extends ClusteringModelConverter<KMeansModel> 
 	public ClusteringModel encodeModel(Schema schema){
 		KMeansModel model = getTransformer();
 
-		List<Feature> features = schema.getFeatures();
-
 		List<Cluster> clusters = new ArrayList<>();
 
 		Vector[] clusterCenters = model.clusterCenters();
@@ -66,9 +61,6 @@ public class KMeansModelConverter extends ClusteringModelConverter<KMeansModel> 
 			.setCompareFunction(CompareFunction.ABS_DIFF)
 			.setMeasure(new SquaredEuclidean());
 
-		ClusteringModel clusteringModel = new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(schema), comparisonMeasure, ClusteringModelUtil.createClusteringFields(features), clusters)
-			.setOutput(ClusteringModelUtil.createOutput(FieldName.create("cluster"), Collections.<Cluster>emptyList()));
-
-		return clusteringModel;
+		return new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(schema), comparisonMeasure, ClusteringModelUtil.createClusteringFields(schema.getFeatures()), clusters);
 	}
 }

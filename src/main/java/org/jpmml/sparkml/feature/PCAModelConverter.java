@@ -42,7 +42,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		PCAModel transformer = getTransformer();
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());

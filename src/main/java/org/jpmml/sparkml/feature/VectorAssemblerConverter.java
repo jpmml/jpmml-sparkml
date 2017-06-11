@@ -33,7 +33,7 @@ public class VectorAssemblerConverter extends FeatureConverter<VectorAssembler> 
 	}
 
 	@Override
-	public List<Feature> encodeOutputFeatures(SparkMLEncoder encoder){
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		VectorAssembler transformer = getTransformer();
 
 		List<Feature> result = new ArrayList<>();

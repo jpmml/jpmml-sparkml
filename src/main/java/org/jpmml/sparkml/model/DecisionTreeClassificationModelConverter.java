@@ -20,7 +20,6 @@ package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.dmg.pmml.tree.TreeModel;
-import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
@@ -34,9 +33,6 @@ public class DecisionTreeClassificationModelConverter extends ClassificationMode
 	public TreeModel encodeModel(Schema schema){
 		DecisionTreeClassificationModel model = getTransformer();
 
-		TreeModel treeModel = TreeModelUtil.encodeDecisionTree(model, schema)
-			.setOutput(ModelUtil.createProbabilityOutput(schema));
-
-		return treeModel;
+		return TreeModelUtil.encodeDecisionTree(model, schema);
 	}
 }

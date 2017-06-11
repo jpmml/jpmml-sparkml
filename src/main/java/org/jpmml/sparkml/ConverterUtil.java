@@ -25,7 +25,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,16 +39,10 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.sql.types.StructType;
-import org.dmg.pmml.DataField;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
-import org.dmg.pmml.Output;
-import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
-import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
@@ -65,7 +58,7 @@ public class ConverterUtil {
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
 		SparkMLEncoder encoder = new SparkMLEncoder(schema);
 
-		Map<String, org.dmg.pmml.Model> models = new LinkedHashMap<>();
+		List<org.dmg.pmml.Model> models = new ArrayList<>();
 
 		List<Transformer> transformers = getTransformers(pipelineModel);
 		for(Transformer transformer : transformers){
@@ -80,15 +73,9 @@ public class ConverterUtil {
 			if(converter instanceof ModelConverter){
 				ModelConverter<?> modelConverter = (ModelConverter<?>)converter;
 
-				org.dmg.pmml.Model model = modelConverter.encodeModel(encoder);
+				org.dmg.pmml.Model model = modelConverter.registerModel(encoder);
 
-				modelConverter.registerFeatures(encoder);
-
-				HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
-
-				String predictionCol = hasPredictionCol.getPredictionCol();
-
-				models.put(predictionCol, model);
+				models.add(model);
 			} else
 
 			{
@@ -99,26 +86,19 @@ public class ConverterUtil {
 		org.dmg.pmml.Model rootModel;
 
 		if(models.size() == 1){
-			rootModel = Iterables.getOnlyElement(models.values());
+			rootModel = Iterables.getOnlyElement(models);
 		} else
 
 		if(models.size() >= 2){
 			List<MiningField> targetMiningFields = new ArrayList<>();
 
-			List<Map.Entry<String, org.dmg.pmml.Model>> entries = new ArrayList<>(models.entrySet());
-			for(Iterator<Map.Entry<String, org.dmg.pmml.Model>> entryIt = entries.iterator(); entryIt.hasNext(); ){
-				Map.Entry<String, org.dmg.pmml.Model> entry = entryIt.next();
-
-				String predictionCol = entry.getKey();
-				org.dmg.pmml.Model model = entry.getValue();
-
+			for(org.dmg.pmml.Model model : models){
 				MiningSchema miningSchema = model.getMiningSchema();
 
 				List<MiningField> miningFields = miningSchema.getMiningFields();
-				for(Iterator<MiningField> miningFieldIt = miningFields.iterator(); miningFieldIt.hasNext(); ){
-					MiningField miningField = miningFieldIt.next();
-
+				for(MiningField miningField : miningFields){
 					MiningField.UsageType usageType = miningField.getUsageType();
+
 					switch(usageType){
 						case PREDICTED:
 						case TARGET:
@@ -128,39 +108,11 @@ public class ConverterUtil {
 							break;
 					}
 				}
-
-				if(!entryIt.hasNext()){
-					break;
-				}
-
-				FieldName name = FieldName.create(predictionCol);
-
-				DataField dataField = encoder.getDataField(name);
-				if(dataField == null){
-					throw new IllegalArgumentException();
-				}
-
-				encoder.removeDataField(name);
-
-				Output output = model.getOutput();
-				if(output == null){
-					output = new Output();
-
-					model.setOutput(output);
-				}
-
-				OutputField outputField = new OutputField(name, dataField.getDataType())
-					.setOpType(dataField.getOpType())
-					.setResultFeature(ResultFeature.PREDICTED_VALUE);
-
-				output.addOutputFields(outputField);
 			}
 
 			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
 
-			List<org.dmg.pmml.Model> memberModels = new ArrayList<>(models.values());
-
-			MiningModel miningModel = MiningModelUtil.createModelChain(memberModels, new Schema(null, Collections.<Feature>emptyList()))
+			MiningModel miningModel = MiningModelUtil.createModelChain(models, new Schema(null, Collections.<Feature>emptyList()))
 				.setMiningSchema(miningSchema);
 
 			rootModel = miningModel;
