@@ -18,12 +18,13 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PredictionModel;
+import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
@@ -79,8 +80,21 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 						if(feature instanceof ContinuousFeature){
 							ContinuousFeature continuousFeature = (ContinuousFeature)feature;
 
-							// XXX
-							dataField = encoder.toCategorical(continuousFeature.getName(), Arrays.asList("0", "1"));
+							int numClasses = 2;
+
+							if(model instanceof ClassificationModel){
+								ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
+
+								numClasses = classificationModel.numClasses();
+							}
+
+							List<String> categories = new ArrayList<>();
+
+							for(int i = 0; i < numClasses; i++){
+								categories.add(String.valueOf(i));
+							}
+
+							dataField = encoder.toCategorical(continuousFeature.getName(), categories);
 
 							CategoricalFeature categoricalFeature = new CategoricalFeature(encoder, dataField);
 
@@ -88,7 +102,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 						} else
 
 						{
-							throw new IllegalArgumentException();
+							throw new IllegalArgumentException("Expected a categorical or categorical-like continuous feature, got " + feature);
 						}
 
 						label = new CategoricalLabel(dataField);
@@ -104,7 +118,18 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 					}
 					break;
 				default:
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Mining function " + miningFunction + " is not supported");
+			}
+		}
+
+		if(model instanceof ClassificationModel){
+			ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
+
+			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
+
+			int numClasses = classificationModel.numClasses();
+			if(numClasses != categoricalLabel.size()){
+				throw new IllegalArgumentException("Expected " + numClasses + " target categories, got " + categoricalLabel.size() + " target categories");
 			}
 		}
 

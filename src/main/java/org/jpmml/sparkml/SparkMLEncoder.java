@@ -88,7 +88,7 @@ public class SparkMLEncoder extends ModelEncoder {
 					feature = new BooleanFeature(this, dataField);
 					break;
 				default:
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 			}
 
 			return Collections.singletonList(feature);
@@ -119,12 +119,12 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(existingFeatures != null && existingFeatures.size() > 0){
 
 			if(features.size() != existingFeatures.size()){
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Expected " + existingFeatures.size() + " features, got " + features.size() + " features");
 			}
 
-			for(int i = 0; i < features.size(); i++){
-				Feature feature = features.get(i);
+			for(int i = 0; i < existingFeatures.size(); i++){
 				Feature existingFeature = existingFeatures.get(i);
+				Feature feature = features.get(i);
 
 				if(!(feature.getName()).equals(existingFeature.getName())){
 					throw new IllegalArgumentException();
@@ -166,7 +166,7 @@ public class SparkMLEncoder extends ModelEncoder {
 
 		DataField dataField = dataFields.remove(name);
 		if(dataField == null){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(name.getValue());
 		}
 	}
 }

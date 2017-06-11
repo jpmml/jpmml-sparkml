@@ -79,7 +79,7 @@ public class ConverterUtil {
 			} else
 
 			{
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Expected a " + FeatureConverter.class.getName() + " or " + ModelConverter.class.getName() + " instance, got " + converter);
 			}
 		}
 
@@ -89,7 +89,7 @@ public class ConverterUtil {
 			rootModel = Iterables.getOnlyElement(models);
 		} else
 
-		if(models.size() >= 2){
+		if(models.size() > 1){
 			List<MiningField> targetMiningFields = new ArrayList<>();
 
 			for(org.dmg.pmml.Model model : models){
@@ -119,7 +119,7 @@ public class ConverterUtil {
 		} else
 
 		{
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected a pipeline with one or more models, got a pipeline with zero models");
 		}
 
 		PMML pmml = encoder.encodePMML(rootModel);
@@ -179,11 +179,11 @@ public class ConverterUtil {
 	public void putConverterClazz(Class<? extends Transformer> clazz, Class<? extends TransformerConverter<?>> converterClazz){
 
 		if(clazz == null || !(Transformer.class).isAssignableFrom(clazz)){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected " + Transformer.class.getName() + " subclass, got " + (clazz != null ? clazz.getName() : null));
 		} // End if
 
 		if(converterClazz == null || !(TransformerConverter.class).isAssignableFrom(converterClazz)){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected " + TransformerConverter.class.getName() + " subclass, got " + (converterClazz != null ? converterClazz.getName() : null));
 		}
 
 		ConverterUtil.converters.put(clazz, converterClazz);

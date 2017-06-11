@@ -57,7 +57,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 
 		int numFeatures = transformer.numFeatures();
 		if(numFeatures != features.size()){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
 		}
 
 		Map<Integer, Map<Double, Integer>> categoryMaps = transformer.javaCategoryMaps();
