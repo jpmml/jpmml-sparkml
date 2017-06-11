@@ -52,7 +52,7 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 			.addExpressions(PMMLUtil.createApply("lessOrEqual", continuousFeature.ref(), PMMLUtil.createConstant(transformer.getThreshold())))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
-		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.DOUBLE, apply);
 
 		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1")));
 	}
