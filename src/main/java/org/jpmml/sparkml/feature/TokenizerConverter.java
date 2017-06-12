@@ -29,9 +29,9 @@ import org.dmg.pmml.OpType;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.DocumentFeature;
 
 public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 

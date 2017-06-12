@@ -48,20 +48,18 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
-		List<Feature> features = schema.getFeatures();
+		if(categoricalLabel.size() == 2){
+			RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), RegressionModel.NormalizationMethod.SOFTMAX, true, schema)
+				.setOutput(null);
 
-		int numClasses = model.numClasses();
-		if(numClasses != categoricalLabel.size()){
-			throw new IllegalArgumentException();
-		} // End if
-
-		if(numClasses == 2){
-			return RegressionModelUtil.createBinaryLogisticClassification(features, model.intercept(), VectorUtil.toList(model.coefficients()), RegressionModel.NormalizationMethod.SOFTMAX, true, schema);
+			return regressionModel;
 		} else
 
-		if(numClasses >= 3){
+		if(categoricalLabel.size() > 2){
 			Matrix coefficientMatrix = model.coefficientMatrix();
 			Vector interceptVector = model.interceptVector();
+
+			List<Feature> features = schema.getFeatures();
 
 			List<RegressionTable> regressionTables = new ArrayList<>();
 
@@ -73,8 +71,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			}
 
 			RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema), regressionTables)
-				.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX)
-				.setOutput(ModelUtil.createProbabilityOutput(categoricalLabel));
+				.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
 
 			return regressionModel;
 		} else

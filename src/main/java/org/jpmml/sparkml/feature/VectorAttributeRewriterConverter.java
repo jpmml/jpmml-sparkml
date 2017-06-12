@@ -18,21 +18,12 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.List;
-
 import org.apache.spark.ml.feature.VectorAttributeRewriter;
-import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorAttributeRewriterConverter extends FeatureConverter<VectorAttributeRewriter> {
 
 	public VectorAttributeRewriterConverter(VectorAttributeRewriter transformer){
 		super(transformer);
-	}
-
-	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
-		return null;
 	}
 }

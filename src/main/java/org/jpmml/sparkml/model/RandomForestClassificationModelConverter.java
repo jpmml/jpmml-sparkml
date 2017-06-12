@@ -43,8 +43,7 @@ public class RandomForestClassificationModelConverter extends ClassificationMode
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
 
 		MiningModel miningModel = new MiningModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema))
-			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, treeModels))
-			.setOutput(ModelUtil.createProbabilityOutput(schema));
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, treeModels));
 
 		return miningModel;
 	}

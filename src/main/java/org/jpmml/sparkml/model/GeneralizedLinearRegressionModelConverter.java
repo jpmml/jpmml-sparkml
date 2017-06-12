@@ -18,18 +18,18 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.List;
-
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.CategoricalLabel;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
 public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> {
@@ -52,40 +52,54 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	}
 
 	@Override
+	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+		Output output = super.encodeOutput(label, encoder);
+
+		MiningFunction miningFunction = getMiningFunction();
+		switch(miningFunction){
+			case CLASSIFICATION:
+				CategoricalLabel categoricalLabel = (CategoricalLabel)label;
+
+				for(int i = 0; i < categoricalLabel.size(); i++){
+					OutputField probabilityField = ModelUtil.createProbabilityField(categoricalLabel.getValue(i));
+
+					output.addOutputFields(probabilityField);
+				}
+				break;
+			default:
+				break;
+		}
+
+		return output;
+	}
+
+	@Override
 	public GeneralRegressionModel encodeModel(Schema schema){
 		GeneralizedLinearRegressionModel model = getTransformer();
 
-		Label label = schema.getLabel();
-		List<Feature> features = schema.getFeatures();
-
 		String targetCategory = null;
 
-		if(label instanceof CategoricalLabel){
-			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
+		MiningFunction miningFunction = getMiningFunction();
+		switch(miningFunction){
+			case CLASSIFICATION:
+				CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
-			if(categoricalLabel.size() != 2){
-				throw new IllegalArgumentException();
-			}
+				if(categoricalLabel.size() != 2){
+					throw new IllegalArgumentException();
+				}
 
-			targetCategory = categoricalLabel.getValue(1);
+				targetCategory = categoricalLabel.getValue(1);
+				break;
+			default:
+				break;
 		}
-
-		MiningFunction miningFunction = (targetCategory != null ? MiningFunction.CLASSIFICATION : MiningFunction.REGRESSION);
 
 		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
 
-		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
-
-		switch(miningFunction){
-			case CLASSIFICATION:
-				generalRegressionModel.setOutput(ModelUtil.createProbabilityOutput(schema));
-				break;
-			default:
-				break;
-		}
+		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
 
 		return generalRegressionModel;
 	}

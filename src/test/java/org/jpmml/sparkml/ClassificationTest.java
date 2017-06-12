@@ -43,6 +43,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateModelChainAudit() throws Exception {
+		evaluate("ModelChain", "Audit");
+	}
+
+	@Test
 	public void evaluateNeuralNetworkAudit() throws Exception {
 		evaluate("NeuralNetwork", "Audit");
 	}

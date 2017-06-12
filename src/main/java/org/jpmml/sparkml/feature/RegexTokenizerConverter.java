@@ -44,11 +44,11 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 		RegexTokenizer transformer = getTransformer();
 
 		if(!transformer.getGaps()){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected splitter mode, got token matching mode");
 		} // End if
 
 		if(transformer.getMinTokenLength() != 1){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected 1 as minimum token length, got " + transformer.getMinTokenLength() + " as minimum token length");
 		}
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

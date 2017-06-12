@@ -37,7 +37,7 @@ public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 
 		String[] names = transformer.getNames();
 		if(names != null && names.length > 0){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected index mode, got name mode");
 		}
 
 		return encoder.getFeatures(transformer.getInputCol(), transformer.getIndices());

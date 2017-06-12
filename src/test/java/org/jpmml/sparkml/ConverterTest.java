@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.spark.ml.PipelineModel;
@@ -70,6 +71,18 @@ public class ConverterTest extends IntegrationTest {
 
 	@Override
 	public void evaluate(Batch batch, Set<FieldName> ignoredFields) throws Exception {
+
+		if(ignoredFields != null && ignoredFields.size() > 0){
+			ignoredFields = new LinkedHashSet<>(ignoredFields);
+		} else
+
+		{
+			ignoredFields = new LinkedHashSet<>();
+		}
+
+		ignoredFields.add(FieldName.create("prediction"));
+		ignoredFields.add(FieldName.create("pmml(prediction)"));
+
 		super.evaluate(batch, ignoredFields, 1e-12, 1e-12);
 	}
 }

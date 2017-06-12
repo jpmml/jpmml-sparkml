@@ -68,7 +68,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 			discretize.addDiscretizeBins(discretizeBin);
 		}
 
-		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CONTINUOUS, DataType.INTEGER, discretize);
+		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.INTEGER, discretize);
 
 		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, derivedField, categories));
 	}

@@ -18,21 +18,12 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.List;
-
 import org.apache.spark.ml.feature.ColumnPruner;
-import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SparkMLEncoder;
 
 public class ColumnPrunerConverter extends FeatureConverter<ColumnPruner> {
 
 	public ColumnPrunerConverter(ColumnPruner transformer){
 		super(transformer);
-	}
-
-	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
-		return null;
 	}
 }

@@ -78,7 +78,8 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 			String tokenRE;
 
-			switch(documentFeature.getWordSeparatorRE()){
+			String wordSeparatorRE = documentFeature.getWordSeparatorRE();
+			switch(wordSeparatorRE){
 				case "\\s+":
 					tokenRE = "(^|\\s+)\\p{Punct}*(" + JOINER.join(stopWordSet) + ")\\p{Punct}*(\\s+|$)";
 					break;
@@ -86,7 +87,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 					tokenRE = "(\\W+)(" + JOINER.join(stopWordSet) + ")(\\W+)";
 					break;
 				default:
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Expected \"\\s+\" or \"\\W+\" as splitter regex pattern, got \"" + wordSeparatorRE + "\"");
 			}
 
 			InlineTable inlineTable = new InlineTable()

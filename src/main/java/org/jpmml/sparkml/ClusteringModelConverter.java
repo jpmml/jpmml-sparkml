@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2017 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -20,11 +20,10 @@ package org.jpmml.sparkml;
 
 import java.util.Collections;
 
-import org.apache.spark.ml.PredictionModel;
-import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
-import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
@@ -36,15 +35,15 @@ import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 
 abstract
-public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
 
-	public RegressionModelConverter(T model){
+	public ClusteringModelConverter(T model){
 		super(model);
 	}
 
 	@Override
 	public MiningFunction getMiningFunction(){
-		return MiningFunction.REGRESSION;
+		return MiningFunction.CLUSTERING;
 	}
 
 	@Override
@@ -55,12 +54,21 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 		String predictionCol = hasPredictionCol.getPredictionCol();
 
-		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), label.getDataType(), OpType.CONTINUOUS);
+		final
+		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), DataType.STRING, OpType.CATEGORICAL);
 
 		Output output = new Output()
 			.addOutputFields(predictedField);
 
-		encoder.putFeatures(predictionCol, Collections.<Feature>singletonList(new ContinuousFeature(encoder, predictedField.getName(), predictedField.getDataType())));
+		Feature feature = new Feature(encoder, predictedField.getName(), predictedField.getDataType()){
+
+			@Override
+			public ContinuousFeature toContinuousFeature(){
+				throw new UnsupportedOperationException();
+			}
+		};
+
+		encoder.putFeatures(predictionCol, Collections.singletonList(feature));
 
 		return output;
 	}
