@@ -35,7 +35,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 	public RegressionModel encodeModel(Schema schema){
 		LogisticRegressionModel model = getTransformer();
 
-		RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), RegressionModel.NormalizationMethod.SOFTMAX, true, schema)
+		RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
 			.setOutput(null);
 
 		return regressionModel;
