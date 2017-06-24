@@ -25,30 +25,20 @@ import org.apache.spark.ml.classification.MultilayerPerceptronClassificationMode
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Entity;
-import org.dmg.pmml.Expression;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.NormDiscrete;
-import org.dmg.pmml.OpType;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.neural_network.Connection;
-import org.dmg.pmml.neural_network.NeuralInput;
 import org.dmg.pmml.neural_network.NeuralInputs;
 import org.dmg.pmml.neural_network.NeuralLayer;
 import org.dmg.pmml.neural_network.NeuralNetwork;
-import org.dmg.pmml.neural_network.NeuralOutput;
-import org.dmg.pmml.neural_network.NeuralOutputs;
 import org.dmg.pmml.neural_network.Neuron;
-import org.jpmml.converter.BinaryFeature;
-import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalLabel;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.neural_network.NeuralNetworkUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -94,40 +84,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 			throw new IllegalArgumentException();
 		}
 
-		NeuralInputs neuralInputs = new NeuralInputs();
-
-		for(int column = 0; column < features.size(); column++){
-			Feature feature = features.get(column);
-
-			Expression expression;
-
-			if(feature instanceof BinaryFeature){
-				BinaryFeature binaryFeature = (BinaryFeature)feature;
-
-				expression = new NormDiscrete(binaryFeature.getName(), binaryFeature.getValue());
-			} else
-
-			if(feature instanceof BooleanFeature){
-				BooleanFeature booleanFeature = (BooleanFeature)feature;
-
-				expression = new NormDiscrete(booleanFeature.getName(), "true");
-			} else
-
-			{
-				ContinuousFeature continuousFeature = feature.toContinuousFeature();
-
-				expression = continuousFeature.ref();
-			}
-
-			DerivedField derivedField = new DerivedField(OpType.CONTINUOUS, DataType.DOUBLE)
-				.setExpression(expression);
-
-			NeuralInput neuralInput = new NeuralInput()
-				.setId("0/" + String.valueOf(column + 1))
-				.setDerivedField(derivedField);
-
-			neuralInputs.addNeuralInputs(neuralInput);
-		}
+		NeuralInputs neuralInputs = NeuralNetworkUtil.createNeuralInputs(features, DataType.DOUBLE);
 
 		List<? extends Entity> entities = neuralInputs.getNeuralInputs();
 
@@ -135,40 +92,39 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 		int weightPos = 0;
 
-		for(int i = 1; i < layers.length; i++){
-			List<Neuron> neurons = new ArrayList<>();
+		for(int layer = 1; layer < layers.length; layer++){
+			NeuralLayer neuralLayer = new NeuralLayer();
 
 			int rows = entities.size();
-			int columns = layers[i];
+			int columns = layers[layer];
+
+			List<List<Double>> weightMatrix = new ArrayList<>();
 
 			for(int column = 0; column < columns; column++){
-				Neuron neuron = new Neuron()
-					.setId(i + "/" + String.valueOf(column + 1));
+				List<Double> weightVector = new ArrayList<>();
 
 				for(int row = 0; row < rows; row++){
-					Entity entity = entities.get(row);
-
-					Connection connection = new Connection()
-						.setFrom(entity.getId())
-						.setWeight(weights.apply(weightPos + (row * columns) + column));
-
-					neuron.addConnections(connection);
+					weightVector.add(weights.apply(weightPos + (row * columns) + column));
 				}
 
-				neurons.add(neuron);
+				weightMatrix.add(weightVector);
 			}
 
 			weightPos += (rows * columns);
 
-			for(Neuron neuron : neurons){
-				neuron.setBias(weights.apply(weightPos));
+			for(int column = 0; column < columns; column++){
+				List<Double> weightVector = weightMatrix.get(column);
+				Double bias = weights.apply(weightPos);
+
+				Neuron neuron = NeuralNetworkUtil.createNeuron(entities, weightVector, bias)
+					.setId(String.valueOf(layer) + "/" + String.valueOf(column + 1));
+
+				neuralLayer.addNeurons(neuron);
 
 				weightPos++;
 			}
 
-			NeuralLayer neuralLayer = new NeuralLayer(neurons);
-
-			if(i == (layers.length - 1)){
+			if(layer == (layers.length - 1)){
 				neuralLayer
 					.setActivationFunction(NeuralNetwork.ActivationFunction.IDENTITY)
 					.setNormalizationMethod(NeuralNetwork.NormalizationMethod.SOFTMAX);
@@ -176,30 +132,15 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 			neuralLayers.add(neuralLayer);
 
-			entities = neurons;
+			entities = neuralLayer.getNeurons();
 		}
 
 		if(weightPos != weights.size()){
 			throw new IllegalArgumentException();
 		}
 
-		NeuralOutputs neuralOutputs = new NeuralOutputs();
-
-		for(int column = 0; column < categoricalLabel.size(); column++){
-			Entity entity = entities.get(column);
-
-			DerivedField derivedField = new DerivedField(OpType.CATEGORICAL, DataType.STRING)
-				.setExpression(new NormDiscrete(categoricalLabel.getName(), categoricalLabel.getValue(column)));
-
-			NeuralOutput neuralOutput = new NeuralOutput()
-				.setOutputNeuron(entity.getId())
-				.setDerivedField(derivedField);
-
-			neuralOutputs.addNeuralOutputs(neuralOutput);
-		}
-
 		NeuralNetwork neuralNetwork = new NeuralNetwork(MiningFunction.CLASSIFICATION, NeuralNetwork.ActivationFunction.LOGISTIC, ModelUtil.createMiningSchema(schema), neuralInputs, neuralLayers)
-			.setNeuralOutputs(neuralOutputs);
+			.setNeuralOutputs(NeuralNetworkUtil.createClassificationNeuralOutputs(entities, categoricalLabel));
 
 		return neuralNetwork;
 	}
