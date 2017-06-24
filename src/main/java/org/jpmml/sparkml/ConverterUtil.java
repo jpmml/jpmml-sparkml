@@ -23,22 +23,26 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.tuning.CrossValidatorModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
@@ -60,7 +64,7 @@ public class ConverterUtil {
 
 		List<org.dmg.pmml.Model> models = new ArrayList<>();
 
-		List<Transformer> transformers = getTransformers(pipelineModel);
+		Iterable<Transformer> transformers = getTransformers(pipelineModel);
 		for(Transformer transformer : transformers){
 			TransformerConverter<?> converter = ConverterUtil.createConverter(transformer);
 
@@ -190,24 +194,57 @@ public class ConverterUtil {
 	}
 
 	static
-	private List<Transformer> getTransformers(PipelineModel pipelineModel){
-		List<Transformer> result = new ArrayList<>();
+	private Iterable<Transformer> getTransformers(PipelineModel pipelineModel){
+		List<Transformer> transformers = new ArrayList<>();
+		transformers.add(pipelineModel);
 
-		Transformer[] stages = pipelineModel.stages();
-		for(Transformer stage : stages){
+		Function<Transformer, List<Transformer>> function = new Function<Transformer, List<Transformer>>(){
 
-			if(stage instanceof PipelineModel){
-				PipelineModel nestedPipelineModel = (PipelineModel)stage;
+			@Override
+			public List<Transformer> apply(Transformer transformer){
 
-				result.addAll(getTransformers(nestedPipelineModel));
-			} else
+				if(transformer instanceof PipelineModel){
+					PipelineModel pipelineModel = (PipelineModel)transformer;
 
-			{
-				result.add(stage);
+					return Arrays.asList(pipelineModel.stages());
+				} else
+
+				if(transformer instanceof CrossValidatorModel){
+					CrossValidatorModel crossValidatorModel = (CrossValidatorModel)transformer;
+
+					return Collections.<Transformer>singletonList(crossValidatorModel.bestModel());
+				}
+
+				return null;
+			}
+		};
+
+		while(true){
+			ListIterator<Transformer> transformerIt = transformers.listIterator();
+
+			boolean modified = false;
+
+			while(transformerIt.hasNext()){
+				Transformer transformer = transformerIt.next();
+
+				List<Transformer> childTransformers = function.apply(transformer);
+				if(childTransformers != null){
+					transformerIt.remove();
+
+					for(Transformer childTransformer : childTransformers){
+						transformerIt.add(childTransformer);
+					}
+
+					modified = true;
+				}
+			}
+
+			if(!modified){
+				break;
 			}
 		}
 
-		return result;
+		return transformers;
 	}
 
 	static
