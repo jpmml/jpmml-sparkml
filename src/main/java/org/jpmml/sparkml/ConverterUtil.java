@@ -43,6 +43,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.tuning.CrossValidatorModel;
+import org.apache.spark.ml.tuning.TrainValidationSplitModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
@@ -213,6 +214,12 @@ public class ConverterUtil {
 					CrossValidatorModel crossValidatorModel = (CrossValidatorModel)transformer;
 
 					return Collections.<Transformer>singletonList(crossValidatorModel.bestModel());
+				} else
+
+				if(transformer instanceof TrainValidationSplitModel){
+					TrainValidationSplitModel trainValidationSplitModel = (TrainValidationSplitModel)transformer;
+
+					return Collections.<Transformer>singletonList(trainValidationSplitModel.bestModel());
 				}
 
 				return null;
