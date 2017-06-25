@@ -73,6 +73,6 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, treeModels, Doubles.asList(model.treeWeights())))
 			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("gbtValue"), OpType.CONTINUOUS, DataType.DOUBLE, binarizedGbtValue));
 
-		return MiningModelUtil.createBinaryLogisticClassification(miningModel, 0d, -1000d, RegressionModel.NormalizationMethod.SOFTMAX, false, schema);
+		return MiningModelUtil.createBinaryLogisticClassification(miningModel, -1000d, 0d, RegressionModel.NormalizationMethod.LOGIT, false, schema);
 	}
 }

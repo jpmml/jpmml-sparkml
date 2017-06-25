@@ -6,8 +6,6 @@ Java library and command-line application for converting Apache Spark ML pipelin
 # Features #
 
 * Supported Spark ML `PipelineStage` types:
-  * Estimators:
-    * [`PipelineModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/PipelineModel.html) (the result of fitting a `Pipeline`)
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
@@ -46,8 +44,12 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`regression.LinearRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/LinearRegressionModel.html)
     * [`regression.RandomForestRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/RandomForestRegressionModel.html)
   * Prediction model chains:
+    * [`PipelineModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/PipelineModel.html)
     * Referencing the prediction column (`HasPredictionCol#getPredictionCol()`) of earlier clustering, classification and regression models.
     * Referencing the predicted probabilities column (`HasProbabilityCol#getProbabilityCol()`) of earlier classification models.
+  * Hyperparameter selectors and tuners:
+    * [`tuning.CrossValidatorModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/tuning/CrossValidatorModel.html)
+    * [`tuning.TrainValidationSplitModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/tuning/TrainValidationSplitModel.html)
 * Production quality:
   * Complete test coverage.
   * Fully compliant with the [JPMML-Evaluator](https://github.com/jpmml/jpmml-evaluator) library.

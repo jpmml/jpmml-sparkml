@@ -20,25 +20,39 @@ package org.jpmml.sparkml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.ArchiveBatch;
-import org.jpmml.evaluator.Batch;
 import org.jpmml.evaluator.IntegrationTest;
 import org.jpmml.evaluator.IntegrationTestBatch;
+import org.jpmml.evaluator.PMMLEquivalence;
 import org.jpmml.model.SerializationUtil;
 
 abstract
 public class ConverterTest extends IntegrationTest {
 
+	public ConverterTest(){
+		super(new PMMLEquivalence(1e-12, 1e-12));
+	}
+
 	@Override
-	protected ArchiveBatch createBatch(String name, String dataset){
-		ArchiveBatch result = new IntegrationTestBatch(name, dataset){
+	protected ArchiveBatch createBatch(String name, String dataset, Predicate<FieldName> predicate){
+		Predicate<FieldName> excludePredictionFields = excludeFields(FieldName.create("prediction"), FieldName.create("pmml(prediction)"));
+
+		if(predicate == null){
+			predicate = excludePredictionFields;
+		} else
+
+		{
+			predicate = Predicates.and(predicate, excludePredictionFields);
+		}
+
+		ArchiveBatch result = new IntegrationTestBatch(name, dataset, predicate){
 
 			@Override
 			public IntegrationTest getIntegrationTest(){
@@ -67,22 +81,5 @@ public class ConverterTest extends IntegrationTest {
 		};
 
 		return result;
-	}
-
-	@Override
-	public void evaluate(Batch batch, Set<FieldName> ignoredFields) throws Exception {
-
-		if(ignoredFields != null && ignoredFields.size() > 0){
-			ignoredFields = new LinkedHashSet<>(ignoredFields);
-		} else
-
-		{
-			ignoredFields = new LinkedHashSet<>();
-		}
-
-		ignoredFields.add(FieldName.create("prediction"));
-		ignoredFields.add(FieldName.create("pmml(prediction)"));
-
-		super.evaluate(batch, ignoredFields, 1e-12, 1e-12);
 	}
 }

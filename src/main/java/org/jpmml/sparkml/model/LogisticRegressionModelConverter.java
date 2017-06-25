@@ -49,7 +49,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
 		if(categoricalLabel.size() == 2){
-			RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), RegressionModel.NormalizationMethod.SOFTMAX, true, schema)
+			RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
 				.setOutput(null);
 
 			return regressionModel;
@@ -64,7 +64,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			List<RegressionTable> regressionTables = new ArrayList<>();
 
 			for(int i = 0; i < categoricalLabel.size(); i++){
-				RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, interceptVector.apply(i), MatrixUtil.getRow(coefficientMatrix, i))
+				RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, MatrixUtil.getRow(coefficientMatrix, i), interceptVector.apply(i))
 					.setTargetCategory(categoricalLabel.getValue(i));
 
 				regressionTables.add(regressionTable);
