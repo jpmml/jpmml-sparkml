@@ -49,14 +49,6 @@
 			<version>1.48</version>
 		</dependency>
 
-		<!-- Required for Apache Hadoop compatibility -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>11.0.2</version>
-			<scope>provided</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.11</artifactId>
@@ -81,10 +73,6 @@
 			<artifactId>jpmml-converter</artifactId>
 			<version>1.2.4</version>
 			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
 				<exclusion>
 					<groupId>com.sun.xml.fastinfoset</groupId>
 					<artifactId>FastInfoset</artifactId>
