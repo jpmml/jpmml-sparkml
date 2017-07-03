@@ -130,7 +130,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			for(int i = 0; i < categoricalLabel.size(); i++){
 				String value = categoricalLabel.getValue(i);
 
-				OutputField probabilityField = ModelUtil.createProbabilityField(FieldName.create(probabilityCol + "(" + value + ")"), value);
+				OutputField probabilityField = ModelUtil.createProbabilityField(FieldName.create(probabilityCol + "(" + value + ")"), DataType.DOUBLE, value);
 
 				output.addOutputFields(probabilityField);
 

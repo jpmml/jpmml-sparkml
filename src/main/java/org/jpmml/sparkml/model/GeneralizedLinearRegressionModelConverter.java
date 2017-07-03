@@ -19,6 +19,7 @@
 package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
@@ -61,7 +62,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 				CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
 				for(int i = 0; i < categoricalLabel.size(); i++){
-					OutputField probabilityField = ModelUtil.createProbabilityField(categoricalLabel.getValue(i));
+					OutputField probabilityField = ModelUtil.createProbabilityField(DataType.DOUBLE, categoricalLabel.getValue(i));
 
 					output.addOutputFields(probabilityField);
 				}
@@ -94,7 +95,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 				break;
 		}
 
-		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), null, null, null)
+		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
