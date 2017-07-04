@@ -84,7 +84,20 @@ Compatibility matrix:
 
 JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
 
-Excluding the legacy version of JPMML-Model library from the application classpath:
+This conflict is documented in [SPARK-15526](https://issues.apache.org/jira/browse/SPARK-15526).
+
+### Modifying Apache Spark installation ###
+
+The embodiment of the legacy version of the JPMML-Model library:
+
+* `$SPARK_HOME/jars/pmml-model-1.2.15.jar`
+* `$SPARK_HOME/jars/pmml-schema-1.2.15.jar`
+
+Removing these two JAR files will solve all conflicts for all applications forever.
+
+### Compile-time conflict resolution ###
+
+Excluding the legacy version of the JPMML-Model library:
 ```xml
 <dependency>
 	<groupId>org.apache.spark</groupId>
@@ -100,7 +113,9 @@ Excluding the legacy version of JPMML-Model library from the application classpa
 </dependency>
 ```
 
-Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/) for "shading" all the affected `org.dmg.pmml.*` and `org.jpmml.*` classes during the packaging of the application:
+### Run-time conflict resolution ###
+
+Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/) to relocate all `org.dmg.pmml.*` and `org.jpmml.*` classes of the latest and greatest version of the JPMML-Model library to a different namespace (aka "shading"):
 ```xml
 <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
@@ -129,7 +144,7 @@ Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plug
 </plugin>
 ```
 
-For a complete example, please see the [JPMML-SparkML-Bootstrap](https://github.com/jpmml/jpmml-sparkml-bootstrap) project.
+The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `ConverterUtil#toPMML(StructType, PipelineModel)` utility method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
 
 ## Example application ##
 
