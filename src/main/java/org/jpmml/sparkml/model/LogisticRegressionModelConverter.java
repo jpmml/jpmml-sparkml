@@ -70,7 +70,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 				regressionTables.add(regressionTable);
 			}
 
-			RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema), regressionTables)
+			RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), regressionTables)
 				.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
 
 			return regressionModel;

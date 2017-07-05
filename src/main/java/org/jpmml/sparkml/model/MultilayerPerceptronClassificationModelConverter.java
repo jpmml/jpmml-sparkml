@@ -58,7 +58,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
 			for(int i = 0; i < categoricalLabel.size(); i++){
-				OutputField probabilityField = ModelUtil.createProbabilityField(categoricalLabel.getValue(i));
+				OutputField probabilityField = ModelUtil.createProbabilityField(DataType.DOUBLE, categoricalLabel.getValue(i));
 
 				output.addOutputFields(probabilityField);
 			}
@@ -139,7 +139,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 			throw new IllegalArgumentException();
 		}
 
-		NeuralNetwork neuralNetwork = new NeuralNetwork(MiningFunction.CLASSIFICATION, NeuralNetwork.ActivationFunction.LOGISTIC, ModelUtil.createMiningSchema(schema), neuralInputs, neuralLayers)
+		NeuralNetwork neuralNetwork = new NeuralNetwork(MiningFunction.CLASSIFICATION, NeuralNetwork.ActivationFunction.LOGISTIC, ModelUtil.createMiningSchema(categoricalLabel), neuralInputs, neuralLayers)
 			.setNeuralOutputs(NeuralNetworkUtil.createClassificationNeuralOutputs(entities, categoricalLabel));
 
 		return neuralNetwork;

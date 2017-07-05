@@ -35,6 +35,6 @@ public class LinearRegressionModelConverter extends RegressionModelConverter<Lin
 	public RegressionModel encodeModel(Schema schema){
 		LinearRegressionModel model = getTransformer();
 
-		return RegressionModelUtil.createRegression(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), schema);
+		return RegressionModelUtil.createRegression(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), null, schema);
 	}
 }
