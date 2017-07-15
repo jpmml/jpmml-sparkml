@@ -20,6 +20,7 @@ package org.jpmml.sparkml.feature;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.spark.ml.feature.StopWordsRemover;
 import org.jpmml.converter.Feature;
@@ -40,10 +41,18 @@ public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover
 
 		DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
+		Pattern pattern = Pattern.compile(documentFeature.getWordSeparatorRE());
+
 		DocumentFeature.StopWordSet stopWordSet = new DocumentFeature.StopWordSet(transformer.getCaseSensitive());
 
 		String[] stopWords = transformer.getStopWords();
 		for(String stopWord : stopWords){
+			String[] stopTokens = pattern.split(stopWord);
+
+			// Skip multi-token stopwords. See https://issues.apache.org/jira/browse/SPARK-18374
+			if(stopTokens.length > 1){
+				continue;
+			} // End if
 
 			if(TermUtil.hasPunctuation(stopWord)){
 				throw new IllegalArgumentException(stopWord);

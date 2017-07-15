@@ -23,21 +23,16 @@ import java.util.List;
 import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.classification.GBTClassificationModel;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segmentation;
 import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.tree.TreeModel;
-import org.jpmml.converter.AbstractTransformation;
 import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
@@ -51,28 +46,22 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 	public MiningModel encodeModel(Schema schema){
 		GBTClassificationModel model = getTransformer();
 
+		String lossType = model.getLossType();
+		switch(lossType){
+			case "logistic":
+				break;
+			default:
+				throw new IllegalArgumentException("Loss function " + lossType + " is not supported");
+		}
+
 		Schema segmentSchema = new Schema(new ContinuousLabel(null, DataType.DOUBLE), schema.getFeatures());
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, segmentSchema);
 
-		// "(y > 0) ? -1 : 1"
-		Transformation binarizedGbtValue = new AbstractTransformation(){
-
-			@Override
-			public FieldName getName(FieldName name){
-				return withPrefix(name, "binarized");
-			}
-
-			@Override
-			public Expression createExpression(FieldRef fieldRef){
-				return PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", fieldRef, PMMLUtil.createConstant(0d)), PMMLUtil.createConstant(-1d), PMMLUtil.createConstant(1d));
-			}
-		};
-
 		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema.getLabel()))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, treeModels, Doubles.asList(model.treeWeights())))
-			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("gbtValue"), OpType.CONTINUOUS, DataType.DOUBLE, binarizedGbtValue));
+			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("gbtValue"), OpType.CONTINUOUS, DataType.DOUBLE));
 
-		return MiningModelUtil.createBinaryLogisticClassification(miningModel, -1000d, 0d, RegressionModel.NormalizationMethod.LOGIT, false, schema);
+		return MiningModelUtil.createBinaryLogisticClassification(miningModel, 2d, 0d, RegressionModel.NormalizationMethod.LOGIT, false, schema);
 	}
 }
