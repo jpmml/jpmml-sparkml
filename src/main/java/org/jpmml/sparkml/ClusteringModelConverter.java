@@ -19,6 +19,7 @@
 package org.jpmml.sparkml;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
@@ -27,7 +28,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -47,18 +47,14 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	}
 
 	@Override
-	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
 
 		String predictionCol = hasPredictionCol.getPredictionCol();
 
-		final
 		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), DataType.STRING, OpType.CATEGORICAL);
-
-		Output output = new Output()
-			.addOutputFields(predictedField);
 
 		Feature feature = new Feature(encoder, predictedField.getName(), predictedField.getDataType()){
 
@@ -70,6 +66,6 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		encoder.putFeatures(predictionCol, Collections.singletonList(feature));
 
-		return output;
+		return Collections.singletonList(predictedField);
 	}
 }

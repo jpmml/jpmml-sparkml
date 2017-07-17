@@ -27,7 +27,6 @@ import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.Entity;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.neural_network.NeuralInputs;
 import org.dmg.pmml.neural_network.NeuralLayer;
@@ -49,22 +48,19 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 	}
 
 	@Override
-	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		MultilayerPerceptronClassificationModel model = getTransformer();
 
-		Output output = super.encodeOutput(label, encoder);
+		List<OutputField> result = super.registerOutputFields(label, encoder);
 
 		if(!(model instanceof HasProbabilityCol)){
 			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
-			for(int i = 0; i < categoricalLabel.size(); i++){
-				OutputField probabilityField = ModelUtil.createProbabilityField(DataType.DOUBLE, categoricalLabel.getValue(i));
-
-				output.addOutputFields(probabilityField);
-			}
+			result = new ArrayList<>(result);
+			result.addAll(ModelUtil.createProbabilityFields(DataType.DOUBLE, categoricalLabel.getValues()));
 		}
 
-		return output;
+		return result;
 	}
 
 	@Override

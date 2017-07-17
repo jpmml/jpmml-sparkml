@@ -38,7 +38,6 @@ import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.Row;
@@ -64,16 +63,20 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 	}
 
 	@Override
-	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
+
+		List<OutputField> result = new ArrayList<>();
 
 		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
 
 		String predictionCol = hasPredictionCol.getPredictionCol();
 
 		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL);
+
+		result.add(pmmlPredictedField);
 
 		List<String> categories = new ArrayList<>();
 
@@ -105,8 +108,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(mapValues);
 
-		Output output = new Output()
-			.addOutputFields(pmmlPredictedField, predictedField);
+		result.add(predictedField);
 
 		Feature feature = new CategoricalFeature(encoder, predictedField.getName(), predictedField.getDataType(), categories){
 
@@ -132,7 +134,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 				OutputField probabilityField = ModelUtil.createProbabilityField(FieldName.create(probabilityCol + "(" + value + ")"), DataType.DOUBLE, value);
 
-				output.addOutputFields(probabilityField);
+				result.add(probabilityField);
 
 				features.add(new ContinuousFeature(encoder, probabilityField.getName(), probabilityField.getDataType()));
 			}
@@ -140,6 +142,6 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			encoder.putFeatures(probabilityCol, features);
 		}
 
-		return output;
+		return result;
 	}
 }

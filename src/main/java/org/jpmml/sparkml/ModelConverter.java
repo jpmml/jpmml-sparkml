@@ -32,6 +32,11 @@ import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
+import org.dmg.pmml.mining.MiningModel;
+import org.dmg.pmml.mining.Segment;
+import org.dmg.pmml.mining.Segmentation;
+import org.dmg.pmml.mining.Segmentation.MultipleModelMethod;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
@@ -153,7 +158,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		return result;
 	}
 
-	public Output encodeOutput(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		return null;
 	}
 
@@ -162,10 +167,49 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 		Label label = schema.getLabel();
 
-		Output output = encodeOutput(label, encoder);
+		org.dmg.pmml.Model model = encodeModel(schema);
 
-		org.dmg.pmml.Model model = encodeModel(schema)
-			.setOutput(output);
+		List<OutputField> sparkOutputFields = registerOutputFields(label, encoder);
+		if(sparkOutputFields != null && sparkOutputFields.size() > 0){
+			org.dmg.pmml.Model lastModel = getLastModel(model);
+
+			Output output = lastModel.getOutput();
+			if(output == null){
+				output = new Output();
+
+				lastModel.setOutput(output);
+			}
+
+			List<OutputField> outputFields = output.getOutputFields();
+
+			outputFields.addAll(0, sparkOutputFields);
+		}
+
+		return model;
+	}
+
+	protected org.dmg.pmml.Model getLastModel(org.dmg.pmml.Model model){
+
+		if(model instanceof MiningModel){
+			MiningModel miningModel = (MiningModel)model;
+
+			Segmentation segmentation = miningModel.getSegmentation();
+
+			MultipleModelMethod multipleModelMethod = segmentation.getMultipleModelMethod();
+			switch(multipleModelMethod){
+				case MODEL_CHAIN:
+					List<Segment> segments = segmentation.getSegments();
+
+					if(segments.size() > 0){
+						Segment lastSegment = segments.get(segments.size() - 1);
+
+						return lastSegment.getModel();
+					}
+					break;
+				default:
+					break;
+			}
+		}
 
 		return model;
 	}
