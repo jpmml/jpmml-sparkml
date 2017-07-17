@@ -194,9 +194,9 @@ The example application JAR file contains an executable class `org.jpmml.sparkml
 
 The example application JAR file does not include Apache Spark runtime libraries. Therefore, this executable class must be executed using Apache Spark's `spark-submit` helper script.
 
-For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/ser/Iris.ser` and `src/test/resources/ser/DecisionTreeIris.ser`, respectively, to a PMML file `DecisionTreeIris.pmml`:
+For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.1-SNAPSHOT.jar --ser-schema-input src/test/resources/ser/Iris.ser --ser-pipeline-input src/test/resources/ser/DecisionTreeIris.ser --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.1-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
