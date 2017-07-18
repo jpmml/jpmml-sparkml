@@ -19,7 +19,6 @@
 package org.jpmml.sparkml;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.Model;
@@ -101,9 +100,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 							dataField = encoder.toCategorical(continuousFeature.getName(), categories);
 
-							CategoricalFeature categoricalFeature = new CategoricalFeature(encoder, dataField);
-
-							encoder.putFeatures(labelCol, Collections.<Feature>singletonList(categoricalFeature));
+							encoder.putOnlyFeature(labelCol, new CategoricalFeature(encoder, dataField));
 						} else
 
 						{
@@ -138,9 +135,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			}
 		}
 
-		HasFeaturesCol hasFeaturesCol = (HasFeaturesCol)model;
-
-		String featuresCol = hasFeaturesCol.getFeaturesCol();
+		String featuresCol = model.getFeaturesCol();
 
 		List<Feature> features = encoder.getFeatures(featuresCol);
 

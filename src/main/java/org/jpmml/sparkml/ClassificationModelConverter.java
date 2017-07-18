@@ -20,7 +20,6 @@ package org.jpmml.sparkml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -70,9 +69,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		List<OutputField> result = new ArrayList<>();
 
-		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
-
-		String predictionCol = hasPredictionCol.getPredictionCol();
+		String predictionCol = model.getPredictionCol();
 
 		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL);
 
@@ -120,7 +117,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			}
 		};
 
-		encoder.putFeatures(predictionCol, Collections.<Feature>singletonList(feature));
+		encoder.putOnlyFeature(predictionCol, feature);
 
 		if(model instanceof HasProbabilityCol){
 			HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)model;

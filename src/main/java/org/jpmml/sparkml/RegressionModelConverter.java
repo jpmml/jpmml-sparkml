@@ -31,7 +31,6 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 
@@ -51,13 +50,11 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
-		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
-
-		String predictionCol = hasPredictionCol.getPredictionCol();
+		String predictionCol = model.getPredictionCol();
 
 		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), label.getDataType(), OpType.CONTINUOUS);
 
-		encoder.putFeatures(predictionCol, Collections.<Feature>singletonList(new ContinuousFeature(encoder, predictedField.getName(), predictedField.getDataType())));
+		encoder.putOnlyFeature(predictionCol, new ContinuousFeature(encoder, predictedField.getName(), predictedField.getDataType()));
 
 		return Collections.singletonList(predictedField);
 	}

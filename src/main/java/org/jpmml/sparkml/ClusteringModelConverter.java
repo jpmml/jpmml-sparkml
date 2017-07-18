@@ -50,9 +50,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
-		HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
-
-		String predictionCol = hasPredictionCol.getPredictionCol();
+		String predictionCol = model.getPredictionCol();
 
 		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), DataType.STRING, OpType.CATEGORICAL);
 
@@ -64,7 +62,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 			}
 		};
 
-		encoder.putFeatures(predictionCol, Collections.singletonList(feature));
+		encoder.putOnlyFeature(predictionCol, feature);
 
 		return Collections.singletonList(predictedField);
 	}
