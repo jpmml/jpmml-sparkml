@@ -113,6 +113,10 @@ public class SparkMLEncoder extends ModelEncoder {
 		return result;
 	}
 
+	public void putOnlyFeature(String column, Feature feature){
+		putFeatures(column, Collections.singletonList(feature));
+	}
+
 	public void putFeatures(String column, List<Feature> features){
 		List<Feature> existingFeatures = this.columnFeatures.get(column);
 

@@ -20,6 +20,7 @@ package org.jpmml.sparkml.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
@@ -32,12 +33,10 @@ import org.apache.spark.ml.tree.LeafNode;
 import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
-import org.dmg.pmml.Array;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
-import org.dmg.pmml.SimpleSetPredicate;
 import org.dmg.pmml.True;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
@@ -48,6 +47,7 @@ import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
 
@@ -57,29 +57,21 @@ public class TreeModelUtil {
 	}
 
 	static
-	public TreeModel encodeDecisionTree(DecisionTreeModel model, Schema schema){
-		org.apache.spark.ml.tree.Node node = model.rootNode();
+	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, Schema schema){
+		PredicateManager predicateManager = new PredicateManager();
 
-		if(model instanceof DecisionTreeRegressionModel){
-			return encodeTreeModel(MiningFunction.REGRESSION, node, schema);
-		} else
-
-		if(model instanceof DecisionTreeClassificationModel){
-			return encodeTreeModel(MiningFunction.CLASSIFICATION, node, schema);
-		}
-
-		throw new IllegalArgumentException();
+		return encodeDecisionTreeEnsemble(model, predicateManager, schema);
 	}
 
 	static
-	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, Schema schema){
+	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, PredicateManager predicateManager, Schema schema){
 		Schema segmentSchema = schema.toAnonymousSchema();
 
 		List<TreeModel> treeModels = new ArrayList<>();
 
 		DecisionTreeModel[] trees = model.trees();
 		for(DecisionTreeModel tree : trees){
-			TreeModel treeModel = encodeDecisionTree(tree, segmentSchema);
+			TreeModel treeModel = encodeDecisionTree(tree, predicateManager, segmentSchema);
 
 			treeModels.add(treeModel);
 		}
@@ -88,8 +80,30 @@ public class TreeModelUtil {
 	}
 
 	static
-	public TreeModel encodeTreeModel(MiningFunction miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
-		Node root = encodeNode(miningFunction, node, schema)
+	public TreeModel encodeDecisionTree(DecisionTreeModel model, Schema schema){
+		PredicateManager predicateManager = new PredicateManager();
+
+		return encodeDecisionTree(model, predicateManager, schema);
+	}
+
+	static
+	public TreeModel encodeDecisionTree(DecisionTreeModel model, PredicateManager predicateManager, Schema schema){
+		org.apache.spark.ml.tree.Node node = model.rootNode();
+
+		if(model instanceof DecisionTreeRegressionModel){
+			return encodeTreeModel(node, predicateManager, MiningFunction.REGRESSION, schema);
+		} else
+
+		if(model instanceof DecisionTreeClassificationModel){
+			return encodeTreeModel(node, predicateManager, MiningFunction.CLASSIFICATION, schema);
+		}
+
+		throw new IllegalArgumentException();
+	}
+
+	static
+	public TreeModel encodeTreeModel(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
+		Node root = encodeNode(node, predicateManager, miningFunction, schema)
 			.setPredicate(new True());
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
@@ -99,29 +113,29 @@ public class TreeModelUtil {
 	}
 
 	static
-	public Node encodeNode(MiningFunction miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
+	public Node encodeNode(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
 
 		if(node instanceof InternalNode){
-			return encodeInternalNode(miningFunction, (InternalNode)node, schema);
+			return encodeInternalNode((InternalNode)node, predicateManager, miningFunction, schema);
 		} else
 
 		if(node instanceof LeafNode){
-			return encodeLeafNode(miningFunction, (LeafNode)node, schema);
+			return encodeLeafNode((LeafNode)node, miningFunction, schema);
 		}
 
 		throw new IllegalArgumentException();
 	}
 
 	static
-	private Node encodeInternalNode(MiningFunction miningFunction, InternalNode internalNode, Schema schema){
-		Node result = createNode(miningFunction, internalNode, schema);
+	private Node encodeInternalNode(InternalNode internalNode, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
+		Node result = createNode(internalNode, miningFunction, schema);
 
-		Predicate[] predicates = encodeSplit(internalNode.split(), schema);
+		Predicate[] predicates = encodeSplit(internalNode.split(), predicateManager, schema);
 
-		Node leftChild = encodeNode(miningFunction, internalNode.leftChild(), schema)
+		Node leftChild = encodeNode(internalNode.leftChild(), predicateManager, miningFunction, schema)
 			.setPredicate(predicates[0]);
 
-		Node rightChild = encodeNode(miningFunction, internalNode.rightChild(), schema)
+		Node rightChild = encodeNode(internalNode.rightChild(), predicateManager, miningFunction, schema)
 			.setPredicate(predicates[1]);
 
 		result.addNodes(leftChild, rightChild);
@@ -130,14 +144,14 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeLeafNode(MiningFunction miningFunction, LeafNode leafNode, Schema schema){
-		Node result = createNode(miningFunction, leafNode, schema);
+	private Node encodeLeafNode(LeafNode leafNode, MiningFunction miningFunction, Schema schema){
+		Node result = createNode(leafNode, miningFunction, schema);
 
 		return result;
 	}
 
 	static
-	private Node createNode(MiningFunction miningFunction, org.apache.spark.ml.tree.Node node, Schema schema){
+	private Node createNode(org.apache.spark.ml.tree.Node node, MiningFunction miningFunction, Schema schema){
 		Node result = new Node();
 
 		switch(miningFunction){
@@ -181,24 +195,27 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Predicate[] encodeSplit(Split split, Schema schema){
+	private Predicate[] encodeSplit(Split split, PredicateManager predicateManager, Schema schema){
 
 		if(split instanceof ContinuousSplit){
-			return encodeContinuousSplit((ContinuousSplit)split, schema);
+			return encodeContinuousSplit((ContinuousSplit)split, predicateManager, schema);
 		} else
 
 		if(split instanceof CategoricalSplit){
-			return encodeCategoricalSplit((CategoricalSplit)split, schema);
+			return encodeCategoricalSplit((CategoricalSplit)split, predicateManager, schema);
 		}
 
 		throw new IllegalArgumentException();
 	}
 
 	static
-	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, Schema schema){
+	private Predicate[] encodeContinuousSplit(ContinuousSplit continuousSplit, PredicateManager predicateManager, Schema schema){
 		Feature feature = schema.getFeature(continuousSplit.featureIndex());
 
 		double threshold = continuousSplit.threshold();
+
+		Predicate leftPredicate;
+		Predicate rightPredicate;
 
 		if(feature instanceof BooleanFeature){
 			BooleanFeature booleanFeature = (BooleanFeature)feature;
@@ -207,13 +224,8 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			SimplePredicate leftPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.EQUAL)
-				.setValue(booleanFeature.getValue(0));
-
-			SimplePredicate rightPredicate = new SimplePredicate(feature.getName(), SimplePredicate.Operator.EQUAL)
-				.setValue(booleanFeature.getValue(1));
-
-			return new Predicate[]{leftPredicate, rightPredicate};
+			leftPredicate = predicateManager.createSimplePredicate(booleanFeature, SimplePredicate.Operator.EQUAL, booleanFeature.getValue(0));
+			rightPredicate = predicateManager.createSimplePredicate(booleanFeature, SimplePredicate.Operator.EQUAL, booleanFeature.getValue(1));
 		} else
 
 		{
@@ -221,22 +233,22 @@ public class TreeModelUtil {
 
 			String value = ValueUtil.formatValue(threshold);
 
-			SimplePredicate leftPredicate = new SimplePredicate(continuousFeature.getName(), SimplePredicate.Operator.LESS_OR_EQUAL)
-				.setValue(value);
-
-			SimplePredicate rightPredicate = new SimplePredicate(continuousFeature.getName(), SimplePredicate.Operator.GREATER_THAN)
-				.setValue(value);
-
-			return new Predicate[]{leftPredicate, rightPredicate};
+			leftPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.LESS_OR_EQUAL, value);
+			rightPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.GREATER_THAN, value);
 		}
+
+		return new Predicate[]{leftPredicate, rightPredicate};
 	}
 
 	static
-	private Predicate[] encodeCategoricalSplit(CategoricalSplit categoricalSplit, Schema schema){
+	private Predicate[] encodeCategoricalSplit(CategoricalSplit categoricalSplit, PredicateManager predicateManager, Schema schema){
 		Feature feature = schema.getFeature(categoricalSplit.featureIndex());
 
 		double[] leftCategories = categoricalSplit.leftCategories();
 		double[] rightCategories = categoricalSplit.rightCategories();
+
+		Predicate leftPredicate;
+		Predicate rightPredicate;
 
 		if(feature instanceof BinaryFeature){
 			BinaryFeature binaryFeature = (BinaryFeature)feature;
@@ -260,13 +272,8 @@ public class TreeModelUtil {
 
 			String value = ValueUtil.formatValue(binaryFeature.getValue());
 
-			SimplePredicate leftPredicate = new SimplePredicate(binaryFeature.getName(), leftOperator)
-				.setValue(value);
-
-			SimplePredicate rightPredicate = new SimplePredicate(binaryFeature.getName(), rightOperator)
-				.setValue(value);
-
-			return new Predicate[]{leftPredicate, rightPredicate};
+			leftPredicate = predicateManager.createSimplePredicate(binaryFeature, leftOperator, value);
+			rightPredicate = predicateManager.createSimplePredicate(binaryFeature, rightOperator, value);
 		} else
 
 		if(feature instanceof CategoricalFeature){
@@ -277,48 +284,43 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			Predicate leftPredicate = createCategoricalPredicate(categoricalFeature, leftCategories);
+			List<String> leftValues = getValues(categoricalFeature, leftCategories);
+			List<String> rightValues = getValues(categoricalFeature, rightCategories);
 
-			Predicate rightPredicate = createCategoricalPredicate(categoricalFeature, rightCategories);
-
-			return new Predicate[]{leftPredicate, rightPredicate};
-		}
-
-		throw new IllegalArgumentException();
-	}
-
-	static
-	private Predicate createCategoricalPredicate(CategoricalFeature categoricalFeature, double[] categories){
-		List<String> values = new ArrayList<>();
-
-		for(int i = 0; i < categories.length; i++){
-			int index = ValueUtil.asInt(categories[i]);
-
-			String value = categoricalFeature.getValue(index);
-
-			values.add(value);
-		}
-
-		if(values.size() == 1){
-			String value = values.get(0);
-
-			SimplePredicate simplePredicate = new SimplePredicate()
-				.setField(categoricalFeature.getName())
-				.setOperator(SimplePredicate.Operator.EQUAL)
-				.setValue(value);
-
-			return simplePredicate;
+			leftPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, leftValues);
+			rightPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, rightValues);
 		} else
 
 		{
-			Array array = new Array(Array.Type.INT, ValueUtil.formatArrayValue(values));
+			throw new IllegalArgumentException();
+		}
 
-			SimpleSetPredicate simpleSetPredicate = new SimpleSetPredicate()
-				.setField(categoricalFeature.getName())
-				.setBooleanOperator(SimpleSetPredicate.BooleanOperator.IS_IN)
-				.setArray(array);
+		return new Predicate[]{leftPredicate, rightPredicate};
+	}
 
-			return simpleSetPredicate;
+	static
+	private List<String> getValues(CategoricalFeature categoricalFeature, double[] categories){
+
+		if(categories.length == 1){
+			int index = ValueUtil.asInt(categories[0]);
+
+			String value = categoricalFeature.getValue(index);
+
+			return Collections.singletonList(value);
+		} else
+
+		{
+			List<String> result = new ArrayList<>(categories.length);
+
+			for(int i = 0; i < categories.length; i++){
+				int index = ValueUtil.asInt(categories[i]);
+
+				String value = categoricalFeature.getValue(index);
+
+				result.add(value);
+			}
+
+			return result;
 		}
 	}
 

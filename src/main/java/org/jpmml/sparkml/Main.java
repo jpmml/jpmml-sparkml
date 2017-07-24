@@ -23,16 +23,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.zip.ZipFile;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.google.common.io.CharStreams;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.MetroJAXBUtil;
-import org.jpmml.model.SerializationUtil;
 
 public class Main {
 
@@ -44,15 +47,15 @@ public class Main {
 	private boolean help = false;
 
 	@Parameter (
-		names = "--ser-schema-input",
-		description = "Schema SER input file",
+		names = "--schema-input",
+		description = "Schema JSON input file",
 		required = true
 	)
 	private File schemaInput = null;
 
 	@Parameter (
-		names = "--ser-pipeline-input",
-		description = "Pipeline SER input file",
+		names = "--pipeline-input",
+		description = "Pipeline ML input ZIP file or directory",
 		required = true
 	)
 	private File pipelineInput = null;
@@ -101,9 +104,41 @@ public class Main {
 	}
 
 	private void run() throws Exception {
-		StructType schema = (StructType)deserialize(this.schemaInput);
+		StructType schema;
 
-		PipelineModel pipelineModel = (PipelineModel)deserialize(this.pipelineInput);
+		try(InputStream is = new FileInputStream(this.schemaInput)){
+			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
+
+			schema = (StructType)DataType.fromJson(json);
+		}
+
+		File pipelineDir = this.pipelineInput;
+
+		zipFile:
+		{
+			ZipFile zipFile;
+
+			try {
+				zipFile = new ZipFile(pipelineDir);
+			} catch(IOException ioe){
+				break zipFile;
+			}
+
+			try {
+				pipelineDir = File.createTempFile("PipelineModel", "");
+				if(!pipelineDir.delete()){
+					throw new IOException();
+				}
+
+				pipelineDir.mkdirs();
+
+				ZipUtil.uncompress(zipFile, pipelineDir);
+			} finally {
+				zipFile.close();
+			}
+		}
+
+		PipelineModel pipelineModel = PipelineModel.load(pipelineDir.getAbsolutePath());
 
 		PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
 
@@ -134,13 +169,5 @@ public class Main {
 
 	public void setOutput(File output){
 		this.output = output;
-	}
-
-	static
-	private Object deserialize(File file) throws ClassNotFoundException, IOException {
-
-		try(InputStream is = new FileInputStream(file)){
-			return SerializationUtil.deserialize(is);
-		}
 	}
 }
