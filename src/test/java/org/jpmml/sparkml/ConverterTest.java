@@ -18,12 +18,22 @@
  */
 package org.jpmml.sparkml;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
+import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.util.MLReader;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
@@ -31,7 +41,8 @@ import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.IntegrationTest;
 import org.jpmml.evaluator.IntegrationTestBatch;
 import org.jpmml.evaluator.PMMLEquivalence;
-import org.jpmml.model.SerializationUtil;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 abstract
 public class ConverterTest extends IntegrationTest {
@@ -61,9 +72,35 @@ public class ConverterTest extends IntegrationTest {
 
 			@Override
 			public PMML getPMML() throws Exception {
-				StructType schema = (StructType)deserialize(getDataset() + ".ser");
+				StructType schema;
 
-				PipelineModel pipelineModel = (PipelineModel)deserialize(getName() + getDataset() + ".ser");
+				try(InputStream is = open("/schema/" + getDataset() + ".json")){
+					String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
+
+					schema = (StructType)DataType.fromJson(json);
+				}
+
+				PipelineModel pipelineModel;
+
+				try(InputStream is = open("/pipeline/" + getName() + getDataset() + ".zip")){
+					File tmpZipFile = File.createTempFile(getName() + getDataset(), ".zip");
+
+					try(OutputStream os = new FileOutputStream(tmpZipFile)){
+						ByteStreams.copy(is, os);
+					}
+
+					File tmpDir = File.createTempFile(getName() + getDataset(), "");
+					if(!tmpDir.delete()){
+						throw new IOException();
+					}
+
+					ZipUtil.uncompress(tmpZipFile, tmpDir);
+
+					MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
+					mlReader.session(ConverterTest.sparkSession);
+
+					pipelineModel = mlReader.load(tmpDir.getAbsolutePath());
+				}
 
 				PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
 
@@ -71,15 +108,33 @@ public class ConverterTest extends IntegrationTest {
 
 				return pmml;
 			}
-
-			private Object deserialize(String name) throws IOException, ClassNotFoundException {
-
-				try(InputStream is = open("/ser/" + name)){
-					return SerializationUtil.deserialize(is);
-				}
-			}
 		};
 
 		return result;
 	}
+
+	@BeforeClass
+	static
+	public void createSparkSession(){
+		SparkSession.Builder builder = SparkSession.builder()
+			.appName("test")
+			.master("local[1]")
+			.config("spark.ui.enabled", false);
+
+		SparkSession sparkSession = builder.getOrCreate();
+
+		SparkContext sparkContext = sparkSession.sparkContext();
+		sparkContext.setLogLevel("ERROR");
+
+		ConverterTest.sparkSession = sparkSession;
+	}
+
+	@AfterClass
+	static
+	public void destroySparkSession(){
+		ConverterTest.sparkSession.stop();
+		ConverterTest.sparkSession = null;
+	}
+
+	public static SparkSession sparkSession = null;
 }

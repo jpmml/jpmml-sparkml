@@ -18,10 +18,12 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.CategoricalLabel;
@@ -53,25 +55,22 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	}
 
 	@Override
-	public Output encodeOutput(Label label, SparkMLEncoder encoder){
-		Output output = super.encodeOutput(label, encoder);
+	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
+		List<OutputField> result = super.registerOutputFields(label, encoder);
 
 		MiningFunction miningFunction = getMiningFunction();
 		switch(miningFunction){
 			case CLASSIFICATION:
 				CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
-				for(int i = 0; i < categoricalLabel.size(); i++){
-					OutputField probabilityField = ModelUtil.createProbabilityField(DataType.DOUBLE, categoricalLabel.getValue(i));
-
-					output.addOutputFields(probabilityField);
-				}
+				result = new ArrayList<>(result);
+				result.addAll(ModelUtil.createProbabilityFields(DataType.DOUBLE, categoricalLabel.getValues()));
 				break;
 			default:
 				break;
 		}
 
-		return output;
+		return result;
 	}
 
 	@Override
