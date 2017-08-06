@@ -48,7 +48,7 @@ abstract
 public class ConverterTest extends IntegrationTest {
 
 	public ConverterTest(){
-		super(new PMMLEquivalence(1e-12, 1e-12));
+		super(new PMMLEquivalence(1e-14, 1e-14));
 	}
 
 	@Override
