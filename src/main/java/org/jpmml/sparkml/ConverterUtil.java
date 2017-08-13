@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -37,7 +38,6 @@ import javax.xml.bind.JAXBException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.ml.PipelineModel;
