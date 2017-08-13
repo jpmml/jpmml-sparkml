@@ -18,16 +18,22 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.StringIndexerModel;
+import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
+import org.dmg.pmml.OpType;
+import org.dmg.pmml.TypeDefinitionField;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.InvalidValueDecorator;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -41,14 +47,19 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StringIndexerModel transformer = getTransformer();
 
+		List<String> labels = Arrays.asList(transformer.labels());
+
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		DataField dataField = encoder.toCategorical(feature.getName(), Arrays.asList(transformer.labels()));
+		DataField dataField = encoder.toCategorical(feature.getName(), labels);
 
 		InvalidValueTreatmentMethod invalidValueTreatmentMethod;
 
 		String handleInvalid = transformer.getHandleInvalid();
 		switch(handleInvalid){
+			case "keep":
+				invalidValueTreatmentMethod = InvalidValueTreatmentMethod.AS_IS;
+				break;
 			case "error":
 				invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
 				break;
@@ -61,6 +72,29 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		encoder.addDecorator(dataField.getName(), invalidValueDecorator);
 
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, dataField));
+		TypeDefinitionField field = dataField;
+
+		switch(handleInvalid){
+			case "keep":
+				Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
+
+				for(String label : labels){
+					setApply.addExpressions(PMMLUtil.createConstant(label));
+				}
+
+				labels = new ArrayList<>(labels);
+				labels.add(StringIndexerModelConverter.LABEL_UNKNOWN);
+
+				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(StringIndexerModelConverter.LABEL_UNKNOWN));
+
+				field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, feature.getDataType(), apply);
+				break;
+			default:
+				break;
+		}
+
+		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, field, labels));
 	}
+
+	private static final String LABEL_UNKNOWN = "__unknown";
 }
