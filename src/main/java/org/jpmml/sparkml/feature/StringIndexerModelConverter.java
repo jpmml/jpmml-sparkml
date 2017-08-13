@@ -24,8 +24,10 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.DataField;
+import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.InvalidValueDecorator;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -42,6 +44,22 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
 		DataField dataField = encoder.toCategorical(feature.getName(), Arrays.asList(transformer.labels()));
+
+		InvalidValueTreatmentMethod invalidValueTreatmentMethod;
+
+		String handleInvalid = transformer.getHandleInvalid();
+		switch(handleInvalid){
+			case "error":
+				invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
+				break;
+			default:
+				throw new IllegalArgumentException(handleInvalid);
+		}
+
+		InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()
+			.setInvalidValueTreatment(invalidValueTreatmentMethod);
+
+		encoder.addDecorator(dataField.getName(), invalidValueDecorator);
 
 		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, dataField));
 	}

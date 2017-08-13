@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import org.jpmml.evaluator.PMMLEquivalence;
 import org.junit.Test;
 
 public class ClassificationTest extends ConverterTest {
@@ -69,7 +70,7 @@ public class ClassificationTest extends ConverterTest {
 
 	@Test
 	public void evaluateNeuralNetworkIris() throws Exception {
-		evaluate("NeuralNetwork", "Iris");
+		evaluate("NeuralNetwork", "Iris", new PMMLEquivalence(1e-13, 1e-13));
 	}
 
 	@Test
