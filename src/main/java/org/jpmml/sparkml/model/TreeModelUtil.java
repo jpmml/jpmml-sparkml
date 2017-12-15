@@ -21,7 +21,11 @@ package org.jpmml.sparkml.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
@@ -33,6 +37,7 @@ import org.apache.spark.ml.tree.LeafNode;
 import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
+import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
@@ -103,7 +108,7 @@ public class TreeModelUtil {
 
 	static
 	public TreeModel encodeTreeModel(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
-		Node root = encodeNode(node, predicateManager, miningFunction, schema)
+		Node root = encodeNode(node, predicateManager, Collections.<FieldName, Set<String>>emptyMap(), miningFunction, schema)
 			.setPredicate(new True());
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
@@ -113,10 +118,13 @@ public class TreeModelUtil {
 	}
 
 	static
-	public Node encodeNode(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
+	public Node encodeNode(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, Map<FieldName, Set<String>> parentFieldValues, MiningFunction miningFunction, Schema schema){
 
 		if(node instanceof InternalNode){
 			InternalNode internalNode = (InternalNode)node;
+
+			Map<FieldName, Set<String>> leftFieldValues = parentFieldValues;
+			Map<FieldName, Set<String>> rightFieldValues = parentFieldValues;
 
 			Predicate leftPredicate;
 			Predicate rightPredicate;
@@ -186,13 +194,37 @@ public class TreeModelUtil {
 				if(feature instanceof CategoricalFeature){
 					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
+					FieldName name = categoricalFeature.getName();
+
 					List<String> values = categoricalFeature.getValues();
 					if(values.size() != (leftCategories.length + rightCategories.length)){
 						throw new IllegalArgumentException();
 					}
 
-					List<String> leftValues = getValues(categoricalFeature, leftCategories);
-					List<String> rightValues = getValues(categoricalFeature, rightCategories);
+					final
+					Set<String> parentValues = parentFieldValues.get(name);
+
+					com.google.common.base.Predicate<String> valueFilter = new com.google.common.base.Predicate<String>(){
+
+						@Override
+						public boolean apply(String value){
+
+							if(parentValues != null){
+								return parentValues.contains(value);
+							}
+
+							return true;
+						}
+					};
+
+					List<String> leftValues = selectValues(values, leftCategories, valueFilter);
+					List<String> rightValues = selectValues(values, rightCategories, valueFilter);
+
+					leftFieldValues = new HashMap<>(parentFieldValues);
+					leftFieldValues.put(name, new HashSet<>(leftValues));
+
+					rightFieldValues = new HashMap<>(parentFieldValues);
+					rightFieldValues.put(name, new HashSet<>(rightValues));
 
 					leftPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, leftValues);
 					rightPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, rightValues);
@@ -209,10 +241,10 @@ public class TreeModelUtil {
 
 			Node result = new Node();
 
-			Node leftChild = encodeNode(internalNode.leftChild(), predicateManager, miningFunction, schema)
+			Node leftChild = encodeNode(internalNode.leftChild(), predicateManager, leftFieldValues, miningFunction, schema)
 				.setPredicate(leftPredicate);
 
-			Node rightChild = encodeNode(internalNode.rightChild(), predicateManager, miningFunction, schema)
+			Node rightChild = encodeNode(internalNode.rightChild(), predicateManager, rightFieldValues, miningFunction, schema)
 				.setPredicate(rightPredicate);
 
 			result.addNodes(leftChild, rightChild);
@@ -266,14 +298,18 @@ public class TreeModelUtil {
 	}
 
 	static
-	private List<String> getValues(CategoricalFeature categoricalFeature, double[] categories){
+	private List<String> selectValues(List<String> values, double[] categories, com.google.common.base.Predicate<String> valueFilter){
 
 		if(categories.length == 1){
 			int index = ValueUtil.asInt(categories[0]);
 
-			String value = categoricalFeature.getValue(index);
+			String value = values.get(index);
 
-			return Collections.singletonList(value);
+			if(valueFilter.apply(value)){
+				return Collections.singletonList(value);
+			}
+
+			return Collections.emptyList();
 		} else
 
 		{
@@ -282,9 +318,11 @@ public class TreeModelUtil {
 			for(int i = 0; i < categories.length; i++){
 				int index = ValueUtil.asInt(categories[i]);
 
-				String value = categoricalFeature.getValue(index);
+				String value = values.get(index);
 
-				result.add(value);
+				if(valueFilter.apply(value)){
+					result.add(value);
+				}
 			}
 
 			return result;
