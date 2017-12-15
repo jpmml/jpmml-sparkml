@@ -32,6 +32,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
+import org.dmg.pmml.TypeDefinitionField;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segment;
 import org.dmg.pmml.mining.Segmentation;
@@ -73,12 +74,12 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			switch(miningFunction){
 				case CLASSIFICATION:
 					{
-						DataField dataField;
-
 						if(feature instanceof CategoricalFeature){
 							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
-							dataField = encoder.getDataField(categoricalFeature.getName());
+							DataField dataField = encoder.getDataField(categoricalFeature.getName());
+
+							label = new CategoricalLabel(dataField);
 						} else
 
 						if(feature instanceof ContinuousFeature){
@@ -98,25 +99,25 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 								categories.add(String.valueOf(i));
 							}
 
-							dataField = encoder.toCategorical(continuousFeature.getName(), categories);
+							TypeDefinitionField field = encoder.toCategorical(continuousFeature.getName(), categories);
 
-							encoder.putOnlyFeature(labelCol, new CategoricalFeature(encoder, dataField));
+							encoder.putOnlyFeature(labelCol, new CategoricalFeature(encoder, field, categories));
+
+							label = new CategoricalLabel(field.getName(), field.getDataType(), categories);
 						} else
 
 						{
 							throw new IllegalArgumentException("Expected a categorical or categorical-like continuous feature, got " + feature);
 						}
-
-						label = new CategoricalLabel(dataField);
 					}
 					break;
 				case REGRESSION:
 					{
-						DataField dataField = encoder.toContinuous(feature.getName());
+						TypeDefinitionField field = encoder.toContinuous(feature.getName());
 
-						dataField.setDataType(DataType.DOUBLE);
+						field.setDataType(DataType.DOUBLE);
 
-						label = new ContinuousLabel(dataField);
+						label = new ContinuousLabel(field.getName(), field.getDataType());
 					}
 					break;
 				default:
