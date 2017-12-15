@@ -33,6 +33,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
@@ -40,6 +42,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.tuning.CrossValidatorModel;
@@ -61,6 +64,8 @@ public class ConverterUtil {
 
 	static
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
+		checkVersion();
+
 		SparkMLEncoder encoder = new SparkMLEncoder(schema);
 
 		List<org.dmg.pmml.Model> models = new ArrayList<>();
@@ -255,6 +260,34 @@ public class ConverterUtil {
 	}
 
 	static
+	public void checkVersion(){
+		SparkContext sparkContext = SparkContext.getOrCreate();
+
+		int[] version = parseVersion(sparkContext.version());
+
+		if(!Arrays.equals(ConverterUtil.VERSION, version)){
+			throw new IllegalArgumentException("Expected Apache Spark ML version " + formatVersion(ConverterUtil.VERSION) + ", got version " + formatVersion(version) + " (" + sparkContext.version() + ")");
+		}
+	}
+
+	static
+	private int[] parseVersion(String string){
+		Pattern pattern = Pattern.compile("^(\\d+)\\.(\\d+)(\\..*)?$");
+
+		Matcher matcher = pattern.matcher(string);
+		if(!matcher.matches()){
+			return new int[]{-1, -1};
+		}
+
+		return new int[]{Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))};
+	}
+
+	static
+	private String formatVersion(int[] version){
+		return String.valueOf(version[0]) + "." + String.valueOf(version[1]);
+	}
+
+	static
 	private void init(){
 		Thread thread = Thread.currentThread();
 
@@ -325,6 +358,8 @@ public class ConverterUtil {
 			putConverterClazz(clazz, converterClazz);
 		}
 	}
+
+	private static final int[] VERSION = {2, 0};
 
 	private static final Map<Class<? extends Transformer>, Class<? extends TransformerConverter>> converters = new LinkedHashMap<>();
 
