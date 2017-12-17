@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.tree.CategoricalSplit;
@@ -62,20 +63,20 @@ public class TreeModelUtil {
 	}
 
 	static
-	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, Schema schema){
+	public <M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(M model, Schema schema){
 		PredicateManager predicateManager = new PredicateManager();
 
 		return encodeDecisionTreeEnsemble(model, predicateManager, schema);
 	}
 
 	static
-	public List<TreeModel> encodeDecisionTreeEnsemble(TreeEnsembleModel<?> model, PredicateManager predicateManager, Schema schema){
+	public <M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(M model, PredicateManager predicateManager, Schema schema){
 		Schema segmentSchema = schema.toAnonymousSchema();
 
 		List<TreeModel> treeModels = new ArrayList<>();
 
-		DecisionTreeModel[] trees = model.trees();
-		for(DecisionTreeModel tree : trees){
+		T[] trees = model.trees();
+		for(T tree : trees){
 			TreeModel treeModel = encodeDecisionTree(tree, predicateManager, segmentSchema);
 
 			treeModels.add(treeModel);
@@ -85,14 +86,14 @@ public class TreeModelUtil {
 	}
 
 	static
-	public TreeModel encodeDecisionTree(DecisionTreeModel model, Schema schema){
+	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(M model, Schema schema){
 		PredicateManager predicateManager = new PredicateManager();
 
 		return encodeDecisionTree(model, predicateManager, schema);
 	}
 
 	static
-	public TreeModel encodeDecisionTree(DecisionTreeModel model, PredicateManager predicateManager, Schema schema){
+	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(M model, PredicateManager predicateManager, Schema schema){
 		org.apache.spark.ml.tree.Node node = model.rootNode();
 
 		if(model instanceof DecisionTreeRegressionModel){
