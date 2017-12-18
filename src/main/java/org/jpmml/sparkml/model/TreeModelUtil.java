@@ -44,6 +44,7 @@ import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.True;
+import org.dmg.pmml.Visitor;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
@@ -56,6 +57,8 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
+import org.jpmml.sparkml.TreeModelOptions;
+import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
 public class TreeModelUtil {
 
@@ -114,6 +117,13 @@ public class TreeModelUtil {
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
+
+		String compact = TreeModelOptions.COMPACT;
+		if(compact != null && Boolean.valueOf(compact)){
+			Visitor visitor = new TreeModelCompactor();
+
+			visitor.applyTo(treeModel);
+		}
 
 		return treeModel;
 	}
