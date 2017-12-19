@@ -197,7 +197,7 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.2-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --properties-file src/etc/converter.properties --class org.jpmml.sparkml.Main target/converter-executable-1.2-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:

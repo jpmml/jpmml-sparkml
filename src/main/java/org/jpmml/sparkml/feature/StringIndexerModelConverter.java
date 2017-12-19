@@ -18,13 +18,16 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.DataField;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
+import org.dmg.pmml.TypeDefinitionField;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
@@ -43,24 +46,39 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		DataField dataField = encoder.toCategorical(feature.getName(), Arrays.asList(transformer.labels()));
+		List<String> categories = new ArrayList<>();
+		categories.addAll(Arrays.asList(transformer.labels()));
 
-		InvalidValueTreatmentMethod invalidValueTreatmentMethod;
+		TypeDefinitionField field = encoder.toCategorical(feature.getName(), categories);
 
-		String handleInvalid = transformer.getHandleInvalid();
-		switch(handleInvalid){
-			case "error":
-				invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
-				break;
-			default:
-				throw new IllegalArgumentException(handleInvalid);
+		if(field instanceof DataField){
+			DataField dataField = (DataField)field;
+
+			InvalidValueTreatmentMethod invalidValueTreatmentMethod;
+
+			String handleInvalid = transformer.getHandleInvalid();
+			switch(handleInvalid){
+				case "error":
+					invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
+					break;
+				default:
+					throw new IllegalArgumentException(handleInvalid);
+			}
+
+			InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()
+				.setInvalidValueTreatment(invalidValueTreatmentMethod);
+
+			encoder.addDecorator(dataField.getName(), invalidValueDecorator);
+		} else
+
+		if(field instanceof DerivedField){
+			// Ignored
+		} else
+
+		{
+			throw new IllegalArgumentException();
 		}
 
-		InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()
-			.setInvalidValueTreatment(invalidValueTreatmentMethod);
-
-		encoder.addDecorator(dataField.getName(), invalidValueDecorator);
-
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, dataField));
+		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, field, categories));
 	}
 }
