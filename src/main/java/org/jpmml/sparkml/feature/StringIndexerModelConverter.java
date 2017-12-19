@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataField;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.TypeDefinitionField;
@@ -47,43 +48,54 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StringIndexerModel transformer = getTransformer();
 
-		List<String> labels = Arrays.asList(transformer.labels());
-
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		DataField dataField = encoder.toCategorical(feature.getName(), labels);
-
-		InvalidValueTreatmentMethod invalidValueTreatmentMethod;
+		List<String> categories = new ArrayList<>();
+		categories.addAll(Arrays.asList(transformer.labels()));
 
 		String handleInvalid = transformer.getHandleInvalid();
-		switch(handleInvalid){
-			case "keep":
-				invalidValueTreatmentMethod = InvalidValueTreatmentMethod.AS_IS;
-				break;
-			case "error":
-				invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
-				break;
-			default:
-				throw new IllegalArgumentException(handleInvalid);
+
+		TypeDefinitionField field = encoder.toCategorical(feature.getName(), categories);
+
+		if(field instanceof DataField){
+			DataField dataField = (DataField)field;
+
+			InvalidValueTreatmentMethod invalidValueTreatmentMethod;
+
+			switch(handleInvalid){
+				case "keep":
+					invalidValueTreatmentMethod = InvalidValueTreatmentMethod.AS_IS;
+					break;
+				case "error":
+					invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
+					break;
+				default:
+					throw new IllegalArgumentException(handleInvalid);
+			}
+
+			InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()
+				.setInvalidValueTreatment(invalidValueTreatmentMethod);
+
+			encoder.addDecorator(dataField.getName(), invalidValueDecorator);
+		} else
+
+		if(field instanceof DerivedField){
+			// Ignored
+		} else
+
+		{
+			throw new IllegalArgumentException();
 		}
-
-		InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()
-			.setInvalidValueTreatment(invalidValueTreatmentMethod);
-
-		encoder.addDecorator(dataField.getName(), invalidValueDecorator);
-
-		TypeDefinitionField field = dataField;
 
 		switch(handleInvalid){
 			case "keep":
 				Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
 
-				for(String label : labels){
-					setApply.addExpressions(PMMLUtil.createConstant(label));
+				for(String category : categories){
+					setApply.addExpressions(PMMLUtil.createConstant(category));
 				}
 
-				labels = new ArrayList<>(labels);
-				labels.add(StringIndexerModelConverter.LABEL_UNKNOWN);
+				categories.add(StringIndexerModelConverter.LABEL_UNKNOWN);
 
 				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(StringIndexerModelConverter.LABEL_UNKNOWN));
 
@@ -93,7 +105,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 				break;
 		}
 
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, field, labels));
+		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, field, categories));
 	}
 
 	private static final String LABEL_UNKNOWN = "__unknown";
