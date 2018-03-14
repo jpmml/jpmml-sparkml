@@ -152,7 +152,7 @@ public class TreeModelUtil {
 				if(feature instanceof BooleanFeature){
 					BooleanFeature booleanFeature = (BooleanFeature)feature;
 
-					if(threshold != 0d){
+					if(threshold != 0.5d){
 						throw new IllegalArgumentException();
 					}
 

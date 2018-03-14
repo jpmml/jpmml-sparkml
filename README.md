@@ -20,6 +20,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.MinMaxScalerModel`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/MinMaxScalerModel.html) (the result of fitting a `feature.MinMaxScaler`)
     * [`feature.NGram`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/NGram.html)
     * [`feature.OneHotEncoder`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoder.html)
+    * [`feature.OneHotEncoderModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/OneHotEncoderModel.html) (the result of fitting a `feature.OneHotEncoderEstimator`)
     * [`feature.PCAModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/PCAModel.html) (the result of fitting a `feature.PCA`)
     * [`feature.QuantileDiscretizer`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
     * [`feature.RegexTokenizer`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RegexTokenizer.html)
@@ -57,7 +58,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X or 2.2.X.
+* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X or 2.3.X.
 
 # Installation #
 

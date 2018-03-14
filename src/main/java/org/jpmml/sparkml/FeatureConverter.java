@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasOutputCol;
+import org.apache.spark.ml.param.shared.HasOutputCols;
 import org.dmg.pmml.FieldName;
 import org.jpmml.converter.Feature;
 
@@ -47,6 +48,32 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			List<Feature> features = encodeFeatures(encoder);
 
 			encoder.putFeatures(outputCol, features);
+		} else
+
+		if(transformer instanceof HasOutputCols){
+			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
+
+			String[] outputCols = hasOutputCols.getOutputCols();
+
+			List<Feature> features = encodeFeatures(encoder);
+			if(outputCols.length != features.size()){
+				throw new IllegalArgumentException("Expected " + outputCols.length + " features, got " + features.size() + " features");
+			}
+
+			for(int i = 0; i < outputCols.length; i++){
+				String outputCol = outputCols[i];
+				Feature feature = features.get(i);
+
+				if(feature instanceof BinarizedCategoricalFeature){
+					BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)feature;
+
+					encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
+				} else
+
+				{
+					encoder.putOnlyFeature(outputCol, feature);
+				}
+			}
 		}
 	}
 

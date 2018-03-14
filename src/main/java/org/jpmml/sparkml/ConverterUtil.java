@@ -359,7 +359,7 @@ public class ConverterUtil {
 		}
 	}
 
-	private static final int[] VERSION = {2, 2};
+	private static final int[] VERSION = {2, 3};
 
 	private static final Map<Class<? extends Transformer>, Class<? extends TransformerConverter>> converters = new LinkedHashMap<>();
 

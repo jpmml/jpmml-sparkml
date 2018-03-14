@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2018 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -21,43 +21,46 @@ package org.jpmml.sparkml.feature;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.spark.ml.feature.OneHotEncoder;
+import org.apache.spark.ml.feature.OneHotEncoderModel;
 import org.dmg.pmml.DataType;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.sparkml.BinarizedCategoricalFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
-import scala.Option;
 
-public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
+public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderModel> {
 
-	public OneHotEncoderConverter(OneHotEncoder transformer){
+	public OneHotEncoderModelConverter(OneHotEncoderModel transformer){
 		super(transformer);
 	}
 
 	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
-		OneHotEncoder transformer = getTransformer();
+		OneHotEncoderModel transformer = getTransformer();
 
-		boolean dropLast = true;
+		String[] inputCols = transformer.getInputCols();
 
-		Option<Object> dropLastOption = transformer.get(transformer.dropLast());
-		if(dropLastOption.isDefined()){
-			dropLast = (Boolean)dropLastOption.get();
-		}
-
-		CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
-
-		List<String> values = categoricalFeature.getValues();
-		if(dropLast){
-			values = values.subList(0, values.size() - 1);
-		}
+		boolean dropLast = transformer.getDropLast();
 
 		List<Feature> result = new ArrayList<>();
 
-		for(String value : values){
-			result.add(new BinaryFeature(encoder, categoricalFeature.getName(), DataType.STRING, value));
+		for(int i = 0; i < inputCols.length; i++){
+			CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(inputCols[i]);
+
+			List<String> values = categoricalFeature.getValues();
+			if(dropLast){
+				values = values.subList(0, values.size() - 1);
+			}
+
+			List<BinaryFeature> binaryFeatures = new ArrayList<>();
+
+			for(String value : values){
+				binaryFeatures.add(new BinaryFeature(encoder, categoricalFeature.getName(), DataType.STRING, value));
+			}
+
+			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature.getName(), categoricalFeature.getDataType(), binaryFeatures));
 		}
 
 		return result;
