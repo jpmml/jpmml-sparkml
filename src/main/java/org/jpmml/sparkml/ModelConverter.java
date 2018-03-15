@@ -29,10 +29,10 @@ import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.TypeDefinitionField;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segment;
 import org.dmg.pmml.mining.Segmentation;
@@ -99,7 +99,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 								categories.add(String.valueOf(i));
 							}
 
-							TypeDefinitionField field = encoder.toCategorical(continuousFeature.getName(), categories);
+							Field<?> field = encoder.toCategorical(continuousFeature.getName(), categories);
 
 							encoder.putOnlyFeature(labelCol, new CategoricalFeature(encoder, field, categories));
 
@@ -113,7 +113,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 					break;
 				case REGRESSION:
 					{
-						TypeDefinitionField field = encoder.toContinuous(feature.getName());
+						Field<?> field = encoder.toContinuous(feature.getName());
 
 						field.setDataType(DataType.DOUBLE);
 

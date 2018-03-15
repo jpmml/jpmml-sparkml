@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.google.common.base.Objects.ToStringHelper;
-import org.dmg.pmml.TypeDefinitionField;
+import org.dmg.pmml.Field;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 
@@ -34,7 +34,7 @@ public class DocumentFeature extends Feature {
 	private Set<StopWordSet> stopWordSets = new LinkedHashSet<>();
 
 
-	public DocumentFeature(SparkMLEncoder encoder, TypeDefinitionField field, String wordSeparatorRE){
+	public DocumentFeature(SparkMLEncoder encoder, Field<?> field, String wordSeparatorRE){
 		super(encoder, field.getName(), field.getDataType());
 
 		setWordSeparatorRE(wordSeparatorRE);

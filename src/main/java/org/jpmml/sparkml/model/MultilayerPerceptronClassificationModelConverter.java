@@ -75,7 +75,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 			throw new IllegalArgumentException();
 		}
 
-		List<Feature> features = schema.getFeatures();
+		List<? extends Feature> features = schema.getFeatures();
 		if(features.size() != layers[0]){
 			throw new IllegalArgumentException();
 		}
