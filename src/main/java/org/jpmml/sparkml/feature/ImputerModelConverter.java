@@ -26,8 +26,8 @@ import org.apache.spark.ml.feature.ImputerModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.dmg.pmml.DataField;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.MissingValueTreatmentMethod;
-import org.dmg.pmml.TypeDefinitionField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.MissingValueDecorator;
 import org.jpmml.converter.ValueUtil;
@@ -71,7 +71,7 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
-			TypeDefinitionField field = encoder.getField(feature.getName());
+			Field<?> field = encoder.getField(feature.getName());
 
 			if(field instanceof DataField){
 				DataField dataField = (DataField)field;

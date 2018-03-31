@@ -59,7 +59,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			Matrix coefficientMatrix = model.coefficientMatrix();
 			Vector interceptVector = model.interceptVector();
 
-			List<Feature> features = schema.getFeatures();
+			List<? extends Feature> features = schema.getFeatures();
 
 			List<RegressionTable> regressionTables = new ArrayList<>();
 
