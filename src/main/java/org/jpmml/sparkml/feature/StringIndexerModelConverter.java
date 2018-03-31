@@ -26,10 +26,11 @@ import java.util.List;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataField;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.TypeDefinitionField;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
@@ -55,7 +56,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		String handleInvalid = transformer.getHandleInvalid();
 
-		TypeDefinitionField field = encoder.toCategorical(feature.getName(), categories);
+		Field<?> field = encoder.toCategorical(feature.getName(), categories);
 
 		if(field instanceof DataField){
 			DataField dataField = (DataField)field;
@@ -92,12 +93,12 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 				Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
 
 				for(String category : categories){
-					setApply.addExpressions(PMMLUtil.createConstant(category));
+					setApply.addExpressions(PMMLUtil.createConstant(category, feature.getDataType()));
 				}
 
 				categories.add(StringIndexerModelConverter.LABEL_UNKNOWN);
 
-				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(StringIndexerModelConverter.LABEL_UNKNOWN));
+				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(StringIndexerModelConverter.LABEL_UNKNOWN, DataType.STRING));
 
 				field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, feature.getDataType(), apply);
 				break;

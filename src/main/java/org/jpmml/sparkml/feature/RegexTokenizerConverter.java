@@ -24,8 +24,8 @@ import java.util.List;
 import org.apache.spark.ml.feature.RegexTokenizer;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.TypeDefinitionField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.PMMLUtil;
@@ -53,7 +53,7 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		TypeDefinitionField field = encoder.getField(feature.getName());
+		Field<?> field = encoder.getField(feature.getName());
 
 		if(transformer.getToLowercase()){
 			Apply apply = PMMLUtil.createApply("lowercase", feature.ref());
