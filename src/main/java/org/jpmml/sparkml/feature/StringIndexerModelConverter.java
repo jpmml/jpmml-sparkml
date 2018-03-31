@@ -26,8 +26,8 @@ import java.util.List;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DerivedField;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
-import org.dmg.pmml.TypeDefinitionField;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
@@ -49,7 +49,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 		List<String> categories = new ArrayList<>();
 		categories.addAll(Arrays.asList(transformer.labels()));
 
-		TypeDefinitionField field = encoder.toCategorical(feature.getName(), categories);
+		Field<?> field = encoder.toCategorical(feature.getName(), categories);
 
 		if(field instanceof DataField){
 			DataField dataField = (DataField)field;

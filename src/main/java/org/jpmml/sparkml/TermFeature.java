@@ -100,8 +100,7 @@ public class TermFeature extends Feature {
 		Feature feature = getFeature();
 		String value = getValue();
 
-		Constant constant = PMMLUtil.createConstant(value)
-			.setDataType(DataType.STRING);
+		Constant constant = PMMLUtil.createConstant(value, DataType.STRING);
 
 		return PMMLUtil.createApply(defineFunction.getName(), feature.ref(), constant);
 	}
