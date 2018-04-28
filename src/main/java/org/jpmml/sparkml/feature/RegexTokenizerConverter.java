@@ -61,6 +61,6 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 			field = encoder.createDerivedField(FeatureUtil.createName("lowercase", feature), OpType.CATEGORICAL, DataType.STRING, apply);
 		}
 
-		return Collections.<Feature>singletonList(new DocumentFeature(encoder, field, transformer.getPattern()));
+		return Collections.singletonList(new DocumentFeature(encoder, field, transformer.getPattern()));
 	}
 }

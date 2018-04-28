@@ -112,7 +112,7 @@ public class TreeModelUtil {
 
 	static
 	public TreeModel encodeTreeModel(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
-		Node root = encodeNode(node, predicateManager, Collections.<FieldName, Set<String>>emptyMap(), miningFunction, schema)
+		Node root = encodeNode(node, predicateManager, Collections.emptyMap(), miningFunction, schema)
 			.setPredicate(new True());
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
@@ -212,7 +212,6 @@ public class TreeModelUtil {
 						throw new IllegalArgumentException();
 					}
 
-					final
 					Set<String> parentValues = parentFieldValues.get(name);
 
 					com.google.common.base.Predicate<String> valueFilter = new com.google.common.base.Predicate<String>(){

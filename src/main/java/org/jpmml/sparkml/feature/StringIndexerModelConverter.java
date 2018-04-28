@@ -79,6 +79,6 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			throw new IllegalArgumentException();
 		}
 
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, field, categories));
+		return Collections.singletonList(new CategoricalFeature(encoder, field, categories));
 	}
 }

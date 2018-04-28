@@ -52,7 +52,6 @@ import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.mining.MiningModel;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.MetroJAXBUtil;
@@ -122,7 +121,7 @@ public class ConverterUtil {
 
 			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
 
-			MiningModel miningModel = MiningModelUtil.createModelChain(models, new Schema(null, Collections.<Feature>emptyList()))
+			MiningModel miningModel = MiningModelUtil.createModelChain(models, new Schema(null, Collections.emptyList()))
 				.setMiningSchema(miningSchema);
 
 			rootModel = miningModel;
@@ -218,13 +217,13 @@ public class ConverterUtil {
 				if(transformer instanceof CrossValidatorModel){
 					CrossValidatorModel crossValidatorModel = (CrossValidatorModel)transformer;
 
-					return Collections.<Transformer>singletonList(crossValidatorModel.bestModel());
+					return Collections.singletonList(crossValidatorModel.bestModel());
 				} else
 
 				if(transformer instanceof TrainValidationSplitModel){
 					TrainValidationSplitModel trainValidationSplitModel = (TrainValidationSplitModel)transformer;
 
-					return Collections.<Transformer>singletonList(trainValidationSplitModel.bestModel());
+					return Collections.singletonList(trainValidationSplitModel.bestModel());
 				}
 
 				return null;

@@ -99,7 +99,6 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			.setOutputColumn(columns.get(1))
 			.setInlineTable(inlineTable);
 
-		final
 		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.DOUBLE)
 			.setOpType(OpType.CATEGORICAL)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)

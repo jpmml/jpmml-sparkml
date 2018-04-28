@@ -54,6 +54,6 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.DOUBLE, apply);
 
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1")));
+		return Collections.singletonList(new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1")));
 	}
 }
