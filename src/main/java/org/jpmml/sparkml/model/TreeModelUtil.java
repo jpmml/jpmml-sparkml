@@ -97,23 +97,60 @@ public class TreeModelUtil {
 
 	static
 	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(M model, PredicateManager predicateManager, Schema schema){
-		org.apache.spark.ml.tree.Node node = model.rootNode();
 
 		if(model instanceof DecisionTreeRegressionModel){
-			return encodeTreeModel(node, predicateManager, MiningFunction.REGRESSION, schema);
+			ScoreEncoder scoreEncoder = new ScoreEncoder(){
+
+				@Override
+				public void encode(Node node, LeafNode leafNode){
+					String score = ValueUtil.formatValue(leafNode.prediction());
+
+					node.setScore(score);
+				}
+			};
+
+			return encodeTreeModel(model, predicateManager, MiningFunction.REGRESSION, scoreEncoder, schema);
 		} else
 
 		if(model instanceof DecisionTreeClassificationModel){
-			return encodeTreeModel(node, predicateManager, MiningFunction.CLASSIFICATION, schema);
-		}
+			ScoreEncoder scoreEncoder = new ScoreEncoder(){
 
-		throw new IllegalArgumentException();
+				private CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+
+
+				@Override
+				public void encode(Node node, LeafNode leafNode){
+					int index = ValueUtil.asInt(leafNode.prediction());
+
+					node.setScore(this.categoricalLabel.getValue(index));
+
+					ImpurityCalculator impurityCalculator = leafNode.impurityStats();
+
+					node.setRecordCount((double)impurityCalculator.count());
+
+					double[] stats = impurityCalculator.stats();
+					for(int i = 0; i < stats.length; i++){
+						ScoreDistribution scoreDistribution = new ScoreDistribution(this.categoricalLabel.getValue(i), stats[i]);
+
+						node.addScoreDistributions(scoreDistribution);
+					}
+				}
+			};
+
+			return encodeTreeModel(model, predicateManager, MiningFunction.CLASSIFICATION, scoreEncoder, schema);
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	static
-	public TreeModel encodeTreeModel(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, MiningFunction miningFunction, Schema schema){
-		Node root = encodeNode(node, predicateManager, Collections.emptyMap(), miningFunction, schema)
+	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(M model, PredicateManager predicateManager, MiningFunction miningFunction, ScoreEncoder scoreEncoder, Schema schema){
+		Node root = new Node()
 			.setPredicate(new True());
+
+		encodeNode(root, model.rootNode(), predicateManager, Collections.emptyMap(), scoreEncoder, schema);
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
@@ -129,10 +166,16 @@ public class TreeModelUtil {
 	}
 
 	static
-	public Node encodeNode(org.apache.spark.ml.tree.Node node, PredicateManager predicateManager, Map<FieldName, Set<String>> parentFieldValues, MiningFunction miningFunction, Schema schema){
+	private void encodeNode(Node node, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, Map<FieldName, Set<String>> parentFieldValues, ScoreEncoder scoreEncoder, Schema schema){
 
-		if(node instanceof InternalNode){
-			InternalNode internalNode = (InternalNode)node;
+		if(sparkNode instanceof LeafNode){
+			LeafNode leafNode = (LeafNode)sparkNode;
+
+			scoreEncoder.encode(node, leafNode);
+		} else
+
+		if(sparkNode instanceof InternalNode){
+			InternalNode internalNode = (InternalNode)sparkNode;
 
 			Map<FieldName, Set<String>> leftFieldValues = parentFieldValues;
 			Map<FieldName, Set<String>> rightFieldValues = parentFieldValues;
@@ -214,10 +257,10 @@ public class TreeModelUtil {
 
 					Set<String> parentValues = parentFieldValues.get(name);
 
-					com.google.common.base.Predicate<String> valueFilter = new com.google.common.base.Predicate<String>(){
+					java.util.function.Predicate<String> valueFilter = new java.util.function.Predicate<String>(){
 
 						@Override
-						public boolean apply(String value){
+						public boolean test(String value){
 
 							if(parentValues != null){
 								return parentValues.contains(value);
@@ -249,57 +292,16 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			Node result = new Node();
-
-			Node leftChild = encodeNode(internalNode.leftChild(), predicateManager, leftFieldValues, miningFunction, schema)
+			Node leftChild = new Node()
 				.setPredicate(leftPredicate);
 
-			Node rightChild = encodeNode(internalNode.rightChild(), predicateManager, rightFieldValues, miningFunction, schema)
+			Node rightChild = new Node()
 				.setPredicate(rightPredicate);
 
-			result.addNodes(leftChild, rightChild);
+			encodeNode(leftChild, internalNode.leftChild(), predicateManager, leftFieldValues, scoreEncoder, schema);
+			encodeNode(rightChild, internalNode.rightChild(), predicateManager, rightFieldValues, scoreEncoder, schema);
 
-			return result;
-		} else
-
-		if(node instanceof LeafNode){
-			LeafNode leafNode = (LeafNode)node;
-
-			Node result = new Node();
-
-			switch(miningFunction){
-				case REGRESSION:
-					{
-						String score = ValueUtil.formatValue(node.prediction());
-
-						result.setScore(score);
-					}
-					break;
-				case CLASSIFICATION:
-					{
-						CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
-
-						int index = ValueUtil.asInt(node.prediction());
-
-						result.setScore(categoricalLabel.getValue(index));
-
-						ImpurityCalculator impurityCalculator = node.impurityStats();
-
-						result.setRecordCount((double)impurityCalculator.count());
-
-						double[] stats = impurityCalculator.stats();
-						for(int i = 0; i < stats.length; i++){
-							ScoreDistribution scoreDistribution = new ScoreDistribution(categoricalLabel.getValue(i), stats[i]);
-
-							result.addScoreDistributions(scoreDistribution);
-						}
-					}
-					break;
-				default:
-					throw new UnsupportedOperationException();
-			}
-
-			return result;
+			node.addNodes(leftChild, rightChild);
 		} else
 
 		{
@@ -308,14 +310,14 @@ public class TreeModelUtil {
 	}
 
 	static
-	private List<String> selectValues(List<String> values, double[] categories, com.google.common.base.Predicate<String> valueFilter){
+	private List<String> selectValues(List<String> values, double[] categories, java.util.function.Predicate<String> valueFilter){
 
 		if(categories.length == 1){
 			int index = ValueUtil.asInt(categories[0]);
 
 			String value = values.get(index);
 
-			if(valueFilter.apply(value)){
+			if(valueFilter.test(value)){
 				return Collections.singletonList(value);
 			}
 
@@ -330,13 +332,18 @@ public class TreeModelUtil {
 
 				String value = values.get(index);
 
-				if(valueFilter.apply(value)){
+				if(valueFilter.test(value)){
 					result.add(value);
 				}
 			}
 
 			return result;
 		}
+	}
+
+	interface ScoreEncoder {
+
+		void encode(Node node, LeafNode leafNode);
 	}
 
 	private static final double[] TRUE = {1.0d};
