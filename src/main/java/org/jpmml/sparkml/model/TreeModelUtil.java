@@ -156,7 +156,7 @@ public class TreeModelUtil {
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
 
 		String compact = TreeModelOptions.COMPACT;
-		if(compact != null && Boolean.valueOf(compact)){
+		if(compact != null && Boolean.parseBoolean(compact)){
 			Visitor visitor = new TreeModelCompactor();
 
 			visitor.applyTo(treeModel);
