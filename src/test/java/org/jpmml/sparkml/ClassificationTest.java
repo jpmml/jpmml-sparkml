@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import org.jpmml.evaluator.PMMLEquivalence;
 import org.junit.Test;
 
 public class ClassificationTest extends ConverterTest {
@@ -48,6 +49,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateNaiveBayesAudit() throws Exception {
+		evaluate("NaiveBayes", "Audit", new PMMLEquivalence(5e-10, 5e-10));
+	}
+
+	@Test
 	public void evaluateNeuralNetworkAudit() throws Exception {
 		evaluate("NeuralNetwork", "Audit");
 	}
@@ -60,6 +66,11 @@ public class ClassificationTest extends ConverterTest {
 	@Test
 	public void evaluateDecisionTreeIris() throws Exception {
 		evaluate("DecisionTree", "Iris");
+	}
+
+	@Test
+	public void evaluateNaiveBayesIris() throws Exception {
+		evaluate("NaiveBayes", "Iris");
 	}
 
 	@Test
