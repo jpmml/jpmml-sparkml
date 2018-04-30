@@ -20,5 +20,5 @@ package org.jpmml.sparkml;
 
 public interface TreeModelOptions {
 
-	String COMPACT = System.getProperty(TreeModelOptions.class.getName() + ".COMPACT");
+	String COMPACT = System.getProperty(TreeModelOptions.class.getName() + ".COMPACT", "true");
 }

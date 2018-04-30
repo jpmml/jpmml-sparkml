@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.feature.OneHotEncoderModel;
-import org.dmg.pmml.DataType;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
@@ -57,7 +56,7 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 			List<BinaryFeature> binaryFeatures = new ArrayList<>();
 
 			for(String value : values){
-				binaryFeatures.add(new BinaryFeature(encoder, categoricalFeature.getName(), DataType.STRING, value));
+				binaryFeatures.add(new BinaryFeature(encoder, categoricalFeature, value));
 			}
 
 			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature.getName(), categoricalFeature.getDataType(), binaryFeatures));

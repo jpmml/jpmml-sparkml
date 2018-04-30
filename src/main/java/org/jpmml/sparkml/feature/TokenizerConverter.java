@@ -49,6 +49,6 @@ public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 
 		DerivedField derivedField = encoder.createDerivedField(FeatureUtil.createName("lowercase", feature), OpType.CATEGORICAL, DataType.STRING, apply);
 
-		return Collections.<Feature>singletonList(new DocumentFeature(encoder, derivedField, "\\s+"));
+		return Collections.singletonList(new DocumentFeature(encoder, derivedField, "\\s+"));
 	}
 }

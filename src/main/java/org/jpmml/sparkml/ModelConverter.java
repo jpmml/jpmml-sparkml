@@ -37,6 +37,7 @@ import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segment;
 import org.dmg.pmml.mining.Segmentation;
 import org.dmg.pmml.mining.Segmentation.MultipleModelMethod;
+import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
@@ -74,6 +75,12 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			switch(miningFunction){
 				case CLASSIFICATION:
 					{
+						if(feature instanceof BooleanFeature){
+							BooleanFeature booleanFeature = (BooleanFeature)feature;
+
+							label = new CategoricalLabel(booleanFeature.getName(), booleanFeature.getDataType(), booleanFeature.getValues());
+						} else
+
 						if(feature instanceof CategoricalFeature){
 							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 

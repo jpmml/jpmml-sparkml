@@ -70,7 +70,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.INTEGER, discretize);
 
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, derivedField, categories));
+		return Collections.singletonList(new CategoricalFeature(encoder, derivedField, categories));
 	}
 
 	static
