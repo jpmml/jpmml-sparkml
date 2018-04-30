@@ -90,17 +90,31 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		switch(handleInvalid){
 			case "keep":
+				String invalidCategory;
+
+				DataType dataType = feature.getDataType();
+				switch(dataType){
+					case INTEGER:
+					case FLOAT:
+					case DOUBLE:
+						invalidCategory = "-999";
+						break;
+					default:
+						invalidCategory = "__unknown";
+						break;
+				}
+
 				Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
 
 				for(String category : categories){
-					setApply.addExpressions(PMMLUtil.createConstant(category, feature.getDataType()));
+					setApply.addExpressions(PMMLUtil.createConstant(category, dataType));
 				}
 
-				categories.add(StringIndexerModelConverter.LABEL_UNKNOWN);
+				categories.add(invalidCategory);
 
-				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(StringIndexerModelConverter.LABEL_UNKNOWN, DataType.STRING));
+				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
 
-				field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, feature.getDataType(), apply);
+				field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 				break;
 			default:
 				break;
@@ -108,6 +122,4 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 		return Collections.singletonList(new CategoricalFeature(encoder, field, categories));
 	}
-
-	private static final String LABEL_UNKNOWN = "__unknown";
 }
