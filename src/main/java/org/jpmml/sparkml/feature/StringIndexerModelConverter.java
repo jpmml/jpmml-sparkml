@@ -106,7 +106,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 				break;
 		}
 
-		return Collections.<Feature>singletonList(new CategoricalFeature(encoder, field, categories));
+		return Collections.singletonList(new CategoricalFeature(encoder, field, categories));
 	}
 
 	private static final String LABEL_UNKNOWN = "__unknown";

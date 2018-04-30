@@ -39,6 +39,6 @@ public class NGramConverter extends FeatureConverter<NGram> {
 
 		DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
-		return Collections.<Feature>singletonList(documentFeature);
+		return Collections.singletonList(documentFeature);
 	}
 }

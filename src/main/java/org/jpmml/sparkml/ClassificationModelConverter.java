@@ -99,7 +99,6 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			.setOutputColumn(columns.get(1))
 			.setInlineTable(inlineTable);
 
-		final
 		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.DOUBLE)
 			.setOpType(OpType.CATEGORICAL)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
@@ -107,13 +106,13 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		result.add(predictedField);
 
-		Feature feature = new CategoricalFeature(encoder, predictedField.getName(), predictedField.getDataType(), categories){
+		Feature feature = new CategoricalFeature(encoder, predictedField, categories){
 
 			@Override
 			public ContinuousFeature toContinuousFeature(){
 				PMMLEncoder encoder = ensureEncoder();
 
-				return new ContinuousFeature(encoder, getName(), getDataType());
+				return new ContinuousFeature(encoder, this);
 			}
 		};
 
@@ -133,7 +132,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 				result.add(probabilityField);
 
-				features.add(new ContinuousFeature(encoder, probabilityField.getName(), probabilityField.getDataType()));
+				features.add(new ContinuousFeature(encoder, probabilityField));
 			}
 
 			encoder.putFeatures(probabilityCol, features);

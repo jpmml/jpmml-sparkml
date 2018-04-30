@@ -54,7 +54,7 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), label.getDataType(), OpType.CONTINUOUS);
 
-		encoder.putOnlyFeature(predictionCol, new ContinuousFeature(encoder, predictedField.getName(), predictedField.getDataType()));
+		encoder.putOnlyFeature(predictionCol, new ContinuousFeature(encoder, predictedField));
 
 		return Collections.singletonList(predictedField);
 	}

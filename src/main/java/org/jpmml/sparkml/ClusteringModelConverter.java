@@ -29,10 +29,10 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.StringFeature;
 
 abstract
 public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -54,13 +54,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), DataType.STRING, OpType.CATEGORICAL);
 
-		Feature feature = new Feature(encoder, predictedField.getName(), predictedField.getDataType()){
-
-			@Override
-			public ContinuousFeature toContinuousFeature(){
-				throw new UnsupportedOperationException();
-			}
-		};
+		Feature feature = new StringFeature(encoder, predictedField);
 
 		encoder.putOnlyFeature(predictionCol, feature);
 
