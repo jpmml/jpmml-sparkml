@@ -54,6 +54,6 @@ public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover
 
 		documentFeature.addStopWordSet(stopWordSet);
 
-		return Collections.<Feature>singletonList(documentFeature);
+		return Collections.singletonList(documentFeature);
 	}
 }

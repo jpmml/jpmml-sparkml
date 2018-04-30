@@ -99,7 +99,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
 
-		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), model.intercept(), VectorUtil.toList(model.coefficients()), targetCategory);
+		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), targetCategory);
 
 		return generalRegressionModel;
 	}
