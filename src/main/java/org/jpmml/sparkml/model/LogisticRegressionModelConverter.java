@@ -18,11 +18,16 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.dmg.pmml.regression.RegressionModel;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> {
@@ -35,7 +40,12 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 	public RegressionModel encodeModel(Schema schema){
 		LogisticRegressionModel model = getTransformer();
 
-		RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
+		List<Feature> features = new ArrayList<>(schema.getFeatures());
+		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
+
+		ScaledFeatureUtil.simplify(features, coefficients);
+
+		RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(features, coefficients, model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
 			.setOutput(null);
 
 		return regressionModel;
