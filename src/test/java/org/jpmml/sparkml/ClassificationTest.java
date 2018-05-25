@@ -89,6 +89,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateDecisionTreeSentiment() throws Exception {
+		evaluate("DecisionTree", "Sentiment");
+	}
+
+	@Test
 	public void evaluateGLMSentiment() throws Exception {
 		evaluate("GLM", "Sentiment");
 	}

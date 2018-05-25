@@ -18,11 +18,16 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.dmg.pmml.regression.RegressionModel;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> {
@@ -35,6 +40,11 @@ public class LinearRegressionModelConverter extends RegressionModelConverter<Lin
 	public RegressionModel encodeModel(Schema schema){
 		LinearRegressionModel model = getTransformer();
 
-		return RegressionModelUtil.createRegression(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), null, schema);
+		List<Feature> features = new ArrayList<>(schema.getFeatures());
+		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
+
+		ScaledFeatureUtil.simplify(features, coefficients);
+
+		return RegressionModelUtil.createRegression(features, coefficients, model.intercept(), null, schema);
 	}
 }
