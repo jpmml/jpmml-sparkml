@@ -27,11 +27,13 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
@@ -94,12 +96,17 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 				break;
 		}
 
+		List<Feature> features = new ArrayList<>(schema.getFeatures());
+		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
+
+		ScaledFeatureUtil.simplify(features, coefficients);
+
 		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
 
-		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), targetCategory);
+		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, coefficients, model.intercept(), targetCategory);
 
 		return generalRegressionModel;
 	}

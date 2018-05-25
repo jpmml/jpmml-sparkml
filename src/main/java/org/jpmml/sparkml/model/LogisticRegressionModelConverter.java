@@ -34,6 +34,7 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.MatrixUtil;
+import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> {
@@ -49,7 +50,12 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
 		if(categoricalLabel.size() == 2){
-			RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(schema.getFeatures(), VectorUtil.toList(model.coefficients()), model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
+			List<Feature> features = new ArrayList<>(schema.getFeatures());
+			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
+
+			ScaledFeatureUtil.simplify(features, coefficients);
+
+			RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(features, coefficients, model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
 				.setOutput(null);
 
 			return regressionModel;
@@ -59,12 +65,15 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			Matrix coefficientMatrix = model.coefficientMatrix();
 			Vector interceptVector = model.interceptVector();
 
-			List<? extends Feature> features = schema.getFeatures();
-
 			List<RegressionTable> regressionTables = new ArrayList<>();
 
 			for(int i = 0; i < categoricalLabel.size(); i++){
-				RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, MatrixUtil.getRow(coefficientMatrix, i), interceptVector.apply(i))
+				List<Feature> features = new ArrayList<>(schema.getFeatures());
+				List<Double> coefficients = new ArrayList<>(MatrixUtil.getRow(coefficientMatrix, i));
+
+				ScaledFeatureUtil.simplify(features, coefficients);
+
+				RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, interceptVector.apply(i))
 					.setTargetCategory(categoricalLabel.getValue(i));
 
 				regressionTables.add(regressionTable);
