@@ -48,9 +48,15 @@ import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.tuning.CrossValidatorModel;
 import org.apache.spark.ml.tuning.TrainValidationSplitModel;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.DerivedField;
+import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningSchema;
+import org.dmg.pmml.Output;
+import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
@@ -67,7 +73,13 @@ public class ConverterUtil {
 
 		SparkMLEncoder encoder = new SparkMLEncoder(schema);
 
+		Map<FieldName, DataField> dataFields = encoder.getDataFields();
+		Map<FieldName, DerivedField> derivedFields = encoder.getDerivedFields();
+
 		List<org.dmg.pmml.Model> models = new ArrayList<>();
+
+		// Transformations preceding the last model
+		List<FieldName> preProcessorNames = Collections.emptyList();
 
 		Iterable<Transformer> transformers = getTransformers(pipelineModel);
 		for(Transformer transformer : transformers){
@@ -85,12 +97,18 @@ public class ConverterUtil {
 				org.dmg.pmml.Model model = modelConverter.registerModel(encoder);
 
 				models.add(model);
+
+				preProcessorNames = new ArrayList<>(derivedFields.keySet());
 			} else
 
 			{
 				throw new IllegalArgumentException("Expected a " + FeatureConverter.class.getName() + " or " + ModelConverter.class.getName() + " instance, got " + converter);
 			}
 		}
+
+		// Transformations following the last model
+		List<FieldName> postProcessorNames = new ArrayList<>(derivedFields.keySet());
+		postProcessorNames.removeAll(preProcessorNames);
 
 		org.dmg.pmml.Model rootModel;
 
@@ -129,6 +147,26 @@ public class ConverterUtil {
 
 		{
 			throw new IllegalArgumentException("Expected a pipeline with one or more models, got a pipeline with zero models");
+		}
+
+		for(FieldName postProcessorName : postProcessorNames){
+			DerivedField derivedField = derivedFields.get(postProcessorName);
+
+			encoder.removeDerivedField(postProcessorName);
+
+			Output output = rootModel.getOutput();
+			if(output == null){
+				output = new Output();
+
+				rootModel.setOutput(output);
+			}
+
+			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getDataType())
+				.setOpType(derivedField.getOpType())
+				.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
+				.setExpression(derivedField.getExpression());
+
+			output.addOutputFields(outputField);
 		}
 
 		PMML pmml = encoder.encodePMML(rootModel);
