@@ -33,6 +33,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.BooleanFeature;
@@ -172,5 +173,24 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(dataField == null){
 			throw new IllegalArgumentException(name.getValue());
 		}
+	}
+
+	public void removeDerivedField(FieldName name){
+		Map<FieldName, DerivedField> derivedFields = getDerivedFields();
+
+		DerivedField derivedField = derivedFields.remove(name);
+		if(derivedField == null){
+			throw new IllegalArgumentException(name.getValue());
+		}
+	}
+
+	@Override
+	public Map<FieldName, DataField> getDataFields(){
+		return super.getDataFields();
+	}
+
+	@Override
+	public Map<FieldName, DerivedField> getDerivedFields(){
+		return super.getDerivedFields();
 	}
 }

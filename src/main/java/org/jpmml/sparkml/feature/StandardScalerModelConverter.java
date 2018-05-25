@@ -26,12 +26,15 @@ import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
+import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.ScaledFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class StandardScalerModelConverter extends FeatureConverter<StandardScalerModel> {
@@ -61,15 +64,17 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 		for(int i = 0; i < features.size(); i++){
 			Feature feature = features.get(i);
 
-			ContinuousFeature continuousFeature = feature.toContinuousFeature();
+			FieldName name = formatName(transformer, i);
 
-			Expression expression = continuousFeature.ref();
+			Expression expression = null;
 
 			if(transformer.getWithMean()){
 				double meanValue = mean.apply(i);
 
 				if(!ValueUtil.isZero(meanValue)){
-					expression = PMMLUtil.createApply("-", expression, PMMLUtil.createConstant(meanValue));
+					ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+					expression = PMMLUtil.createApply("-", continuousFeature.ref(), PMMLUtil.createConstant(meanValue));
 				}
 			} // End if
 
@@ -77,13 +82,47 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				double stdValue = std.apply(i);
 
 				if(!ValueUtil.isOne(stdValue)){
-					expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(1d / stdValue));
+					Double factor = (1d / stdValue);
+
+					if(expression != null){
+						expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(factor));
+					} else
+
+					{
+						feature = new ScaledFeature(encoder, feature, factor){
+
+							@Override
+							public ContinuousFeature toContinuousFeature(){
+								PMMLEncoder encoder = ensureEncoder();
+
+								DerivedField derivedField = encoder.getDerivedField(name);
+								if(derivedField == null){
+									Feature feature = getFeature();
+									Number factor = getFactor();
+
+									ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+									Expression expression = PMMLUtil.createApply("*", continuousFeature.ref(), PMMLUtil.createConstant(factor));
+
+									derivedField = encoder.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
+								}
+
+								return new ContinuousFeature(encoder, derivedField);
+							}
+						};
+					}
 				}
+			} // End if
+
+			if(expression != null){
+				DerivedField derivedField = encoder.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
+
+				result.add(new ContinuousFeature(encoder, derivedField));
+			} else
+
+			{
+				result.add(feature);
 			}
-
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
-
-			result.add(new ContinuousFeature(encoder, derivedField));
 		}
 
 		return result;

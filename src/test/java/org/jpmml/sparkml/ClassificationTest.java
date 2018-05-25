@@ -40,7 +40,7 @@ public class ClassificationTest extends ConverterTest {
 
 	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
-		evaluate("LogisticRegression", "Audit", new PMMLEquivalence(2e-11, 1e-14));
+		evaluate("LogisticRegression", "Audit", new PMMLEquivalence(5e-11, 1e-14));
 	}
 
 	@Test
@@ -86,6 +86,11 @@ public class ClassificationTest extends ConverterTest {
 	@Test
 	public void evaluateRandomForestIris() throws Exception {
 		evaluate("RandomForest", "Iris");
+	}
+
+	@Test
+	public void evaluateDecisionTreeSentiment() throws Exception {
+		evaluate("DecisionTree", "Sentiment");
 	}
 
 	@Test

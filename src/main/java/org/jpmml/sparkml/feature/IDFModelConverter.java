@@ -23,10 +23,13 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.IDFModel;
 import org.apache.spark.ml.linalg.Vector;
+import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.ScaledFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.TermFeature;
+import org.jpmml.sparkml.WeightedTermFeature;
 
 public class IDFModelConverter extends FeatureConverter<IDFModel> {
 
@@ -49,10 +52,28 @@ public class IDFModelConverter extends FeatureConverter<IDFModel> {
 
 		for(int i = 0; i < features.size(); i++){
 			Feature feature = features.get(i);
+			Double weight = idf.apply(i);
 
-			TermFeature termFeature = (TermFeature)feature;
+			ScaledFeature scaledFeature = new ScaledFeature(encoder, feature, weight){
 
-			result.add(termFeature.toWeightedTermFeature(idf.apply(i)));
+				private WeightedTermFeature weightedTermFeature = null;
+
+
+				@Override
+				public ContinuousFeature toContinuousFeature(){
+
+					if(this.weightedTermFeature == null){
+						TermFeature termFeature = (TermFeature)getFeature();
+						Double factor = getFactor();
+
+						this.weightedTermFeature = termFeature.toWeightedTermFeature(factor);
+					}
+
+					return this.weightedTermFeature.toContinuousFeature();
+				}
+			};
+
+			result.add(scaledFeature);
 		}
 
 		return result;

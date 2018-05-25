@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import org.dmg.pmml.FieldName;
 import org.junit.Test;
 
 public class RegressionTest extends ConverterTest {
@@ -39,7 +40,9 @@ public class RegressionTest extends ConverterTest {
 
 	@Test
 	public void evaluateLinearRegressionAuto() throws Exception {
-		evaluate("LinearRegression", "Auto");
+		FieldName[] transformFields = {FieldName.create("mpgBucket")};
+
+		evaluate("LinearRegression", "Auto", excludeFields(transformFields));
 	}
 
 	@Test

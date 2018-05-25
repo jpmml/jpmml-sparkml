@@ -30,6 +30,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
+import org.dmg.pmml.MiningField;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
@@ -54,6 +55,20 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 		List<String> categories = new ArrayList<>();
 		categories.addAll(Arrays.asList(transformer.labels()));
 
+		String invalidCategory;
+
+		DataType dataType = feature.getDataType();
+		switch(dataType){
+			case INTEGER:
+			case FLOAT:
+			case DOUBLE:
+				invalidCategory = "-999";
+				break;
+			default:
+				invalidCategory = "__unknown";
+				break;
+		}
+
 		String handleInvalid = transformer.getHandleInvalid();
 
 		Field<?> field = encoder.toCategorical(feature.getName(), categories);
@@ -61,63 +76,64 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 		if(field instanceof DataField){
 			DataField dataField = (DataField)field;
 
-			InvalidValueTreatmentMethod invalidValueTreatmentMethod;
+			InvalidValueDecorator invalidValueDecorator;
 
 			switch(handleInvalid){
 				case "keep":
-					invalidValueTreatmentMethod = InvalidValueTreatmentMethod.AS_IS;
+					{
+						invalidValueDecorator = new InvalidValueDecorator(){
+
+							@Override
+							public void decorate(DataField dataField, MiningField miningField){
+								super.decorate(dataField, miningField);
+
+								miningField.setInvalidValueReplacement(invalidCategory);
+							}
+						}
+							.setInvalidValueTreatment(InvalidValueTreatmentMethod.AS_IS)
+							.addValues(invalidCategory);
+
+						categories.add(invalidCategory);
+					}
 					break;
 				case "error":
-					invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
+					{
+						invalidValueDecorator = new InvalidValueDecorator()
+							.setInvalidValueTreatment(InvalidValueTreatmentMethod.RETURN_INVALID);
+					}
 					break;
 				default:
 					throw new IllegalArgumentException(handleInvalid);
 			}
 
-			InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()
-				.setInvalidValueTreatment(invalidValueTreatmentMethod);
-
 			encoder.addDecorator(dataField.getName(), invalidValueDecorator);
 		} else
 
 		if(field instanceof DerivedField){
-			// Ignored
+
+			switch(handleInvalid){
+				case "keep":
+					{
+						Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
+
+						for(String category : categories){
+							setApply.addExpressions(PMMLUtil.createConstant(category, dataType));
+						}
+
+						categories.add(invalidCategory);
+
+						Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
+
+						field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
+					}
+					break;
+				default:
+					throw new IllegalArgumentException(handleInvalid);
+			}
 		} else
 
 		{
 			throw new IllegalArgumentException();
-		}
-
-		switch(handleInvalid){
-			case "keep":
-				String invalidCategory;
-
-				DataType dataType = feature.getDataType();
-				switch(dataType){
-					case INTEGER:
-					case FLOAT:
-					case DOUBLE:
-						invalidCategory = "-999";
-						break;
-					default:
-						invalidCategory = "__unknown";
-						break;
-				}
-
-				Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
-
-				for(String category : categories){
-					setApply.addExpressions(PMMLUtil.createConstant(category, dataType));
-				}
-
-				categories.add(invalidCategory);
-
-				Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
-
-				field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
-				break;
-			default:
-				break;
 		}
 
 		return Collections.singletonList(new CategoricalFeature(encoder, field, categories));
