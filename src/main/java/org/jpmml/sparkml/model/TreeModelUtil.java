@@ -66,14 +66,26 @@ public class TreeModelUtil {
 	}
 
 	static
-	public <M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(ModelConverter<? extends M> converter, Schema schema){
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, Schema schema){
+		PredicateManager predicateManager = new PredicateManager();
+
+		return encodeDecisionTree(converter, predicateManager, schema);
+	}
+
+	static
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, PredicateManager predicateManager, Schema schema){
+		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, schema);
+	}
+
+	static
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, Schema schema){
 		PredicateManager predicateManager = new PredicateManager();
 
 		return encodeDecisionTreeEnsemble(converter, predicateManager, schema);
 	}
 
 	static
-	public <M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(ModelConverter<? extends M> converter, PredicateManager predicateManager, Schema schema){
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, PredicateManager predicateManager, Schema schema){
 		M model = converter.getTransformer();
 
 		Schema segmentSchema = schema.toAnonymousSchema();
@@ -88,18 +100,6 @@ public class TreeModelUtil {
 		}
 
 		return treeModels;
-	}
-
-	static
-	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(ModelConverter<? extends M> converter, Schema schema){
-		PredicateManager predicateManager = new PredicateManager();
-
-		return encodeDecisionTree(converter, predicateManager, schema);
-	}
-
-	static
-	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(ModelConverter<? extends M> converter, PredicateManager predicateManager, Schema schema){
-		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, schema);
 	}
 
 	static
