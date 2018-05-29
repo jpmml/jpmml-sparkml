@@ -69,6 +69,11 @@ public class ConverterUtil {
 
 	static
 	public PMML toPMML(StructType schema, PipelineModel pipelineModel){
+		return toPMML(schema, pipelineModel, Collections.emptyMap());
+	}
+
+	static
+	public PMML toPMML(StructType schema, PipelineModel pipelineModel, Map<String, Map<String, ?>> options){
 		checkVersion();
 
 		SparkMLEncoder encoder = new SparkMLEncoder(schema);
@@ -84,6 +89,10 @@ public class ConverterUtil {
 		Iterable<Transformer> transformers = getTransformers(pipelineModel);
 		for(Transformer transformer : transformers){
 			TransformerConverter<?> converter = ConverterUtil.createConverter(transformer);
+
+			if(converter != null){
+				converter.setOptions(options.get(transformer.uid()));
+			} // End if
 
 			if(converter instanceof FeatureConverter){
 				FeatureConverter<?> featureConverter = (FeatureConverter<?>)converter;
@@ -176,7 +185,12 @@ public class ConverterUtil {
 
 	static
 	public byte[] toPMMLByteArray(StructType schema, PipelineModel pipelineModel){
-		PMML pmml = toPMML(schema, pipelineModel);
+		return toPMMLByteArray(schema, pipelineModel, Collections.emptyMap());
+	}
+
+	static
+	public byte[] toPMMLByteArray(StructType schema, PipelineModel pipelineModel, Map<String, Map<String, ?>> options){
+		PMML pmml = toPMML(schema, pipelineModel, options);
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream(1024 * 1024);
 

@@ -41,7 +41,7 @@ import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> {
+public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> implements HasTreeOptions {
 
 	public GBTClassificationModelConverter(GBTClassificationModel model){
 		super(model);
@@ -53,7 +53,7 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 
 		Schema segmentSchema = new Schema(new ContinuousLabel(null, DataType.DOUBLE), schema.getFeatures());
 
-		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, segmentSchema);
+		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, segmentSchema);
 
 		// "(y > 0) ? -1 : 1"
 		Transformation binarizedGbtValue = new AbstractTransformation(){

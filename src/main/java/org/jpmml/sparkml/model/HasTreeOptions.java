@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Villu Ruusmann
+ * Copyright (c) 2018 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,9 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.model;
 
-public interface TreeModelOptions {
+import org.jpmml.sparkml.HasOptions;
+import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
-	String COMPACT = System.getProperty(TreeModelOptions.class.getName() + ".COMPACT", "true");
+public interface HasTreeOptions extends HasOptions {
+
+	/**
+	 * @see TreeModelCompactor
+	 */
+	String OPTION_COMPACT = "compact";
 }

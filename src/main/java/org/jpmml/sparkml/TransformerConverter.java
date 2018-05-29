@@ -18,6 +18,8 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Map;
+
 import org.apache.spark.ml.Transformer;
 
 abstract
@@ -25,9 +27,21 @@ public class TransformerConverter<T extends Transformer> {
 
 	private T transformer = null;
 
+	private Map<String, ?> options = null;
+
 
 	public TransformerConverter(T transformer){
 		setTransformer(transformer);
+	}
+
+	public Object getOption(String key, Object defaultValue){
+		Map<String, ?> options = getOptions();
+
+		if(options != null && options.containsKey(key)){
+			return options.get(key);
+		}
+
+		return defaultValue;
 	}
 
 	public T getTransformer(){
@@ -36,5 +50,13 @@ public class TransformerConverter<T extends Transformer> {
 
 	private void setTransformer(T transformer){
 		this.transformer = transformer;
+	}
+
+	public Map<String, ?> getOptions(){
+		return this.options;
+	}
+
+	public void setOptions(Map<String, ?> options){
+		this.options = options;
 	}
 }
