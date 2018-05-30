@@ -30,7 +30,7 @@ import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
-public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> {
+public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> implements HasRegressionOptions {
 
 	public LogisticRegressionModelConverter(LogisticRegressionModel model){
 		super(model);
@@ -44,6 +44,8 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
 
 		ScaledFeatureUtil.simplify(features, coefficients);
+
+		RegressionTableUtil.simplify(this, null, features, coefficients);
 
 		RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(features, coefficients, model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
 			.setOutput(null);

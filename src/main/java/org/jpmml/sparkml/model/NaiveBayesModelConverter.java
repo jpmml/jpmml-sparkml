@@ -37,7 +37,7 @@ import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
-public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> {
+public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
 
 	public NaiveBayesModelConverter(NaiveBayesModel model){
 		super(model);
@@ -82,13 +82,17 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
 
 		for(int i = 0; i < categoricalLabel.size(); i++){
+			String targetCategory = categoricalLabel.getValue(i);
+
 			List<Feature> features = new ArrayList<>(schema.getFeatures());
 			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(thetaRows.next()));
 
 			ScaledFeatureUtil.simplify(features, coefficients);
 
+			RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
+
 			RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, intercepts.get(i))
-				.setTargetCategory(categoricalLabel.getValue(i));
+				.setTargetCategory(targetCategory);
 
 			regressionModel.addRegressionTables(regressionTable);
 		}
