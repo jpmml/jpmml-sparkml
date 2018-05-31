@@ -18,7 +18,6 @@
  */
 package org.jpmml.sparkml;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -35,8 +34,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.bind.JAXBException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -60,7 +57,6 @@ import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.model.MetroJAXBUtil;
 
 public class ConverterUtil {
 
@@ -73,7 +69,7 @@ public class ConverterUtil {
 	}
 
 	static
-	public PMML toPMML(StructType schema, PipelineModel pipelineModel, Map<String, Map<String, ?>> options){
+	public PMML toPMML(StructType schema, PipelineModel pipelineModel, Map<String, ? extends Map<String, ?>> options){
 		checkVersion();
 
 		SparkMLEncoder encoder = new SparkMLEncoder(schema);
@@ -181,26 +177,6 @@ public class ConverterUtil {
 		PMML pmml = encoder.encodePMML(rootModel);
 
 		return pmml;
-	}
-
-	static
-	public byte[] toPMMLByteArray(StructType schema, PipelineModel pipelineModel){
-		return toPMMLByteArray(schema, pipelineModel, Collections.emptyMap());
-	}
-
-	static
-	public byte[] toPMMLByteArray(StructType schema, PipelineModel pipelineModel, Map<String, Map<String, ?>> options){
-		PMML pmml = toPMML(schema, pipelineModel, options);
-
-		ByteArrayOutputStream os = new ByteArrayOutputStream(1024 * 1024);
-
-		try {
-			MetroJAXBUtil.marshalPMML(pmml, os);
-		} catch(JAXBException je){
-			throw new RuntimeException(je);
-		}
-
-		return os.toByteArray();
 	}
 
 	static

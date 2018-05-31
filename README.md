@@ -145,7 +145,7 @@ Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plug
 </plugin>
 ```
 
-The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `ConverterUtil#toPMML(StructType, PipelineModel)` utility method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
+The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `PMMLBuilder#build()` builder method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
 
 ## Example application ##
 
@@ -181,9 +181,10 @@ Pipeline pipeline = new Pipeline()
 PipelineModel pipelineModel = pipeline.fit(irisData);
 ```
 
-Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.ConverterUtil#toPMML(StructType, PipelineModel)` utility method:
+Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.PMMLBuilder` builder class:
 ```java
-PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
+PMML pmml = new PMMLBuilder(schema, pipelineModel)
+	.build();
 
 // Viewing the result
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
