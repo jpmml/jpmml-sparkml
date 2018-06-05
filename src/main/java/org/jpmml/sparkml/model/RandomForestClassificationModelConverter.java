@@ -30,7 +30,7 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> {
+public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> implements HasTreeOptions {
 
 	public RandomForestClassificationModelConverter(RandomForestClassificationModel model){
 		super(model);
@@ -38,9 +38,7 @@ public class RandomForestClassificationModelConverter extends ClassificationMode
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		RandomForestClassificationModel model = getTransformer();
-
-		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
+		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, schema);
 
 		MiningModel miningModel = new MiningModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema.getLabel()))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, treeModels));

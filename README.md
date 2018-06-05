@@ -148,7 +148,7 @@ Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plug
 </plugin>
 ```
 
-The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `ConverterUtil#toPMML(StructType, PipelineModel)` utility method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
+The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `PMMLBuilder#build()` builder method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
 
 ## Example application ##
 
@@ -184,9 +184,10 @@ Pipeline pipeline = new Pipeline()
 PipelineModel pipelineModel = pipeline.fit(irisData);
 ```
 
-Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.ConverterUtil#toPMML(StructType, PipelineModel)` utility method:
+Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.PMMLBuilder` builder class:
 ```java
-PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
+PMML pmml = new PMMLBuilder(schema, pipelineModel)
+	.build();
 
 // Viewing the result
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
@@ -200,7 +201,7 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --properties-file src/etc/converter.properties --class org.jpmml.sparkml.Main target/converter-executable-1.3-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/converter-executable-1.3-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:

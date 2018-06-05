@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2018 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,19 +18,13 @@
  */
 package org.jpmml.sparkml.model;
 
-import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
-import org.dmg.pmml.tree.TreeModel;
-import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.HasOptions;
+import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
-public class DecisionTreeRegressionModelConverter extends RegressionModelConverter<DecisionTreeRegressionModel> implements HasTreeOptions {
+public interface HasTreeOptions extends HasOptions {
 
-	public DecisionTreeRegressionModelConverter(DecisionTreeRegressionModel model){
-		super(model);
-	}
-
-	@Override
-	public TreeModel encodeModel(Schema schema){
-		return TreeModelUtil.encodeDecisionTree(this, schema);
-	}
+	/**
+	 * @see TreeModelCompactor
+	 */
+	String OPTION_COMPACT = "compact";
 }

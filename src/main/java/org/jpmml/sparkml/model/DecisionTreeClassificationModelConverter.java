@@ -23,7 +23,7 @@ import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class DecisionTreeClassificationModelConverter extends ClassificationModelConverter<DecisionTreeClassificationModel> {
+public class DecisionTreeClassificationModelConverter extends ClassificationModelConverter<DecisionTreeClassificationModel> implements HasTreeOptions {
 
 	public DecisionTreeClassificationModelConverter(DecisionTreeClassificationModel model){
 		super(model);
@@ -31,8 +31,6 @@ public class DecisionTreeClassificationModelConverter extends ClassificationMode
 
 	@Override
 	public TreeModel encodeModel(Schema schema){
-		DecisionTreeClassificationModel model = getTransformer();
-
-		return TreeModelUtil.encodeDecisionTree(model, schema);
+		return TreeModelUtil.encodeDecisionTree(this, schema);
 	}
 }

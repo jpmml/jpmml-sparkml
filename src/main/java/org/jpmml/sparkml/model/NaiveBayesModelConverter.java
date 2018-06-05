@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -33,9 +34,10 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
-public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> {
+public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
 
 	public NaiveBayesModelConverter(NaiveBayesModel model){
 		super(model);
@@ -74,18 +76,23 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
-		List<? extends Feature> features = schema.getFeatures();
-
 		scala.collection.Iterator<Vector> thetaRows = theta.rowIter();
 
 		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), null)
 			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
 
 		for(int i = 0; i < categoricalLabel.size(); i++){
-			List<Double> coefficients = VectorUtil.toList(thetaRows.next());
+			String targetCategory = categoricalLabel.getValue(i);
+
+			List<Feature> features = new ArrayList<>(schema.getFeatures());
+			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(thetaRows.next()));
+
+			ScaledFeatureUtil.simplify(features, coefficients);
+
+			RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
 
 			RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, intercepts.get(i))
-				.setTargetCategory(categoricalLabel.getValue(i));
+				.setTargetCategory(targetCategory);
 
 			regressionModel.addRegressionTables(regressionTable);
 		}
