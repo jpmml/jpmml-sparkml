@@ -57,7 +57,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
-import org.jpmml.sparkml.TreeModelOptions;
+import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
 public class TreeModelUtil {
@@ -66,21 +66,35 @@ public class TreeModelUtil {
 	}
 
 	static
-	public <M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(M model, Schema schema){
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, Schema schema){
 		PredicateManager predicateManager = new PredicateManager();
 
-		return encodeDecisionTreeEnsemble(model, predicateManager, schema);
+		return encodeDecisionTree(converter, predicateManager, schema);
 	}
 
 	static
-	public <M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(M model, PredicateManager predicateManager, Schema schema){
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, PredicateManager predicateManager, Schema schema){
+		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, schema);
+	}
+
+	static
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, Schema schema){
+		PredicateManager predicateManager = new PredicateManager();
+
+		return encodeDecisionTreeEnsemble(converter, predicateManager, schema);
+	}
+
+	static
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, PredicateManager predicateManager, Schema schema){
+		M model = converter.getTransformer();
+
 		Schema segmentSchema = schema.toAnonymousSchema();
 
 		List<TreeModel> treeModels = new ArrayList<>();
 
 		T[] trees = model.trees();
 		for(T tree : trees){
-			TreeModel treeModel = encodeDecisionTree(tree, predicateManager, segmentSchema);
+			TreeModel treeModel = encodeDecisionTree(converter, tree, predicateManager, segmentSchema);
 
 			treeModels.add(treeModel);
 		}
@@ -89,14 +103,8 @@ public class TreeModelUtil {
 	}
 
 	static
-	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(M model, Schema schema){
-		PredicateManager predicateManager = new PredicateManager();
-
-		return encodeDecisionTree(model, predicateManager, schema);
-	}
-
-	static
-	public <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(M model, PredicateManager predicateManager, Schema schema){
+	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(ModelConverter<?> converter, M model, PredicateManager predicateManager, Schema schema){
+		TreeModel treeModel;
 
 		if(model instanceof DecisionTreeRegressionModel){
 			ScoreEncoder scoreEncoder = new ScoreEncoder(){
@@ -109,7 +117,7 @@ public class TreeModelUtil {
 				}
 			};
 
-			return encodeTreeModel(model, predicateManager, MiningFunction.REGRESSION, scoreEncoder, schema);
+			treeModel = encodeTreeModel(model, predicateManager, MiningFunction.REGRESSION, scoreEncoder, schema);
 		} else
 
 		if(model instanceof DecisionTreeClassificationModel){
@@ -137,12 +145,21 @@ public class TreeModelUtil {
 				}
 			};
 
-			return encodeTreeModel(model, predicateManager, MiningFunction.CLASSIFICATION, scoreEncoder, schema);
+			treeModel = encodeTreeModel(model, predicateManager, MiningFunction.CLASSIFICATION, scoreEncoder, schema);
 		} else
 
 		{
 			throw new IllegalArgumentException();
 		}
+
+		Boolean compact = (Boolean)converter.getOption(HasTreeOptions.OPTION_COMPACT, Boolean.TRUE);
+		if(compact != null && compact){
+			Visitor visitor = new TreeModelCompactor();
+
+			visitor.applyTo(treeModel);
+		}
+
+		return treeModel;
 	}
 
 	static
@@ -154,13 +171,6 @@ public class TreeModelUtil {
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
-
-		String compact = TreeModelOptions.COMPACT;
-		if(compact != null && Boolean.parseBoolean(compact)){
-			Visitor visitor = new TreeModelCompactor();
-
-			visitor.applyTo(treeModel);
-		}
 
 		return treeModel;
 	}

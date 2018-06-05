@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Villu Ruusmann
+ * Copyright (c) 2018 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.model;
 
-public interface TreeModelOptions {
+import org.jpmml.sparkml.HasOptions;
 
-	String COMPACT = System.getProperty(TreeModelOptions.class.getName() + ".COMPACT", "true");
+public interface HasRegressionOptions extends HasOptions {
+
+	String OPTION_LOOKUP_THRESHOLD = "lookup_threshold";
 }

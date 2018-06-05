@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2018 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,21 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.model;
+package org.jpmml.sparkml;
 
-import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
-import org.dmg.pmml.tree.TreeModel;
-import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.RegressionModelConverter;
-
-public class DecisionTreeRegressionModelConverter extends RegressionModelConverter<DecisionTreeRegressionModel> implements HasTreeOptions {
-
-	public DecisionTreeRegressionModelConverter(DecisionTreeRegressionModel model){
-		super(model);
-	}
-
-	@Override
-	public TreeModel encodeModel(Schema schema){
-		return TreeModelUtil.encodeDecisionTree(this, schema);
-	}
+/**
+ * @see TransformerConverter#getOption(String, Object)
+ */
+public interface HasOptions {
 }

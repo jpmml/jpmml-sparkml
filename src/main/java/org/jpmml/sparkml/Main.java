@@ -140,7 +140,8 @@ public class Main {
 
 		PipelineModel pipelineModel = PipelineModel.load(pipelineDir.getAbsolutePath());
 
-		PMML pmml = ConverterUtil.toPMML(schema, pipelineModel);
+		PMML pmml = new PMMLBuilder(schema, pipelineModel)
+			.build();
 
 		try(OutputStream os = new FileOutputStream(this.output)){
 			MetroJAXBUtil.marshalPMML(pmml, os);

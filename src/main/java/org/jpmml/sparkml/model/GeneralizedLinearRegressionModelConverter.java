@@ -37,7 +37,7 @@ import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
-public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> {
+public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> implements HasRegressionOptions {
 
 	public GeneralizedLinearRegressionModelConverter(GeneralizedLinearRegressionModel model){
 		super(model);
@@ -100,6 +100,8 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
 
 		ScaledFeatureUtil.simplify(features, coefficients);
+
+		RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
 
 		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
