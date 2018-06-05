@@ -37,7 +37,7 @@ import org.jpmml.sparkml.MatrixUtil;
 import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
-public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> {
+public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> implements HasRegressionOptions {
 
 	public LogisticRegressionModelConverter(LogisticRegressionModel model){
 		super(model);
@@ -55,6 +55,8 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 
 			ScaledFeatureUtil.simplify(features, coefficients);
 
+			RegressionTableUtil.simplify(this, null, features, coefficients);
+
 			RegressionModel regressionModel = RegressionModelUtil.createBinaryLogisticClassification(features, coefficients, model.intercept(), RegressionModel.NormalizationMethod.LOGIT, true, schema)
 				.setOutput(null);
 
@@ -68,13 +70,17 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			List<RegressionTable> regressionTables = new ArrayList<>();
 
 			for(int i = 0; i < categoricalLabel.size(); i++){
+				String targetCategory = categoricalLabel.getValue(i);
+
 				List<Feature> features = new ArrayList<>(schema.getFeatures());
 				List<Double> coefficients = new ArrayList<>(MatrixUtil.getRow(coefficientMatrix, i));
 
 				ScaledFeatureUtil.simplify(features, coefficients);
 
+				RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
+
 				RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, interceptVector.apply(i))
-					.setTargetCategory(categoricalLabel.getValue(i));
+					.setTargetCategory(targetCategory);
 
 				regressionTables.add(regressionTable);
 			}

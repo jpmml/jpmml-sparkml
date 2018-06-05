@@ -31,7 +31,7 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
 
-public class GBTRegressionModelConverter extends RegressionModelConverter<GBTRegressionModel> {
+public class GBTRegressionModelConverter extends RegressionModelConverter<GBTRegressionModel> implements HasTreeOptions {
 
 	public GBTRegressionModelConverter(GBTRegressionModel model){
 		super(model);
@@ -41,7 +41,7 @@ public class GBTRegressionModelConverter extends RegressionModelConverter<GBTReg
 	public MiningModel encodeModel(Schema schema){
 		GBTRegressionModel model = getTransformer();
 
-		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(model, schema);
+		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, schema);
 
 		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(schema.getLabel()))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, treeModels, Doubles.asList(model.treeWeights())));
