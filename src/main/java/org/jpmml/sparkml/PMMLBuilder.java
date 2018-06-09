@@ -19,6 +19,10 @@
 package org.jpmml.sparkml;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,9 +58,13 @@ public class PMMLBuilder {
 	}
 
 	public byte[] buildByteArray(){
+		return buildByteArray(1024 * 1024);
+	}
+
+	private byte[] buildByteArray(int size){
 		PMML pmml = build();
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream(1024 * 1024);
+		ByteArrayOutputStream os = new ByteArrayOutputStream(size);
 
 		try {
 			MetroJAXBUtil.marshalPMML(pmml, os);
@@ -65,6 +73,22 @@ public class PMMLBuilder {
 		}
 
 		return os.toByteArray();
+	}
+
+	public File buildFile(File file) throws IOException {
+		PMML pmml = build();
+
+		OutputStream os = new FileOutputStream(file);
+
+		try {
+			MetroJAXBUtil.marshalPMML(pmml, os);
+		} catch(JAXBException je){
+			throw new RuntimeException(je);
+		} finally {
+			os.close();
+		}
+
+		return file;
 	}
 
 	public PMMLBuilder putOption(PipelineStage pipelineStage, String key, Object value){
