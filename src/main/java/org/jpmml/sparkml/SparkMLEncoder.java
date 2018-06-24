@@ -45,11 +45,14 @@ public class SparkMLEncoder extends ModelEncoder {
 
 	private StructType schema = null;
 
+	private ConverterFactory converterFactory = null;
+
 	private Map<String, List<Feature>> columnFeatures = new LinkedHashMap<>();
 
 
-	public SparkMLEncoder(StructType schema){
-		this.schema = schema;
+	public SparkMLEncoder(StructType schema, ConverterFactory converterFactory){
+		setSchema(schema);
+		setConverterFactory(converterFactory);
 	}
 
 	public boolean hasFeatures(String column){
@@ -140,7 +143,9 @@ public class SparkMLEncoder extends ModelEncoder {
 	}
 
 	public DataField createDataField(FieldName name){
-		StructField field = this.schema.apply(name.getValue());
+		StructType schema = getSchema();
+
+		StructField field = schema.apply(name.getValue());
 
 		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
 
@@ -163,5 +168,31 @@ public class SparkMLEncoder extends ModelEncoder {
 		{
 			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
 		}
+	}
+
+	public StructType getSchema(){
+		return this.schema;
+	}
+
+	private void setSchema(StructType schema){
+
+		if(schema == null){
+			throw new IllegalArgumentException();
+		}
+
+		this.schema = schema;
+	}
+
+	public ConverterFactory getConverterFactory(){
+		return this.converterFactory;
+	}
+
+	private void setConverterFactory(ConverterFactory converterFactory){
+
+		if(converterFactory == null){
+			throw new IllegalArgumentException();
+		}
+
+		this.converterFactory = converterFactory;
 	}
 }

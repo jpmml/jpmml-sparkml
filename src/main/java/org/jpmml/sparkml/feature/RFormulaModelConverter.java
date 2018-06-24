@@ -25,9 +25,10 @@ import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.feature.RFormulaModel;
 import org.apache.spark.ml.feature.ResolvedRFormula;
 import org.jpmml.converter.Feature;
-import org.jpmml.sparkml.ConverterUtil;
+import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.TransformerConverter;
 
 public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 
@@ -50,13 +51,23 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 			encoder.putFeatures(labelCol, features);
 		}
 
+		ConverterFactory converterFactory = encoder.getConverterFactory();
+
 		PipelineModel pipelineModel = transformer.pipelineModel();
 
 		Transformer[] stages = pipelineModel.stages();
 		for(Transformer stage : stages){
-			FeatureConverter<?> featureConverter = ConverterUtil.createFeatureConverter(stage);
+			TransformerConverter<?> converter = converterFactory.newConverter(stage);
 
-			featureConverter.registerFeatures(encoder);
+			if(converter instanceof FeatureConverter){
+				FeatureConverter<?> featureConverter = (FeatureConverter<?>)converter;
+
+				featureConverter.registerFeatures(encoder);
+			} else
+
+			{
+				throw new IllegalArgumentException("Expected a " + FeatureConverter.class.getName() + " instance, got " + converter);
+			}
 		}
 	}
 }
