@@ -30,8 +30,6 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.param.shared.HasFitIntercept;
 import org.apache.spark.ml.util.MLReader;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
@@ -104,15 +102,8 @@ public class ConverterTest extends IntegrationTest {
 					pipelineModel = mlReader.load(tmpDir.getAbsolutePath());
 				}
 
-				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel);
-
-				Transformer[] transformers = pipelineModel.stages();
-				for(Transformer transformer : transformers){
-
-					if(transformer instanceof HasFitIntercept){
-						pmmlBuilder.putOption(transformer, HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3);
-					}
-				}
+				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
+					.putOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3);
 
 				PMML pmml = pmmlBuilder.build();
 

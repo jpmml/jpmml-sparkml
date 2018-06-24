@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
@@ -61,7 +62,7 @@ public class PMMLBuilder {
 
 	private PipelineModel pipelineModel = null;
 
-	private Map<String, Map<String, Object>> options = new LinkedHashMap<>();
+	private Map<RegexKey, Map<String, Object>> options = new LinkedHashMap<>();
 
 
 	public PMMLBuilder(StructType schema, PipelineModel pipelineModel){
@@ -74,7 +75,7 @@ public class PMMLBuilder {
 	public PMML build(){
 		StructType schema = getSchema();
 		PipelineModel pipelineModel = getPipelineModel();
-		Map<String, ? extends Map<String, ?>> options = getOptions();
+		Map<RegexKey, ? extends Map<String, ?>> options = getOptions();
 
 		ConverterFactory converterFactory = new ConverterFactory(options);
 
@@ -209,41 +210,35 @@ public class PMMLBuilder {
 		return file;
 	}
 
+	public PMMLBuilder putOption(String key, Object value){
+		return putOptions(Collections.singletonMap(key, value));
+	}
+
+	public PMMLBuilder putOptions(Map<String, ?> map){
+		return putOptions(Pattern.compile(".*"), map);
+	}
+
 	public PMMLBuilder putOption(PipelineStage pipelineStage, String key, Object value){
-		return putOption(pipelineStage.uid(), key, value);
+		return putOptions(pipelineStage, Collections.singletonMap(key, value));
 	}
 
 	public PMMLBuilder putOptions(PipelineStage pipelineStage, Map<String, ?> map){
-		return putOptions(pipelineStage.uid(), map);
+		return putOptions(Pattern.compile(pipelineStage.uid(), Pattern.LITERAL), map);
 	}
 
-	public PMMLBuilder putOption(String uid, String key, Object value){
-		return putOptions(uid, Collections.singletonMap(key, value));
-	}
+	public PMMLBuilder putOptions(Pattern pattern, Map<String, ?> map){
+		Map<RegexKey, Map<String, Object>> options = getOptions();
 
-	public PMMLBuilder putOptions(String uid, Map<String, ?> map){
-		Map<String, Map<String, Object>> options = getOptions();
+		RegexKey key = new RegexKey(pattern);
 
-		Map<String, Object> pipelineStageOptions = options.get(uid);
-		if(pipelineStageOptions == null){
-			pipelineStageOptions = new LinkedHashMap<>();
+		Map<String, Object> patternOptions = options.get(key);
+		if(patternOptions == null){
+			patternOptions = new LinkedHashMap<>();
 
-			options.put(uid, pipelineStageOptions);
+			options.put(key, patternOptions);
 		}
 
-		pipelineStageOptions.putAll(map);
-
-		return this;
-	}
-
-	public PMMLBuilder removeOptions(PipelineStage pipelineStage){
-		return removeOptions(pipelineStage.uid());
-	}
-
-	public PMMLBuilder removeOptions(String uid){
-		Map<String, Map<String, Object>> options = getOptions();
-
-		options.remove(uid);
+		patternOptions.putAll(map);
 
 		return this;
 	}
@@ -278,7 +273,7 @@ public class PMMLBuilder {
 		return this;
 	}
 
-	public Map<String, Map<String, Object>> getOptions(){
+	public Map<RegexKey, Map<String, Object>> getOptions(){
 		return this.options;
 	}
 

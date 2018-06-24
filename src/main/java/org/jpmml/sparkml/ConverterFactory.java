@@ -38,10 +38,10 @@ import org.apache.spark.ml.Transformer;
 
 public class ConverterFactory {
 
-	private Map<String, ? extends Map<String, ?>> options = null;
+	private Map<RegexKey, ? extends Map<String, ?>> options = null;
 
 
-	public ConverterFactory(Map<String, ? extends Map<String, ?>> options){
+	public ConverterFactory(Map<RegexKey, ? extends Map<String, ?>> options){
 		setOptions(options);
 	}
 
@@ -64,19 +64,26 @@ public class ConverterFactory {
 		}
 
 		if(converter != null){
-			Map<String, ? extends Map<String, ?>> options = getOptions();
+			Map<RegexKey, ? extends Map<String, ?>> options = getOptions();
 
-			converter.setOptions(options.get(transformer.uid()));
+			Map<String, Object> converterOptions = new LinkedHashMap<>();
+
+			options.entrySet().stream()
+				.filter(entry -> (entry.getKey()).test(transformer.uid()))
+				.map(entry -> entry.getValue())
+				.forEach(converterOptions::putAll);
+
+			converter.setOptions(converterOptions);
 		}
 
 		return converter;
 	}
 
-	public Map<String, ? extends Map<String, ?>> getOptions(){
+	public Map<RegexKey, ? extends Map<String, ?>> getOptions(){
 		return this.options;
 	}
 
-	private void setOptions(Map<String, ? extends Map<String, ?>> options){
+	private void setOptions(Map<RegexKey, ? extends Map<String, ?>> options){
 
 		if(options == null){
 			throw new IllegalArgumentException();
