@@ -39,6 +39,8 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.Visitor;
+import org.jpmml.converter.visitors.CellTransformer;
 import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.IntegrationTest;
 import org.jpmml.evaluator.IntegrationTestBatch;
@@ -116,6 +118,9 @@ public class ConverterTest extends IntegrationTest {
 				}
 
 				PMML pmml = pmmlBuilder.build();
+
+				Visitor visitor = new CellTransformer();
+				visitor.applyTo(pmml);
 
 				ensureValidity(pmml);
 

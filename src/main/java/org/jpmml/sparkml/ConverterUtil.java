@@ -45,7 +45,6 @@ import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.tuning.CrossValidatorModel;
 import org.apache.spark.ml.tuning.TrainValidationSplitModel;
 import org.apache.spark.sql.types.StructType;
-import org.dmg.pmml.DataField;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
@@ -55,6 +54,7 @@ import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.mining.MiningModel;
+import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 
@@ -74,7 +74,6 @@ public class ConverterUtil {
 
 		SparkMLEncoder encoder = new SparkMLEncoder(schema);
 
-		Map<FieldName, DataField> dataFields = encoder.getDataFields();
 		Map<FieldName, DerivedField> derivedFields = encoder.getDerivedFields();
 
 		List<org.dmg.pmml.Model> models = new ArrayList<>();
@@ -159,12 +158,7 @@ public class ConverterUtil {
 
 			encoder.removeDerivedField(postProcessorName);
 
-			Output output = rootModel.getOutput();
-			if(output == null){
-				output = new Output();
-
-				rootModel.setOutput(output);
-			}
+			Output output = ModelUtil.ensureOutput(rootModel);
 
 			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getDataType())
 				.setOpType(derivedField.getOpType())

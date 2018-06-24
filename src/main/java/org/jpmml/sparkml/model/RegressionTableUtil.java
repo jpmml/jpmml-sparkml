@@ -18,28 +18,23 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldColumnPair;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Row;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.DOMUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
 
@@ -77,16 +72,13 @@ public class RegressionTableUtil {
 
 	static
 	private MapValues createMapValues(FieldName name, String identifier, List<Feature> features, List<Double> coefficients){
-		DocumentBuilder documentBuilder = DOMUtil.createDocumentBuilder();
-
-		InlineTable inlineTable = new InlineTable();
-
-		List<String> columns = Arrays.asList("input", "output");
-
 		ListIterator<Feature> featureIt = features.listIterator();
 		ListIterator<Double> coefficientIt = coefficients.listIterator();
 
 		PMMLEncoder encoder = null;
+
+		List<String> inputValues = new ArrayList<>();
+		List<String> outputValues = new ArrayList<>();
 
 		while(featureIt.hasNext()){
 			Feature feature = featureIt.next();
@@ -108,15 +100,11 @@ public class RegressionTableUtil {
 				encoder = binaryFeature.getEncoder();
 			}
 
-			Row row = DOMUtil.createRow(documentBuilder, columns, Arrays.asList(binaryFeature.getValue(), coefficient));
-
-			inlineTable.addRows(row);
+			inputValues.add(binaryFeature.getValue());
+			outputValues.add(ValueUtil.formatValue(coefficient));
 		}
 
-		MapValues mapValues = new MapValues()
-			.addFieldColumnPairs(new FieldColumnPair(name, columns.get(0)))
-			.setOutputColumn(columns.get(1))
-			.setInlineTable(inlineTable)
+		MapValues mapValues = PMMLUtil.createMapValues(name, inputValues, outputValues)
 			.setDefaultValue(ValueUtil.formatValue(0d));
 
 		DerivedField derivedField = encoder.createDerivedField(FieldName.create("lookup(" + name.getValue() + (identifier != null ? (", " + identifier) : "") + ")"), OpType.CONTINUOUS, DataType.DOUBLE, mapValues);

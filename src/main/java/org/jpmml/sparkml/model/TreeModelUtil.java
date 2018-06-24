@@ -21,11 +21,7 @@ package org.jpmml.sparkml.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
@@ -51,6 +47,7 @@ import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.CategoryManager;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
@@ -167,7 +164,7 @@ public class TreeModelUtil {
 		Node root = new Node()
 			.setPredicate(new True());
 
-		encodeNode(root, model.rootNode(), predicateManager, Collections.emptyMap(), scoreEncoder, schema);
+		encodeNode(root, model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
@@ -176,7 +173,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private void encodeNode(Node node, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, Map<FieldName, Set<String>> parentFieldValues, ScoreEncoder scoreEncoder, Schema schema){
+	private void encodeNode(Node node, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, ScoreEncoder scoreEncoder, Schema schema){
 
 		if(sparkNode instanceof LeafNode){
 			LeafNode leafNode = (LeafNode)sparkNode;
@@ -187,8 +184,8 @@ public class TreeModelUtil {
 		if(sparkNode instanceof InternalNode){
 			InternalNode internalNode = (InternalNode)sparkNode;
 
-			Map<FieldName, Set<String>> leftFieldValues = parentFieldValues;
-			Map<FieldName, Set<String>> rightFieldValues = parentFieldValues;
+			CategoryManager leftCategoryManager = categoryManager;
+			CategoryManager rightCategoryManager = categoryManager;
 
 			Predicate leftPredicate;
 			Predicate rightPredicate;
@@ -265,29 +262,13 @@ public class TreeModelUtil {
 						throw new IllegalArgumentException();
 					}
 
-					Set<String> parentValues = parentFieldValues.get(name);
-
-					java.util.function.Predicate<String> valueFilter = new java.util.function.Predicate<String>(){
-
-						@Override
-						public boolean test(String value){
-
-							if(parentValues != null){
-								return parentValues.contains(value);
-							}
-
-							return true;
-						}
-					};
+					java.util.function.Predicate<String> valueFilter = categoryManager.getValueFilter(name);
 
 					List<String> leftValues = selectValues(values, leftCategories, valueFilter);
 					List<String> rightValues = selectValues(values, rightCategories, valueFilter);
 
-					leftFieldValues = new HashMap<>(parentFieldValues);
-					leftFieldValues.put(name, new HashSet<>(leftValues));
-
-					rightFieldValues = new HashMap<>(parentFieldValues);
-					rightFieldValues.put(name, new HashSet<>(rightValues));
+					leftCategoryManager = categoryManager.fork(name, leftValues);
+					rightCategoryManager = categoryManager.fork(name, rightValues);
 
 					leftPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, leftValues);
 					rightPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, rightValues);
@@ -308,8 +289,8 @@ public class TreeModelUtil {
 			Node rightChild = new Node()
 				.setPredicate(rightPredicate);
 
-			encodeNode(leftChild, internalNode.leftChild(), predicateManager, leftFieldValues, scoreEncoder, schema);
-			encodeNode(rightChild, internalNode.rightChild(), predicateManager, rightFieldValues, scoreEncoder, schema);
+			encodeNode(leftChild, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
+			encodeNode(rightChild, internalNode.rightChild(), predicateManager, rightCategoryManager, scoreEncoder, schema);
 
 			node.addNodes(leftChild, rightChild);
 		} else

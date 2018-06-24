@@ -19,12 +19,12 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import com.google.common.base.Joiner;
 import org.apache.spark.ml.feature.CountVectorizerModel;
@@ -32,13 +32,12 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
-import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.ParameterField;
 import org.dmg.pmml.TextIndex;
 import org.dmg.pmml.TextIndexNormalization;
-import org.jpmml.converter.DOMUtil;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -74,8 +73,6 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 				continue;
 			}
 
-			DocumentBuilder documentBuilder = DOMUtil.createDocumentBuilder();
-
 			String tokenRE;
 
 			String wordSeparatorRE = documentFeature.getWordSeparatorRE();
@@ -90,13 +87,15 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 					throw new IllegalArgumentException("Expected \"\\s+\" or \"\\W+\" as splitter regex pattern, got \"" + wordSeparatorRE + "\"");
 			}
 
-			InlineTable inlineTable = new InlineTable()
-				.addRows(DOMUtil.createRow(documentBuilder, Arrays.asList("string", "stem", "regex"), Arrays.asList(tokenRE, " ", "true")));
+			Map<String, List<String>> data = new LinkedHashMap<>();
+			data.put("string", Collections.singletonList(tokenRE));
+			data.put("stem", Collections.singletonList(" "));
+			data.put("regex", Collections.singletonList("true"));
 
 			TextIndexNormalization textIndexNormalization = new TextIndexNormalization()
 				.setCaseSensitive(stopWordSet.isCaseSensitive())
 				.setRecursive(Boolean.TRUE) // Handles consecutive matches. See http://stackoverflow.com/a/25085385
-				.setInlineTable(inlineTable);
+				.setInlineTable(PMMLUtil.createInlineTable(data));
 
 			textIndex.addTextIndexNormalizations(textIndexNormalization);
 		}
