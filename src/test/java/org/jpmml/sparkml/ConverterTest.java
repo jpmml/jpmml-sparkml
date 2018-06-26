@@ -24,10 +24,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.google.common.io.MoreFiles;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.util.MLReader;
@@ -76,6 +79,8 @@ public class ConverterTest extends IntegrationTest {
 
 			@Override
 			public PMML getPMML() throws Exception {
+				List<File> tmpResources = new ArrayList<>();
+
 				StructType schema;
 
 				try(InputStream is = open("/schema/" + getDataset() + ".json")){
@@ -89,27 +94,33 @@ public class ConverterTest extends IntegrationTest {
 				try(InputStream is = open("/pipeline/" + getName() + getDataset() + ".zip")){
 					File tmpZipFile = File.createTempFile(getName() + getDataset(), ".zip");
 
+					tmpResources.add(tmpZipFile);
+
 					try(OutputStream os = new FileOutputStream(tmpZipFile)){
 						ByteStreams.copy(is, os);
 					}
 
-					File tmpDir = File.createTempFile(getName() + getDataset(), "");
-					if(!tmpDir.delete()){
+					File tmpPipelineDir = File.createTempFile(getName() + getDataset(), "");
+					if(!tmpPipelineDir.delete()){
 						throw new IOException();
 					}
 
-					ZipUtil.uncompress(tmpZipFile, tmpDir);
+					tmpResources.add(tmpPipelineDir);
+
+					ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
 
 					MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
 					mlReader.session(ConverterTest.sparkSession);
 
-					pipelineModel = mlReader.load(tmpDir.getAbsolutePath());
+					pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 				}
 
 				Dataset<Row> dataset;
 
 				try(InputStream is = open("/csv/" + getDataset() + ".csv")){
 					File tmpCsvFile = File.createTempFile(getDataset(), ".csv");
+
+					tmpResources.add(tmpCsvFile);
 
 					try(OutputStream os = new FileOutputStream(tmpCsvFile)){
 						ByteStreams.copy(is, os);
@@ -147,6 +158,10 @@ public class ConverterTest extends IntegrationTest {
 				PMML pmml = pmmlBuilder.build();
 
 				ensureValidity(pmml);
+
+				for(File tmpResource : tmpResources){
+					MoreFiles.deleteRecursively(tmpResource.toPath());
+				}
 
 				return pmml;
 			}
