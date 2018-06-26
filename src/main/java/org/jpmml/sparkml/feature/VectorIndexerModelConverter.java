@@ -19,26 +19,20 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.apache.spark.ml.feature.VectorIndexerModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldColumnPair;
-import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.Row;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.DOMUtil;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -72,35 +66,20 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 				List<String> categories = new ArrayList<>();
 				List<String> values = new ArrayList<>();
 
-				DocumentBuilder documentBuilder = DOMUtil.createDocumentBuilder();
-
-				InlineTable inlineTable = new InlineTable();
-
-				List<String> columns = Arrays.asList("input", "output");
-
 				List<Map.Entry<Double, Integer>> entries = new ArrayList<>(categoryMap.entrySet());
 				Collections.sort(entries, VectorIndexerModelConverter.COMPARATOR);
 
 				for(Map.Entry<Double, Integer> entry : entries){
 					String category = ValueUtil.formatValue(entry.getKey());
-
-					categories.add(category);
-
 					String value = ValueUtil.formatValue(entry.getValue());
 
+					categories.add(category);
 					values.add(value);
-
-					Row row = DOMUtil.createRow(documentBuilder, columns, Arrays.asList(category, value));
-
-					inlineTable.addRows(row);
 				}
 
 				encoder.toCategorical(feature.getName(), categories);
 
-				MapValues mapValues = new MapValues()
-					.addFieldColumnPairs(new FieldColumnPair(feature.getName(), columns.get(0)))
-					.setOutputColumn(columns.get(1))
-					.setInlineTable(inlineTable);
+				MapValues mapValues = PMMLUtil.createMapValues(feature.getName(), categories, values);
 
 				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 

@@ -27,7 +27,6 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
-import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> implements HasRegressionOptions {
@@ -42,8 +41,6 @@ public class LinearRegressionModelConverter extends RegressionModelConverter<Lin
 
 		List<Feature> features = new ArrayList<>(schema.getFeatures());
 		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
-
-		ScaledFeatureUtil.simplify(features, coefficients);
 
 		RegressionTableUtil.simplify(this, null, features, coefficients);
 

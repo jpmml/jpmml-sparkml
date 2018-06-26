@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.google.common.base.Objects.ToStringHelper;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
@@ -36,6 +35,7 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.model.ToStringHelper;
 
 public class TermFeature extends Feature {
 
@@ -69,7 +69,7 @@ public class TermFeature extends Feature {
 		return new ContinuousFeature(encoder, derivedField);
 	}
 
-	public WeightedTermFeature toWeightedTermFeature(double weight){
+	public WeightedTermFeature toWeightedTermFeature(Number weight){
 		PMMLEncoder encoder = ensureEncoder();
 
 		DefineFunction defineFunction = getDefineFunction();
