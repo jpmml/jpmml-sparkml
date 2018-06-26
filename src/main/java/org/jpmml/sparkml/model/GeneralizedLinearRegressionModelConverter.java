@@ -33,7 +33,6 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
-import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
@@ -98,8 +97,6 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 		List<Feature> features = new ArrayList<>(schema.getFeatures());
 		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
-
-		ScaledFeatureUtil.simplify(features, coefficients);
 
 		RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
 

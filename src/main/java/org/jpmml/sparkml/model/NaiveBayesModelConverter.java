@@ -34,7 +34,6 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
-import org.jpmml.sparkml.ScaledFeatureUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
@@ -86,8 +85,6 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 
 			List<Feature> features = new ArrayList<>(schema.getFeatures());
 			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(thetaRows.next()));
-
-			ScaledFeatureUtil.simplify(features, coefficients);
 
 			RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
 

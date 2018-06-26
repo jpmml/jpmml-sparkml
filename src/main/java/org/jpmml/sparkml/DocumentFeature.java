@@ -22,10 +22,10 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.google.common.base.Objects.ToStringHelper;
 import org.dmg.pmml.Field;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.model.ToStringHelper;
 
 public class DocumentFeature extends Feature {
 

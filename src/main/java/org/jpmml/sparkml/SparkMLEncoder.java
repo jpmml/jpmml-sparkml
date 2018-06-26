@@ -33,7 +33,6 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.BooleanFeature;
@@ -46,11 +45,14 @@ public class SparkMLEncoder extends ModelEncoder {
 
 	private StructType schema = null;
 
+	private ConverterFactory converterFactory = null;
+
 	private Map<String, List<Feature>> columnFeatures = new LinkedHashMap<>();
 
 
-	public SparkMLEncoder(StructType schema){
-		this.schema = schema;
+	public SparkMLEncoder(StructType schema, ConverterFactory converterFactory){
+		setSchema(schema);
+		setConverterFactory(converterFactory);
 	}
 
 	public boolean hasFeatures(String column){
@@ -141,7 +143,9 @@ public class SparkMLEncoder extends ModelEncoder {
 	}
 
 	public DataField createDataField(FieldName name){
-		StructField field = this.schema.apply(name.getValue());
+		StructType schema = getSchema();
+
+		StructField field = schema.apply(name.getValue());
 
 		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
 
@@ -166,31 +170,29 @@ public class SparkMLEncoder extends ModelEncoder {
 		}
 	}
 
-	public void removeDataField(FieldName name){
-		Map<FieldName, DataField> dataFields = getDataFields();
+	public StructType getSchema(){
+		return this.schema;
+	}
 
-		DataField dataField = dataFields.remove(name);
-		if(dataField == null){
-			throw new IllegalArgumentException(name.getValue());
+	private void setSchema(StructType schema){
+
+		if(schema == null){
+			throw new IllegalArgumentException();
 		}
+
+		this.schema = schema;
 	}
 
-	public void removeDerivedField(FieldName name){
-		Map<FieldName, DerivedField> derivedFields = getDerivedFields();
+	public ConverterFactory getConverterFactory(){
+		return this.converterFactory;
+	}
 
-		DerivedField derivedField = derivedFields.remove(name);
-		if(derivedField == null){
-			throw new IllegalArgumentException(name.getValue());
+	private void setConverterFactory(ConverterFactory converterFactory){
+
+		if(converterFactory == null){
+			throw new IllegalArgumentException();
 		}
-	}
 
-	@Override
-	public Map<FieldName, DataField> getDataFields(){
-		return super.getDataFields();
-	}
-
-	@Override
-	public Map<FieldName, DerivedField> getDerivedFields(){
-		return super.getDerivedFields();
+		this.converterFactory = converterFactory;
 	}
 }
