@@ -18,36 +18,24 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.List;
-import java.util.ListIterator;
+import java.util.regex.Pattern;
 
-import org.jpmml.converter.Feature;
+import org.junit.Test;
 
-public class ScaledFeatureUtil {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-	private ScaledFeatureUtil(){
-	}
+public class RegexKeyTest {
 
-	static
-	public void simplify(List<Feature> features, List<Double> coefficients){
+	@Test
+	public void compile(){
+		RegexKey anyKey = new RegexKey(Pattern.compile(".*"));
+		RegexKey dotAsteriskKey = new RegexKey(Pattern.compile(".*", Pattern.LITERAL));
 
-		if(features.size() != coefficients.size()){
-			throw new IllegalArgumentException();
-		}
+		assertTrue(anyKey.test(""));
+		assertTrue(anyKey.test(".*"));
 
-		ListIterator<Feature> featureIt = features.listIterator();
-		ListIterator<Double> coefficientIt = coefficients.listIterator();
-
-		while(featureIt.hasNext()){
-			Feature feature = featureIt.next();
-			Double coefficient = coefficientIt.next();
-
-			if(feature instanceof ScaledFeature){
-				ScaledFeature scaledFeature = (ScaledFeature)feature;
-
-				featureIt.set(scaledFeature.getFeature());
-				coefficientIt.set(coefficient * scaledFeature.getFactor());
-			}
-		}
+		assertFalse(dotAsteriskKey.test(""));
+		assertTrue(dotAsteriskKey.test(".*"));
 	}
 }

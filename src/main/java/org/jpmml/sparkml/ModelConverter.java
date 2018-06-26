@@ -44,6 +44,7 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
+import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 
 abstract
@@ -176,12 +177,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		if(sparkOutputFields != null && sparkOutputFields.size() > 0){
 			org.dmg.pmml.Model lastModel = getLastModel(model);
 
-			Output output = lastModel.getOutput();
-			if(output == null){
-				output = new Output();
-
-				lastModel.setOutput(output);
-			}
+			Output output = ModelUtil.ensureOutput(lastModel);
 
 			List<OutputField> outputFields = output.getOutputFields();
 

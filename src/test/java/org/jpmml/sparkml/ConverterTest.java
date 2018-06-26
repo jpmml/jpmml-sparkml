@@ -24,18 +24,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.google.common.io.MoreFiles;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.param.shared.HasFitIntercept;
 import org.apache.spark.ml.util.MLReader;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
@@ -63,7 +67,7 @@ public class ConverterTest extends IntegrationTest {
 		} else
 
 		{
-			predicate = Predicates.and(predicate, excludePredictionFields);
+			predicate = predicate.and(excludePredictionFields);
 		}
 
 		ArchiveBatch result = new IntegrationTestBatch(name, dataset, predicate){
@@ -75,6 +79,8 @@ public class ConverterTest extends IntegrationTest {
 
 			@Override
 			public PMML getPMML() throws Exception {
+				List<File> tmpResources = new ArrayList<>();
+
 				StructType schema;
 
 				try(InputStream is = open("/schema/" + getDataset() + ".json")){
@@ -88,36 +94,74 @@ public class ConverterTest extends IntegrationTest {
 				try(InputStream is = open("/pipeline/" + getName() + getDataset() + ".zip")){
 					File tmpZipFile = File.createTempFile(getName() + getDataset(), ".zip");
 
+					tmpResources.add(tmpZipFile);
+
 					try(OutputStream os = new FileOutputStream(tmpZipFile)){
 						ByteStreams.copy(is, os);
 					}
 
-					File tmpDir = File.createTempFile(getName() + getDataset(), "");
-					if(!tmpDir.delete()){
+					File tmpPipelineDir = File.createTempFile(getName() + getDataset(), "");
+					if(!tmpPipelineDir.delete()){
 						throw new IOException();
 					}
 
-					ZipUtil.uncompress(tmpZipFile, tmpDir);
+					tmpResources.add(tmpPipelineDir);
+
+					ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
 
 					MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
 					mlReader.session(ConverterTest.sparkSession);
 
-					pipelineModel = mlReader.load(tmpDir.getAbsolutePath());
+					pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 				}
 
-				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel);
+				Dataset<Row> dataset;
 
-				Transformer[] transformers = pipelineModel.stages();
-				for(Transformer transformer : transformers){
+				try(InputStream is = open("/csv/" + getDataset() + ".csv")){
+					File tmpCsvFile = File.createTempFile(getDataset(), ".csv");
 
-					if(transformer instanceof HasFitIntercept){
-						pmmlBuilder.putOption(transformer, HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3);
+					tmpResources.add(tmpCsvFile);
+
+					try(OutputStream os = new FileOutputStream(tmpCsvFile)){
+						ByteStreams.copy(is, os);
 					}
+
+					dataset = ConverterTest.sparkSession.read()
+						.format("csv")
+						.option("header", true)
+						.option("inferSchema", false)
+						.load(tmpCsvFile.getAbsolutePath());
+
+					StructField[] fields = schema.fields();
+					for(StructField field : fields){
+						Column column = dataset.apply(field.name()).cast(field.dataType());
+
+						dataset = dataset.withColumn("tmp_" + field.name(), column).drop(field.name()).withColumnRenamed("tmp_" + field.name(), field.name());
+					}
+
+					dataset = dataset.sample(false, 0.05d, 63317);
 				}
+
+				double precision = 1e-14;
+				double zeroThreshold = 1e-14;
+
+				// XXX
+				if(("NaiveBayes").equals(getName()) && (getDataset()).equals("Audit")){
+					precision = 1e-10;
+					zeroThreshold = 1e-10;
+				}
+
+				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
+					.putOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3)
+					.verify(dataset, precision, zeroThreshold);
 
 				PMML pmml = pmmlBuilder.build();
 
 				ensureValidity(pmml);
+
+				for(File tmpResource : tmpResources){
+					MoreFiles.deleteRecursively(tmpResource.toPath());
+				}
 
 				return pmml;
 			}

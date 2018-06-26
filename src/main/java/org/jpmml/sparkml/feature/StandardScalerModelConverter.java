@@ -32,9 +32,9 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.ProductFeature;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.ScaledFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class StandardScalerModelConverter extends FeatureConverter<StandardScalerModel> {
@@ -89,7 +89,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 					} else
 
 					{
-						feature = new ScaledFeature(encoder, feature, factor){
+						feature = new ProductFeature(encoder, feature, factor){
 
 							@Override
 							public ContinuousFeature toContinuousFeature(){

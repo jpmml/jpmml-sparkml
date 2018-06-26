@@ -20,19 +20,19 @@ package org.jpmml.sparkml;
 
 import java.util.Objects;
 
-import com.google.common.base.Objects.ToStringHelper;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DefineFunction;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.model.ToStringHelper;
 
 public class WeightedTermFeature extends TermFeature {
 
-	private Double weight = null;
+	private Number weight = null;
 
 
-	public WeightedTermFeature(PMMLEncoder encoder, DefineFunction defineFunction, Feature feature, String value, Double weight){
+	public WeightedTermFeature(PMMLEncoder encoder, DefineFunction defineFunction, Feature feature, String value, Number weight){
 		super(encoder, defineFunction, feature, value);
 
 		setWeight(weight);
@@ -40,7 +40,7 @@ public class WeightedTermFeature extends TermFeature {
 
 	@Override
 	public Apply createApply(){
-		Double weight = getWeight();
+		Number weight = getWeight();
 
 		Apply apply = super.createApply()
 			.addExpressions(PMMLUtil.createConstant(weight));
@@ -71,11 +71,11 @@ public class WeightedTermFeature extends TermFeature {
 			.add("weight", getWeight());
 	}
 
-	public Double getWeight(){
+	public Number getWeight(){
 		return this.weight;
 	}
 
-	private void setWeight(Double weight){
+	private void setWeight(Number weight){
 
 		if(weight == null){
 			throw new IllegalArgumentException();

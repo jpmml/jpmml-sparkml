@@ -19,10 +19,7 @@
 package org.jpmml.sparkml;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.linalg.Vector;
@@ -31,23 +28,20 @@ import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldColumnPair;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.InlineTable;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
-import org.dmg.pmml.Row;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.DOMUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLEncoder;
+import org.jpmml.converter.PMMLUtil;
 
 abstract
 public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -67,6 +61,14 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
+		List<String> categories = new ArrayList<>();
+
+		for(int i = 0; i < categoricalLabel.size(); i++){
+			String category = String.valueOf(i);
+
+			categories.add(category);
+		}
+
 		List<OutputField> result = new ArrayList<>();
 
 		String predictionCol = model.getPredictionCol();
@@ -75,29 +77,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		result.add(pmmlPredictedField);
 
-		List<String> categories = new ArrayList<>();
-
-		DocumentBuilder documentBuilder = DOMUtil.createDocumentBuilder();
-
-		InlineTable inlineTable = new InlineTable();
-
-		List<String> columns = Arrays.asList("input", "output");
-
-		for(int i = 0; i < categoricalLabel.size(); i++){
-			String value = categoricalLabel.getValue(i);
-			String category = String.valueOf(i);
-
-			categories.add(category);
-
-			Row row = DOMUtil.createRow(documentBuilder, columns, Arrays.asList(value, category));
-
-			inlineTable.addRows(row);
-		}
-
-		MapValues mapValues = new MapValues()
-			.addFieldColumnPairs(new FieldColumnPair(pmmlPredictedField.getName(), columns.get(0)))
-			.setOutputColumn(columns.get(1))
-			.setInlineTable(inlineTable);
+		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories);
 
 		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.DOUBLE)
 			.setOpType(OpType.CATEGORICAL)
