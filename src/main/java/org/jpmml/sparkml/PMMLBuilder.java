@@ -32,6 +32,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
 
@@ -39,18 +40,27 @@ import com.google.common.collect.Iterables;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.apache.spark.ml.param.shared.HasProbabilityCol;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.ml.tuning.CrossValidatorModel;
 import org.apache.spark.ml.tuning.TrainValidationSplitModel;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
+import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
+import org.dmg.pmml.VerificationField;
 import org.dmg.pmml.mining.MiningModel;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
@@ -64,6 +74,8 @@ public class PMMLBuilder {
 
 	private Map<RegexKey, Map<String, Object>> options = new LinkedHashMap<>();
 
+	private Verification verification = null;
+
 
 	public PMMLBuilder(StructType schema, PipelineModel pipelineModel){
 		ConverterFactory.checkVersion();
@@ -76,6 +88,7 @@ public class PMMLBuilder {
 		StructType schema = getSchema();
 		PipelineModel pipelineModel = getPipelineModel();
 		Map<RegexKey, ? extends Map<String, ?>> options = getOptions();
+		Verification verification = getVerification();
 
 		ConverterFactory converterFactory = new ConverterFactory(options);
 
@@ -84,6 +97,9 @@ public class PMMLBuilder {
 		Map<FieldName, DerivedField> derivedFields = encoder.getDerivedFields();
 
 		List<org.dmg.pmml.Model> models = new ArrayList<>();
+
+		List<String> predictionColumns = new ArrayList<>();
+		List<String> probabilityColumns = new ArrayList<>();
 
 		// Transformations preceding the last model
 		List<FieldName> preProcessorNames = Collections.emptyList();
@@ -104,6 +120,24 @@ public class PMMLBuilder {
 				org.dmg.pmml.Model model = modelConverter.registerModel(encoder);
 
 				models.add(model);
+
+				hasPredictionCol:
+				if(transformer instanceof HasPredictionCol){
+					HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
+
+					// XXX
+					if((transformer instanceof GeneralizedLinearRegressionModel) && (MiningFunction.CLASSIFICATION).equals(model.getMiningFunction())){
+						break hasPredictionCol;
+					}
+
+					predictionColumns.add(hasPredictionCol.getPredictionCol());
+				} // End if
+
+				if(transformer instanceof HasProbabilityCol){
+					HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)transformer;
+
+					probabilityColumns.add(hasProbabilityCol.getProbabilityCol());
+				}
 
 				preProcessorNames = new ArrayList<>(derivedFields.keySet());
 			} else
@@ -172,6 +206,66 @@ public class PMMLBuilder {
 		}
 
 		PMML pmml = encoder.encodePMML(rootModel);
+
+		if((predictionColumns.size() > 0 || probabilityColumns.size() > 0) && (verification != null)){
+			Dataset<Row> dataset = verification.getDataset();
+			Dataset<Row> transformedDataset = verification.getTransformedDataset();
+			Double precision = verification.getPrecision();
+			Double zeroThreshold = verification.getZeroThreshold();
+
+			List<String> inputColumns = new ArrayList<>();
+
+			MiningSchema miningSchema = rootModel.getMiningSchema();
+
+			List<MiningField> miningFields = miningSchema.getMiningFields();
+			for(MiningField miningField : miningFields){
+				MiningField.UsageType usageType = miningField.getUsageType();
+
+				switch(usageType){
+					case ACTIVE:
+						FieldName name = miningField.getName();
+
+						inputColumns.add(name.getValue());
+						break;
+					default:
+						break;
+				}
+			}
+
+			Map<VerificationField, List<?>> data = new LinkedHashMap<>();
+
+			for(String inputColumn : inputColumns){
+				VerificationField verificationField = ModelUtil.createVerificationField(FieldName.create(inputColumn));
+
+				data.put(verificationField, getColumn(dataset, inputColumn));
+			}
+
+			for(String predictionColumn : predictionColumns){
+				Feature feature = encoder.getOnlyFeature(predictionColumn);
+
+				VerificationField verificationField = ModelUtil.createVerificationField(feature.getName())
+					.setPrecision(precision)
+					.setZeroThreshold(zeroThreshold);
+
+				data.put(verificationField, getColumn(transformedDataset, predictionColumn));
+			}
+
+			for(String probabilityColumn : probabilityColumns){
+				List<Feature> features = encoder.getFeatures(probabilityColumn);
+
+				for(int i = 0; i < features.size(); i++){
+					Feature feature = features.get(i);
+
+					VerificationField verificationField = ModelUtil.createVerificationField(feature.getName())
+						.setPrecision(precision)
+						.setZeroThreshold(zeroThreshold);
+
+					data.put(verificationField, getVectorColumn(transformedDataset, probabilityColumn, i));
+				}
+			}
+
+			rootModel.setModelVerification(ModelUtil.createModelVerification(data));
+		}
 
 		return pmml;
 	}
@@ -243,6 +337,22 @@ public class PMMLBuilder {
 		return this;
 	}
 
+	public PMMLBuilder verify(Dataset<Row> dataset){
+		return verify(dataset, 1e-14, 1e-14);
+	}
+
+	public PMMLBuilder verify(Dataset<Row> dataset, double precision, double zeroThreshold){
+		PipelineModel pipelineModel = getPipelineModel();
+
+		Dataset<Row> transformedDataset = pipelineModel.transform(dataset);
+
+		Verification verification = new Verification(dataset, transformedDataset)
+			.setPrecision(precision)
+			.setZeroThreshold(zeroThreshold);
+
+		return setVerification(verification);
+	}
+
 	public StructType getSchema(){
 		return this.schema;
 	}
@@ -275,6 +385,27 @@ public class PMMLBuilder {
 
 	public Map<RegexKey, Map<String, Object>> getOptions(){
 		return this.options;
+	}
+
+	private PMMLBuilder setOptions(Map<RegexKey, Map<String, Object>> options){
+
+		if(options == null){
+			throw new IllegalArgumentException();
+		}
+
+		this.options = options;
+
+		return this;
+	}
+
+	public Verification getVerification(){
+		return this.verification;
+	}
+
+	private PMMLBuilder setVerification(Verification verification){
+		this.verification = verification;
+
+		return this;
 	}
 
 	static
@@ -334,5 +465,82 @@ public class PMMLBuilder {
 		}
 
 		return result;
+	}
+
+	static
+	private List<?> getColumn(Dataset<Row> dataset, String name){
+		List<Row> rows = dataset.select(name)
+			.collectAsList();
+
+		return rows.stream()
+			.map(row -> row.apply(0))
+			.collect(Collectors.toList());
+	}
+
+	static
+	private List<?> getVectorColumn(Dataset<Row> dataset, String name, int index){
+		List<Vector> column = (List<Vector>)getColumn(dataset, name);
+
+		return column.stream()
+			.map(vector -> vector.apply(index))
+			.collect(Collectors.toList());
+	}
+
+	static
+	public class Verification {
+
+		private Dataset<Row> dataset = null;
+
+		private Dataset<Row> transformedDataset = null;
+
+		public Double precision = null;
+
+		public Double zeroThreshold = null;
+
+
+		private Verification(Dataset<Row> dataset, Dataset<Row> transformedDataset){
+			setDataset(dataset);
+			setTransformedDataset(transformedDataset);
+		}
+
+		public Dataset<Row> getDataset(){
+			return this.dataset;
+		}
+
+		private Verification setDataset(Dataset<Row> dataset){
+			this.dataset = dataset;
+
+			return this;
+		}
+
+		public Dataset<Row> getTransformedDataset(){
+			return this.transformedDataset;
+		}
+
+		private Verification setTransformedDataset(Dataset<Row> transformedDataset){
+			this.transformedDataset = transformedDataset;
+
+			return this;
+		}
+
+		public Double getPrecision(){
+			return this.precision;
+		}
+
+		public Verification setPrecision(Double precision){
+			this.precision = precision;
+
+			return this;
+		}
+
+		public Double getZeroThreshold(){
+			return this.zeroThreshold;
+		}
+
+		public Verification setZeroThreshold(Double zeroThreshold){
+			this.zeroThreshold = zeroThreshold;
+
+			return this;
+		}
 	}
 }

@@ -31,8 +31,12 @@ import com.google.common.io.CharStreams;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.util.MLReader;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
@@ -102,8 +106,43 @@ public class ConverterTest extends IntegrationTest {
 					pipelineModel = mlReader.load(tmpDir.getAbsolutePath());
 				}
 
+				Dataset<Row> dataset;
+
+				try(InputStream is = open("/csv/" + getDataset() + ".csv")){
+					File tmpCsvFile = File.createTempFile(getDataset(), ".csv");
+
+					try(OutputStream os = new FileOutputStream(tmpCsvFile)){
+						ByteStreams.copy(is, os);
+					}
+
+					dataset = ConverterTest.sparkSession.read()
+						.format("csv")
+						.option("header", true)
+						.option("inferSchema", false)
+						.load(tmpCsvFile.getAbsolutePath());
+
+					StructField[] fields = schema.fields();
+					for(StructField field : fields){
+						Column column = dataset.apply(field.name()).cast(field.dataType());
+
+						dataset = dataset.withColumn("tmp_" + field.name(), column).drop(field.name()).withColumnRenamed("tmp_" + field.name(), field.name());
+					}
+
+					dataset = dataset.sample(false, 0.05d, 63317);
+				}
+
+				double precision = 1e-14;
+				double zeroThreshold = 1e-14;
+
+				// XXX
+				if(("NaiveBayes").equals(getName()) && (getDataset()).equals("Audit")){
+					precision = 1e-10;
+					zeroThreshold = 1e-10;
+				}
+
 				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
-					.putOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3);
+					.putOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3)
+					.verify(dataset, precision, zeroThreshold);
 
 				PMML pmml = pmmlBuilder.build();
 
