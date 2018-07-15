@@ -104,6 +104,17 @@ public class ConverterFactory {
 	}
 
 	static
+	public void checkNoShading(){
+		Package _package = TransformerConverter.class.getPackage();
+
+		String name = _package.getName();
+
+		if(!(name).equals("org.jpmml.sparkml")){
+			throw new IllegalArgumentException("Expected JPMML-SparkML converter classes to have package name prefix \'org.jpmml.sparkml\', got package name prefix \'" + name + "\'");
+		}
+	}
+
+	static
 	private void init(){
 		Thread thread = Thread.currentThread();
 

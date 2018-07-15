@@ -79,6 +79,7 @@ public class PMMLBuilder {
 
 	public PMMLBuilder(StructType schema, PipelineModel pipelineModel){
 		ConverterFactory.checkVersion();
+		ConverterFactory.checkNoShading();
 
 		setSchema(schema);
 		setPipelineModel(pipelineModel);
