@@ -78,9 +78,6 @@ public class PMMLBuilder {
 
 
 	public PMMLBuilder(StructType schema, PipelineModel pipelineModel){
-		ConverterFactory.checkVersion();
-		ConverterFactory.checkNoShading();
-
 		setSchema(schema);
 		setPipelineModel(pipelineModel);
 	}
@@ -488,6 +485,13 @@ public class PMMLBuilder {
 	}
 
 	static
+	private void init(){
+		ConverterFactory.checkVersion();
+		ConverterFactory.checkApplicationClasspath();
+		ConverterFactory.checkNoShading();
+	}
+
+	static
 	public class Verification {
 
 		private Dataset<Row> dataset = null;
@@ -543,5 +547,9 @@ public class PMMLBuilder {
 
 			return this;
 		}
+	}
+
+	static {
+		init();
 	}
 }
