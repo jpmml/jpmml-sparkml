@@ -18,87 +18,30 @@
  */
 package org.jpmml.sparkml.visitors;
 
-import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.HasFieldReference;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.PMMLObject;
 import org.dmg.pmml.Predicate;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.SimpleSetPredicate;
 import org.dmg.pmml.True;
-import org.dmg.pmml.VisitorAction;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
-import org.jpmml.model.visitors.AbstractVisitor;
+import org.jpmml.converter.visitors.AbstractTreeModelTransformer;
 
-public class TreeModelCompactor extends AbstractVisitor {
+public class TreeModelCompactor extends AbstractTreeModelTransformer {
 
 	private MiningFunction miningFunction = null;
 
-	private Map<True, FieldName> categoricalFields = new IdentityHashMap<>();
+	private Map<Node, SimpleSetPredicate> replacedPredicates = new IdentityHashMap<>();
 
 
 	@Override
-	public void pushParent(PMMLObject object){
-		super.pushParent(object);
-
-		if(object instanceof Node){
-			handleNodePush((Node)object);
-		} else
-
-		if(object instanceof TreeModel){
-			handleTreeModelPush((TreeModel)object);
-		}
-	}
-
-	@Override
-	public PMMLObject popParent(){
-		PMMLObject object = super.popParent();
-
-		if(object instanceof Node){
-			handleNodePop((Node)object);
-		} else
-
-		if(object instanceof TreeModel){
-			handleTreeModelPop((TreeModel)object);
-		}
-
-		return object;
-	}
-
-	@Override
-	public VisitorAction visit(TreeModel treeModel){
-		TreeModel.MissingValueStrategy missingValueStrategy = treeModel.getMissingValueStrategy();
-		TreeModel.NoTrueChildStrategy noTrueChildStrategy = treeModel.getNoTrueChildStrategy();
-		TreeModel.SplitCharacteristic splitCharacteristic = treeModel.getSplitCharacteristic();
-
-		if(!(TreeModel.MissingValueStrategy.NONE).equals(missingValueStrategy) || !(TreeModel.NoTrueChildStrategy.RETURN_NULL_PREDICTION).equals(noTrueChildStrategy) || !(TreeModel.SplitCharacteristic.BINARY_SPLIT).equals(splitCharacteristic)){
-			throw new IllegalArgumentException();
-		}
-
-		treeModel
-			.setMissingValueStrategy(TreeModel.MissingValueStrategy.NULL_PREDICTION)
-			.setSplitCharacteristic(TreeModel.SplitCharacteristic.MULTI_SPLIT);
-
-		MiningFunction miningFunction = treeModel.getMiningFunction();
-		switch(miningFunction){
-			case REGRESSION:
-				treeModel.setNoTrueChildStrategy(TreeModel.NoTrueChildStrategy.RETURN_LAST_PREDICTION);
-				break;
-			case CLASSIFICATION:
-				break;
-			default:
-				throw new IllegalArgumentException();
-		}
-
-		return super.visit(treeModel);
-	}
-
-	private void handleNodePush(Node node){
+	public void enterNode(Node node){
 		String id = node.getId();
 		String score = node.getScore();
 
@@ -119,95 +62,52 @@ public class TreeModelCompactor extends AbstractVisitor {
 			Predicate firstPredicate = firstChild.getPredicate();
 			Predicate secondPredicate = secondChild.getPredicate();
 
-			predicate:
-			if(firstPredicate instanceof SimplePredicate && secondPredicate instanceof SimplePredicate){
-				SimplePredicate firstSimplePredicate = (SimplePredicate)firstPredicate;
-				SimplePredicate secondSimplePredicate = (SimplePredicate)secondPredicate;
+			checkFieldReference(firstPredicate, secondPredicate);
 
-				SimplePredicate.Operator firstOperator = firstSimplePredicate.getOperator();
-				SimplePredicate.Operator secondOperator = secondSimplePredicate.getOperator();
+			boolean update = true;
 
-				if(!(firstSimplePredicate.getField()).equals(secondSimplePredicate.getField())){
-					throw new IllegalArgumentException();
-				} // End if
-
-				if((SimplePredicate.Operator.EQUAL).equals(firstOperator) && (SimplePredicate.Operator.EQUAL).equals(secondOperator)){
-
-					if(!isCategoricalField(firstSimplePredicate.getField())){
-						break predicate;
-					}
-
-					secondChild.setPredicate(new True());
-				} else
-
-				{
-					if(!(firstSimplePredicate.getValue()).equals(secondSimplePredicate.getValue())){
-						throw new IllegalArgumentException();
-					} // End if
-
-					if((SimplePredicate.Operator.NOT_EQUAL).equals(firstOperator) && (SimplePredicate.Operator.EQUAL).equals(secondOperator)){
-						swapChildren(children);
-
-						firstChild = children.get(0);
-						secondChild = children.get(1);
-					} else
-
-					if((SimplePredicate.Operator.EQUAL).equals(firstOperator) && (SimplePredicate.Operator.NOT_EQUAL).equals(secondOperator)){
-						// Ignored
-					} else
-
-					if((SimplePredicate.Operator.LESS_OR_EQUAL).equals(firstOperator) && (SimplePredicate.Operator.GREATER_THAN).equals(secondOperator)){
-						// Ignored
-					} else
-
-					{
-						throw new IllegalArgumentException();
-					}
-
-					secondChild.setPredicate(new True());
-				}
+			if(hasOperator(firstPredicate, SimplePredicate.Operator.EQUAL) && hasOperator(secondPredicate, SimplePredicate.Operator.EQUAL)){
+				update = isCategoricalField((SimplePredicate)firstPredicate);
 			} else
 
-			if(firstPredicate instanceof SimplePredicate && secondPredicate instanceof SimpleSetPredicate){
-				SimplePredicate simplePredicate = (SimplePredicate)firstPredicate;
-				SimpleSetPredicate simpleSetPredicate = (SimpleSetPredicate)secondPredicate;
+			if(hasOperator(firstPredicate, SimplePredicate.Operator.NOT_EQUAL) && hasOperator(secondPredicate, SimplePredicate.Operator.EQUAL)){
+				children = swapChildren(node);
 
-				if(!(simplePredicate.getField()).equals(simpleSetPredicate.getField()) || !(SimplePredicate.Operator.EQUAL).equals(simplePredicate.getOperator()) || !(SimpleSetPredicate.BooleanOperator.IS_IN).equals(simpleSetPredicate.getBooleanOperator())){
-					throw new IllegalArgumentException();
-				}
-
-				secondChild.setPredicate(addCategoricalField(simpleSetPredicate));
+				firstChild = children.get(0);
+				secondChild = children.get(1);
 			} else
 
-			if(firstPredicate instanceof SimpleSetPredicate && secondPredicate instanceof SimplePredicate){
-				SimpleSetPredicate simpleSetPredicate = (SimpleSetPredicate)firstPredicate;
-				SimplePredicate simplePredicate = (SimplePredicate)secondPredicate;
+			if(hasOperator(firstPredicate, SimplePredicate.Operator.EQUAL) && hasOperator(secondPredicate, SimplePredicate.Operator.NOT_EQUAL)){
+				// Ignored
+			} else
 
-				if(!(simpleSetPredicate.getField()).equals(simplePredicate.getField()) || !(SimpleSetPredicate.BooleanOperator.IS_IN).equals(simpleSetPredicate.getBooleanOperator()) || !(SimplePredicate.Operator.EQUAL).equals(simplePredicate.getOperator())){
-					throw new IllegalArgumentException();
-				}
+			if(hasOperator(firstPredicate, SimplePredicate.Operator.LESS_OR_EQUAL) && hasOperator(secondPredicate, SimplePredicate.Operator.GREATER_THAN)){
+				// Ignored
+			} else
 
-				swapChildren(children);
+			if(hasOperator(firstPredicate, SimplePredicate.Operator.EQUAL) && hasBooleanOperator(secondPredicate, SimpleSetPredicate.BooleanOperator.IS_IN)){
+				addCategoricalField(secondChild);
+			} else
+
+			if(hasBooleanOperator(firstPredicate, SimpleSetPredicate.BooleanOperator.IS_IN) && hasOperator(secondPredicate, SimplePredicate.Operator.EQUAL)){
+				children = swapChildren(node);
 
 				firstChild = children.get(0);
 				secondChild = children.get(1);
 
-				secondChild.setPredicate(addCategoricalField(simpleSetPredicate));
+				addCategoricalField(secondChild);
 			} else
 
-			if(firstPredicate instanceof SimpleSetPredicate && secondPredicate instanceof SimpleSetPredicate){
-				SimpleSetPredicate firstSimpleSetPredicate = (SimpleSetPredicate)firstPredicate;
-				SimpleSetPredicate secondSimpleSetPredicate = (SimpleSetPredicate)secondPredicate;
-
-				if(!(firstSimpleSetPredicate.getField()).equals(secondSimpleSetPredicate.getField()) || !(SimpleSetPredicate.BooleanOperator.IS_IN).equals(firstSimpleSetPredicate.getBooleanOperator()) || !(SimpleSetPredicate.BooleanOperator.IS_IN).equals(secondSimpleSetPredicate.getBooleanOperator())){
-					throw new IllegalArgumentException();
-				}
-
-				secondChild.setPredicate(addCategoricalField(secondSimpleSetPredicate));
+			if(hasBooleanOperator(firstPredicate, SimpleSetPredicate.BooleanOperator.IS_IN) && hasBooleanOperator(secondPredicate, SimpleSetPredicate.BooleanOperator.IS_IN)){
+				addCategoricalField(secondChild);
 			} else
 
 			{
 				throw new IllegalArgumentException();
+			} // End if
+
+			if(update){
+				secondChild.setPredicate(new True());
 			}
 		} else
 
@@ -218,8 +118,8 @@ public class TreeModelCompactor extends AbstractVisitor {
 		}
 	}
 
-	private void handleNodePop(Node node){
-		String score = node.getScore();
+	@Override
+	public void exitNode(Node node){
 		Predicate predicate = node.getPredicate();
 
 		if(predicate instanceof True){
@@ -229,41 +129,16 @@ public class TreeModelCompactor extends AbstractVisitor {
 				return;
 			}
 
-			String parentScore = parentNode.getScore();
-			if(parentScore != null){
-				throw new IllegalArgumentException();
-			} // End if
-
 			if((MiningFunction.REGRESSION).equals(this.miningFunction)){
-				parentNode.setScore(score);
-
-				List<Node> parentChildren = parentNode.getNodes();
-
-				boolean success = parentChildren.remove(node);
-				if(!success){
-					throw new IllegalArgumentException();
-				} // End if
-
-				if(node.hasNodes()){
-					List<Node> children = node.getNodes();
-
-					parentChildren.addAll(children);
-				}
+				initScore(parentNode, node);
+				replaceChildWithGrandchildren(parentNode, node);
 			} else
 
 			if((MiningFunction.CLASSIFICATION).equals(this.miningFunction)){
 
+				// Replace intermediate nodes, but not terminal nodes
 				if(node.hasNodes()){
-					List<Node> parentChildren = parentNode.getNodes();
-
-					boolean success = parentChildren.remove(node);
-					if(!success){
-						throw new IllegalArgumentException();
-					}
-
-					List<Node> children = node.getNodes();
-
-					parentChildren.addAll(children);
+					replaceChildWithGrandchildren(parentNode, node);
 				}
 			} else
 
@@ -273,78 +148,69 @@ public class TreeModelCompactor extends AbstractVisitor {
 		}
 	}
 
-	private void handleTreeModelPush(TreeModel treeModel){
+	@Override
+	public void enterTreeModel(TreeModel treeModel){
+		TreeModel.MissingValueStrategy missingValueStrategy = treeModel.getMissingValueStrategy();
+		TreeModel.NoTrueChildStrategy noTrueChildStrategy = treeModel.getNoTrueChildStrategy();
+		TreeModel.SplitCharacteristic splitCharacteristic = treeModel.getSplitCharacteristic();
+
+		if(!(TreeModel.MissingValueStrategy.NONE).equals(missingValueStrategy) || !(TreeModel.NoTrueChildStrategy.RETURN_NULL_PREDICTION).equals(noTrueChildStrategy) || !(TreeModel.SplitCharacteristic.BINARY_SPLIT).equals(splitCharacteristic)){
+			throw new IllegalArgumentException();
+		}
+
 		this.miningFunction = treeModel.getMiningFunction();
 
-		this.categoricalFields.clear();
+		this.replacedPredicates.clear();
 	}
 
-	private void handleTreeModelPop(TreeModel treeModel){
+	@Override
+	public void exitTreeModel(TreeModel treeModel){
+		treeModel
+			.setMissingValueStrategy(TreeModel.MissingValueStrategy.NULL_PREDICTION)
+			.setSplitCharacteristic(TreeModel.SplitCharacteristic.MULTI_SPLIT);
+
+		switch(this.miningFunction){
+			case REGRESSION:
+				treeModel.setNoTrueChildStrategy(TreeModel.NoTrueChildStrategy.RETURN_LAST_PREDICTION);
+				break;
+			case CLASSIFICATION:
+				break;
+			default:
+				throw new IllegalArgumentException();
+		}
+
 		this.miningFunction = null;
 	}
 
-	private boolean isCategoricalField(FieldName name){
-		Deque<PMMLObject> parents = getParents();
+	private boolean isCategoricalField(HasFieldReference<?> hasFieldReference){
+		FieldName name = hasFieldReference.getField();
 
-		for(PMMLObject parent : parents){
+		java.util.function.Predicate<Node> predicate = new java.util.function.Predicate<Node>(){
 
-			if(parent instanceof Node){
-				Node node = (Node)parent;
-
+			@Override
+			public boolean test(Node node){
 				Predicate predicate = node.getPredicate();
+
+				if(predicate instanceof True){
+					predicate = TreeModelCompactor.this.replacedPredicates.get(node);
+				} // End if
 
 				if(predicate instanceof SimpleSetPredicate){
 					SimpleSetPredicate simpleSetPredicate = (SimpleSetPredicate)predicate;
 
-					FieldName categoricalField = simpleSetPredicate.getField();
-
-					if((name).equals(categoricalField)){
-						return true;
-					}
-				} else
-
-				if(predicate instanceof True){
-					True truePredicate = (True)predicate;
-
-					FieldName categoricalField = this.categoricalFields.get(truePredicate);
-
-					if((name).equals(categoricalField)){
-						return true;
-					}
+					return hasFieldReference(simpleSetPredicate, name);
 				}
-			} else
 
-			{
 				return false;
 			}
-		}
+		};
 
-		return false;
+		Node ancestorNode = getAncestorNode(predicate);
+
+		return (ancestorNode != null);
 	}
 
-	private True addCategoricalField(SimpleSetPredicate simpleSetPredicate){
-		True truePredicate = new True();
-
-		this.categoricalFields.put(truePredicate, simpleSetPredicate.getField());
-
-		return truePredicate;
-	}
-
-	private Node getParentNode(){
-		Deque<PMMLObject> parents = getParents();
-
-		PMMLObject parent = parents.peekFirst();
-		if(parent instanceof Node){
-			return (Node)parent;
-		}
-
-		return null;
-	}
-
-	static
-	private void swapChildren(List<Node> children){
-		Node firstChild = children.remove(0);
-
-		children.add(1, firstChild);
+	private void addCategoricalField(Node node){
+		this.replacedPredicates.put(node, (SimpleSetPredicate)node.getPredicate());
 	}
 }
