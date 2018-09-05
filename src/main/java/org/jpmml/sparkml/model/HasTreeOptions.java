@@ -18,10 +18,10 @@
  */
 package org.jpmml.sparkml.model;
 
-import org.jpmml.sparkml.HasOptions;
+import org.jpmml.sparkml.HasSparkMLOptions;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
-public interface HasTreeOptions extends HasOptions {
+public interface HasTreeOptions extends HasSparkMLOptions {
 
 	/**
 	 * @see TreeModelCompactor
