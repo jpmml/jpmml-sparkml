@@ -31,7 +31,6 @@ import java.util.function.Predicate;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.MoreFiles;
-import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.util.MLReader;
 import org.apache.spark.sql.Column;
@@ -173,24 +172,13 @@ public class ConverterTest extends IntegrationTest {
 	@BeforeClass
 	static
 	public void createSparkSession(){
-		SparkSession.Builder builder = SparkSession.builder()
-			.appName("test")
-			.master("local[1]")
-			.config("spark.ui.enabled", false);
-
-		SparkSession sparkSession = builder.getOrCreate();
-
-		SparkContext sparkContext = sparkSession.sparkContext();
-		sparkContext.setLogLevel("ERROR");
-
-		ConverterTest.sparkSession = sparkSession;
+		ConverterTest.sparkSession = SparkSessionUtil.createSparkSession();
 	}
 
 	@AfterClass
 	static
 	public void destroySparkSession(){
-		ConverterTest.sparkSession.stop();
-		ConverterTest.sparkSession = null;
+		ConverterTest.sparkSession = SparkSessionUtil.destroySparkSession(ConverterTest.sparkSession);
 	}
 
 	public static SparkSession sparkSession = null;

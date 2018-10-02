@@ -59,6 +59,21 @@ public class SparkMLEncoder extends ModelEncoder {
 		return this.columnFeatures.containsKey(column);
 	}
 
+	public List<Feature> getSchemaFeatures(){
+		StructType schema = getSchema();
+
+		List<Feature> result = new ArrayList<>();
+
+		StructField[] fields = schema.fields();
+		for(StructField field : fields){
+			Feature feature = getOnlyFeature(field.name());
+
+			result.add(feature);
+		}
+
+		return result;
+	}
+
 	public Feature getOnlyFeature(String column){
 		List<Feature> features = getFeatures(column);
 

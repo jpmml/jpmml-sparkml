@@ -16,15 +16,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.model;
+package org.jpmml.sparkml;
 
-import org.jpmml.sparkml.HasSparkMLOptions;
-import org.jpmml.sparkml.visitors.TreeModelCompactor;
+import org.apache.spark.SparkContext;
+import org.apache.spark.sql.SparkSession;
 
-public interface HasTreeOptions extends HasSparkMLOptions {
+public class SparkSessionUtil {
 
-	/**
-	 * @see TreeModelCompactor
-	 */
-	String OPTION_COMPACT = "compact";
+	private SparkSessionUtil(){
+	}
+
+	static
+	public SparkSession createSparkSession(){
+		SparkSession.Builder builder = SparkSession.builder()
+			.appName("test")
+			.master("local[1]")
+			.config("spark.ui.enabled", false);
+
+		SparkSession sparkSession = builder.getOrCreate();
+
+		SparkContext sparkContext = sparkSession.sparkContext();
+		sparkContext.setLogLevel("ERROR");
+
+		return sparkSession;
+	}
+
+	static
+	public SparkSession destroySparkSession(SparkSession sparkSession){
+		sparkSession.stop();
+
+		return null;
+	}
 }

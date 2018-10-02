@@ -18,9 +18,9 @@
  */
 package org.jpmml.sparkml.model;
 
-import org.jpmml.sparkml.HasOptions;
+import org.jpmml.sparkml.HasSparkMLOptions;
 
-public interface HasRegressionOptions extends HasOptions {
+public interface HasRegressionOptions extends HasSparkMLOptions {
 
 	String OPTION_LOOKUP_THRESHOLD = "lookup_threshold";
 }

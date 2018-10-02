@@ -23,6 +23,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.QuantileDiscretizer`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
     * [`feature.RegexTokenizer`](http://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RegexTokenizer.html)
     * [`feature.RFormulaModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
+    * [`feature.SQLTransformer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/SQLTransformer.html)
     * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
     * [`feature.StopWordsRemover`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StopWordsRemover.html)
     * [`feature.StringIndexerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
@@ -190,6 +191,10 @@ PMML pmml = new PMMLBuilder(schema, pipelineModel)
 // Viewing the result
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
 ```
+
+Please refer to the following resources for more ideas and code examples:
+
+* [Converting Apache Spark ML pipeline models to PMML](http://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
 
 ## Example application ##
 
