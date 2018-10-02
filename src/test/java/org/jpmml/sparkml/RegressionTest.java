@@ -19,6 +19,7 @@
 package org.jpmml.sparkml;
 
 import org.dmg.pmml.FieldName;
+import org.jpmml.evaluator.PMMLEquivalence;
 import org.junit.Test;
 
 public class RegressionTest extends ConverterTest {
@@ -77,6 +78,6 @@ public class RegressionTest extends ConverterTest {
 
 	@Test
 	public void evaluateGLMFormulaVisit() throws Exception {
-		evaluate("GLM", "Visit");
+		evaluate("GLM", "Visit", new PMMLEquivalence(1e-12, 1e-12));
 	}
 }

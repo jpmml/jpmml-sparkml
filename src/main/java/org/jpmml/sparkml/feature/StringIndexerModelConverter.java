@@ -127,6 +127,11 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 						field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 					}
 					break;
+				case "error":
+					{
+						// Ignored: Assume that a DerivedField element can never return an erroneous field value
+					}
+					break;
 				default:
 					throw new IllegalArgumentException(handleInvalid);
 			}

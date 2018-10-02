@@ -18,8 +18,10 @@
  */
 package org.jpmml.sparkml;
 
+import org.jpmml.converter.HasOptions;
+
 /**
  * @see TransformerConverter#getOption(String, Object)
  */
-public interface HasOptions {
+public interface HasSparkMLOptions extends HasOptions {
 }
