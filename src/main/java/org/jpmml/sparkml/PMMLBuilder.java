@@ -59,10 +59,8 @@ import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.VerificationField;
-import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.MetroJAXBUtil;
 
@@ -149,39 +147,14 @@ public class PMMLBuilder {
 		List<FieldName> postProcessorNames = new ArrayList<>(derivedFields.keySet());
 		postProcessorNames.removeAll(preProcessorNames);
 
-		org.dmg.pmml.Model rootModel;
+		org.dmg.pmml.Model model;
 
 		if(models.size() == 1){
-			rootModel = Iterables.getOnlyElement(models);
+			model = Iterables.getOnlyElement(models);
 		} else
 
 		if(models.size() > 1){
-			List<MiningField> targetMiningFields = new ArrayList<>();
-
-			for(org.dmg.pmml.Model model : models){
-				MiningSchema miningSchema = model.getMiningSchema();
-
-				List<MiningField> miningFields = miningSchema.getMiningFields();
-				for(MiningField miningField : miningFields){
-					MiningField.UsageType usageType = miningField.getUsageType();
-
-					switch(usageType){
-						case PREDICTED:
-						case TARGET:
-							targetMiningFields.add(miningField);
-							break;
-						default:
-							break;
-					}
-				}
-			}
-
-			MiningSchema miningSchema = new MiningSchema(targetMiningFields);
-
-			MiningModel miningModel = MiningModelUtil.createModelChain(models, new Schema(null, Collections.emptyList()))
-				.setMiningSchema(miningSchema);
-
-			rootModel = miningModel;
+			model = MiningModelUtil.createModelChain(models);
 		} else
 
 		{
@@ -193,7 +166,7 @@ public class PMMLBuilder {
 
 			encoder.removeDerivedField(postProcessorName);
 
-			Output output = ModelUtil.ensureOutput(rootModel);
+			Output output = ModelUtil.ensureOutput(model);
 
 			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getDataType())
 				.setOpType(derivedField.getOpType())
@@ -203,7 +176,7 @@ public class PMMLBuilder {
 			output.addOutputFields(outputField);
 		}
 
-		PMML pmml = encoder.encodePMML(rootModel);
+		PMML pmml = encoder.encodePMML(model);
 
 		if((predictionColumns.size() > 0 || probabilityColumns.size() > 0) && (verification != null)){
 			Dataset<Row> dataset = verification.getDataset();
@@ -213,7 +186,7 @@ public class PMMLBuilder {
 
 			List<String> inputColumns = new ArrayList<>();
 
-			MiningSchema miningSchema = rootModel.getMiningSchema();
+			MiningSchema miningSchema = model.getMiningSchema();
 
 			List<MiningField> miningFields = miningSchema.getMiningFields();
 			for(MiningField miningField : miningFields){
@@ -262,7 +235,7 @@ public class PMMLBuilder {
 				}
 			}
 
-			rootModel.setModelVerification(ModelUtil.createModelVerification(data));
+			model.setModelVerification(ModelUtil.createModelVerification(data));
 		}
 
 		return pmml;

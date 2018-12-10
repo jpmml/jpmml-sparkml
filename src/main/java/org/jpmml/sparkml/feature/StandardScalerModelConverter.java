@@ -20,9 +20,11 @@ package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.spark.ml.feature.StandardScalerModel;
 import org.apache.spark.ml.linalg.Vector;
+import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
@@ -30,7 +32,6 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ProductFeature;
 import org.jpmml.converter.ValueUtil;
@@ -93,21 +94,14 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 
 							@Override
 							public ContinuousFeature toContinuousFeature(){
-								PMMLEncoder encoder = ensureEncoder();
-
-								DerivedField derivedField = encoder.getDerivedField(name);
-								if(derivedField == null){
+								Supplier<Apply> applySupplier = () -> {
 									Feature feature = getFeature();
 									Number factor = getFactor();
 
-									ContinuousFeature continuousFeature = feature.toContinuousFeature();
+									return PMMLUtil.createApply("*", (feature.toContinuousFeature()).ref(), PMMLUtil.createConstant(factor));
+								};
 
-									Expression expression = PMMLUtil.createApply("*", continuousFeature.ref(), PMMLUtil.createConstant(factor));
-
-									derivedField = encoder.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
-								}
-
-								return new ContinuousFeature(encoder, derivedField);
+								return toContinuousFeature(name, DataType.DOUBLE, applySupplier);
 							}
 						};
 					}
