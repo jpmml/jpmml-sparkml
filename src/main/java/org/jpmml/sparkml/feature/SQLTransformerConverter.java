@@ -19,18 +19,25 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.spark.ml.feature.SQLTransformer;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.analysis.UnresolvedAlias;
 import org.apache.spark.sql.catalyst.analysis.UnresolvedStar;
 import org.apache.spark.sql.catalyst.expressions.Alias;
+import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.Expression;
-import org.apache.spark.sql.catalyst.parser.ParseException;
 import org.apache.spark.sql.catalyst.parser.ParserInterface;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.internal.SessionState;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
@@ -51,26 +58,27 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 		super(sqlTransformer);
 	}
 
+	// @todo this is a sad copy-paste of #org.apache.spark.ml.feature.SQLTransformer
+	private LogicalPlan analyzed(StructType schema, String statement, String uid)
+	{
+		SparkSession sparkSession = SparkSession.builder()
+				.getOrCreate();
+		Dataset<Row> df = sparkSession.createDataFrame(Collections.emptyList(), schema);
+		String tableName = uid + "_" + UUID.randomUUID().toString().substring(0, 6);
+		String realStatement = statement.replace("__THIS__", tableName);
+		df.createOrReplaceTempView(tableName);
+		LogicalPlan retval = sparkSession.sql(realStatement).queryExecution().analyzed();
+		sparkSession.catalog().dropTempView(tableName);
+		return retval;
+	}
+
 	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		SQLTransformer transformer = getTransformer();
 
 		String statement = transformer.getStatement();
 
-		SparkSession sparkSession = SparkSession.builder()
-			.getOrCreate();
-
-		SessionState sessionState = sparkSession.sessionState();
-
-		ParserInterface parserInterface = sessionState.sqlParser();
-
-		LogicalPlan logicalPlan;
-
-		try {
-			logicalPlan = parserInterface.parsePlan(statement);
-		} catch(ParseException pe){
-			throw new IllegalArgumentException(pe);
-		}
+		LogicalPlan logicalPlan = analyzed(encoder.getSchema(), statement, transformer.uid());
 
 		ExpressionTranslator.DataTypeResolver dataTypeResolver = new ExpressionTranslator.DataTypeResolver(){
 
@@ -81,6 +89,8 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 				return feature.getDataType();
 			}
 		};
+
+		Map<String, Feature> schemaFeatureMap = encoder.getSchemaFeatures().stream().collect(Collectors.toMap(f -> f.getName().getValue(), f -> f));
 
 		List<Feature> result = new ArrayList<>();
 
@@ -95,7 +105,16 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 				name = alias.name();
 			} else
-
+			if(expression instanceof AttributeReference) {
+				AttributeReference reference = (AttributeReference)expression;
+				name = reference.name();
+				Feature feature = schemaFeatureMap.get(name);
+				if(null == feature) {
+					throw new IllegalArgumentException(name);
+				}
+				result.add(feature);
+				continue;
+			} else
 			if(expression instanceof UnresolvedAlias){
 				UnresolvedAlias unresolvedAlias = (UnresolvedAlias)expression;
 

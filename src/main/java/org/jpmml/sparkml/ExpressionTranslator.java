@@ -26,6 +26,7 @@ import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute;
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction;
 import org.apache.spark.sql.catalyst.expressions.Add;
 import org.apache.spark.sql.catalyst.expressions.And;
+import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
@@ -68,6 +69,10 @@ public class ExpressionTranslator {
 			Expression child = unresolvedAlias.child();
 
 			return translate(child, dataTypeResolver);
+		} else
+		if(expression instanceof AttributeReference) {
+			AttributeReference attribute = (AttributeReference) expression;
+			return new ExpressionMapping(attribute, new FieldRef(FieldName.create(attribute.name())), translateDataType(attribute.dataType()));
 		} else
 
 		if(expression instanceof UnresolvedAttribute){
@@ -230,13 +235,12 @@ public class ExpressionTranslator {
 			if(expression instanceof IsNotNull){
 				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isNotMissing", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
 			} else
-
 			if(expression instanceof IsNull){
 				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isMissing", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
 			} else
 
 			{
-				throw new IllegalArgumentException(String.valueOf(unaryExpression));
+				return translate(child, dataTypeResolver);
 			}
 		} else
 
