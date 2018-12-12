@@ -20,12 +20,10 @@ package org.jpmml.sparkml;
 
 import java.util.List;
 
-import org.apache.spark.sql.catalyst.FunctionIdentifier;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedAlias;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction;
 import org.apache.spark.sql.catalyst.expressions.Add;
+import org.apache.spark.sql.catalyst.expressions.Alias;
 import org.apache.spark.sql.catalyst.expressions.And;
+import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
@@ -60,48 +58,25 @@ import scala.collection.JavaConversions;
 public class ExpressionTranslator {
 
 	static
-	public ExpressionMapping translate(Expression expression, DataTypeResolver dataTypeResolver){
+	public ExpressionMapping translate(Expression expression){
 
-		if(expression instanceof UnresolvedAlias){
-			UnresolvedAlias unresolvedAlias = (UnresolvedAlias)expression;
+		if(expression instanceof Alias){
+			Alias alias = (Alias)expression;
 
-			Expression child = unresolvedAlias.child();
+			Expression child = alias.child();
 
-			return translate(child, dataTypeResolver);
-		} else
-
-		if(expression instanceof UnresolvedAttribute){
-			UnresolvedAttribute unresolvedAttribute = (UnresolvedAttribute)expression;
-
-			String name = unresolvedAttribute.name();
-
-			return new ExpressionMapping(unresolvedAttribute, new FieldRef(FieldName.create(name)), dataTypeResolver.getDataType(name));
-		} else
-
-		if(expression instanceof UnresolvedFunction){
-			UnresolvedFunction unresolvedFunction = (UnresolvedFunction)expression;
-
-			FunctionIdentifier name = unresolvedFunction.name();
-			List<Expression> children = JavaConversions.seqAsJavaList(unresolvedFunction.children());
-
-			String identifier = name.identifier();
-
-			if("IF".equalsIgnoreCase(identifier) && children.size() == 3){
-				return translate(new If(children.get(0), children.get(1), children.get(2)), dataTypeResolver);
-			} else
-
-			if("ISNOTNULL".equalsIgnoreCase(identifier) && children.size() == 1){
-				return translate(new IsNotNull(children.get(0)), dataTypeResolver);
-			} else
-
-			if("ISNULL".equalsIgnoreCase(identifier) && children.size() == 1){
-				return translate(new IsNull(children.get(0)), dataTypeResolver);
-			} else
-
-			{
-				throw new IllegalArgumentException(String.valueOf(unresolvedFunction));
-			}
+			return translate(child);
 		} // End if
+
+		if(expression instanceof AttributeReference){
+			AttributeReference attributeReference = (AttributeReference)expression;
+
+			String name = attributeReference.name();
+
+			DataType dataType = translateDataType(attributeReference.dataType());
+
+			return new ExpressionMapping(attributeReference, new FieldRef(FieldName.create(name)), dataType);
+		} else
 
 		if(expression instanceof BinaryOperator){
 			BinaryOperator binaryOperator = (BinaryOperator)expression;
@@ -165,7 +140,7 @@ public class ExpressionTranslator {
 				throw new IllegalArgumentException(String.valueOf(binaryOperator));
 			}
 
-			return new ExpressionMapping(binaryOperator, PMMLUtil.createApply(symbol, translateChild(left, dataTypeResolver), translateChild(right, dataTypeResolver)), dataType);
+			return new ExpressionMapping(binaryOperator, PMMLUtil.createApply(symbol, translateChild(left), translateChild(right)), dataType);
 		} else
 
 		if(expression instanceof If){
@@ -182,8 +157,8 @@ public class ExpressionTranslator {
 
 			DataType dataType = translateDataType(trueValue.dataType());
 
-			Apply apply = PMMLUtil.createApply("if", translateChild(predicate, dataTypeResolver))
-				.addExpressions(translateChild(trueValue, dataTypeResolver), translateChild(falseValue, dataTypeResolver));
+			Apply apply = PMMLUtil.createApply("if", translateChild(predicate))
+				.addExpressions(translateChild(trueValue), translateChild(falseValue));
 
 			return new ExpressionMapping(_if, apply, dataType);
 		} else
@@ -195,10 +170,10 @@ public class ExpressionTranslator {
 
 			List<Expression> elements = JavaConversions.seqAsJavaList(in.list());
 
-			Apply apply = PMMLUtil.createApply("isIn", translateChild(value, dataTypeResolver));
+			Apply apply = PMMLUtil.createApply("isIn", translateChild(value));
 
 			for(Expression element : elements){
-				apply.addExpressions(translateChild(element, dataTypeResolver));
+				apply.addExpressions(translateChild(element));
 			}
 
 			return new ExpressionMapping(in, apply, DataType.BOOLEAN);
@@ -219,7 +194,7 @@ public class ExpressionTranslator {
 
 			 Expression child = not.child();
 
-			 return new ExpressionMapping(not, PMMLUtil.createApply("not", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
+			 return new ExpressionMapping(not, PMMLUtil.createApply("not", translateChild(child)), DataType.BOOLEAN);
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -228,11 +203,11 @@ public class ExpressionTranslator {
 			Expression child = unaryExpression.child();
 
 			if(expression instanceof IsNotNull){
-				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isNotMissing", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
+				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isNotMissing", translateChild(child)), DataType.BOOLEAN);
 			} else
 
 			if(expression instanceof IsNull){
-				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isMissing", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
+				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isMissing", translateChild(child)), DataType.BOOLEAN);
 			} else
 
 			{
@@ -246,8 +221,8 @@ public class ExpressionTranslator {
 	}
 
 	static
-	private org.dmg.pmml.Expression translateChild(Expression expression, DataTypeResolver dataTypeResolver){
-		ExpressionMapping expressionMapping = translate(expression, dataTypeResolver);
+	private org.dmg.pmml.Expression translateChild(Expression expression){
+		ExpressionMapping expressionMapping = translate(expression);
 
 		return expressionMapping.getTo();
 	}
@@ -274,11 +249,5 @@ public class ExpressionTranslator {
 		{
 			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
 		}
-	}
-
-	static
-	public interface DataTypeResolver {
-
-		DataType getDataType(String name);
 	}
 }

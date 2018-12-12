@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.OpType;
 
 public class ExpressionMapping {
 
@@ -58,5 +59,21 @@ public class ExpressionMapping {
 
 	private void setDataType(DataType dataType){
 		this.dataType = dataType;
+	}
+
+	public OpType getOpType(){
+		DataType dataType = getDataType();
+
+		switch(dataType){
+			case STRING:
+				return OpType.CATEGORICAL;
+			case INTEGER:
+			case DOUBLE:
+				return OpType.CONTINUOUS;
+			case BOOLEAN:
+				return OpType.CATEGORICAL;
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 }

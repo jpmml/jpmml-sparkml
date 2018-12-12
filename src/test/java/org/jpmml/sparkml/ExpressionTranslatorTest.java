@@ -22,13 +22,13 @@ import java.util.List;
 
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.expressions.And;
+import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.expressions.If;
-import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Or;
-import org.apache.spark.sql.catalyst.parser.ParserInterface;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
-import org.apache.spark.sql.internal.SessionState;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.junit.AfterClass;
@@ -42,64 +42,45 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void translateLogicalExpression(){
-		ExpressionTranslator.DataTypeResolver dataTypeResolver = new ExpressionTranslator.DataTypeResolver(){
-
-			@Override
-			public DataType getDataType(String name){
-				return DataType.DOUBLE;
-			}
-		};
-
-		ExpressionMapping expressionMapping = translate("SELECT (isnull(x1) and not(isnotnull(x2))) FROM __THIS__", dataTypeResolver);
+		ExpressionMapping expressionMapping = translate("SELECT (isnull(x1) and not(isnotnull(x2))) FROM __THIS__");
 
 		checkExpressionMapping(expressionMapping, And.class, Apply.class, DataType.BOOLEAN);
 
-		expressionMapping = translate("SELECT ((x1 <= x2) or (x1 >= x3)) FROM __THIS__", dataTypeResolver);
+		expressionMapping = translate("SELECT ((x1 <= x3) or (x2 >= x3)) FROM __THIS__");
 
 		checkExpressionMapping(expressionMapping, Or.class, Apply.class, DataType.BOOLEAN);
 	}
 
 	@Test
 	public void translateArithmeticExpression(){
-		ExpressionMapping expressionMapping = translate("SELECT 2 * ((0 + 1) / (0 - 1)) FROM __THIS__", null);
+		ExpressionMapping expressionMapping = translate("SELECT ((x1 - x3) / (x2 + x3)) FROM __THIS__");
 
-		checkExpressionMapping(expressionMapping, Multiply.class, Apply.class, DataType.INTEGER);
+		checkExpressionMapping(expressionMapping, Divide.class, Apply.class, DataType.DOUBLE);
 	}
 
 	@Test
 	public void translateIfExpression(){
-		ExpressionTranslator.DataTypeResolver dataTypeResolver = new ExpressionTranslator.DataTypeResolver(){
-
-			@Override
-			public DataType getDataType(String name){
-
-				if(("status").equals(name)){
-					return DataType.INTEGER;
-				}
-
-				return DataType.DOUBLE;
-			}
-		};
-
-		ExpressionMapping expressionMapping = translate("SELECT if(status in (1, 2, 3), x1 < 0, x2 > 0)", dataTypeResolver);
+		ExpressionMapping expressionMapping = translate("SELECT if(flag, x1 != x3, x2 != x3) FROM __THIS__");
 
 		checkExpressionMapping(expressionMapping, If.class, Apply.class, DataType.BOOLEAN);
 	}
 
 	static
-	private ExpressionMapping translate(String statement, ExpressionTranslator.DataTypeResolver dataTypeResolver){
-		SessionState sessionState = ExpressionTranslatorTest.sparkSession.sessionState();
+	private ExpressionMapping translate(String statement){
+		StructType schema = new StructType()
+			.add("flag", DataTypes.BooleanType)
+			.add("x1", DataTypes.DoubleType)
+			.add("x2", DataTypes.DoubleType)
+			.add("x3", DataTypes.DoubleType);
 
-		ParserInterface parserInterface = sessionState.sqlParser();
-
-		LogicalPlan logicalPlan = parserInterface.parsePlan(statement);
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, schema, statement);
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		if(expressions.size() != 1){
 			throw new IllegalArgumentException();
 		}
 
-		return ExpressionTranslator.translate(expressions.get(0), dataTypeResolver);
+		return ExpressionTranslator.translate(expressions.get(0));
 	}
 
 	static
