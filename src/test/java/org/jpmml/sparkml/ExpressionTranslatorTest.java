@@ -46,21 +46,21 @@ public class ExpressionTranslatorTest {
 
 		checkExpressionMapping(expressionMapping, And.class, Apply.class, DataType.BOOLEAN);
 
-		expressionMapping = translate("SELECT ((x1 <= x3) or (x2 >= x3)) FROM __THIS__");
+		expressionMapping = translate("SELECT ((x1 <= 0) or (x2 >= 0)) FROM __THIS__");
 
 		checkExpressionMapping(expressionMapping, Or.class, Apply.class, DataType.BOOLEAN);
 	}
 
 	@Test
 	public void translateArithmeticExpression(){
-		ExpressionMapping expressionMapping = translate("SELECT ((x1 - x3) / (x2 + x3)) FROM __THIS__");
+		ExpressionMapping expressionMapping = translate("SELECT ((x1 - 1) / (x2 + 1)) FROM __THIS__");
 
 		checkExpressionMapping(expressionMapping, Divide.class, Apply.class, DataType.DOUBLE);
 	}
 
 	@Test
 	public void translateIfExpression(){
-		ExpressionMapping expressionMapping = translate("SELECT if(flag, x1 != x3, x2 != x3) FROM __THIS__");
+		ExpressionMapping expressionMapping = translate("SELECT if(flag, x1 != 0, x2 != 0) FROM __THIS__");
 
 		checkExpressionMapping(expressionMapping, If.class, Apply.class, DataType.BOOLEAN);
 	}
@@ -70,8 +70,7 @@ public class ExpressionTranslatorTest {
 		StructType schema = new StructType()
 			.add("flag", DataTypes.BooleanType)
 			.add("x1", DataTypes.DoubleType)
-			.add("x2", DataTypes.DoubleType)
-			.add("x3", DataTypes.DoubleType);
+			.add("x2", DataTypes.DoubleType);
 
 		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, schema, statement);
 

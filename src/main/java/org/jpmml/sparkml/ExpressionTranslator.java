@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
+import org.apache.spark.sql.catalyst.expressions.Cast;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
 import org.apache.spark.sql.catalyst.expressions.Expression;
@@ -52,6 +53,7 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
+import org.dmg.pmml.HasDataType;
 import org.jpmml.converter.PMMLUtil;
 import scala.collection.JavaConversions;
 
@@ -141,6 +143,33 @@ public class ExpressionTranslator {
 			}
 
 			return new ExpressionMapping(binaryOperator, PMMLUtil.createApply(symbol, translateChild(left), translateChild(right)), dataType);
+		} else
+
+		if(expression instanceof Cast){
+			Cast cast = (Cast)expression;
+
+			Expression child = cast.child();
+
+			DataType dataType = translateDataType(cast.dataType());
+
+			ExpressionMapping expressionMapping = translate(child);
+
+			Expression from = expressionMapping.getFrom();
+			org.dmg.pmml.Expression to = expressionMapping.getTo();
+
+			if(to instanceof HasDataType){
+				HasDataType<?> hasDataType = (HasDataType<?>)to;
+
+				hasDataType.setDataType(dataType);
+
+				expressionMapping = new ExpressionMapping(from, to, dataType);
+			} else
+
+			{
+				throw new IllegalArgumentException(String.valueOf(cast));
+			}
+
+			return expressionMapping;
 		} else
 
 		if(expression instanceof If){
