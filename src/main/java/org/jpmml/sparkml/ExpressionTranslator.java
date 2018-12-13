@@ -45,10 +45,6 @@ import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
-import org.apache.spark.sql.types.BooleanType;
-import org.apache.spark.sql.types.DoubleType;
-import org.apache.spark.sql.types.IntegralType;
-import org.apache.spark.sql.types.StringType;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
@@ -60,7 +56,7 @@ import scala.collection.JavaConversions;
 public class ExpressionTranslator {
 
 	static
-	public ExpressionMapping translate(Expression expression){
+	public org.dmg.pmml.Expression translate(Expression expression){
 
 		if(expression instanceof Alias){
 			Alias alias = (Alias)expression;
@@ -75,9 +71,7 @@ public class ExpressionTranslator {
 
 			String name = attributeReference.name();
 
-			DataType dataType = translateDataType(attributeReference.dataType());
-
-			return new ExpressionMapping(attributeReference, new FieldRef(FieldName.create(name)), dataType);
+			return new FieldRef(FieldName.create(name));
 		} else
 
 		if(expression instanceof BinaryOperator){
@@ -88,27 +82,31 @@ public class ExpressionTranslator {
 			Expression left = binaryOperator.left();
 			Expression right = binaryOperator.right();
 
-			DataType dataType;
-
 			if(expression instanceof And || expression instanceof Or){
-				symbol = symbol.toLowerCase();
 
-				dataType = DataType.BOOLEAN;
+				switch(symbol){
+					case "&&":
+						symbol = "and";
+						break;
+					case "||":
+						symbol = "or";
+						break;
+					default:
+						throw new IllegalArgumentException(String.valueOf(binaryOperator));
+				}
 			} else
 
 			if(expression instanceof Add || expression instanceof Divide || expression instanceof Multiply || expression instanceof Subtract){
 				BinaryArithmetic binaryArithmetic = (BinaryArithmetic)binaryOperator;
 
-				if((left.dataType()).acceptsType(right.dataType())){
-					dataType = translateDataType(left.dataType());
-				} else
-
-				if((right.dataType()).acceptsType(left.dataType())){
-					dataType = translateDataType(right.dataType());
-				} else
-
-				{
-					throw new IllegalArgumentException(String.valueOf(binaryArithmetic));
+				switch(symbol){
+					case "+":
+					case "/":
+					case "*":
+					case "-":
+						break;
+					default:
+						throw new IllegalArgumentException(String.valueOf(binaryArithmetic));
 				}
 			} else
 
@@ -134,15 +132,13 @@ public class ExpressionTranslator {
 					default:
 						throw new IllegalArgumentException(String.valueOf(binaryComparison));
 				}
-
-				dataType = DataType.BOOLEAN;
 			} else
 
 			{
 				throw new IllegalArgumentException(String.valueOf(binaryOperator));
 			}
 
-			return new ExpressionMapping(binaryOperator, PMMLUtil.createApply(symbol, translateChild(left), translateChild(right)), dataType);
+			return PMMLUtil.createApply(symbol, translate(left), translate(right));
 		} else
 
 		if(expression instanceof Cast){
@@ -150,26 +146,21 @@ public class ExpressionTranslator {
 
 			Expression child = cast.child();
 
-			DataType dataType = translateDataType(cast.dataType());
+			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
 
-			ExpressionMapping expressionMapping = translate(child);
+			org.dmg.pmml.Expression pmmlExpression = translate(child);
 
-			Expression from = expressionMapping.getFrom();
-			org.dmg.pmml.Expression to = expressionMapping.getTo();
-
-			if(to instanceof HasDataType){
-				HasDataType<?> hasDataType = (HasDataType<?>)to;
+			if(pmmlExpression instanceof HasDataType){
+				HasDataType<?> hasDataType = (HasDataType<?>)pmmlExpression;
 
 				hasDataType.setDataType(dataType);
 
-				expressionMapping = new ExpressionMapping(from, to, dataType);
+				return pmmlExpression;
 			} else
 
 			{
 				throw new IllegalArgumentException(String.valueOf(cast));
 			}
-
-			return expressionMapping;
 		} else
 
 		if(expression instanceof If){
@@ -180,16 +171,8 @@ public class ExpressionTranslator {
 			Expression trueValue = _if.trueValue();
 			Expression falseValue = _if.falseValue();
 
-			if(!(trueValue.dataType()).sameType(falseValue.dataType())){
-				throw new IllegalArgumentException(String.valueOf(_if));
-			}
-
-			DataType dataType = translateDataType(trueValue.dataType());
-
-			Apply apply = PMMLUtil.createApply("if", translateChild(predicate))
-				.addExpressions(translateChild(trueValue), translateChild(falseValue));
-
-			return new ExpressionMapping(_if, apply, dataType);
+			return PMMLUtil.createApply("if", translate(predicate))
+				.addExpressions(translate(trueValue), translate(falseValue));
 		} else
 
 		if(expression instanceof In){
@@ -199,13 +182,13 @@ public class ExpressionTranslator {
 
 			List<Expression> elements = JavaConversions.seqAsJavaList(in.list());
 
-			Apply apply = PMMLUtil.createApply("isIn", translateChild(value));
+			Apply apply = PMMLUtil.createApply("isIn", translate(value));
 
 			for(Expression element : elements){
-				apply.addExpressions(translateChild(element));
+				apply.addExpressions(translate(element));
 			}
 
-			return new ExpressionMapping(in, apply, DataType.BOOLEAN);
+			return apply;
 		} else
 
 		if(expression instanceof Literal){
@@ -213,9 +196,9 @@ public class ExpressionTranslator {
 
 			Object value = literal.value();
 
-			DataType dataType = translateDataType(literal.dataType());
+			DataType dataType = DatasetUtil.translateDataType(literal.dataType());
 
-			return new ExpressionMapping(literal, PMMLUtil.createConstant(value, dataType), dataType);
+			return PMMLUtil.createConstant(value, dataType);
 		} else
 
 		if(expression instanceof Not){
@@ -223,7 +206,7 @@ public class ExpressionTranslator {
 
 			 Expression child = not.child();
 
-			 return new ExpressionMapping(not, PMMLUtil.createApply("not", translateChild(child)), DataType.BOOLEAN);
+			 return PMMLUtil.createApply("not", translate(child));
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -232,11 +215,11 @@ public class ExpressionTranslator {
 			Expression child = unaryExpression.child();
 
 			if(expression instanceof IsNotNull){
-				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isNotMissing", translateChild(child)), DataType.BOOLEAN);
+				return PMMLUtil.createApply("isNotMissing", translate(child));
 			} else
 
 			if(expression instanceof IsNull){
-				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isMissing", translateChild(child)), DataType.BOOLEAN);
+				return PMMLUtil.createApply("isMissing", translate(child));
 			} else
 
 			{
@@ -246,37 +229,6 @@ public class ExpressionTranslator {
 
 		{
 			throw new IllegalArgumentException(String.valueOf(expression));
-		}
-	}
-
-	static
-	private org.dmg.pmml.Expression translateChild(Expression expression){
-		ExpressionMapping expressionMapping = translate(expression);
-
-		return expressionMapping.getTo();
-	}
-
-	static
-	private DataType translateDataType(org.apache.spark.sql.types.DataType sparkDataType){
-
-		if(sparkDataType instanceof StringType){
-			return DataType.STRING;
-		} else
-
-		if(sparkDataType instanceof IntegralType){
-			return DataType.INTEGER;
-		} else
-
-		if(sparkDataType instanceof DoubleType){
-			return DataType.DOUBLE;
-		} else
-
-		if(sparkDataType instanceof BooleanType){
-			return DataType.BOOLEAN;
-		} else
-
-		{
-			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
 		}
 	}
 }

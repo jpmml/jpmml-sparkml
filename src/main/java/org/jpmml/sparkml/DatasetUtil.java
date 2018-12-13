@@ -27,7 +27,12 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalog.Catalog;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.execution.QueryExecution;
+import org.apache.spark.sql.types.BooleanType;
+import org.apache.spark.sql.types.DoubleType;
+import org.apache.spark.sql.types.IntegralType;
+import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.DataType;
 
 public class DatasetUtil {
 
@@ -52,6 +57,30 @@ public class DatasetUtil {
 			Catalog catalog = sparkSession.catalog();
 
 			catalog.dropTempView(tableName);
+		}
+	}
+
+	static
+	public DataType translateDataType(org.apache.spark.sql.types.DataType sparkDataType){
+
+		if(sparkDataType instanceof StringType){
+			return DataType.STRING;
+		} else
+
+		if(sparkDataType instanceof IntegralType){
+			return DataType.INTEGER;
+		} else
+
+		if(sparkDataType instanceof DoubleType){
+			return DataType.DOUBLE;
+		} else
+
+		if(sparkDataType instanceof BooleanType){
+			return DataType.BOOLEAN;
+		} else
+
+		{
+			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
 		}
 	}
 

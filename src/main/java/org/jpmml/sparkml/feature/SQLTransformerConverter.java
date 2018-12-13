@@ -31,12 +31,12 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.OpType;
 import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.StringFeature;
 import org.jpmml.sparkml.DatasetUtil;
-import org.jpmml.sparkml.ExpressionMapping;
 import org.jpmml.sparkml.ExpressionTranslator;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -76,6 +76,8 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 			String name;
 
+			DataType dataType = DatasetUtil.translateDataType(expression.dataType());
+
 			if(expression instanceof Alias){
 				Alias alias = (Alias)expression;
 
@@ -88,13 +90,29 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 				name = "sql(" + expression.toString() + ")";
 			}
 
-			ExpressionMapping expressionMapping = ExpressionTranslator.translate(expression);
+			OpType opType;
 
-			DerivedField derivedField = encoder.createDerivedField(FieldName.create(name), expressionMapping.getOpType(), expressionMapping.getDataType(), expressionMapping.getTo());
+			switch(dataType){
+				case STRING:
+					opType = OpType.CATEGORICAL;
+					break;
+				case INTEGER:
+				case DOUBLE:
+					opType = OpType.CONTINUOUS;
+					break;
+				case BOOLEAN:
+					opType = OpType.CATEGORICAL;
+					break;
+				default:
+					throw new IllegalArgumentException();
+			}
+
+			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
+
+			DerivedField derivedField = encoder.createDerivedField(FieldName.create(name), opType, dataType, pmmlExpression);
 
 			Feature feature;
 
-			DataType dataType = derivedField.getDataType();
 			switch(dataType){
 				case STRING:
 					feature = new StringFeature(encoder, derivedField);
