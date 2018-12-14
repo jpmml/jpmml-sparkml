@@ -51,19 +51,38 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.visitors.ExpressionCompactor;
 import scala.collection.JavaConversions;
 
 public class ExpressionTranslator {
 
 	static
 	public org.dmg.pmml.Expression translate(Expression expression){
+		return translate(expression, true);
+	}
+
+	static
+	public org.dmg.pmml.Expression translate(Expression expression, boolean compact){
+		org.dmg.pmml.Expression pmmlExpression = translateInternal(expression);
+
+		if(compact){
+			ExpressionCompactor expressionCompactor = new ExpressionCompactor();
+
+			expressionCompactor.applyTo(pmmlExpression);
+		}
+
+		return pmmlExpression;
+	}
+
+	static
+	private org.dmg.pmml.Expression translateInternal(Expression expression){
 
 		if(expression instanceof Alias){
 			Alias alias = (Alias)expression;
 
 			Expression child = alias.child();
 
-			return translate(child);
+			return translateInternal(child);
 		} // End if
 
 		if(expression instanceof AttributeReference){
@@ -138,7 +157,7 @@ public class ExpressionTranslator {
 				throw new IllegalArgumentException(String.valueOf(binaryOperator));
 			}
 
-			return PMMLUtil.createApply(symbol, translate(left), translate(right));
+			return PMMLUtil.createApply(symbol, translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof Cast){
@@ -148,7 +167,7 @@ public class ExpressionTranslator {
 
 			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
 
-			org.dmg.pmml.Expression pmmlExpression = translate(child);
+			org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
 
 			if(pmmlExpression instanceof HasDataType){
 				HasDataType<?> hasDataType = (HasDataType<?>)pmmlExpression;
@@ -171,8 +190,8 @@ public class ExpressionTranslator {
 			Expression trueValue = _if.trueValue();
 			Expression falseValue = _if.falseValue();
 
-			return PMMLUtil.createApply("if", translate(predicate))
-				.addExpressions(translate(trueValue), translate(falseValue));
+			return PMMLUtil.createApply("if", translateInternal(predicate))
+				.addExpressions(translateInternal(trueValue), translateInternal(falseValue));
 		} else
 
 		if(expression instanceof In){
@@ -182,10 +201,10 @@ public class ExpressionTranslator {
 
 			List<Expression> elements = JavaConversions.seqAsJavaList(in.list());
 
-			Apply apply = PMMLUtil.createApply("isIn", translate(value));
+			Apply apply = PMMLUtil.createApply("isIn", translateInternal(value));
 
 			for(Expression element : elements){
-				apply.addExpressions(translate(element));
+				apply.addExpressions(translateInternal(element));
 			}
 
 			return apply;
@@ -206,7 +225,7 @@ public class ExpressionTranslator {
 
 			 Expression child = not.child();
 
-			 return PMMLUtil.createApply("not", translate(child));
+			 return PMMLUtil.createApply("not", translateInternal(child));
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -215,11 +234,11 @@ public class ExpressionTranslator {
 			Expression child = unaryExpression.child();
 
 			if(expression instanceof IsNotNull){
-				return PMMLUtil.createApply("isNotMissing", translate(child));
+				return PMMLUtil.createApply("isNotMissing", translateInternal(child));
 			} else
 
 			if(expression instanceof IsNull){
-				return PMMLUtil.createApply("isMissing", translate(child));
+				return PMMLUtil.createApply("isMissing", translateInternal(child));
 			} else
 
 			{
