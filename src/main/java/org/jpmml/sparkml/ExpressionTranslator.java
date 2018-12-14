@@ -47,7 +47,9 @@ import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
+import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
 import org.dmg.pmml.Apply;
+import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
@@ -285,6 +287,24 @@ public class ExpressionTranslator {
 
 			if(expression instanceof IsNull){
 				return PMMLUtil.createApply("isMissing", translateInternal(child));
+			} else
+
+			if(expression instanceof UnaryMinus){
+				UnaryMinus unaryMinus = (UnaryMinus)unaryExpression;
+
+				org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+				if(pmmlExpression instanceof Constant){
+					Constant constant = (Constant)pmmlExpression;
+
+					constant.setValue("-" + constant.getValue());
+
+					return constant;
+				} else
+
+				{
+					return PMMLUtil.createApply("*", PMMLUtil.createConstant(-1), pmmlExpression);
+				}
 			} else
 
 			{

@@ -50,7 +50,11 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void translateArithmeticExpression(){
-		Apply apply = (Apply)translate("SELECT ((x1 - 1) / (x2 + 1)) FROM __THIS__");
+		Apply apply = (Apply)translate("SELECT -((x1 - 1) / (x2 + 1)) FROM __THIS__");
+
+		List<org.dmg.pmml.Expression> pmmlExpressions = checkApply(apply, "*", Constant.class, Apply.class);
+
+		apply = (Apply)pmmlExpressions.get(1);
 
 		checkApply(apply, "/", Apply.class, Apply.class);
 	}
@@ -72,7 +76,7 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void translateIfExpression(){
-		Apply apply = (Apply)translate("SELECT if(status in (0, 1), x1 != 0, x2 != 0) FROM __THIS__");
+		Apply apply = (Apply)translate("SELECT if(status in (-1, 1), x1 != 0, x2 != 0) FROM __THIS__");
 
 		checkApply(apply, "if", Apply.class, Apply.class, Apply.class);
 	}
