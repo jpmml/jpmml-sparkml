@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.spark.sql.catalyst.expressions.Add;
@@ -27,6 +28,7 @@ import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
+import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
@@ -52,6 +54,8 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
+import scala.Option;
+import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 public class ExpressionTranslator {
@@ -158,6 +162,48 @@ public class ExpressionTranslator {
 			}
 
 			return PMMLUtil.createApply(symbol, translateInternal(left), translateInternal(right));
+		} else
+
+		if(expression instanceof CaseWhen){
+			CaseWhen caseWhen = (CaseWhen)expression;
+
+			List<Tuple2<Expression, Expression>> branches = JavaConversions.seqAsJavaList(caseWhen.branches());
+
+			Option<Expression> elseValue = caseWhen.elseValue();
+
+			Apply apply = null;
+
+			Iterator<Tuple2<Expression, Expression>> branchIt = branches.iterator();
+
+			Apply prevBranchApply = null;
+
+			do {
+				Tuple2<Expression, Expression> branch = branchIt.next();
+
+				Expression predicate = branch._1();
+				Expression value = branch._2();
+
+				Apply branchApply = PMMLUtil.createApply("if")
+					.addExpressions(translateInternal(predicate), translateInternal(value));
+
+				if(apply == null){
+					apply = branchApply;
+				} // End if
+
+				if(prevBranchApply != null){
+					prevBranchApply.addExpressions(branchApply);
+				}
+
+				prevBranchApply = branchApply;
+			} while(branchIt.hasNext());
+
+			if(elseValue.isDefined()){
+				Expression value = elseValue.get();
+
+				prevBranchApply.addExpressions(translateInternal(value));
+			}
+
+			return apply;
 		} else
 
 		if(expression instanceof Cast){

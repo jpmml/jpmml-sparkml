@@ -26,6 +26,8 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Apply;
+import org.dmg.pmml.Constant;
+import org.dmg.pmml.FieldRef;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,6 +56,21 @@ public class ExpressionTranslatorTest {
 	}
 
 	@Test
+	public void translateCaseWhenExpression(){
+		Apply apply = (Apply)translate("SELECT (CASE WHEN x1 < 0 THEN x1 WHEN x2 > 0 THEN x2 ELSE 0 END) FROM __THIS__");
+
+		List<org.dmg.pmml.Expression> pmmlExpressions = checkApply(apply, "if", Apply.class, FieldRef.class, Apply.class);
+
+		apply = (Apply)pmmlExpressions.get(0);
+
+		checkApply(apply, "lessThan", FieldRef.class, Constant.class);
+
+		apply = (Apply)pmmlExpressions.get(2);
+
+		checkApply(apply, "if", Apply.class, FieldRef.class, Constant.class);
+	}
+
+	@Test
 	public void translateIfExpression(){
 		Apply apply = (Apply)translate("SELECT if(status in (0, 1), x1 != 0, x2 != 0) FROM __THIS__");
 
@@ -79,7 +96,7 @@ public class ExpressionTranslatorTest {
 	}
 
 	static
-	private void checkApply(Apply apply, String function, Class<? extends org.dmg.pmml.Expression>... pmmlExpressionClazzes){
+	private List<org.dmg.pmml.Expression> checkApply(Apply apply, String function, Class<? extends org.dmg.pmml.Expression>... pmmlExpressionClazzes){
 		assertEquals(function, apply.getFunction());
 
 		List<org.dmg.pmml.Expression> pmmlExpressions = apply.getExpressions();
@@ -91,6 +108,8 @@ public class ExpressionTranslatorTest {
 
 			assertEquals(expressionClazz, pmmlExpression.getClass());
 		}
+
+		return pmmlExpressions;
 	}
 
 	@BeforeClass
