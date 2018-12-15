@@ -25,6 +25,7 @@ import org.apache.spark.ml.feature.OneHotEncoder;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import scala.Option;
@@ -39,9 +40,9 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoder transformer = getTransformer();
 
-		CategoricalFeature feature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
+		CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
-		List<String> values = feature.getValues();
+		List<String> values = categoricalFeature.getValues();
 
 		boolean dropLast = true;
 
@@ -54,6 +55,11 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 			values = values.subList(0, values.size() - 1);
 		}
 
+		return encodeFeature(encoder, categoricalFeature, values);
+	}
+
+	static
+	public List<Feature> encodeFeature(PMMLEncoder encoder, Feature feature, List<String> values){
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
