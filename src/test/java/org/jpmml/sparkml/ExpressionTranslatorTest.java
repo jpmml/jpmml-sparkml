@@ -21,17 +21,13 @@ package org.jpmml.sparkml;
 import java.util.List;
 
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.catalyst.expressions.And;
 import org.apache.spark.sql.catalyst.expressions.Expression;
-import org.apache.spark.sql.catalyst.expressions.If;
-import org.apache.spark.sql.catalyst.expressions.Multiply;
-import org.apache.spark.sql.catalyst.expressions.Or;
-import org.apache.spark.sql.catalyst.parser.ParseException;
-import org.apache.spark.sql.catalyst.parser.ParserInterface;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
-import org.apache.spark.sql.internal.SessionState;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Apply;
-import org.dmg.pmml.DataType;
+import org.dmg.pmml.Constant;
+import org.dmg.pmml.FieldRef;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,80 +39,81 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void translateLogicalExpression(){
-		ExpressionTranslator.DataTypeResolver dataTypeResolver = new ExpressionTranslator.DataTypeResolver(){
+		Apply apply = (Apply)translate("SELECT (isnull(x1) and not(isnotnull(x2))) FROM __THIS__");
 
-			@Override
-			public DataType getDataType(String name){
-				return DataType.DOUBLE;
-			}
-		};
+		checkApply(apply, "and", Apply.class, Apply.class);
 
-		ExpressionMapping expressionMapping = translate("SELECT (isnull(x1) and not(isnotnull(x2))) FROM __THIS__", dataTypeResolver);
+		apply = (Apply)translate("SELECT ((x1 <= 0) or (x2 >= 0)) FROM __THIS__");
 
-		checkExpressionMapping(expressionMapping, And.class, Apply.class, DataType.BOOLEAN);
-
-		expressionMapping = translate("SELECT ((x1 <= x2) or (x1 >= x3)) FROM __THIS__", dataTypeResolver);
-
-		checkExpressionMapping(expressionMapping, Or.class, Apply.class, DataType.BOOLEAN);
+		checkApply(apply, "or", Apply.class, Apply.class);
 	}
 
 	@Test
 	public void translateArithmeticExpression(){
-		ExpressionMapping expressionMapping = translate("SELECT 2 * ((0 + 1) / (0 - 1)) FROM __THIS__", null);
+		Apply apply = (Apply)translate("SELECT -((x1 - 1) / (x2 + 1)) FROM __THIS__");
 
-		checkExpressionMapping(expressionMapping, Multiply.class, Apply.class, DataType.INTEGER);
+		List<org.dmg.pmml.Expression> pmmlExpressions = checkApply(apply, "*", Constant.class, Apply.class);
+
+		apply = (Apply)pmmlExpressions.get(1);
+
+		checkApply(apply, "/", Apply.class, Apply.class);
+	}
+
+	@Test
+	public void translateCaseWhenExpression(){
+		Apply apply = (Apply)translate("SELECT (CASE WHEN x1 < 0 THEN x1 WHEN x2 > 0 THEN x2 ELSE 0 END) FROM __THIS__");
+
+		List<org.dmg.pmml.Expression> pmmlExpressions = checkApply(apply, "if", Apply.class, FieldRef.class, Apply.class);
+
+		apply = (Apply)pmmlExpressions.get(0);
+
+		checkApply(apply, "lessThan", FieldRef.class, Constant.class);
+
+		apply = (Apply)pmmlExpressions.get(2);
+
+		checkApply(apply, "if", Apply.class, FieldRef.class, Constant.class);
 	}
 
 	@Test
 	public void translateIfExpression(){
-		ExpressionTranslator.DataTypeResolver dataTypeResolver = new ExpressionTranslator.DataTypeResolver(){
+		Apply apply = (Apply)translate("SELECT if(status in (-1, 1), x1 != 0, x2 != 0) FROM __THIS__");
 
-			@Override
-			public DataType getDataType(String name){
-
-				if(("status").equals(name)){
-					return DataType.INTEGER;
-				}
-
-				return DataType.DOUBLE;
-			}
-		};
-
-		ExpressionMapping expressionMapping = translate("SELECT if(status in (1, 2, 3), x1 < 0, x2 > 0)", dataTypeResolver);
-
-		checkExpressionMapping(expressionMapping, If.class, Apply.class, DataType.BOOLEAN);
+		checkApply(apply, "if", Apply.class, Apply.class, Apply.class);
 	}
 
 	static
-	private ExpressionMapping translate(String statement, ExpressionTranslator.DataTypeResolver dataTypeResolver){
-		SessionState sessionState = ExpressionTranslatorTest.sparkSession.sessionState();
+	private org.dmg.pmml.Expression translate(String statement){
+		StructType schema = new StructType()
+			.add("flag", DataTypes.BooleanType)
+			.add("x1", DataTypes.DoubleType)
+			.add("x2", DataTypes.DoubleType)
+			.add("status", DataTypes.IntegerType);
 
-		ParserInterface parserInterface = sessionState.sqlParser();
-
-		LogicalPlan logicalPlan;
-
-		try {
-			logicalPlan = parserInterface.parsePlan(statement);
-		} catch(ParseException pe){
-			throw new IllegalArgumentException(pe);
-		}
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, schema, statement);
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		if(expressions.size() != 1){
 			throw new IllegalArgumentException();
 		}
 
-		return ExpressionTranslator.translate(expressions.get(0), dataTypeResolver);
+		return ExpressionTranslator.translate(expressions.get(0));
 	}
 
 	static
-	private void checkExpressionMapping(ExpressionMapping expressionMapping, Class<? extends Expression> fromClazz, Class<? extends org.dmg.pmml.Expression> toClazz, DataType dataType){
-		Expression from = expressionMapping.getFrom();
-		org.dmg.pmml.Expression to = expressionMapping.getTo();
+	private List<org.dmg.pmml.Expression> checkApply(Apply apply, String function, Class<? extends org.dmg.pmml.Expression>... pmmlExpressionClazzes){
+		assertEquals(function, apply.getFunction());
 
-		assertEquals(fromClazz, from.getClass());
-		assertEquals(toClazz, to.getClass());
-		assertEquals(dataType, expressionMapping.getDataType());
+		List<org.dmg.pmml.Expression> pmmlExpressions = apply.getExpressions();
+		assertEquals(pmmlExpressionClazzes.length, pmmlExpressions.size());
+
+		for(int i = 0; i < pmmlExpressionClazzes.length; i++){
+			Class<? extends org.dmg.pmml.Expression> expressionClazz = pmmlExpressionClazzes[i];
+			org.dmg.pmml.Expression pmmlExpression = pmmlExpressions.get(i);
+
+			assertEquals(expressionClazz, pmmlExpression.getClass());
+		}
+
+		return pmmlExpressions;
 	}
 
 	@BeforeClass

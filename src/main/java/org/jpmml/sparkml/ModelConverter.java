@@ -85,7 +85,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 						if(feature instanceof CategoricalFeature){
 							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
-							DataField dataField = encoder.getDataField(categoricalFeature.getName());
+							DataField dataField = (DataField)categoricalFeature.getField();
 
 							label = new CategoricalLabel(dataField);
 						} else

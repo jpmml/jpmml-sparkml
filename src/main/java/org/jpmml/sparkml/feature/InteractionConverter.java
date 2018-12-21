@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.spark.ml.feature.Interaction;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InteractionFeature;
 import org.jpmml.sparkml.FeatureConverter;
@@ -40,7 +41,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Interaction transformer = getTransformer();
 
-		String name = "";
+		StringBuilder sb = new StringBuilder();
 
 		List<Feature> result = new ArrayList<>();
 
@@ -50,14 +51,29 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 
 			List<Feature> features = encoder.getFeatures(inputCol);
 
+			if(features.size() == 1){
+				Feature feature = features.get(0);
+
+				if(feature instanceof CategoricalFeature){
+					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+
+					FieldName name = categoricalFeature.getName();
+
+					// XXX
+					inputCol = name.getValue();
+
+					features = OneHotEncoderConverter.encodeFeature(categoricalFeature.getEncoder(), categoricalFeature, categoricalFeature.getValues());
+				}
+			} // End if
+
 			if(i == 0){
-				name = inputCol;
+				sb.append(inputCol);
 
 				result = features;
 			} else
 
 			{
-				name += (":" + inputCol);
+				sb.append(':').append(inputCol);
 
 				List<Feature> interactionFeatures = new ArrayList<>();
 
@@ -66,7 +82,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				for(Feature left : result){
 
 					for(Feature right : features){
-						interactionFeatures.add(new InteractionFeature(encoder, FieldName.create(name + "[" + index + "]"), DataType.DOUBLE, Arrays.asList(left, right)));
+						interactionFeatures.add(new InteractionFeature(encoder, FieldName.create(sb.toString() + "[" + index + "]"), DataType.DOUBLE, Arrays.asList(left, right)));
 
 						index++;
 					}

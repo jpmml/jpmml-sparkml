@@ -53,7 +53,7 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		Field<?> field = encoder.getField(feature.getName());
+		Field<?> field = feature.getField();
 
 		if(transformer.getToLowercase()){
 			Apply apply = PMMLUtil.createApply("lowercase", feature.ref());

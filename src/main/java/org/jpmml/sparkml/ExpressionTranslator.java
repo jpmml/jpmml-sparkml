@@ -18,17 +18,18 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.spark.sql.catalyst.FunctionIdentifier;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedAlias;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction;
 import org.apache.spark.sql.catalyst.expressions.Add;
+import org.apache.spark.sql.catalyst.expressions.Alias;
 import org.apache.spark.sql.catalyst.expressions.And;
+import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
+import org.apache.spark.sql.catalyst.expressions.CaseWhen;
+import org.apache.spark.sql.catalyst.expressions.Cast;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
 import org.apache.spark.sql.catalyst.expressions.Expression;
@@ -46,62 +47,57 @@ import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
-import org.apache.spark.sql.types.BooleanType;
-import org.apache.spark.sql.types.DoubleType;
-import org.apache.spark.sql.types.IntegralType;
-import org.apache.spark.sql.types.StringType;
+import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
 import org.dmg.pmml.Apply;
+import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
+import org.dmg.pmml.HasDataType;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.visitors.ExpressionCompactor;
+import scala.Option;
+import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 public class ExpressionTranslator {
 
 	static
-	public ExpressionMapping translate(Expression expression, DataTypeResolver dataTypeResolver){
+	public org.dmg.pmml.Expression translate(Expression expression){
+		return translate(expression, true);
+	}
 
-		if(expression instanceof UnresolvedAlias){
-			UnresolvedAlias unresolvedAlias = (UnresolvedAlias)expression;
+	static
+	public org.dmg.pmml.Expression translate(Expression expression, boolean compact){
+		org.dmg.pmml.Expression pmmlExpression = translateInternal(expression);
 
-			Expression child = unresolvedAlias.child();
+		if(compact){
+			ExpressionCompactor expressionCompactor = new ExpressionCompactor();
 
-			return translate(child, dataTypeResolver);
-		} else
+			expressionCompactor.applyTo(pmmlExpression);
+		}
 
-		if(expression instanceof UnresolvedAttribute){
-			UnresolvedAttribute unresolvedAttribute = (UnresolvedAttribute)expression;
+		return pmmlExpression;
+	}
 
-			String name = unresolvedAttribute.name();
+	static
+	private org.dmg.pmml.Expression translateInternal(Expression expression){
 
-			return new ExpressionMapping(unresolvedAttribute, new FieldRef(FieldName.create(name)), dataTypeResolver.getDataType(name));
-		} else
+		if(expression instanceof Alias){
+			Alias alias = (Alias)expression;
 
-		if(expression instanceof UnresolvedFunction){
-			UnresolvedFunction unresolvedFunction = (UnresolvedFunction)expression;
+			Expression child = alias.child();
 
-			FunctionIdentifier name = unresolvedFunction.name();
-			List<Expression> children = JavaConversions.seqAsJavaList(unresolvedFunction.children());
-
-			String identifier = name.identifier();
-
-			if("IF".equalsIgnoreCase(identifier) && children.size() == 3){
-				return translate(new If(children.get(0), children.get(1), children.get(2)), dataTypeResolver);
-			} else
-
-			if("ISNOTNULL".equalsIgnoreCase(identifier) && children.size() == 1){
-				return translate(new IsNotNull(children.get(0)), dataTypeResolver);
-			} else
-
-			if("ISNULL".equalsIgnoreCase(identifier) && children.size() == 1){
-				return translate(new IsNull(children.get(0)), dataTypeResolver);
-			} else
-
-			{
-				throw new IllegalArgumentException(String.valueOf(unresolvedFunction));
-			}
+			return translateInternal(child);
 		} // End if
+
+		if(expression instanceof AttributeReference){
+			AttributeReference attributeReference = (AttributeReference)expression;
+
+			String name = attributeReference.name();
+
+			return new FieldRef(FieldName.create(name));
+		} else
 
 		if(expression instanceof BinaryOperator){
 			BinaryOperator binaryOperator = (BinaryOperator)expression;
@@ -111,27 +107,31 @@ public class ExpressionTranslator {
 			Expression left = binaryOperator.left();
 			Expression right = binaryOperator.right();
 
-			DataType dataType;
-
 			if(expression instanceof And || expression instanceof Or){
-				symbol = symbol.toLowerCase();
 
-				dataType = DataType.BOOLEAN;
+				switch(symbol){
+					case "&&":
+						symbol = "and";
+						break;
+					case "||":
+						symbol = "or";
+						break;
+					default:
+						throw new IllegalArgumentException(String.valueOf(binaryOperator));
+				}
 			} else
 
 			if(expression instanceof Add || expression instanceof Divide || expression instanceof Multiply || expression instanceof Subtract){
 				BinaryArithmetic binaryArithmetic = (BinaryArithmetic)binaryOperator;
 
-				if((left.dataType()).acceptsType(right.dataType())){
-					dataType = translateDataType(left.dataType());
-				} else
-
-				if((right.dataType()).acceptsType(left.dataType())){
-					dataType = translateDataType(right.dataType());
-				} else
-
-				{
-					throw new IllegalArgumentException(String.valueOf(binaryArithmetic));
+				switch(symbol){
+					case "+":
+					case "/":
+					case "*":
+					case "-":
+						break;
+					default:
+						throw new IllegalArgumentException(String.valueOf(binaryArithmetic));
 				}
 			} else
 
@@ -157,15 +157,77 @@ public class ExpressionTranslator {
 					default:
 						throw new IllegalArgumentException(String.valueOf(binaryComparison));
 				}
-
-				dataType = DataType.BOOLEAN;
 			} else
 
 			{
 				throw new IllegalArgumentException(String.valueOf(binaryOperator));
 			}
 
-			return new ExpressionMapping(binaryOperator, PMMLUtil.createApply(symbol, translateChild(left, dataTypeResolver), translateChild(right, dataTypeResolver)), dataType);
+			return PMMLUtil.createApply(symbol, translateInternal(left), translateInternal(right));
+		} else
+
+		if(expression instanceof CaseWhen){
+			CaseWhen caseWhen = (CaseWhen)expression;
+
+			List<Tuple2<Expression, Expression>> branches = JavaConversions.seqAsJavaList(caseWhen.branches());
+
+			Option<Expression> elseValue = caseWhen.elseValue();
+
+			Apply apply = null;
+
+			Iterator<Tuple2<Expression, Expression>> branchIt = branches.iterator();
+
+			Apply prevBranchApply = null;
+
+			do {
+				Tuple2<Expression, Expression> branch = branchIt.next();
+
+				Expression predicate = branch._1();
+				Expression value = branch._2();
+
+				Apply branchApply = PMMLUtil.createApply("if")
+					.addExpressions(translateInternal(predicate), translateInternal(value));
+
+				if(apply == null){
+					apply = branchApply;
+				} // End if
+
+				if(prevBranchApply != null){
+					prevBranchApply.addExpressions(branchApply);
+				}
+
+				prevBranchApply = branchApply;
+			} while(branchIt.hasNext());
+
+			if(elseValue.isDefined()){
+				Expression value = elseValue.get();
+
+				prevBranchApply.addExpressions(translateInternal(value));
+			}
+
+			return apply;
+		} else
+
+		if(expression instanceof Cast){
+			Cast cast = (Cast)expression;
+
+			Expression child = cast.child();
+
+			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
+
+			org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+			if(pmmlExpression instanceof HasDataType){
+				HasDataType<?> hasDataType = (HasDataType<?>)pmmlExpression;
+
+				hasDataType.setDataType(dataType);
+
+				return pmmlExpression;
+			} else
+
+			{
+				throw new IllegalArgumentException(String.valueOf(cast));
+			}
 		} else
 
 		if(expression instanceof If){
@@ -176,16 +238,8 @@ public class ExpressionTranslator {
 			Expression trueValue = _if.trueValue();
 			Expression falseValue = _if.falseValue();
 
-			if(!(trueValue.dataType()).sameType(falseValue.dataType())){
-				throw new IllegalArgumentException(String.valueOf(_if));
-			}
-
-			DataType dataType = translateDataType(trueValue.dataType());
-
-			Apply apply = PMMLUtil.createApply("if", translateChild(predicate, dataTypeResolver))
-				.addExpressions(translateChild(trueValue, dataTypeResolver), translateChild(falseValue, dataTypeResolver));
-
-			return new ExpressionMapping(_if, apply, dataType);
+			return PMMLUtil.createApply("if", translateInternal(predicate))
+				.addExpressions(translateInternal(trueValue), translateInternal(falseValue));
 		} else
 
 		if(expression instanceof In){
@@ -195,13 +249,13 @@ public class ExpressionTranslator {
 
 			List<Expression> elements = JavaConversions.seqAsJavaList(in.list());
 
-			Apply apply = PMMLUtil.createApply("isIn", translateChild(value, dataTypeResolver));
+			Apply apply = PMMLUtil.createApply("isIn", translateInternal(value));
 
 			for(Expression element : elements){
-				apply.addExpressions(translateChild(element, dataTypeResolver));
+				apply.addExpressions(translateInternal(element));
 			}
 
-			return new ExpressionMapping(in, apply, DataType.BOOLEAN);
+			return apply;
 		} else
 
 		if(expression instanceof Literal){
@@ -209,9 +263,9 @@ public class ExpressionTranslator {
 
 			Object value = literal.value();
 
-			DataType dataType = translateDataType(literal.dataType());
+			DataType dataType = DatasetUtil.translateDataType(literal.dataType());
 
-			return new ExpressionMapping(literal, PMMLUtil.createConstant(value, dataType), dataType);
+			return PMMLUtil.createConstant(value, dataType);
 		} else
 
 		if(expression instanceof Not){
@@ -219,7 +273,7 @@ public class ExpressionTranslator {
 
 			 Expression child = not.child();
 
-			 return new ExpressionMapping(not, PMMLUtil.createApply("not", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
+			 return PMMLUtil.createApply("not", translateInternal(child));
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -228,11 +282,29 @@ public class ExpressionTranslator {
 			Expression child = unaryExpression.child();
 
 			if(expression instanceof IsNotNull){
-				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isNotMissing", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
+				return PMMLUtil.createApply("isNotMissing", translateInternal(child));
 			} else
 
 			if(expression instanceof IsNull){
-				return new ExpressionMapping(unaryExpression, PMMLUtil.createApply("isMissing", translateChild(child, dataTypeResolver)), DataType.BOOLEAN);
+				return PMMLUtil.createApply("isMissing", translateInternal(child));
+			} else
+
+			if(expression instanceof UnaryMinus){
+				UnaryMinus unaryMinus = (UnaryMinus)unaryExpression;
+
+				org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+				if(pmmlExpression instanceof Constant){
+					Constant constant = (Constant)pmmlExpression;
+
+					constant.setValue("-" + constant.getValue());
+
+					return constant;
+				} else
+
+				{
+					return PMMLUtil.createApply("*", PMMLUtil.createConstant(-1), pmmlExpression);
+				}
 			} else
 
 			{
@@ -243,42 +315,5 @@ public class ExpressionTranslator {
 		{
 			throw new IllegalArgumentException(String.valueOf(expression));
 		}
-	}
-
-	static
-	private org.dmg.pmml.Expression translateChild(Expression expression, DataTypeResolver dataTypeResolver){
-		ExpressionMapping expressionMapping = translate(expression, dataTypeResolver);
-
-		return expressionMapping.getTo();
-	}
-
-	static
-	private DataType translateDataType(org.apache.spark.sql.types.DataType sparkDataType){
-
-		if(sparkDataType instanceof StringType){
-			return DataType.STRING;
-		} else
-
-		if(sparkDataType instanceof IntegralType){
-			return DataType.INTEGER;
-		} else
-
-		if(sparkDataType instanceof DoubleType){
-			return DataType.DOUBLE;
-		} else
-
-		if(sparkDataType instanceof BooleanType){
-			return DataType.BOOLEAN;
-		} else
-
-		{
-			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
-		}
-	}
-
-	static
-	public interface DataTypeResolver {
-
-		DataType getDataType(String name);
 	}
 }
