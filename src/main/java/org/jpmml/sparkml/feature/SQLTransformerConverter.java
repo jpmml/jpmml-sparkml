@@ -23,14 +23,11 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.SQLTransformer;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedAlias;
-import org.apache.spark.sql.catalyst.analysis.UnresolvedStar;
 import org.apache.spark.sql.catalyst.expressions.Alias;
+import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.Expression;
-import org.apache.spark.sql.catalyst.parser.ParseException;
-import org.apache.spark.sql.catalyst.parser.ParserInterface;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
-import org.apache.spark.sql.internal.SessionState;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
@@ -39,7 +36,7 @@ import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.StringFeature;
-import org.jpmml.sparkml.ExpressionMapping;
+import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.ExpressionTranslator;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -60,33 +57,26 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 		SparkSession sparkSession = SparkSession.builder()
 			.getOrCreate();
 
-		SessionState sessionState = sparkSession.sessionState();
+		StructType schema = encoder.getSchema();
 
-		ParserInterface parserInterface = sessionState.sqlParser();
-
-		LogicalPlan logicalPlan;
-
-		try {
-			logicalPlan = parserInterface.parsePlan(statement);
-		} catch(ParseException pe){
-			throw new IllegalArgumentException(pe);
-		}
-
-		ExpressionTranslator.DataTypeResolver dataTypeResolver = new ExpressionTranslator.DataTypeResolver(){
-
-			@Override
-			public DataType getDataType(String name){
-				Feature feature = encoder.getOnlyFeature(name);
-
-				return feature.getDataType();
-			}
-		};
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(sparkSession, schema, statement);
 
 		List<Feature> result = new ArrayList<>();
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		for(Expression expression : expressions){
+
+			if(expression instanceof AttributeReference){
+				AttributeReference attributeReference = (AttributeReference)expression;
+
+				String name = attributeReference.name();
+
+				encoder.getOnlyFeature(name);
+			}
+
 			String name;
+
+			DataType dataType = DatasetUtil.translateDataType(expression.dataType());
 
 			if(expression instanceof Alias){
 				Alias alias = (Alias)expression;
@@ -96,34 +86,12 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 				name = alias.name();
 			} else
 
-			if(expression instanceof UnresolvedAlias){
-				UnresolvedAlias unresolvedAlias = (UnresolvedAlias)expression;
-
-				expression = unresolvedAlias.child();
-
-				// XXX
-				name = "(" + (expression.toString()).replace("\'", "") + ")";
-			} else
-
-			if(expression instanceof UnresolvedStar){
-				UnresolvedStar unresolvedStar = (UnresolvedStar)expression;
-
-				List<Feature> features = encoder.getSchemaFeatures();
-
-				result.addAll(features);
-
-				continue;
-			} else
-
 			{
-				throw new IllegalArgumentException(String.valueOf(expression));
+				name = "sql(" + expression.toString() + ")";
 			}
-
-			ExpressionMapping expressionMapping = ExpressionTranslator.translate(expression, dataTypeResolver);
 
 			OpType opType;
 
-			DataType dataType = expressionMapping.getDataType();
 			switch(dataType){
 				case STRING:
 					opType = OpType.CATEGORICAL;
@@ -139,7 +107,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 					throw new IllegalArgumentException();
 			}
 
-			org.dmg.pmml.Expression pmmlExpression = expressionMapping.getTo();
+			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
 
 			DerivedField derivedField = encoder.createDerivedField(FieldName.create(name), opType, dataType, pmmlExpression);
 

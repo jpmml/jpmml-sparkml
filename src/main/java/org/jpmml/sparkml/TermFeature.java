@@ -26,7 +26,6 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
-import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
@@ -57,16 +56,7 @@ public class TermFeature extends Feature {
 
 	@Override
 	public ContinuousFeature toContinuousFeature(){
-		PMMLEncoder encoder = ensureEncoder();
-
-		DerivedField derivedField = encoder.getDerivedField(getName());
-		if(derivedField == null){
-			Apply apply = createApply();
-
-			derivedField = encoder.createDerivedField(getName(), OpType.CONTINUOUS, getDataType(), apply);
-		}
-
-		return new ContinuousFeature(encoder, derivedField);
+		return toContinuousFeature(getName(), getDataType(), () -> createApply());
 	}
 
 	public WeightedTermFeature toWeightedTermFeature(Number weight){

@@ -25,6 +25,7 @@ import org.apache.spark.ml.feature.OneHotEncoder;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import scala.Option;
@@ -39,6 +40,8 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoder transformer = getTransformer();
 
+		CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
+
 		boolean dropLast = true;
 
 		Option<Object> dropLastOption = transformer.get(transformer.dropLast());
@@ -46,17 +49,20 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 			dropLast = (Boolean)dropLastOption.get();
 		}
 
-		CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
-
 		List<String> values = categoricalFeature.getValues();
 		if(dropLast){
 			values = values.subList(0, values.size() - 1);
 		}
 
+		return encodeFeature(encoder, categoricalFeature, values);
+	}
+
+	static
+	public List<Feature> encodeFeature(PMMLEncoder encoder, Feature feature, List<String> values){
 		List<Feature> result = new ArrayList<>();
 
 		for(String value : values){
-			result.add(new BinaryFeature(encoder, categoricalFeature, value));
+			result.add(new BinaryFeature(encoder, feature, value));
 		}
 
 		return result;
