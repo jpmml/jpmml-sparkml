@@ -29,8 +29,6 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.tree.CategoricalSplit;
 import org.apache.spark.ml.tree.ContinuousSplit;
 import org.apache.spark.ml.tree.DecisionTreeModel;
-import org.apache.spark.ml.tree.InternalNode;
-import org.apache.spark.ml.tree.LeafNode;
 import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
@@ -41,7 +39,9 @@ import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
+import org.dmg.pmml.tree.BranchNode;
 import org.dmg.pmml.tree.ComplexNode;
+import org.dmg.pmml.tree.LeafNode;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
@@ -108,10 +108,10 @@ public class TreeModelUtil {
 			ScoreEncoder scoreEncoder = new ScoreEncoder(){
 
 				@Override
-				public void encode(Node node, LeafNode leafNode){
-					String score = ValueUtil.formatValue(leafNode.prediction());
+				public Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode){
+					node.setScore(leafNode.prediction());
 
-					node.setScore(score);
+					return node;
 				}
 			};
 
@@ -125,7 +125,11 @@ public class TreeModelUtil {
 
 
 				@Override
-				public void encode(Node node, LeafNode leafNode){
+				public Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode){
+					// XXX
+					node = new ComplexNode()
+						.setPredicate(node.getPredicate());
+
 					int index = ValueUtil.asInt(leafNode.prediction());
 
 					node.setScore(this.categoricalLabel.getValue(index));
@@ -134,12 +138,16 @@ public class TreeModelUtil {
 
 					node.setRecordCount((double)impurityCalculator.count());
 
+					List<ScoreDistribution> scoreDistributions = node.getScoreDistributions();
+
 					double[] stats = impurityCalculator.stats();
 					for(int i = 0; i < stats.length; i++){
 						ScoreDistribution scoreDistribution = new ScoreDistribution(this.categoricalLabel.getValue(i), stats[i]);
 
-						node.addScoreDistributions(scoreDistribution);
+						scoreDistributions.add(scoreDistribution);
 					}
+
+					return node;
 				}
 			};
 
@@ -162,10 +170,7 @@ public class TreeModelUtil {
 
 	static
 	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(M model, PredicateManager predicateManager, MiningFunction miningFunction, ScoreEncoder scoreEncoder, Schema schema){
-		Node root = new ComplexNode()
-			.setPredicate(new True());
-
-		encodeNode(root, model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
+		Node root = encodeNode(new True(), model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
@@ -174,16 +179,19 @@ public class TreeModelUtil {
 	}
 
 	static
-	private void encodeNode(Node node, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, ScoreEncoder scoreEncoder, Schema schema){
+	private Node encodeNode(Predicate predicate, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, ScoreEncoder scoreEncoder, Schema schema){
 
-		if(sparkNode instanceof LeafNode){
-			LeafNode leafNode = (LeafNode)sparkNode;
+		if(sparkNode instanceof org.apache.spark.ml.tree.LeafNode){
+			org.apache.spark.ml.tree.LeafNode leafNode = (org.apache.spark.ml.tree.LeafNode)sparkNode;
 
-			scoreEncoder.encode(node, leafNode);
+			Node result = new LeafNode()
+				.setPredicate(predicate);
+
+			return scoreEncoder.encode(result, leafNode);
 		} else
 
-		if(sparkNode instanceof InternalNode){
-			InternalNode internalNode = (InternalNode)sparkNode;
+		if(sparkNode instanceof org.apache.spark.ml.tree.InternalNode){
+			org.apache.spark.ml.tree.InternalNode internalNode = (org.apache.spark.ml.tree.InternalNode)sparkNode;
 
 			CategoryManager leftCategoryManager = categoryManager;
 			CategoryManager rightCategoryManager = categoryManager;
@@ -284,16 +292,14 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			Node leftChild = new ComplexNode()
-				.setPredicate(leftPredicate);
+			Node leftChild = encodeNode(leftPredicate, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
+			Node rightChild = encodeNode(rightPredicate, internalNode.rightChild(), predicateManager, rightCategoryManager, scoreEncoder, schema);
 
-			Node rightChild = new ComplexNode()
-				.setPredicate(rightPredicate);
+			Node result = new BranchNode()
+				.setPredicate(predicate)
+				.addNodes(leftChild, rightChild);
 
-			encodeNode(leftChild, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
-			encodeNode(rightChild, internalNode.rightChild(), predicateManager, rightCategoryManager, scoreEncoder, schema);
-
-			node.addNodes(leftChild, rightChild);
+			return result;
 		} else
 
 		{
@@ -335,7 +341,7 @@ public class TreeModelUtil {
 
 	interface ScoreEncoder {
 
-		void encode(Node node, LeafNode leafNode);
+		Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode);
 	}
 
 	private static final double[] TRUE = {1.0d};
