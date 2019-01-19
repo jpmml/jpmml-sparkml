@@ -41,6 +41,7 @@ import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
+import org.dmg.pmml.tree.ComplexNode;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
@@ -161,7 +162,7 @@ public class TreeModelUtil {
 
 	static
 	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(M model, PredicateManager predicateManager, MiningFunction miningFunction, ScoreEncoder scoreEncoder, Schema schema){
-		Node root = new Node()
+		Node root = new ComplexNode()
 			.setPredicate(new True());
 
 		encodeNode(root, model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
@@ -283,10 +284,10 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			Node leftChild = new Node()
+			Node leftChild = new ComplexNode()
 				.setPredicate(leftPredicate);
 
-			Node rightChild = new Node()
+			Node rightChild = new ComplexNode()
 				.setPredicate(rightPredicate);
 
 			encodeNode(leftChild, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
