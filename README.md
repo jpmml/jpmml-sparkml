@@ -36,6 +36,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
   * Prediction models:
     * [`classification.DecisionTreeClassificationModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/DecisionTreeClassificationModel.html)
     * [`classification.GBTClassificationModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/GBTClassificationModel.html)
+    * [`classification.LinearSVCModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/LinearSVCModel.html)
     * [`classification.LogisticRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/LogisticRegressionModel.html)
     * [`classification.MultilayerPerceptronClassificationModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/MultilayerPerceptronClassificationModel.html)
     * [`classification.NaiveBayesModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/NaiveBayesModel.html)
