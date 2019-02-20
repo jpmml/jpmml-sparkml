@@ -32,8 +32,8 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.VectorUtil;
 
 public class MaxAbsScalerModelConverter extends FeatureConverter<MaxAbsScalerModel> {
 
@@ -49,7 +49,7 @@ public class MaxAbsScalerModelConverter extends FeatureConverter<MaxAbsScalerMod
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		VectorUtil.checkSize(features.size(), maxAbs);
+		SchemaUtil.checkSize(maxAbs.size(), features);
 
 		List<Feature> result = new ArrayList<>();
 

@@ -74,7 +74,6 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
-		VectorUtil.checkSize(categoricalLabel.size(), pi);
 		MatrixUtil.checkRows(categoricalLabel.size(), theta);
 
 		List<Double> intercepts = VectorUtil.toList(pi);

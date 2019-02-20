@@ -27,9 +27,9 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ProductFeature;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.TermFeature;
-import org.jpmml.sparkml.VectorUtil;
 import org.jpmml.sparkml.WeightedTermFeature;
 
 public class IDFModelConverter extends FeatureConverter<IDFModel> {
@@ -46,7 +46,7 @@ public class IDFModelConverter extends FeatureConverter<IDFModel> {
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		VectorUtil.checkSize(features.size(), idf);
+		SchemaUtil.checkSize(idf.size(), features);
 
 		List<Feature> result = new ArrayList<>();
 

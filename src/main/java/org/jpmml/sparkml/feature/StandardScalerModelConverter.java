@@ -36,8 +36,8 @@ import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ProductFeature;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.VectorUtil;
 
 public class StandardScalerModelConverter extends FeatureConverter<StandardScalerModel> {
 
@@ -58,11 +58,11 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
 		if(withMean){
-			VectorUtil.checkSize(features.size(), mean);
+			SchemaUtil.checkSize(mean.size(), features);
 		} // End if
 
 		if(withStd){
-			VectorUtil.checkSize(features.size(), std);
+			SchemaUtil.checkSize(std.size(), features);
 		}
 
 		List<Feature> result = new ArrayList<>();
