@@ -90,69 +90,9 @@ Compatibility matrix:
 | 1.3.0 through 1.3.10 | 2.2.X | 4.3 |
 | 1.4.0 through 1.4.7 | 2.3.X | 4.3 |
 
-JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of the Apache Spark distribution.
+JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of Apache Spark version 2.0.X, 2.1.X and 2.2.X distributions.
 
-This conflict is documented in [SPARK-15526](https://issues.apache.org/jira/browse/SPARK-15526).
-
-### Modifying Apache Spark installation ###
-
-The embodiment of the legacy version of the JPMML-Model library:
-
-* `$SPARK_HOME/jars/pmml-model-1.2.15.jar`
-* `$SPARK_HOME/jars/pmml-schema-1.2.15.jar`
-
-Removing these two JAR files will solve all conflicts for all applications forever.
-
-### Compile-time conflict resolution ###
-
-Excluding the legacy version of the JPMML-Model library:
-```xml
-<dependency>
-	<groupId>org.apache.spark</groupId>
-	<artifactId>spark-mllib_2.11</artifactId>
-	<version>${spark.version}</version>
-	<scope>provided</scope>
-	<exclusions>
-		<exclusion>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-model</artifactId>
-		</exclusion>
-	</exclusions>
-</dependency>
-```
-
-### Run-time conflict resolution ###
-
-Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/) to relocate all `org.dmg.pmml.*` and `org.jpmml.*` classes of the latest and greatest version of the JPMML-Model library to a different namespace (aka "shading"):
-```xml
-<plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-shade-plugin</artifactId>
-	<version>${maven.shade.version}</version>
-	<executions>
-		<execution>
-			<phase>package</phase>
-			<goals>
-				<goal>shade</goal>
-			</goals>
-			<configuration>
-				<relocations>
-					<relocation>
-						<pattern>org.dmg.pmml</pattern>
-						<shadedPattern>org.shaded.dmg.pmml</shadedPattern>
-					</relocation>
-					<relocation>
-						<pattern>org.jpmml</pattern>
-						<shadedPattern>org.shaded.jpmml</shadedPattern>
-					</relocation>
-				</relocations>
-			</configuration>
-		</execution>
-	</executions>
-</plugin>
-```
-
-The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `PMMLBuilder#build()` builder method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
+This conflict is documented in [SPARK-15526](https://issues.apache.org/jira/browse/SPARK-15526). For possible resolutions, please switch from this README.md file to the README.md file of some earlier JPMML-SparkML development branch.
 
 ## Example application ##
 
