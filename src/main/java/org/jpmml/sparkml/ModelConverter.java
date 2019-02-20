@@ -34,9 +34,6 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.mining.MiningModel;
-import org.dmg.pmml.mining.Segment;
-import org.dmg.pmml.mining.Segmentation;
-import org.dmg.pmml.mining.Segmentation.MultipleModelMethod;
 import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
@@ -46,6 +43,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
 public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends TransformerConverter<T> {
@@ -136,12 +134,11 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		if(model instanceof ClassificationModel){
 			ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
 
+			int numClasses = classificationModel.numClasses();
+
 			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
-			int numClasses = classificationModel.numClasses();
-			if(numClasses != categoricalLabel.size()){
-				throw new IllegalArgumentException("Expected " + numClasses + " target categories, got " + categoricalLabel.size() + " target categories");
-			}
+			SchemaUtil.checkSize(numClasses, categoricalLabel);
 		}
 
 		String featuresCol = model.getFeaturesCol();
@@ -152,12 +149,14 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
 
 			int numFeatures = predictionModel.numFeatures();
-			if(numFeatures != -1 && features.size() != numFeatures){
-				throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
+			if(numFeatures != -1){
+				SchemaUtil.checkSize(numFeatures, features);
 			}
 		}
 
 		Schema result = new Schema(label, features);
+
+		SchemaUtil.checkSchema(result);
 
 		return result;
 	}
@@ -175,39 +174,23 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 		List<OutputField> sparkOutputFields = registerOutputFields(label, encoder);
 		if(sparkOutputFields != null && sparkOutputFields.size() > 0){
-			org.dmg.pmml.Model lastModel = getLastModel(model);
+			Output output;
 
-			Output output = ModelUtil.ensureOutput(lastModel);
+			if(model instanceof MiningModel){
+				MiningModel miningModel = (MiningModel)model;
+
+				org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(miningModel);
+
+				output = ModelUtil.ensureOutput(finalModel);
+			} else
+
+			{
+				output = ModelUtil.ensureOutput(model);
+			}
 
 			List<OutputField> outputFields = output.getOutputFields();
 
 			outputFields.addAll(0, sparkOutputFields);
-		}
-
-		return model;
-	}
-
-	protected org.dmg.pmml.Model getLastModel(org.dmg.pmml.Model model){
-
-		if(model instanceof MiningModel){
-			MiningModel miningModel = (MiningModel)model;
-
-			Segmentation segmentation = miningModel.getSegmentation();
-
-			MultipleModelMethod multipleModelMethod = segmentation.getMultipleModelMethod();
-			switch(multipleModelMethod){
-				case MODEL_CHAIN:
-					List<Segment> segments = segmentation.getSegments();
-
-					if(segments.size() > 0){
-						Segment lastSegment = segments.get(segments.size() - 1);
-
-						return lastSegment.getModel();
-					}
-					break;
-				default:
-					break;
-			}
 		}
 
 		return model;

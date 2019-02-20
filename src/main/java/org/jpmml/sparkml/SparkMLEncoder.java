@@ -59,21 +59,6 @@ public class SparkMLEncoder extends ModelEncoder {
 		return this.columnFeatures.containsKey(column);
 	}
 
-	public List<Feature> getSchemaFeatures(){
-		StructType schema = getSchema();
-
-		List<Feature> result = new ArrayList<>();
-
-		StructField[] fields = schema.fields();
-		for(StructField field : fields){
-			Feature feature = getOnlyFeature(field.name());
-
-			result.add(feature);
-		}
-
-		return result;
-	}
-
 	public Feature getOnlyFeature(String column){
 		List<Feature> features = getFeatures(column);
 
@@ -141,7 +126,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(existingFeatures != null && existingFeatures.size() > 0){
 
 			if(features.size() != existingFeatures.size()){
-				throw new IllegalArgumentException("Expected " + existingFeatures.size() + " features, got " + features.size() + " features");
+				throw new IllegalArgumentException("Expected " + existingFeatures.size() + " feature(s), got " + features.size() + " feature(s)");
 			}
 
 			for(int i = 0; i < existingFeatures.size(); i++){
@@ -149,7 +134,7 @@ public class SparkMLEncoder extends ModelEncoder {
 				Feature feature = features.get(i);
 
 				if(!(feature.getName()).equals(existingFeature.getName())){
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Expected feature column '" + existingFeature.getName() + "', got feature column '" + feature.getName() + "'");
 				}
 			}
 		}

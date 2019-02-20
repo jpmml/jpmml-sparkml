@@ -35,6 +35,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerModel> {
@@ -47,12 +48,11 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		VectorIndexerModel transformer = getTransformer();
 
+		int numFeatures = transformer.numFeatures();
+
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		int numFeatures = transformer.numFeatures();
-		if(numFeatures != features.size()){
-			throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
-		}
+		SchemaUtil.checkSize(numFeatures, features);
 
 		Map<Integer, Map<Double, Integer>> categoryMaps = transformer.javaCategoryMaps();
 

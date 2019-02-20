@@ -55,7 +55,7 @@ public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover
 			} // End if
 
 			if(TermUtil.hasPunctuation(stopWord)){
-				throw new IllegalArgumentException(stopWord);
+				throw new IllegalArgumentException("Punctuated stop words (" + stopWord + ") are not supported");
 			}
 
 			stopWordSet.add(stopWord);

@@ -33,6 +33,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
@@ -85,9 +86,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case CLASSIFICATION:
 				CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
-				if(categoricalLabel.size() != 2){
-					throw new IllegalArgumentException();
-				}
+				SchemaUtil.checkSize(2, categoricalLabel);
 
 				targetCategory = categoricalLabel.getValue(1);
 				break;
@@ -123,7 +122,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "poisson":
 				return GeneralRegressionModel.Distribution.POISSON;
 			default:
-				throw new IllegalArgumentException(family);
+				throw new IllegalArgumentException("Distribution family " + family + " is not supported");
 		}
 	}
 
@@ -146,7 +145,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "sqrt":
 				return GeneralRegressionModel.LinkFunction.POWER;
 			default:
-				throw new IllegalArgumentException(link);
+				throw new IllegalArgumentException("Link function " + link + " is not supported");
 		}
 	}
 

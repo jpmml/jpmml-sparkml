@@ -28,6 +28,21 @@ public class MatrixUtil {
 	private MatrixUtil(){
 	}
 
+	public void checkColumns(int columns, Matrix matrix){
+
+		if(matrix.numCols() != columns){
+			throw new IllegalArgumentException("Expected " + columns + " column(s), got " + matrix.numCols() + " column(s)");
+		}
+	}
+
+	static
+	public void checkRows(int rows, Matrix matrix){
+
+		if(matrix.numRows() != rows){
+			throw new IllegalArgumentException("Expected " + rows + " row(s), got " + matrix.numRows() + " row(s)");
+		}
+	}
+
 	static
 	public List<Double> getRow(Matrix matrix, int row){
 		List<Double> result = new ArrayList<>();

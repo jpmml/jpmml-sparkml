@@ -103,7 +103,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 					}
 					break;
 				default:
-					throw new IllegalArgumentException(handleInvalid);
+					throw new IllegalArgumentException("Invalid value handling strategy " + handleInvalid + " is not supported");
 			}
 
 			encoder.addDecorator(dataField.getName(), invalidValueDecorator);

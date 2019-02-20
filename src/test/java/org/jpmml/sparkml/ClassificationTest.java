@@ -99,6 +99,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateLinearSVCSentiment() throws Exception {
+		evaluate("LinearSVC", "Sentiment");
+	}
+
+	@Test
 	public void evaluateRandomForestSentiment() throws Exception {
 		evaluate("RandomForest", "Sentiment");
 	}
