@@ -33,6 +33,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MatrixUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class PCAModelConverter extends FeatureConverter<PCAModel> {
@@ -45,12 +46,11 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		PCAModel transformer = getTransformer();
 
+		DenseMatrix pc = transformer.pc();
+
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		DenseMatrix pc = transformer.pc();
-		if(pc.numRows() != features.size()){
-			throw new IllegalArgumentException();
-		}
+		MatrixUtil.checkRows(features.size(), pc);
 
 		List<Feature> result = new ArrayList<>();
 

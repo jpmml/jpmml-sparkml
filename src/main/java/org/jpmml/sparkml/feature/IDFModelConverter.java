@@ -29,6 +29,7 @@ import org.jpmml.converter.ProductFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.TermFeature;
+import org.jpmml.sparkml.VectorUtil;
 import org.jpmml.sparkml.WeightedTermFeature;
 
 public class IDFModelConverter extends FeatureConverter<IDFModel> {
@@ -41,12 +42,11 @@ public class IDFModelConverter extends FeatureConverter<IDFModel> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		IDFModel transformer = getTransformer();
 
+		Vector idf = transformer.idf();
+
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		Vector idf = transformer.idf();
-		if(idf.size() != features.size()){
-			throw new IllegalArgumentException();
-		}
+		VectorUtil.checkSize(features.size(), idf);
 
 		List<Feature> result = new ArrayList<>();
 

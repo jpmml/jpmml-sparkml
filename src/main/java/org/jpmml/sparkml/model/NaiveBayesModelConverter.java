@@ -34,6 +34,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.MatrixUtil;
 import org.jpmml.sparkml.VectorUtil;
 
 public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
@@ -71,9 +72,12 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 		Vector pi = model.pi();
 		Matrix theta = model.theta();
 
-		List<Double> intercepts = VectorUtil.toList(pi);
-
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+
+		VectorUtil.checkSize(categoricalLabel.size(), pi);
+		MatrixUtil.checkRows(categoricalLabel.size(), theta);
+
+		List<Double> intercepts = VectorUtil.toList(pi);
 
 		scala.collection.Iterator<Vector> thetaRows = theta.rowIter();
 

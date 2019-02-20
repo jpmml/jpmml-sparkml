@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2019 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,34 +18,26 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.List;
+import org.apache.spark.ml.linalg.Matrix;
 
-import com.google.common.primitives.Doubles;
-import org.apache.spark.ml.linalg.DenseVector;
-import org.apache.spark.ml.linalg.Vector;
+public class MatrixUtil {
 
-public class VectorUtil {
-
-	private VectorUtil(){
+	private MatrixUtil(){
 	}
 
 	static
-	public void checkSize(int size, Vector... vectors){
+	public void checkColumns(int columns, Matrix matrix){
 
-		for(Vector vector : vectors){
-
-			if(vector.size() != size){
-				throw new IllegalArgumentException("Expected " + size + " element(s), got " + vector.size() + " element(s)");
-			}
+		if(matrix.numCols() != columns){
+			throw new IllegalArgumentException("Expected " + columns + " column(s), got " + matrix.numCols() + " column(s)");
 		}
 	}
 
 	static
-	public List<Double> toList(Vector vector){
-		DenseVector denseVector = vector.toDense();
+	public void checkRows(int rows, Matrix matrix){
 
-		double[] values = denseVector.values();
-
-		return Doubles.asList(values);
+		if(matrix.numRows() != rows){
+			throw new IllegalArgumentException("Expected " + rows + " row(s), got " + matrix.numRows() + " row(s)");
+		}
 	}
 }
