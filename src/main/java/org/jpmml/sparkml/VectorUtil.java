@@ -30,6 +30,17 @@ public class VectorUtil {
 	}
 
 	static
+	public void checkSize(int size, Vector... vectors){
+
+		for(Vector vector : vectors){
+
+			if(vector.size() != size){
+				throw new IllegalArgumentException("Expected " + size + " element(s), got " + vector.size() + " element(s)");
+			}
+		}
+	}
+
+	static
 	public List<Double> toList(Vector vector){
 		DenseVector denseVector = vector.toDense();
 
