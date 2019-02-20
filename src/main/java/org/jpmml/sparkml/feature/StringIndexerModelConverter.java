@@ -62,7 +62,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 					invalidValueTreatmentMethod = InvalidValueTreatmentMethod.RETURN_INVALID;
 					break;
 				default:
-					throw new IllegalArgumentException(handleInvalid);
+					throw new IllegalArgumentException("Invalid value handling strategy " + handleInvalid + " is not supported");
 			}
 
 			InvalidValueDecorator invalidValueDecorator = new InvalidValueDecorator()

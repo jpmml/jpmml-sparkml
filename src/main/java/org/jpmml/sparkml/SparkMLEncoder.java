@@ -141,7 +141,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(existingFeatures != null && existingFeatures.size() > 0){
 
 			if(features.size() != existingFeatures.size()){
-				throw new IllegalArgumentException("Expected " + existingFeatures.size() + " features, got " + features.size() + " features");
+				throw new IllegalArgumentException("Expected " + existingFeatures.size() + " feature(s), got " + features.size() + " feature(s)");
 			}
 
 			for(int i = 0; i < existingFeatures.size(); i++){
@@ -149,7 +149,7 @@ public class SparkMLEncoder extends ModelEncoder {
 				Feature feature = features.get(i);
 
 				if(!(feature.getName()).equals(existingFeature.getName())){
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Expected '" + existingFeature.getName() + "' feature, got '" + feature.getName() + "' feature");
 				}
 			}
 		}

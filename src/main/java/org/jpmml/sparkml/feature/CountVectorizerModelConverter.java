@@ -114,7 +114,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 			String term = vocabulary[i];
 
 			if(TermUtil.hasPunctuation(term)){
-				throw new IllegalArgumentException(term);
+				throw new IllegalArgumentException("Punctuated vocabulary terms (" + term + ") are not supported");
 			}
 
 			result.add(new TermFeature(encoder, defineFunction, documentFeature, term));

@@ -212,7 +212,7 @@ public class TreeModelUtil {
 					BooleanFeature booleanFeature = (BooleanFeature)feature;
 
 					if(threshold != 0d){
-						throw new IllegalArgumentException();
+						throw new IllegalArgumentException("Invalid split threshold value " + threshold + " for a boolean feature");
 					}
 
 					leftPredicate = predicateManager.createSimplePredicate(booleanFeature, SimplePredicate.Operator.EQUAL, booleanFeature.getValue(0));

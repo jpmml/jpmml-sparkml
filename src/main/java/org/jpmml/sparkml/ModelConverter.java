@@ -134,12 +134,11 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		if(model instanceof ClassificationModel){
 			ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
 
+			int numClasses = classificationModel.numClasses();
+
 			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
-			int numClasses = classificationModel.numClasses();
-			if(numClasses != categoricalLabel.size()){
-				throw new IllegalArgumentException("Expected " + numClasses + " target categories, got " + categoricalLabel.size() + " target categories");
-			}
+			SchemaUtil.checkSize(numClasses, categoricalLabel);
 		}
 
 		String featuresCol = model.getFeaturesCol();
@@ -150,8 +149,8 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
 
 			int numFeatures = predictionModel.numFeatures();
-			if(numFeatures != -1 && features.size() != numFeatures){
-				throw new IllegalArgumentException("Expected " + numFeatures + " features, got " + features.size() + " features");
+			if(numFeatures != -1){
+				SchemaUtil.checkSize(numFeatures, features);
 			}
 		}
 

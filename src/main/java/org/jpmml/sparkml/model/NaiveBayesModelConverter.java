@@ -52,7 +52,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 			case "multinomial":
 				break;
 			default:
-				throw new IllegalArgumentException(modelType);
+				throw new IllegalArgumentException("Model type " + modelType + " is not supported");
 		}
 
 		try {
@@ -62,7 +62,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 				double threshold = thresholds[i];
 
 				if(threshold != 0d){
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Non-zero thresholds are not supported");
 				}
 			}
 		} catch(NoSuchElementException nsee){
