@@ -37,6 +37,7 @@ import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.SchemaUtil;
 
 public class RegressionTableUtil {
 
@@ -45,10 +46,7 @@ public class RegressionTableUtil {
 
 	static
 	public <C extends ModelConverter<?> & HasRegressionOptions> void simplify(C converter, String identifier, List<Feature> features, List<Double> coefficients){
-
-		if(features.size() != coefficients.size()){
-			throw new IllegalArgumentException();
-		}
+		SchemaUtil.checkSize(coefficients.size(), features);
 
 		Integer lookupThreshold = (Integer)converter.getOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, null);
 		if(lookupThreshold == null){

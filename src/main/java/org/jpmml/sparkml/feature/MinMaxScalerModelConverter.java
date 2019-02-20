@@ -32,6 +32,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerModel> {
@@ -47,17 +48,12 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 		double rescaleFactor = (transformer.getMax() - transformer.getMin());
 		double rescaleConstant = transformer.getMin();
 
+		Vector originalMin = transformer.originalMin();
+		Vector originalMax = transformer.originalMax();
+
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		Vector originalMax = transformer.originalMax();
-		if(originalMax.size() != features.size()){
-			throw new IllegalArgumentException();
-		}
-
-		Vector originalMin = transformer.originalMin();
-		if(originalMin.size() != features.size()){
-			throw new IllegalArgumentException();
-		}
+		SchemaUtil.checkSize(Math.max(originalMin.size(), originalMax.size()), features);
 
 		List<Feature> result = new ArrayList<>();
 
@@ -66,8 +62,8 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 
 			ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-			double max = originalMax.apply(i);
 			double min = originalMin.apply(i);
+			double max = originalMax.apply(i);
 
 			Expression expression = PMMLUtil.createApply("/", PMMLUtil.createApply("-", continuousFeature.ref(), PMMLUtil.createConstant(min)), PMMLUtil.createConstant(max - min));
 

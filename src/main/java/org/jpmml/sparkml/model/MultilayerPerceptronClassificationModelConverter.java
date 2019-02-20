@@ -39,6 +39,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.neural_network.NeuralNetworkUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MultilayerPerceptronClassificationModelConverter extends ClassificationModelConverter<MultilayerPerceptronClassificationModel> {
@@ -71,14 +72,10 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 		Vector weights = model.weights();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
-		if(categoricalLabel.size() != layers[layers.length - 1]){
-			throw new IllegalArgumentException();
-		}
-
 		List<? extends Feature> features = schema.getFeatures();
-		if(features.size() != layers[0]){
-			throw new IllegalArgumentException();
-		}
+
+		SchemaUtil.checkSize(layers[layers.length - 1], categoricalLabel);
+		SchemaUtil.checkSize(layers[0], features);
 
 		NeuralInputs neuralInputs = NeuralNetworkUtil.createNeuralInputs(features, DataType.DOUBLE);
 
