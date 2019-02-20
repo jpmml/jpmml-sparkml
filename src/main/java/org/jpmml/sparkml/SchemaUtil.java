@@ -19,13 +19,32 @@
 package org.jpmml.sparkml;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.Label;
+import org.jpmml.converter.Schema;
 
 public class SchemaUtil {
 
 	private SchemaUtil(){
+	}
+
+	static
+	public void checkSchema(Schema schema){
+		Label label = schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
+
+		if(label != null){
+
+			for(Feature feature : features){
+
+				if(Objects.equals(label.getName(), feature.getName())){
+					throw new IllegalArgumentException("Label column '" + label.getName() + "' is contained in the list of feature columns");
+				}
+			}
+		}
 	}
 
 	static

@@ -156,6 +156,8 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 		Schema result = new Schema(label, features);
 
+		SchemaUtil.checkSchema(result);
+
 		return result;
 	}
 
