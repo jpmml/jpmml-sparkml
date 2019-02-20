@@ -37,6 +37,7 @@ import org.jpmml.converter.ProductFeature;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.VectorUtil;
 
 public class StandardScalerModelConverter extends FeatureConverter<StandardScalerModel> {
 
@@ -48,16 +49,20 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StandardScalerModel transformer = getTransformer();
 
+		Vector mean = transformer.mean();
+		Vector std = transformer.std();
+
+		boolean withMean = transformer.getWithMean();
+		boolean withStd = transformer.getWithStd();
+
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		Vector mean = transformer.mean();
-		if(transformer.getWithMean() && mean.size() != features.size()){
-			throw new IllegalArgumentException();
-		}
+		if(withMean){
+			VectorUtil.checkSize(features.size(), mean);
+		} // End if
 
-		Vector std = transformer.std();
-		if(transformer.getWithStd() && std.size() != features.size()){
-			throw new IllegalArgumentException();
+		if(withStd){
+			VectorUtil.checkSize(features.size(), std);
 		}
 
 		List<Feature> result = new ArrayList<>();
@@ -69,7 +74,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 
 			Expression expression = null;
 
-			if(transformer.getWithMean()){
+			if(withMean){
 				double meanValue = mean.apply(i);
 
 				if(!ValueUtil.isZero(meanValue)){
@@ -79,7 +84,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				}
 			} // End if
 
-			if(transformer.getWithStd()){
+			if(withStd){
 				double stdValue = std.apply(i);
 
 				if(!ValueUtil.isOne(stdValue)){

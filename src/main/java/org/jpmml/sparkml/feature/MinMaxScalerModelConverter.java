@@ -33,6 +33,7 @@ import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.VectorUtil;
 
 public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerModel> {
 
@@ -47,17 +48,12 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 		double rescaleFactor = (transformer.getMax() - transformer.getMin());
 		double rescaleConstant = transformer.getMin();
 
+		Vector originalMax = transformer.originalMax();
+		Vector originalMin = transformer.originalMin();
+
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 
-		Vector originalMax = transformer.originalMax();
-		if(originalMax.size() != features.size()){
-			throw new IllegalArgumentException();
-		}
-
-		Vector originalMin = transformer.originalMin();
-		if(originalMin.size() != features.size()){
-			throw new IllegalArgumentException();
-		}
+		VectorUtil.checkSize(features.size(), originalMax, originalMin);
 
 		List<Feature> result = new ArrayList<>();
 

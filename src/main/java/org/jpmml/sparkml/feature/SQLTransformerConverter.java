@@ -104,7 +104,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 					opType = OpType.CATEGORICAL;
 					break;
 				default:
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 			}
 
 			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
@@ -125,7 +125,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 					feature = new BooleanFeature(encoder, derivedField);
 					break;
 				default:
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 			}
 
 			encoder.putOnlyFeature(name, feature);
