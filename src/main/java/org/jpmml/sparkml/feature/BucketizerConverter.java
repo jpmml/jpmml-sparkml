@@ -51,11 +51,11 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
 		Discretize discretize = new Discretize(continuousFeature.getName());
 
-		List<String> categories = new ArrayList<>();
+		List<Integer> categories = new ArrayList<>();
 
 		double[] splits = transformer.getSplits();
 		for(int i = 0; i < (splits.length - 1); i++){
-			String category = String.valueOf(i);
+			Integer category = i;
 
 			categories.add(category);
 

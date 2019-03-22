@@ -23,11 +23,10 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.dmg.pmml.Field;
-import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.Feature;
+import org.jpmml.converter.ObjectFeature;
 import org.jpmml.model.ToStringHelper;
 
-public class DocumentFeature extends Feature {
+public class DocumentFeature extends ObjectFeature {
 
 	private String wordSeparatorRE = null;
 
@@ -38,11 +37,6 @@ public class DocumentFeature extends Feature {
 		super(encoder, field.getName(), field.getDataType());
 
 		setWordSeparatorRE(wordSeparatorRE);
-	}
-
-	@Override
-	public ContinuousFeature toContinuousFeature(){
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -73,12 +67,7 @@ public class DocumentFeature extends Feature {
 	}
 
 	private void setWordSeparatorRE(String wordSeparatorRE){
-
-		if(wordSeparatorRE == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.wordSeparatorRE = wordSeparatorRE;
+		this.wordSeparatorRE = Objects.requireNonNull(wordSeparatorRE);
 	}
 
 	public void addStopWordSet(StopWordSet stopWordSet){

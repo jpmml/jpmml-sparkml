@@ -25,9 +25,9 @@ import org.apache.spark.ml.classification.MultilayerPerceptronClassificationMode
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.Entity;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OutputField;
+import org.dmg.pmml.neural_network.NeuralEntity;
 import org.dmg.pmml.neural_network.NeuralInputs;
 import org.dmg.pmml.neural_network.NeuralLayer;
 import org.dmg.pmml.neural_network.NeuralNetwork;
@@ -37,9 +37,9 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.neural_network.NeuralNetworkUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
-import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MultilayerPerceptronClassificationModelConverter extends ClassificationModelConverter<MultilayerPerceptronClassificationModel> {
@@ -79,7 +79,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 		NeuralInputs neuralInputs = NeuralNetworkUtil.createNeuralInputs(features, DataType.DOUBLE);
 
-		List<? extends Entity> entities = neuralInputs.getNeuralInputs();
+		List<? extends NeuralEntity> entities = neuralInputs.getNeuralInputs();
 
 		List<NeuralLayer> neuralLayers = new ArrayList<>();
 

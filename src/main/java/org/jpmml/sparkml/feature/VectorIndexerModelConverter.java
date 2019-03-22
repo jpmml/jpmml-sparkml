@@ -33,9 +33,8 @@ import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.converter.ValueUtil;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerModel> {
@@ -63,15 +62,15 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 
 			Map<Double, Integer> categoryMap = categoryMaps.get(i);
 			if(categoryMap != null){
-				List<String> categories = new ArrayList<>();
-				List<String> values = new ArrayList<>();
+				List<Double> categories = new ArrayList<>();
+				List<Integer> values = new ArrayList<>();
 
 				List<Map.Entry<Double, Integer>> entries = new ArrayList<>(categoryMap.entrySet());
 				Collections.sort(entries, VectorIndexerModelConverter.COMPARATOR);
 
 				for(Map.Entry<Double, Integer> entry : entries){
-					String category = ValueUtil.formatValue(entry.getKey());
-					String value = ValueUtil.formatValue(entry.getValue());
+					Double category = entry.getKey();
+					Integer value = entry.getValue();
 
 					categories.add(category);
 					values.add(value);
