@@ -102,7 +102,8 @@ public class RegressionTableUtil {
 		}
 
 		MapValues mapValues = PMMLUtil.createMapValues(name, inputValues, outputValues)
-			.setDefaultValue(0d);
+			.setDefaultValue(0d)
+			.setDataType(DataType.DOUBLE);
 
 		DerivedField derivedField = encoder.createDerivedField(FieldName.create("lookup(" + name.getValue() + (identifier != null ? (", " + identifier) : "") + ")"), OpType.CONTINUOUS, DataType.DOUBLE, mapValues);
 

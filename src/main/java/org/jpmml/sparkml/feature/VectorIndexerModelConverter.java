@@ -78,7 +78,8 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 
 				encoder.toCategorical(feature.getName(), categories);
 
-				MapValues mapValues = PMMLUtil.createMapValues(feature.getName(), categories, values);
+				MapValues mapValues = PMMLUtil.createMapValues(feature.getName(), categories, values)
+					.setDataType(DataType.INTEGER);
 
 				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 

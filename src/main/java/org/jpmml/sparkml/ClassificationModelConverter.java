@@ -72,7 +72,8 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		result.add(pmmlPredictedField);
 
-		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories);
+		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
+			.setDataType(DataType.DOUBLE);
 
 		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.DOUBLE)
 			.setOpType(OpType.CATEGORICAL)
