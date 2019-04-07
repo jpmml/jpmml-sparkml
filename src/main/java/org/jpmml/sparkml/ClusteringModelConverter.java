@@ -18,7 +18,7 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.Model;
@@ -26,13 +26,18 @@ import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
+import org.dmg.pmml.ResultFeature;
+import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
+import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.StringFeature;
+import org.jpmml.converter.PMMLEncoder;
 
 abstract
 public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -40,6 +45,9 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	public ClusteringModelConverter(T model){
 		super(model);
 	}
+
+	abstract
+	public int getNumberOfClusters();
 
 	@Override
 	public MiningFunction getMiningFunction(){
@@ -50,14 +58,36 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
+		List<OutputField> result = new ArrayList<>();
+
 		String predictionCol = model.getPredictionCol();
 
-		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), DataType.STRING, OpType.CATEGORICAL);
+		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), DataType.STRING, OpType.CATEGORICAL)
+			.setFinalResult(false);
 
-		Feature feature = new StringFeature(encoder, predictedField);
+		result.add(pmmlPredictedField);
+
+		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.INTEGER)
+			.setOpType(OpType.CATEGORICAL)
+			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
+			.setExpression(new FieldRef(pmmlPredictedField.getName()));
+
+		result.add(predictedField);
+
+		List<Integer> clusters = LabelUtil.createTargetCategories(getNumberOfClusters());
+
+		Feature feature = new CategoricalFeature(encoder, predictedField, clusters){
+
+			@Override
+			public ContinuousFeature toContinuousFeature(){
+				PMMLEncoder encoder = ensureEncoder();
+
+				return new ContinuousFeature(encoder, predictedField);
+			}
+		};
 
 		encoder.putOnlyFeature(predictionCol, feature);
 
-		return Collections.singletonList(predictedField);
+		return result;
 	}
 }

@@ -30,9 +30,9 @@ import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MaxAbsScalerModelConverter extends FeatureConverter<MaxAbsScalerModel> {

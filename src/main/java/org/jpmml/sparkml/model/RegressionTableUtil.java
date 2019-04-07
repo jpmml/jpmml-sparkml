@@ -35,9 +35,8 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.converter.ValueUtil;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.ModelConverter;
-import org.jpmml.sparkml.SchemaUtil;
 
 public class RegressionTableUtil {
 
@@ -45,7 +44,7 @@ public class RegressionTableUtil {
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasRegressionOptions> void simplify(C converter, String identifier, List<Feature> features, List<Double> coefficients){
+	public <C extends ModelConverter<?> & HasRegressionOptions> void simplify(C converter, Object identifier, List<Feature> features, List<Double> coefficients){
 		SchemaUtil.checkSize(coefficients.size(), features);
 
 		Integer lookupThreshold = (Integer)converter.getOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, null);
@@ -69,14 +68,14 @@ public class RegressionTableUtil {
 	}
 
 	static
-	private MapValues createMapValues(FieldName name, String identifier, List<Feature> features, List<Double> coefficients){
+	private MapValues createMapValues(FieldName name, Object identifier, List<Feature> features, List<Double> coefficients){
 		ListIterator<Feature> featureIt = features.listIterator();
 		ListIterator<Double> coefficientIt = coefficients.listIterator();
 
 		PMMLEncoder encoder = null;
 
-		List<String> inputValues = new ArrayList<>();
-		List<String> outputValues = new ArrayList<>();
+		List<Object> inputValues = new ArrayList<>();
+		List<Double> outputValues = new ArrayList<>();
 
 		while(featureIt.hasNext()){
 			Feature feature = featureIt.next();
@@ -99,11 +98,12 @@ public class RegressionTableUtil {
 			}
 
 			inputValues.add(binaryFeature.getValue());
-			outputValues.add(ValueUtil.formatValue(coefficient));
+			outputValues.add(coefficient);
 		}
 
 		MapValues mapValues = PMMLUtil.createMapValues(name, inputValues, outputValues)
-			.setDefaultValue(ValueUtil.formatValue(0d));
+			.setDefaultValue(0d)
+			.setDataType(DataType.DOUBLE);
 
 		DerivedField derivedField = encoder.createDerivedField(FieldName.create("lookup(" + name.getValue() + (identifier != null ? (", " + identifier) : "") + ")"), OpType.CONTINUOUS, DataType.DOUBLE, mapValues);
 

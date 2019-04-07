@@ -49,13 +49,14 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
 		ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-		Discretize discretize = new Discretize(continuousFeature.getName());
+		Discretize discretize = new Discretize(continuousFeature.getName())
+			.setDataType(DataType.INTEGER);
 
-		List<String> categories = new ArrayList<>();
+		List<Integer> categories = new ArrayList<>();
 
 		double[] splits = transformer.getSplits();
 		for(int i = 0; i < (splits.length - 1); i++){
-			String category = String.valueOf(i);
+			Integer category = i;
 
 			categories.add(category);
 

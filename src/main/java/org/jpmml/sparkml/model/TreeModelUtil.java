@@ -40,7 +40,6 @@ import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.tree.BranchNode;
-import org.dmg.pmml.tree.ComplexNode;
 import org.dmg.pmml.tree.LeafNode;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
@@ -55,6 +54,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
+import org.jpmml.converter.tree.ClassifierNode;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
@@ -126,8 +126,7 @@ public class TreeModelUtil {
 
 				@Override
 				public Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode){
-					// XXX
-					node = new ComplexNode()
+					node = new ClassifierNode()
 						.setPredicate(node.getPredicate());
 
 					int index = ValueUtil.asInt(leafNode.prediction());
@@ -206,7 +205,7 @@ public class TreeModelUtil {
 			if(split instanceof ContinuousSplit){
 				ContinuousSplit continuousSplit = (ContinuousSplit)split;
 
-				double threshold = continuousSplit.threshold();
+				Double threshold = continuousSplit.threshold();
 
 				if(feature instanceof BooleanFeature){
 					BooleanFeature booleanFeature = (BooleanFeature)feature;
@@ -222,10 +221,8 @@ public class TreeModelUtil {
 				{
 					ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-					String value = ValueUtil.formatValue(threshold);
-
-					leftPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.LESS_OR_EQUAL, value);
-					rightPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.GREATER_THAN, value);
+					leftPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.LESS_OR_EQUAL, threshold);
+					rightPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.GREATER_THAN, threshold);
 				}
 			} else
 
@@ -255,7 +252,7 @@ public class TreeModelUtil {
 						throw new IllegalArgumentException();
 					}
 
-					String value = ValueUtil.formatValue(binaryFeature.getValue());
+					Object value = binaryFeature.getValue();
 
 					leftPredicate = predicateManager.createSimplePredicate(binaryFeature, leftOperator, value);
 					rightPredicate = predicateManager.createSimplePredicate(binaryFeature, rightOperator, value);
@@ -266,15 +263,15 @@ public class TreeModelUtil {
 
 					FieldName name = categoricalFeature.getName();
 
-					List<String> values = categoricalFeature.getValues();
+					List<?> values = categoricalFeature.getValues();
 					if(values.size() != (leftCategories.length + rightCategories.length)){
 						throw new IllegalArgumentException();
 					}
 
-					java.util.function.Predicate<String> valueFilter = categoryManager.getValueFilter(name);
+					java.util.function.Predicate<Object> valueFilter = categoryManager.getValueFilter(name);
 
-					List<String> leftValues = selectValues(values, leftCategories, valueFilter);
-					List<String> rightValues = selectValues(values, rightCategories, valueFilter);
+					List<Object> leftValues = selectValues(values, leftCategories, valueFilter);
+					List<Object> rightValues = selectValues(values, rightCategories, valueFilter);
 
 					leftCategoryManager = categoryManager.fork(name, leftValues);
 					rightCategoryManager = categoryManager.fork(name, rightValues);
@@ -308,12 +305,12 @@ public class TreeModelUtil {
 	}
 
 	static
-	private List<String> selectValues(List<String> values, double[] categories, java.util.function.Predicate<String> valueFilter){
+	private List<Object> selectValues(List<?> values, double[] categories, java.util.function.Predicate<Object> valueFilter){
 
 		if(categories.length == 1){
 			int index = ValueUtil.asInt(categories[0]);
 
-			String value = values.get(index);
+			Object value = values.get(index);
 
 			if(valueFilter.test(value)){
 				return Collections.singletonList(value);
@@ -323,12 +320,12 @@ public class TreeModelUtil {
 		} else
 
 		{
-			List<String> result = new ArrayList<>(categories.length);
+			List<Object> result = new ArrayList<>(categories.length);
 
 			for(int i = 0; i < categories.length; i++){
 				int index = ValueUtil.asInt(categories[i]);
 
-				String value = values.get(index);
+				Object value = values.get(index);
 
 				if(valueFilter.test(value)){
 					result.add(value);

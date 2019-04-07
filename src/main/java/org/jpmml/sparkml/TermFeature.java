@@ -131,12 +131,7 @@ public class TermFeature extends Feature {
 	}
 
 	private void setDefineFunction(DefineFunction defineFunction){
-
-		if(defineFunction == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.defineFunction = defineFunction;
+		this.defineFunction = Objects.requireNonNull(defineFunction);
 	}
 
 	public Feature getFeature(){
@@ -144,12 +139,7 @@ public class TermFeature extends Feature {
 	}
 
 	private void setFeature(Feature feature){
-
-		if(feature == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.feature = feature;
+		this.feature = Objects.requireNonNull(feature);
 	}
 
 	public String getValue(){
@@ -157,11 +147,6 @@ public class TermFeature extends Feature {
 	}
 
 	private void setValue(String value){
-
-		if(value == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.value = value;
+		this.value = Objects.requireNonNull(value);
 	}
 }

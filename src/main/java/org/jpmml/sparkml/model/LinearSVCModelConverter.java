@@ -19,7 +19,6 @@
 package org.jpmml.sparkml.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.classification.LinearSVCModel;
@@ -31,7 +30,6 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.AbstractTransformation;
-import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
@@ -67,7 +65,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 			}
 		};
 
-		Schema segmentSchema = new Schema(new ContinuousLabel(null, DataType.DOUBLE), Collections.emptyList());
+		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE).toEmptySchema();
 
 		RegressionModel regressionModel = RegressionModelUtil.createRegression(features, coefficients, model.intercept(), RegressionModel.NormalizationMethod.NONE, segmentSchema)
 			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("margin"), OpType.CONTINUOUS, DataType.DOUBLE, transformation));

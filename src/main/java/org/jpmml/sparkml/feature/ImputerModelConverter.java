@@ -30,7 +30,6 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.MissingValueDecorator;
-import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -79,11 +78,11 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 				Object surrogate = surrogateRow.getAs(inputCol);
 
 				MissingValueDecorator missingValueDecorator = new MissingValueDecorator()
-					.setMissingValueReplacement(ValueUtil.formatValue(surrogate))
+					.setMissingValueReplacement(surrogate)
 					.setMissingValueTreatment(missingValueTreatmentMethod);
 
 				if(missingValue != null && !missingValue.isNaN()){
-					missingValueDecorator.addValues(ValueUtil.formatValue(missingValue));
+					missingValueDecorator.addValues(missingValue);
 				}
 
 				encoder.addDecorator(feature.getName(), missingValueDecorator);

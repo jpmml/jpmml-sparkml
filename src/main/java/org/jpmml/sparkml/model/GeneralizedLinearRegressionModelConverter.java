@@ -31,9 +31,9 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
-import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
@@ -79,7 +79,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	public GeneralRegressionModel encodeModel(Schema schema){
 		GeneralizedLinearRegressionModel model = getTransformer();
 
-		String targetCategory = null;
+		Object targetCategory = null;
 
 		MiningFunction miningFunction = getMiningFunction();
 		switch(miningFunction){

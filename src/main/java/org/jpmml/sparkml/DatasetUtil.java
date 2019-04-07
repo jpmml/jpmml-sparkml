@@ -80,7 +80,7 @@ public class DatasetUtil {
 		} else
 
 		{
-			throw new IllegalArgumentException("Expected string, integral, double or boolean type, got " + sparkDataType.typeName() + " type");
+			throw new IllegalArgumentException("Expected string, integral, double or boolean data type, got " + sparkDataType.typeName() + " data type");
 		}
 	}
 

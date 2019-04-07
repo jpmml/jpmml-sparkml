@@ -48,13 +48,10 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 		for(int i = 0; i < inputCols.length; i++){
 			CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(inputCols[i]);
 
-			List<String> values = categoricalFeature.getValues();
-			if(dropLast){
-				values = values.subList(0, values.size() - 1);
-			}
+			List<?> values = categoricalFeature.getValues();
 
 			// XXX
-			List<BinaryFeature> binaryFeatures = (List)OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, values);
+			List<BinaryFeature> binaryFeatures = (List)OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, values, dropLast);
 
 			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature.getName(), categoricalFeature.getDataType(), binaryFeatures));
 		}
