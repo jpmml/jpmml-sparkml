@@ -42,6 +42,8 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 
 		CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
+		List<?> values = categoricalFeature.getValues();
+
 		boolean dropLast = true;
 
 		Option<Object> dropLastOption = transformer.get(transformer.dropLast());
@@ -49,19 +51,18 @@ public class OneHotEncoderConverter extends FeatureConverter<OneHotEncoder> {
 			dropLast = (Boolean)dropLastOption.get();
 		}
 
-		List<String> values = categoricalFeature.getValues();
+		return encodeFeature(encoder, categoricalFeature, values, dropLast);
+	}
+
+	static
+	public List<Feature> encodeFeature(PMMLEncoder encoder, Feature feature, List<?> values, boolean dropLast){
+		List<Feature> result = new ArrayList<>();
+
 		if(dropLast){
 			values = values.subList(0, values.size() - 1);
 		}
 
-		return encodeFeature(encoder, categoricalFeature, values);
-	}
-
-	static
-	public List<Feature> encodeFeature(PMMLEncoder encoder, Feature feature, List<String> values){
-		List<Feature> result = new ArrayList<>();
-
-		for(String value : values){
+		for(Object value : values){
 			result.add(new BinaryFeature(encoder, feature, value));
 		}
 

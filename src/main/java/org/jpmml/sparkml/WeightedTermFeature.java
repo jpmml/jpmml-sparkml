@@ -76,11 +76,6 @@ public class WeightedTermFeature extends TermFeature {
 	}
 
 	private void setWeight(Number weight){
-
-		if(weight == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.weight = weight;
+		this.weight = Objects.requireNonNull(weight);
 	}
 }

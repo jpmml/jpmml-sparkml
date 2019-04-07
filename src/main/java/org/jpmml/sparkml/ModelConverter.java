@@ -18,8 +18,8 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PredictionModel;
@@ -41,8 +41,10 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
+import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
@@ -99,11 +101,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 								numClasses = classificationModel.numClasses();
 							}
 
-							List<String> categories = new ArrayList<>();
-
-							for(int i = 0; i < numClasses; i++){
-								categories.add(String.valueOf(i));
-							}
+							List<Integer> categories = LabelUtil.createTargetCategories(numClasses);
 
 							Field<?> field = encoder.toCategorical(continuousFeature.getName(), categories);
 
@@ -156,7 +154,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 		Schema result = new Schema(label, features);
 
-		SchemaUtil.checkSchema(result);
+		checkSchema(result);
 
 		return result;
 	}
@@ -194,5 +192,22 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		}
 
 		return model;
+	}
+
+	static
+	private void checkSchema(Schema schema){
+		Label label = schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
+
+		if(label == null){
+			return;
+		}
+
+		for(Feature feature : features){
+
+			if(Objects.equals(label.getName(), feature.getName())){
+				throw new IllegalArgumentException("Label column '" + label.getName() + "' is contained in the list of feature columns");
+			}
+		}
 	}
 }

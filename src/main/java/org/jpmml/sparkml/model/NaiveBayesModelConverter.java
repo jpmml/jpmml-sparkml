@@ -84,7 +84,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
 
 		for(int i = 0; i < categoricalLabel.size(); i++){
-			String targetCategory = categoricalLabel.getValue(i);
+			Object targetCategory = categoricalLabel.getValue(i);
 
 			List<Feature> features = new ArrayList<>(schema.getFeatures());
 			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(thetaRows.next()));

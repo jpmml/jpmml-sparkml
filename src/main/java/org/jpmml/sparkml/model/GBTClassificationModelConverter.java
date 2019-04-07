@@ -30,7 +30,6 @@ import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segmentation;
 import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.tree.TreeModel;
-import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
@@ -54,7 +53,7 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 				throw new IllegalArgumentException("Loss function " + lossType + " is not supported");
 		}
 
-		Schema segmentSchema = new Schema(new ContinuousLabel(null, DataType.DOUBLE), schema.getFeatures());
+		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, segmentSchema);
 

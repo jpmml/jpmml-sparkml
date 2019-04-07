@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.VectorSizeHint;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SchemaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class VectorSizeHintConverter extends FeatureConverter<VectorSizeHint> {

@@ -39,6 +39,7 @@ import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
+import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
@@ -61,23 +62,19 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
-		List<String> categories = new ArrayList<>();
-
-		for(int i = 0; i < categoricalLabel.size(); i++){
-			String category = String.valueOf(i);
-
-			categories.add(category);
-		}
+		List<Integer> categories = LabelUtil.createTargetCategories(categoricalLabel.size());
 
 		List<OutputField> result = new ArrayList<>();
 
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL);
+		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL)
+			.setFinalResult(false);
 
 		result.add(pmmlPredictedField);
 
-		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories);
+		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
+			.setDataType(DataType.DOUBLE);
 
 		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.DOUBLE)
 			.setOpType(OpType.CATEGORICAL)
@@ -106,7 +103,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			List<Feature> features = new ArrayList<>();
 
 			for(int i = 0; i < categoricalLabel.size(); i++){
-				String value = categoricalLabel.getValue(i);
+				Object value = categoricalLabel.getValue(i);
 
 				OutputField probabilityField = ModelUtil.createProbabilityField(FieldName.create(probabilityCol + "(" + value + ")"), DataType.DOUBLE, value);
 

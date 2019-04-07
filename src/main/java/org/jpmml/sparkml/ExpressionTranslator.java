@@ -265,6 +265,8 @@ public class ExpressionTranslator {
 
 			DataType dataType = DatasetUtil.translateDataType(literal.dataType());
 
+			value = toSimpleObject(value);
+
 			return PMMLUtil.createConstant(value, dataType);
 		} else
 
@@ -316,4 +318,17 @@ public class ExpressionTranslator {
 			throw new IllegalArgumentException(String.valueOf(expression));
 		}
 	}
+
+	static
+	private Object toSimpleObject(Object value){
+		Class<?> clazz = value.getClass();
+
+		if(!(ExpressionTranslator.javaLangPackage).equals(clazz.getPackage())){
+			return value.toString();
+		}
+
+		return value;
+	}
+
+	private static final Package javaLangPackage = Package.getPackage("java.lang");
 }

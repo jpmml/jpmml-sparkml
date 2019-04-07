@@ -67,7 +67,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 			List<RegressionTable> regressionTables = new ArrayList<>();
 
 			for(int i = 0; i < categoricalLabel.size(); i++){
-				String targetCategory = categoricalLabel.getValue(i);
+				Object targetCategory = categoricalLabel.getValue(i);
 
 				List<Feature> features = new ArrayList<>(schema.getFeatures());
 				List<Double> coefficients = new ArrayList<>(MatrixUtil.getRow(coefficientMatrix, i));
