@@ -74,6 +74,11 @@ public class ClassificationTest extends ConverterTest {
 	}
 
 	@Test
+	public void evaluateModelChainIris() throws Exception {
+		evaluate("ModelChain", "Iris");
+	}
+
+	@Test
 	public void evaluateNaiveBayesIris() throws Exception {
 		evaluate("NaiveBayes", "Iris");
 	}

@@ -43,6 +43,13 @@ public class KMeansModelConverter extends ClusteringModelConverter<KMeansModel> 
 	}
 
 	@Override
+	public int getNumberOfClusters(){
+		KMeansModel model = getTransformer();
+
+		return model.getK();
+	}
+
+	@Override
 	public ClusteringModel encodeModel(Schema schema){
 		KMeansModel model = getTransformer();
 

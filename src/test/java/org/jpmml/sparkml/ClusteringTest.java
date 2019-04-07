@@ -18,12 +18,15 @@
  */
 package org.jpmml.sparkml;
 
+import org.dmg.pmml.FieldName;
 import org.junit.Test;
 
 public class ClusteringTest extends ConverterTest {
 
 	@Test
 	public void evaluateKMeansIris() throws Exception {
-		evaluate("KMeans", "Iris");
+		FieldName[] outputFields = {FieldName.create("pmml(cluster)")};
+
+		evaluate("KMeans", "Iris", excludeFields(outputFields));
 	}
 }

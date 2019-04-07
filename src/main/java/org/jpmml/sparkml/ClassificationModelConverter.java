@@ -68,7 +68,8 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL);
+		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL)
+			.setFinalResult(false);
 
 		result.add(pmmlPredictedField);
 
