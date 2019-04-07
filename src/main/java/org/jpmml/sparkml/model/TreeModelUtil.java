@@ -32,6 +32,7 @@ import org.apache.spark.ml.tree.DecisionTreeModel;
 import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
@@ -220,6 +221,15 @@ public class TreeModelUtil {
 
 				{
 					ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+					DataType dataType = continuousFeature.getDataType();
+					switch(dataType){
+						case INTEGER:
+							threshold = Math.floor(threshold);
+							break;
+						default:
+							break;
+					}
 
 					leftPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.LESS_OR_EQUAL, threshold);
 					rightPredicate = predicateManager.createSimplePredicate(continuousFeature, SimplePredicate.Operator.GREATER_THAN, threshold);
