@@ -196,10 +196,6 @@ PMML pmml = new PMMLBuilder(schema, pipelineModel)
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
 ```
 
-Please refer to the following resources for more ideas and code examples:
-
-* [Converting Apache Spark ML pipeline models to PMML](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
-
 ## Example application ##
 
 The example application JAR file contains an executable class `org.jpmml.sparkml.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
@@ -215,6 +211,10 @@ Getting help:
 ```
 spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.3-SNAPSHOT.jar --help
 ```
+
+# Documentation #
+
+* [Converting Apache Spark ML pipeline models to PMML documents](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
 
 # License #
 
