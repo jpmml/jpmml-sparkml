@@ -29,10 +29,10 @@ import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
 import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
-import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.IndexFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class BucketizerConverter extends FeatureConverter<Bucketizer> {
@@ -71,7 +71,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.INTEGER, discretize);
 
-		return Collections.singletonList(new CategoricalFeature(encoder, derivedField, categories));
+		return Collections.singletonList(new IndexFeature(encoder, derivedField, categories));
 	}
 
 	static

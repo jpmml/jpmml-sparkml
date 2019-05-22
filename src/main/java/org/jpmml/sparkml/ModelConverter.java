@@ -105,7 +105,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 							Field<?> field = encoder.toCategorical(continuousFeature.getName(), categories);
 
-							encoder.putOnlyFeature(labelCol, new CategoricalFeature(encoder, field, categories));
+							encoder.putOnlyFeature(labelCol, new IndexFeature(encoder, field, categories));
 
 							label = new CategoricalLabel(field.getName(), field.getDataType(), categories);
 						} else

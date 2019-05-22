@@ -54,10 +54,22 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 			if(features.size() == 1){
 				Feature feature = features.get(0);
 
+				categorical:
 				if(feature instanceof CategoricalFeature){
 					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
 					FieldName name = categoricalFeature.getName();
+
+					DataType dataType = categoricalFeature.getDataType();
+					switch(dataType){
+						case INTEGER:
+							break;
+						case FLOAT:
+						case DOUBLE:
+							break categorical;
+						default:
+							break;
+					}
 
 					// XXX
 					inputCol = name.getValue();

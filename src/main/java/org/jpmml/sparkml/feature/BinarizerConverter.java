@@ -27,11 +27,11 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.OpType;
-import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.IndexFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class BinarizerConverter extends FeatureConverter<Binarizer> {
@@ -54,6 +54,6 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.DOUBLE, apply);
 
-		return Collections.singletonList(new CategoricalFeature(encoder, derivedField, Arrays.asList("0", "1")));
+		return Collections.singletonList(new IndexFeature(encoder, derivedField, Arrays.asList(0d, 1d)));
 	}
 }
