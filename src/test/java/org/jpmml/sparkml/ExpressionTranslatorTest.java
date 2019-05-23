@@ -104,6 +104,29 @@ public class ExpressionTranslatorTest {
 		checkApply(apply, "if", Apply.class, Apply.class, Apply.class);
 	}
 
+	@Test
+	public void evaluateUnaryMathExpression(){
+		checkValue(1, "abs(-1)");
+
+		checkValue(0d, "ceil(double(-0.1))");
+		checkValue(5d, "ceil(5)");
+
+		checkValue(1.0d, "exp(0)");
+
+		checkValue(-1d, "floor(double(-0.1))");
+		checkValue(5d, "floor(5)");
+
+		checkValue(0.0d, "ln(1)");
+
+		checkValue(1.0d, "log10(10)");
+
+		checkValue(8.0d, "pow(2, 3)");
+
+		checkValue(12d, "rint(double(12.3456))");
+
+		checkValue(2.0d, "sqrt(4)");
+	}
+
 	static
 	private Object evaluate(String sqlExpression){
 		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
@@ -141,7 +164,22 @@ public class ExpressionTranslatorTest {
 		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
 
 		Object sparkValue = expression.eval(InternalRow.empty());
-		assertEquals(expectedValue, sparkValue);
+
+		if(expectedValue instanceof Integer){
+			assertEquals(expectedValue, ((Number)sparkValue).intValue());
+		} else
+
+		if(expectedValue instanceof Float){
+			assertEquals(expectedValue, ((Number)sparkValue).floatValue());
+		} else
+
+		if(expectedValue instanceof Double){
+			assertEquals(expectedValue, ((Number)sparkValue).doubleValue());
+		} else
+
+		{
+			assertEquals(expectedValue, sparkValue);
+		}
 
 		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
 

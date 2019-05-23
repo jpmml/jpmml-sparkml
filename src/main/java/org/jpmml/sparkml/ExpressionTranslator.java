@@ -21,6 +21,7 @@ package org.jpmml.sparkml;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.spark.sql.catalyst.expressions.Abs;
 import org.apache.spark.sql.catalyst.expressions.Add;
 import org.apache.spark.sql.catalyst.expressions.Alias;
 import org.apache.spark.sql.catalyst.expressions.And;
@@ -30,9 +31,12 @@ import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
 import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
+import org.apache.spark.sql.catalyst.expressions.Ceil;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
+import org.apache.spark.sql.catalyst.expressions.Exp;
 import org.apache.spark.sql.catalyst.expressions.Expression;
+import org.apache.spark.sql.catalyst.expressions.Floor;
 import org.apache.spark.sql.catalyst.expressions.GreaterThan;
 import org.apache.spark.sql.catalyst.expressions.GreaterThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.If;
@@ -42,9 +46,14 @@ import org.apache.spark.sql.catalyst.expressions.IsNull;
 import org.apache.spark.sql.catalyst.expressions.LessThan;
 import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.Literal;
+import org.apache.spark.sql.catalyst.expressions.Log;
+import org.apache.spark.sql.catalyst.expressions.Log10;
 import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
+import org.apache.spark.sql.catalyst.expressions.Pow;
+import org.apache.spark.sql.catalyst.expressions.Rint;
+import org.apache.spark.sql.catalyst.expressions.Sqrt;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
@@ -284,12 +293,14 @@ public class ExpressionTranslator {
 			return PMMLUtil.createConstant(value, dataType);
 		} else
 
-		if(expression instanceof Not){
-			 Not not = (Not)expression;
+		if(expression instanceof Pow){
+			Pow pow = (Pow)expression;
 
-			 Expression child = not.child();
+			Expression left = pow.left();
+			Expression right = pow.right();
 
-			 return PMMLUtil.createApply("not", translateInternal(child));
+			return PMMLUtil.createApply("pow")
+				.addExpressions(translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -297,12 +308,48 @@ public class ExpressionTranslator {
 
 			Expression child = unaryExpression.child();
 
+			if(expression instanceof Abs){
+				return PMMLUtil.createApply("abs", translateInternal(child));
+			} else
+
+			if(expression instanceof Ceil){
+				return PMMLUtil.createApply("ceil", translateInternal(child));
+			} else
+
+			if(expression instanceof Exp){
+				return PMMLUtil.createApply("exp", translateInternal(child));
+			} else
+
+			if(expression instanceof Floor){
+				return PMMLUtil.createApply("floor", translateInternal(child));
+			} else
+
+			if(expression instanceof Log){
+				return PMMLUtil.createApply("ln", translateInternal(child));
+			} else
+
+			if(expression instanceof Log10){
+				return PMMLUtil.createApply("log10", translateInternal(child));
+			} else
+
 			if(expression instanceof IsNotNull){
 				return PMMLUtil.createApply("isNotMissing", translateInternal(child));
 			} else
 
 			if(expression instanceof IsNull){
 				return PMMLUtil.createApply("isMissing", translateInternal(child));
+			} else
+
+			if(expression instanceof Not){
+				 return PMMLUtil.createApply("not", translateInternal(child));
+			} else
+
+			if(expression instanceof Rint){
+				return PMMLUtil.createApply("x-rint", translateInternal(child));
+			} else
+
+			if(expression instanceof Sqrt){
+				return PMMLUtil.createApply("sqrt", translateInternal(child));
 			} else
 
 			if(expression instanceof UnaryMinus){
