@@ -48,6 +48,7 @@ import org.apache.spark.sql.catalyst.expressions.Or;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
+import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
@@ -263,9 +264,22 @@ public class ExpressionTranslator {
 
 			Object value = literal.value();
 
-			DataType dataType = DatasetUtil.translateDataType(literal.dataType());
+			DataType dataType;
 
-			value = toSimpleObject(value);
+			// XXX
+			if(value instanceof Decimal){
+				Decimal decimal = (Decimal)value;
+
+				dataType = DataType.STRING;
+
+				value = decimal.toString();
+			} else
+
+			{
+				dataType = DatasetUtil.translateDataType(literal.dataType());
+
+				value = toSimpleObject(value);
+			}
 
 			return PMMLUtil.createConstant(value, dataType);
 		} else
