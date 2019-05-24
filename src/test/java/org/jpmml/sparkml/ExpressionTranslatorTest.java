@@ -138,6 +138,22 @@ public class ExpressionTranslatorTest {
 	}
 
 	@Test
+	public void evaluateRegexExpression(){
+		checkValue(true, "\"\\abc\" rlike \"^\\abc$\"");
+
+		checkValue(true, "\"January\" rlike \"ar?y\"");
+		checkValue(true, "\"February\" rlike \"ar?y\"");
+		checkValue(false, "\"March\" rlike \"ar?y\"");
+		checkValue(false, "\"April\" rlike \"ar?y\"");
+		checkValue(true, "\"May\" rlike \"ar?y\"");
+		checkValue(false, "\"June\" rlike \"ar?y\"");
+
+		checkValue("num-num", "regexp_replace(\"100-200\", \"(\\\\d+)\", \"num\")");
+
+		checkValue("c", "regexp_replace(\"BBBB\", \"B+\", \"c\")");
+	}
+
+	@Test
 	public void evaluateStringExpression(){
 		checkValue("SparkSQL", "concat(\"Spark\", \"SQL\")");
 

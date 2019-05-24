@@ -54,6 +54,8 @@ import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
 import org.apache.spark.sql.catalyst.expressions.Pow;
+import org.apache.spark.sql.catalyst.expressions.RLike;
+import org.apache.spark.sql.catalyst.expressions.RegExpReplace;
 import org.apache.spark.sql.catalyst.expressions.Rint;
 import org.apache.spark.sql.catalyst.expressions.Sqrt;
 import org.apache.spark.sql.catalyst.expressions.StringTrim;
@@ -321,6 +323,27 @@ public class ExpressionTranslator {
 			Expression right = pow.right();
 
 			return PMMLUtil.createApply("pow")
+				.addExpressions(translateInternal(left), translateInternal(right));
+		} else
+
+		if(expression instanceof RegExpReplace){
+			RegExpReplace regexpReplace = (RegExpReplace)expression;
+
+			Expression subject = regexpReplace.subject();
+			Expression regexp = regexpReplace.regexp();
+			Expression rep = regexpReplace.rep();
+
+			return PMMLUtil.createApply("replace", translateInternal(subject))
+				.addExpressions(translateInternal(regexp), translateInternal(rep));
+		} else
+
+		if(expression instanceof RLike){
+			RLike rlike = (RLike)expression;
+
+			Expression left = rlike.left();
+			Expression right = rlike.right();
+
+			return PMMLUtil.createApply("matches")
 				.addExpressions(translateInternal(left), translateInternal(right));
 		} else
 
