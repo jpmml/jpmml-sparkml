@@ -107,6 +107,9 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void evaluateUnaryMathExpression(){
+		checkValue(1, "-int(-1)");
+		checkValue(1d, "-double(-1.0)");
+
 		checkValue(1, "abs(-1)");
 
 		checkValue(0d, "ceil(double(-0.1))");
@@ -120,6 +123,12 @@ public class ExpressionTranslatorTest {
 		checkValue(0.0d, "ln(1)");
 
 		checkValue(1.0d, "log10(10)");
+
+		checkValue(1, "negative(-1)");
+		checkValue(-1, "negative(1)");
+
+		checkValue(-1, "positive(-1)");
+		checkValue(1, "positive(1)");
 
 		checkValue(8.0d, "pow(2, 3)");
 

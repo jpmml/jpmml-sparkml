@@ -61,6 +61,7 @@ import org.apache.spark.sql.catalyst.expressions.Substring;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
+import org.apache.spark.sql.catalyst.expressions.UnaryPositive;
 import org.apache.spark.sql.catalyst.expressions.Upper;
 import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
@@ -409,7 +410,33 @@ public class ExpressionTranslator {
 				if(pmmlExpression instanceof Constant){
 					Constant constant = (Constant)pmmlExpression;
 
-					constant.setValue("-" + constant.getValue());
+					Object value = constant.getValue();
+
+					if(value instanceof Integer){
+						value = -((Integer)value).intValue();
+					} else
+
+					if(value instanceof Float){
+						value = -((Float)value).floatValue();
+					} else
+
+					if(value instanceof Double){
+						value = -((Double)value).doubleValue();
+					} else
+
+					{
+						String string = String.valueOf(value);
+
+						if(string.startsWith("-")){
+							value = string.substring(1);
+						} else
+
+						{
+							value = ("-" + string);
+						}
+					}
+
+					constant.setValue(value);
 
 					return constant;
 				} else
@@ -417,6 +444,10 @@ public class ExpressionTranslator {
 				{
 					return PMMLUtil.createApply("*", PMMLUtil.createConstant(-1), pmmlExpression);
 				}
+			} else
+
+			if(expression instanceof UnaryPositive){
+				return translateInternal(child);
 			} else
 
 			if(expression instanceof Upper){
