@@ -41,6 +41,7 @@ import org.junit.Test;
 import scala.collection.JavaConversions;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ExpressionTranslatorTest {
 
@@ -127,6 +128,29 @@ public class ExpressionTranslatorTest {
 		checkValue(2.0d, "sqrt(4)");
 	}
 
+	@Test
+	public void evaluateStringExpression(){
+		checkValue("SparkSQL", "concat(\"Spark\", \"SQL\")");
+
+		checkValue("sparksql", "lower(\"SparkSql\")");
+
+		checkValue("k SQL", "substr(\"Spark SQL\", 5)");
+
+		try {
+			checkValue("SQL", "substr(\"Spark SQL\", -3)");
+
+			fail();
+		} catch(IllegalArgumentException iae){
+			// Ignored
+		}
+
+		checkValue("k", "substr(\"Spark SQL\", 5, 1)");
+
+		checkValue("SparkSQL", "trim(\"    SparkSQL   \")");
+
+		checkValue("SPARKSQL", "upper(\"SparkSql\")");
+	}
+
 	static
 	private Object evaluate(String sqlExpression){
 		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
@@ -164,6 +188,10 @@ public class ExpressionTranslatorTest {
 		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
 
 		Object sparkValue = expression.eval(InternalRow.empty());
+
+		if(expectedValue instanceof String){
+			assertEquals(expectedValue, sparkValue.toString());
+		} else
 
 		if(expectedValue instanceof Integer){
 			assertEquals(expectedValue, ((Number)sparkValue).intValue());

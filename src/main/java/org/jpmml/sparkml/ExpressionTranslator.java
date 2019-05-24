@@ -32,6 +32,7 @@ import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
 import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
 import org.apache.spark.sql.catalyst.expressions.Ceil;
+import org.apache.spark.sql.catalyst.expressions.Concat;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
 import org.apache.spark.sql.catalyst.expressions.Exp;
@@ -48,15 +49,19 @@ import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.Literal;
 import org.apache.spark.sql.catalyst.expressions.Log;
 import org.apache.spark.sql.catalyst.expressions.Log10;
+import org.apache.spark.sql.catalyst.expressions.Lower;
 import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
 import org.apache.spark.sql.catalyst.expressions.Pow;
 import org.apache.spark.sql.catalyst.expressions.Rint;
 import org.apache.spark.sql.catalyst.expressions.Sqrt;
+import org.apache.spark.sql.catalyst.expressions.StringTrim;
+import org.apache.spark.sql.catalyst.expressions.Substring;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
+import org.apache.spark.sql.catalyst.expressions.Upper;
 import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
@@ -65,6 +70,7 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
 import scala.Option;
 import scala.Tuple2;
@@ -240,6 +246,20 @@ public class ExpressionTranslator {
 			}
 		} else
 
+		if(expression instanceof Concat){
+			Concat concat = (Concat)expression;
+
+			List<Expression> children = JavaConversions.seqAsJavaList(concat.children());
+
+			Apply apply = PMMLUtil.createApply("concat");
+
+			for(Expression child : children){
+				apply.addExpressions(translateInternal(child));
+			}
+
+			return apply;
+		} else
+
 		if(expression instanceof If){
 			If _if = (If)expression;
 
@@ -303,6 +323,27 @@ public class ExpressionTranslator {
 				.addExpressions(translateInternal(left), translateInternal(right));
 		} else
 
+		if(expression instanceof Substring){
+			Substring substring = (Substring)expression;
+
+			Expression str = substring.str();
+			Literal pos = (Literal)substring.pos();
+			Literal len = (Literal)substring.len();
+
+			int posValue = ValueUtil.asInt((Number)pos.value());
+			if(posValue <= 0){
+				throw new IllegalArgumentException(String.valueOf(pos));
+			}
+
+			int lenValue = ValueUtil.asInt((Number)len.value());
+
+			// XXX
+			lenValue = Math.min(lenValue, 65536);
+
+			return PMMLUtil.createApply("substring", translateInternal(str))
+				.addExpressions(PMMLUtil.createConstant(posValue), PMMLUtil.createConstant(lenValue));
+		} else
+
 		if(expression instanceof UnaryExpression){
 			UnaryExpression unaryExpression = (UnaryExpression)expression;
 
@@ -332,6 +373,10 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply("log10", translateInternal(child));
 			} else
 
+			if(expression instanceof Lower){
+				return PMMLUtil.createApply("lowercase", translateInternal(child));
+			} else
+
 			if(expression instanceof IsNotNull){
 				return PMMLUtil.createApply("isNotMissing", translateInternal(child));
 			} else
@@ -352,6 +397,10 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply("sqrt", translateInternal(child));
 			} else
 
+			if(expression instanceof StringTrim){
+				return PMMLUtil.createApply("trimBlanks", translateInternal(child));
+			} else
+
 			if(expression instanceof UnaryMinus){
 				UnaryMinus unaryMinus = (UnaryMinus)unaryExpression;
 
@@ -368,6 +417,10 @@ public class ExpressionTranslator {
 				{
 					return PMMLUtil.createApply("*", PMMLUtil.createConstant(-1), pmmlExpression);
 				}
+			} else
+
+			if(expression instanceof Upper){
+				return PMMLUtil.createApply("uppercase", translateInternal(child));
 			} else
 
 			{
