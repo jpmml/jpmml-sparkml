@@ -136,7 +136,7 @@ public class ExpressionTranslator {
 						symbol = "or";
 						break;
 					default:
-						throw new IllegalArgumentException(String.valueOf(binaryOperator));
+						throw new IllegalArgumentException(formatMessage(binaryOperator));
 				}
 			} else
 
@@ -150,7 +150,7 @@ public class ExpressionTranslator {
 					case "-":
 						break;
 					default:
-						throw new IllegalArgumentException(String.valueOf(binaryArithmetic));
+						throw new IllegalArgumentException(formatMessage(binaryArithmetic));
 				}
 			} else
 
@@ -174,12 +174,12 @@ public class ExpressionTranslator {
 						symbol = "lessOrEqual";
 						break;
 					default:
-						throw new IllegalArgumentException(String.valueOf(binaryComparison));
+						throw new IllegalArgumentException(formatMessage(binaryComparison));
 				}
 			} else
 
 			{
-				throw new IllegalArgumentException(String.valueOf(binaryOperator));
+				throw new IllegalArgumentException(formatMessage(binaryOperator));
 			}
 
 			return PMMLUtil.createApply(symbol, translateInternal(left), translateInternal(right));
@@ -245,7 +245,7 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(String.valueOf(cast));
+				throw new IllegalArgumentException(formatMessage(cast));
 			}
 		} else
 
@@ -356,7 +356,7 @@ public class ExpressionTranslator {
 
 			int posValue = ValueUtil.asInt((Number)pos.value());
 			if(posValue <= 0){
-				throw new IllegalArgumentException(String.valueOf(pos));
+				throw new IllegalArgumentException("Expected absolute start position, got relative start position " + (pos));
 			}
 
 			int lenValue = ValueUtil.asInt((Number)len.value());
@@ -478,12 +478,12 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(String.valueOf(unaryExpression));
+				throw new IllegalArgumentException(formatMessage(unaryExpression));
 			}
 		} else
 
 		{
-			throw new IllegalArgumentException(String.valueOf(expression));
+			throw new IllegalArgumentException(formatMessage(expression));
 		}
 	}
 
@@ -496,6 +496,11 @@ public class ExpressionTranslator {
 		}
 
 		return value;
+	}
+
+	static
+	private String formatMessage(Expression expression){
+		return "Spark SQL function \'" + String.valueOf(expression) + "\' (Java class " + (expression.getClass()).getName() + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");
