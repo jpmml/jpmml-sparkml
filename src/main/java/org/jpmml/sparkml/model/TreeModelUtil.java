@@ -41,6 +41,7 @@ import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.tree.BranchNode;
+import org.dmg.pmml.tree.ClassifierNode;
 import org.dmg.pmml.tree.LeafNode;
 import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
@@ -55,7 +56,6 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.ValueUtil;
-import org.jpmml.converter.tree.ClassifierNode;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
@@ -136,7 +136,7 @@ public class TreeModelUtil {
 
 					ImpurityCalculator impurityCalculator = leafNode.impurityStats();
 
-					node.setRecordCount((double)impurityCalculator.count());
+					node.setRecordCount(impurityCalculator.count());
 
 					List<ScoreDistribution> scoreDistributions = node.getScoreDistributions();
 

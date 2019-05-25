@@ -31,13 +31,9 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
-import org.jpmml.converter.CategoricalFeature;
-import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.PMMLEncoder;
 
 abstract
 public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -58,6 +54,8 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
 		T model = getTransformer();
 
+		List<Integer> clusters = LabelUtil.createTargetCategories(getNumberOfClusters());
+
 		List<OutputField> result = new ArrayList<>();
 
 		String predictionCol = model.getPredictionCol();
@@ -74,19 +72,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		result.add(predictedField);
 
-		List<Integer> clusters = LabelUtil.createTargetCategories(getNumberOfClusters());
-
-		Feature feature = new CategoricalFeature(encoder, predictedField, clusters){
-
-			@Override
-			public ContinuousFeature toContinuousFeature(){
-				PMMLEncoder encoder = ensureEncoder();
-
-				return new ContinuousFeature(encoder, predictedField);
-			}
-		};
-
-		encoder.putOnlyFeature(predictionCol, feature);
+		encoder.putOnlyFeature(predictionCol, new IndexFeature(encoder, predictedField, clusters));
 
 		return result;
 	}

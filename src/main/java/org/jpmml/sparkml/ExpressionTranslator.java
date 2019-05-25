@@ -21,6 +21,7 @@ package org.jpmml.sparkml;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.spark.sql.catalyst.expressions.Abs;
 import org.apache.spark.sql.catalyst.expressions.Add;
 import org.apache.spark.sql.catalyst.expressions.Alias;
 import org.apache.spark.sql.catalyst.expressions.And;
@@ -30,9 +31,13 @@ import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
 import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
+import org.apache.spark.sql.catalyst.expressions.Ceil;
+import org.apache.spark.sql.catalyst.expressions.Concat;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
+import org.apache.spark.sql.catalyst.expressions.Exp;
 import org.apache.spark.sql.catalyst.expressions.Expression;
+import org.apache.spark.sql.catalyst.expressions.Floor;
 import org.apache.spark.sql.catalyst.expressions.GreaterThan;
 import org.apache.spark.sql.catalyst.expressions.GreaterThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.If;
@@ -42,12 +47,25 @@ import org.apache.spark.sql.catalyst.expressions.IsNull;
 import org.apache.spark.sql.catalyst.expressions.LessThan;
 import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.Literal;
+import org.apache.spark.sql.catalyst.expressions.Log;
+import org.apache.spark.sql.catalyst.expressions.Log10;
+import org.apache.spark.sql.catalyst.expressions.Lower;
 import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Not;
 import org.apache.spark.sql.catalyst.expressions.Or;
+import org.apache.spark.sql.catalyst.expressions.Pow;
+import org.apache.spark.sql.catalyst.expressions.RLike;
+import org.apache.spark.sql.catalyst.expressions.RegExpReplace;
+import org.apache.spark.sql.catalyst.expressions.Rint;
+import org.apache.spark.sql.catalyst.expressions.Sqrt;
+import org.apache.spark.sql.catalyst.expressions.StringTrim;
+import org.apache.spark.sql.catalyst.expressions.Substring;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
+import org.apache.spark.sql.catalyst.expressions.UnaryPositive;
+import org.apache.spark.sql.catalyst.expressions.Upper;
+import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
@@ -55,6 +73,7 @@ import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
 import scala.Option;
 import scala.Tuple2;
@@ -117,7 +136,7 @@ public class ExpressionTranslator {
 						symbol = "or";
 						break;
 					default:
-						throw new IllegalArgumentException(String.valueOf(binaryOperator));
+						throw new IllegalArgumentException(formatMessage(binaryOperator));
 				}
 			} else
 
@@ -131,7 +150,7 @@ public class ExpressionTranslator {
 					case "-":
 						break;
 					default:
-						throw new IllegalArgumentException(String.valueOf(binaryArithmetic));
+						throw new IllegalArgumentException(formatMessage(binaryArithmetic));
 				}
 			} else
 
@@ -155,12 +174,12 @@ public class ExpressionTranslator {
 						symbol = "lessOrEqual";
 						break;
 					default:
-						throw new IllegalArgumentException(String.valueOf(binaryComparison));
+						throw new IllegalArgumentException(formatMessage(binaryComparison));
 				}
 			} else
 
 			{
-				throw new IllegalArgumentException(String.valueOf(binaryOperator));
+				throw new IllegalArgumentException(formatMessage(binaryOperator));
 			}
 
 			return PMMLUtil.createApply(symbol, translateInternal(left), translateInternal(right));
@@ -226,8 +245,22 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(String.valueOf(cast));
+				throw new IllegalArgumentException(formatMessage(cast));
 			}
+		} else
+
+		if(expression instanceof Concat){
+			Concat concat = (Concat)expression;
+
+			List<Expression> children = JavaConversions.seqAsJavaList(concat.children());
+
+			Apply apply = PMMLUtil.createApply("concat");
+
+			for(Expression child : children){
+				apply.addExpressions(translateInternal(child));
+			}
+
+			return apply;
 		} else
 
 		if(expression instanceof If){
@@ -263,19 +296,88 @@ public class ExpressionTranslator {
 
 			Object value = literal.value();
 
-			DataType dataType = DatasetUtil.translateDataType(literal.dataType());
+			DataType dataType;
 
-			value = toSimpleObject(value);
+			// XXX
+			if(value instanceof Decimal){
+				Decimal decimal = (Decimal)value;
+
+				dataType = DataType.STRING;
+
+				value = decimal.toString();
+			} else
+
+			{
+				dataType = DatasetUtil.translateDataType(literal.dataType());
+
+				value = toSimpleObject(value);
+			}
 
 			return PMMLUtil.createConstant(value, dataType);
 		} else
 
-		if(expression instanceof Not){
-			 Not not = (Not)expression;
+		if(expression instanceof Pow){
+			Pow pow = (Pow)expression;
 
-			 Expression child = not.child();
+			Expression left = pow.left();
+			Expression right = pow.right();
 
-			 return PMMLUtil.createApply("not", translateInternal(child));
+			return PMMLUtil.createApply("pow")
+				.addExpressions(translateInternal(left), translateInternal(right));
+		} else
+
+		if(expression instanceof RegExpReplace){
+			RegExpReplace regexpReplace = (RegExpReplace)expression;
+
+			Expression subject = regexpReplace.subject();
+			Expression regexp = regexpReplace.regexp();
+			Expression rep = regexpReplace.rep();
+
+			return PMMLUtil.createApply("replace", translateInternal(subject))
+				.addExpressions(translateInternal(regexp), translateInternal(rep));
+		} else
+
+		if(expression instanceof RLike){
+			RLike rlike = (RLike)expression;
+
+			Expression left = rlike.left();
+			Expression right = rlike.right();
+
+			return PMMLUtil.createApply("matches")
+				.addExpressions(translateInternal(left), translateInternal(right));
+		} else
+
+		if(expression instanceof StringTrim){
+			StringTrim stringTrim = (StringTrim)expression;
+
+			Expression srcStr = stringTrim.srcStr();
+			Option<Expression> trimStr = stringTrim.trimStr();
+			if(trimStr.isDefined()){
+				throw new IllegalArgumentException();
+			}
+
+			return PMMLUtil.createApply("trimBlanks", translateInternal(srcStr));
+		} else
+
+		if(expression instanceof Substring){
+			Substring substring = (Substring)expression;
+
+			Expression str = substring.str();
+			Literal pos = (Literal)substring.pos();
+			Literal len = (Literal)substring.len();
+
+			int posValue = ValueUtil.asInt((Number)pos.value());
+			if(posValue <= 0){
+				throw new IllegalArgumentException("Expected absolute start position, got relative start position " + (pos));
+			}
+
+			int lenValue = ValueUtil.asInt((Number)len.value());
+
+			// XXX
+			lenValue = Math.min(lenValue, 65536);
+
+			return PMMLUtil.createApply("substring", translateInternal(str))
+				.addExpressions(PMMLUtil.createConstant(posValue), PMMLUtil.createConstant(lenValue));
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -283,12 +385,52 @@ public class ExpressionTranslator {
 
 			Expression child = unaryExpression.child();
 
+			if(expression instanceof Abs){
+				return PMMLUtil.createApply("abs", translateInternal(child));
+			} else
+
+			if(expression instanceof Ceil){
+				return PMMLUtil.createApply("ceil", translateInternal(child));
+			} else
+
+			if(expression instanceof Exp){
+				return PMMLUtil.createApply("exp", translateInternal(child));
+			} else
+
+			if(expression instanceof Floor){
+				return PMMLUtil.createApply("floor", translateInternal(child));
+			} else
+
+			if(expression instanceof Log){
+				return PMMLUtil.createApply("ln", translateInternal(child));
+			} else
+
+			if(expression instanceof Log10){
+				return PMMLUtil.createApply("log10", translateInternal(child));
+			} else
+
+			if(expression instanceof Lower){
+				return PMMLUtil.createApply("lowercase", translateInternal(child));
+			} else
+
 			if(expression instanceof IsNotNull){
 				return PMMLUtil.createApply("isNotMissing", translateInternal(child));
 			} else
 
 			if(expression instanceof IsNull){
 				return PMMLUtil.createApply("isMissing", translateInternal(child));
+			} else
+
+			if(expression instanceof Not){
+				 return PMMLUtil.createApply("not", translateInternal(child));
+			} else
+
+			if(expression instanceof Rint){
+				return PMMLUtil.createApply("x-rint", translateInternal(child));
+			} else
+
+			if(expression instanceof Sqrt){
+				return PMMLUtil.createApply("sqrt", translateInternal(child));
 			} else
 
 			if(expression instanceof UnaryMinus){
@@ -299,7 +441,33 @@ public class ExpressionTranslator {
 				if(pmmlExpression instanceof Constant){
 					Constant constant = (Constant)pmmlExpression;
 
-					constant.setValue("-" + constant.getValue());
+					Object value = constant.getValue();
+
+					if(value instanceof Integer){
+						value = -((Integer)value).intValue();
+					} else
+
+					if(value instanceof Float){
+						value = -((Float)value).floatValue();
+					} else
+
+					if(value instanceof Double){
+						value = -((Double)value).doubleValue();
+					} else
+
+					{
+						String string = String.valueOf(value);
+
+						if(string.startsWith("-")){
+							value = string.substring(1);
+						} else
+
+						{
+							value = ("-" + string);
+						}
+					}
+
+					constant.setValue(value);
 
 					return constant;
 				} else
@@ -309,13 +477,21 @@ public class ExpressionTranslator {
 				}
 			} else
 
+			if(expression instanceof UnaryPositive){
+				return translateInternal(child);
+			} else
+
+			if(expression instanceof Upper){
+				return PMMLUtil.createApply("uppercase", translateInternal(child));
+			} else
+
 			{
-				throw new IllegalArgumentException(String.valueOf(unaryExpression));
+				throw new IllegalArgumentException(formatMessage(unaryExpression));
 			}
 		} else
 
 		{
-			throw new IllegalArgumentException(String.valueOf(expression));
+			throw new IllegalArgumentException(formatMessage(expression));
 		}
 	}
 
@@ -328,6 +504,11 @@ public class ExpressionTranslator {
 		}
 
 		return value;
+	}
+
+	static
+	private String formatMessage(Expression expression){
+		return "Spark SQL function \'" + String.valueOf(expression) + "\' (Java class " + (expression.getClass()).getName() + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");
