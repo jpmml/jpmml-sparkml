@@ -26,6 +26,15 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.RegexTokenizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RegexTokenizer.html)
     * [`feature.RFormulaModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
     * [`feature.SQLTransformer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/SQLTransformer.html)
+      * Control flow expressions `case when` and `if`.
+      * Arithmetic operators `+`, `-`, `*` and `/`.
+      * Comparison operators `<`, `<=`, `=`, `==`, `>=` and `>`.
+      * Logical operators `and`, `not` and `or`.
+      * Math functions `abs`, `ceil`, `exp`, `floor`, `ln`, `log10`, `pow` and `rint`.
+      * RegExp functions `regexp_replace` and `rlike`.
+      * String functions `concat`, `lower`, `substring`, `trim` and `upper`.
+      * Type cast functions `boolean`, `cast`, `double`, `int` and `string`.
+      * Value functions `in`, `isnull`, `isnotnull`, `negative` and `positive`.
     * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
     * [`feature.StopWordsRemover`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StopWordsRemover.html)
     * [`feature.StringIndexerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
@@ -138,10 +147,6 @@ PMML pmml = new PMMLBuilder(schema, pipelineModel)
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
 ```
 
-Please refer to the following resources for more ideas and code examples:
-
-* [Converting Apache Spark ML pipeline models to PMML](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
-
 ## Example application ##
 
 The example application JAR file contains an executable class `org.jpmml.sparkml.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
@@ -157,6 +162,10 @@ Getting help:
 ```
 spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.5-SNAPSHOT.jar --help
 ```
+
+# Documentation #
+
+* [Converting Apache Spark ML pipeline models to PMML documents](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
 
 # License #
 
