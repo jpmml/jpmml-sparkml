@@ -31,6 +31,7 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
+import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;

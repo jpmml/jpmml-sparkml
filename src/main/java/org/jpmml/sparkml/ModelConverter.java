@@ -40,6 +40,7 @@ import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;

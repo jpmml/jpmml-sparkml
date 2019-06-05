@@ -29,31 +29,57 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
+import org.dmg.pmml.DataType;
+import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
+import org.dmg.pmml.PMMLFunctions;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.evaluator.EvaluationContext;
 import org.jpmml.evaluator.ExpressionUtil;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.FieldValueUtil;
 import org.jpmml.evaluator.VirtualEvaluationContext;
+import org.jpmml.model.ReflectionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import scala.collection.JavaConversions;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ExpressionTranslatorTest {
 
 	@Test
 	public void translateLogicalExpression(){
-		Apply apply = (Apply)translate("isnull(x1) and not(isnotnull(x2))");
+		String string = "isnull(x1) and not(isnotnull(x2))";
 
-		checkApply(apply, "and", Apply.class, Apply.class);
+		FieldRef first = new FieldRef(FieldName.create("x1"));
+		FieldRef second = new FieldRef(FieldName.create("x2"));
 
-		apply = (Apply)translate("(x1 <= 0) or (x2 >= 0)");
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.AND)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.ISMISSING)
+				.addExpressions(first)
+			)
+			// "not(isnotnull(..)) -> "isnull(..)"
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.ISMISSING)
+				.addExpressions(second)
+			);
 
-		checkApply(apply, "or", Apply.class, Apply.class);
+		checkExpression(expected, string);
+
+		string = "(x1 <= 0) or (x2 >= 0)";
+
+		expected = PMMLUtil.createApply(PMMLFunctions.OR)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL)
+				.addExpressions(first, PMMLUtil.createConstant(0, DataType.DOUBLE))
+			)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATEROREQUAL)
+				.addExpressions(second, PMMLUtil.createConstant(0, DataType.DOUBLE))
+			);
+
+		checkExpression(expected, string);
 	}
 
 	@Test
@@ -74,35 +100,64 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void translateArithmeticExpression(){
-		Apply apply = (Apply)translate("-((x1 - 1) / (x2 + 1))");
+		String string = "-((x1 - 1) / (x2 + 1))";
 
-		List<org.dmg.pmml.Expression> pmmlExpressions = checkApply(apply, "*", Constant.class, Apply.class);
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.MULTIPLY)
+			.addExpressions(PMMLUtil.createConstant(-1))
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.DIVIDE)
+				.addExpressions(PMMLUtil.createApply(PMMLFunctions.SUBTRACT)
+					.addExpressions(new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(1, DataType.DOUBLE))
+				)
+				.addExpressions(PMMLUtil.createApply(PMMLFunctions.ADD)
+					.addExpressions(new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(1, DataType.DOUBLE))
+				)
+			);
 
-		apply = (Apply)pmmlExpressions.get(1);
-
-		checkApply(apply, "/", Apply.class, Apply.class);
+		checkExpression(expected, string);
 	}
 
 	@Test
 	public void translateCaseWhenExpression(){
-		Apply apply = (Apply)translate("CASE WHEN x1 < 0 THEN x1 WHEN x2 > 0 THEN x2 ELSE 0 END");
+		String string = "CASE WHEN x1 < 0 THEN x1 WHEN x2 > 0 THEN x2 ELSE 0 END";
 
-		List<org.dmg.pmml.Expression> pmmlExpressions = checkApply(apply, "if", Apply.class, FieldRef.class, Apply.class);
+		FieldRef first = new FieldRef(FieldName.create("x1"));
+		FieldRef second = new FieldRef(FieldName.create("x2"));
 
-		apply = (Apply)pmmlExpressions.get(0);
+		Constant zero = PMMLUtil.createConstant(0, DataType.DOUBLE);
 
-		checkApply(apply, "lessThan", FieldRef.class, Constant.class);
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSTHAN)
+				.addExpressions(first, zero)
+			)
+			.addExpressions(first)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.IF)
+				.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATERTHAN)
+					.addExpressions(second, zero)
+				)
+				.addExpressions(second)
+				.addExpressions(zero)
+			);
 
-		apply = (Apply)pmmlExpressions.get(2);
-
-		checkApply(apply, "if", Apply.class, FieldRef.class, Constant.class);
+		checkExpression(expected, string);
 	}
 
 	@Test
 	public void translateIfExpression(){
-		Apply apply = (Apply)translate("if(status in (-1, 1), x1 != 0, x2 != 0)");
+		String string = "if(status in (-1, 1), x1 != 0, x2 != 0)";
 
-		checkApply(apply, "if", Apply.class, Apply.class, Apply.class);
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.ISIN)
+				.addExpressions(new FieldRef(FieldName.create("status")))
+				.addExpressions(PMMLUtil.createConstant(-1), PMMLUtil.createConstant(1))
+			)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.NOTEQUAL)
+				.addExpressions(new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(0, DataType.DOUBLE))
+			)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.NOTEQUAL)
+				.addExpressions(new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(0, DataType.DOUBLE))
+			);
+
+		checkExpression(expected, string);
 	}
 
 	@Test
@@ -112,13 +167,13 @@ public class ExpressionTranslatorTest {
 
 		checkValue(1, "abs(-1)");
 
-		checkValue(0d, "ceil(double(-0.1))");
-		checkValue(5d, "ceil(5)");
+		checkValue(0, "ceil(double(-0.1))");
+		checkValue(5, "ceil(5)");
 
 		checkValue(1.0d, "exp(0)");
 
-		checkValue(-1d, "floor(double(-0.1))");
-		checkValue(5d, "floor(5)");
+		checkValue(-1, "floor(double(-0.1))");
+		checkValue(5, "floor(5)");
 
 		checkValue(0.0d, "ln(1)");
 
@@ -246,20 +301,10 @@ public class ExpressionTranslatorTest {
 	}
 
 	static
-	private List<org.dmg.pmml.Expression> checkApply(Apply apply, String function, Class<? extends org.dmg.pmml.Expression>... pmmlExpressionClazzes){
-		assertEquals(function, apply.getFunction());
+	private void checkExpression(org.dmg.pmml.Expression expected, String string){
+		org.dmg.pmml.Expression actual = translate(string);
 
-		List<org.dmg.pmml.Expression> pmmlExpressions = apply.getExpressions();
-		assertEquals(pmmlExpressionClazzes.length, pmmlExpressions.size());
-
-		for(int i = 0; i < pmmlExpressionClazzes.length; i++){
-			Class<? extends org.dmg.pmml.Expression> expressionClazz = pmmlExpressionClazzes[i];
-			org.dmg.pmml.Expression pmmlExpression = pmmlExpressions.get(i);
-
-			assertEquals(expressionClazz, pmmlExpression.getClass());
-		}
-
-		return pmmlExpressions;
+		assertTrue(ReflectionUtil.equals(expected, actual));
 	}
 
 	@BeforeClass

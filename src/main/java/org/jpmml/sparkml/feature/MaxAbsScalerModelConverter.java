@@ -27,6 +27,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
@@ -64,7 +65,7 @@ public class MaxAbsScalerModelConverter extends FeatureConverter<MaxAbsScalerMod
 			if(!ValueUtil.isOne(maxAbsUnzero)){
 				ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-				Expression expression = PMMLUtil.createApply("/", continuousFeature.ref(), PMMLUtil.createConstant(maxAbsUnzero));
+				Expression expression = PMMLUtil.createApply(PMMLFunctions.DIVIDE, continuousFeature.ref(), PMMLUtil.createConstant(maxAbsUnzero));
 
 				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
