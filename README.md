@@ -27,8 +27,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.SQLTransformer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/SQLTransformer.html)
       * Control flow expressions `case when` and `if`.
       * Arithmetic operators `+`, `-`, `*` and `/`.
-      * Comparison operators `<`, `<=`, `=`, `==`, `>=` and `>`.
-      * Logical operators `and`, `not` and `or`.
+      * Comparison operators `<`, `<=`, `==`, `>=` and `>`.
+      * Logical operators `and`, `or` and `not`.
       * Math functions `abs`, `ceil`, `exp`, `floor`, `ln`, `log10`, `pow` and `rint`.
       * RegExp functions `regexp_replace` and `rlike`.
       * String functions `concat`, `lower`, `substring`, `trim` and `upper`.
