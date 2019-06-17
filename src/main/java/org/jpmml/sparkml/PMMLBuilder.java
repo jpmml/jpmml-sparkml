@@ -168,8 +168,7 @@ public class PMMLBuilder {
 
 			Output output = ModelUtil.ensureOutput(model);
 
-			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getDataType())
-				.setOpType(derivedField.getOpType())
+			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getOpType(), derivedField.getDataType())
 				.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 				.setExpression(derivedField.getExpression());
 

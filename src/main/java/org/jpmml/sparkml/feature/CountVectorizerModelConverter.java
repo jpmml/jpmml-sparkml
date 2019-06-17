@@ -60,11 +60,10 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 		ParameterField termField = new ParameterField(FieldName.create("term"));
 
-		TextIndex textIndex = new TextIndex(documentField.getName())
+		TextIndex textIndex = new TextIndex(documentField.getName(), new FieldRef(termField.getName()))
 			.setTokenize(Boolean.TRUE)
 			.setWordSeparatorCharacterRE(documentFeature.getWordSeparatorRE())
-			.setLocalTermWeights(transformer.getBinary() ? TextIndex.LocalTermWeights.BINARY : null)
-			.setExpression(new FieldRef(termField.getName()));
+			.setLocalTermWeights(transformer.getBinary() ? TextIndex.LocalTermWeights.BINARY : null);
 
 		Set<DocumentFeature.StopWordSet> stopWordSets = documentFeature.getStopWordSets();
 		for(DocumentFeature.StopWordSet stopWordSet : stopWordSets){
@@ -92,18 +91,15 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 			data.put("stem", Collections.singletonList(" "));
 			data.put("regex", Collections.singletonList("true"));
 
-			TextIndexNormalization textIndexNormalization = new TextIndexNormalization()
+			TextIndexNormalization textIndexNormalization = new TextIndexNormalization(null, PMMLUtil.createInlineTable(data))
 				.setCaseSensitive(stopWordSet.isCaseSensitive())
-				.setRecursive(Boolean.TRUE) // Handles consecutive matches. See http://stackoverflow.com/a/25085385
-				.setInlineTable(PMMLUtil.createInlineTable(data));
+				.setRecursive(Boolean.TRUE); // Handles consecutive matches. See http://stackoverflow.com/a/25085385
 
 			textIndex.addTextIndexNormalizations(textIndexNormalization);
 		}
 
-		DefineFunction defineFunction = new DefineFunction("tf" + "@" + String.valueOf(CountVectorizerModelConverter.SEQUENCE.getAndIncrement()), OpType.CONTINUOUS, null)
-			.setDataType(DataType.INTEGER)
-			.addParameterFields(documentField, termField)
-			.setExpression(textIndex);
+		DefineFunction defineFunction = new DefineFunction("tf" + "@" + String.valueOf(CountVectorizerModelConverter.SEQUENCE.getAndIncrement()), OpType.CONTINUOUS, DataType.INTEGER, null, textIndex)
+			.addParameterFields(documentField, termField);
 
 		encoder.addDefineFunction(defineFunction);
 

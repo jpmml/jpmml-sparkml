@@ -107,7 +107,7 @@ public class TreeModelCompactor extends AbstractTreeModelTransformer {
 			} // End if
 
 			if(update){
-				secondChild.setPredicate(new True());
+				secondChild.setPredicate(True.INSTANCE);
 			}
 		} else
 

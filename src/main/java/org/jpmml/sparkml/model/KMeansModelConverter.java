@@ -57,16 +57,14 @@ public class KMeansModelConverter extends ClusteringModelConverter<KMeansModel> 
 
 		Vector[] clusterCenters = model.clusterCenters();
 		for(int i = 0; i < clusterCenters.length; i++){
-			Cluster cluster = new Cluster()
-				.setId(String.valueOf(i))
-				.setArray(PMMLUtil.createRealArray(VectorUtil.toList(clusterCenters[i])));
+			Cluster cluster = new Cluster(PMMLUtil.createRealArray(VectorUtil.toList(clusterCenters[i])))
+				.setId(String.valueOf(i));
 
 			clusters.add(cluster);
 		}
 
-		ComparisonMeasure comparisonMeasure = new ComparisonMeasure(ComparisonMeasure.Kind.DISTANCE)
-			.setCompareFunction(CompareFunction.ABS_DIFF)
-			.setMeasure(new SquaredEuclidean());
+		ComparisonMeasure comparisonMeasure = new ComparisonMeasure(ComparisonMeasure.Kind.DISTANCE, new SquaredEuclidean())
+			.setCompareFunction(CompareFunction.ABS_DIFF);
 
 		return new ClusteringModel(MiningFunction.CLUSTERING, ClusteringModel.ModelClass.CENTER_BASED, clusters.size(), ModelUtil.createMiningSchema(schema.getLabel()), comparisonMeasure, ClusteringModelUtil.createClusteringFields(schema.getFeatures()), clusters);
 	}

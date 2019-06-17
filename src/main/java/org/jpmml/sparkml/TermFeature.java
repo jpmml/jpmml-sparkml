@@ -76,9 +76,7 @@ public class TermFeature extends Feature {
 
 			Apply apply = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.getExpression(), new FieldRef(weightField.getName()));
 
-			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, parameterFields)
-				.setDataType(DataType.DOUBLE)
-				.setExpression(apply);
+			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, DataType.DOUBLE, parameterFields, apply);
 
 			encoder.addDefineFunction(weightedDefineFunction);
 		}

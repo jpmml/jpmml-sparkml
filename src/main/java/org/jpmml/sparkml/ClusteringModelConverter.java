@@ -61,13 +61,12 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), DataType.STRING, OpType.CATEGORICAL)
+		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, DataType.STRING)
 			.setFinalResult(false);
 
 		result.add(pmmlPredictedField);
 
-		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.INTEGER)
-			.setOpType(OpType.CATEGORICAL)
+		OutputField predictedField = new OutputField(FieldName.create(predictionCol), OpType.CATEGORICAL, DataType.INTEGER)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(new FieldRef(pmmlPredictedField.getName()));
 
