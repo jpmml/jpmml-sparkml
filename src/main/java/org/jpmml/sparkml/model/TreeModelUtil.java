@@ -127,8 +127,7 @@ public class TreeModelUtil {
 
 				@Override
 				public Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode){
-					node = new ClassifierNode()
-						.setPredicate(node.getPredicate());
+					node = new ClassifierNode(null, node.getPredicate());
 
 					int index = ValueUtil.asInt(leafNode.prediction());
 
@@ -170,7 +169,7 @@ public class TreeModelUtil {
 
 	static
 	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(M model, PredicateManager predicateManager, MiningFunction miningFunction, ScoreEncoder scoreEncoder, Schema schema){
-		Node root = encodeNode(new True(), model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
+		Node root = encodeNode(True.INSTANCE, model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
@@ -184,8 +183,7 @@ public class TreeModelUtil {
 		if(sparkNode instanceof org.apache.spark.ml.tree.LeafNode){
 			org.apache.spark.ml.tree.LeafNode leafNode = (org.apache.spark.ml.tree.LeafNode)sparkNode;
 
-			Node result = new LeafNode()
-				.setPredicate(predicate);
+			Node result = new LeafNode(null, predicate);
 
 			return scoreEncoder.encode(result, leafNode);
 		} else
@@ -302,8 +300,7 @@ public class TreeModelUtil {
 			Node leftChild = encodeNode(leftPredicate, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
 			Node rightChild = encodeNode(rightPredicate, internalNode.rightChild(), predicateManager, rightCategoryManager, scoreEncoder, schema);
 
-			Node result = new BranchNode()
-				.setPredicate(predicate)
+			Node result = new BranchNode(null, predicate)
 				.addNodes(leftChild, rightChild);
 
 			return result;

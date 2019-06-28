@@ -37,6 +37,7 @@ import org.dmg.pmml.ResultFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
@@ -66,7 +67,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), categoricalLabel.getDataType(), OpType.CATEGORICAL)
+		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, categoricalLabel.getDataType())
 			.setFinalResult(false);
 
 		result.add(pmmlPredictedField);
@@ -74,8 +75,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
 			.setDataType(DataType.DOUBLE);
 
-		OutputField predictedField = new OutputField(FieldName.create(predictionCol), DataType.DOUBLE)
-			.setOpType(OpType.CATEGORICAL)
+		OutputField predictedField = new OutputField(FieldName.create(predictionCol), OpType.CONTINUOUS, DataType.DOUBLE)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(mapValues);
 

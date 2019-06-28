@@ -31,8 +31,8 @@ import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.IndexFeature;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.IndexFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class BucketizerConverter extends FeatureConverter<Bucketizer> {

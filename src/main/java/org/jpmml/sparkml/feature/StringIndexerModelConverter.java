@@ -32,6 +32,7 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
@@ -114,7 +115,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			switch(handleInvalid){
 				case "keep":
 					{
-						Apply setApply = PMMLUtil.createApply("isIn", feature.ref());
+						Apply setApply = PMMLUtil.createApply(PMMLFunctions.ISIN, feature.ref());
 
 						for(String category : categories){
 							setApply.addExpressions(PMMLUtil.createConstant(category, dataType));
@@ -122,7 +123,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 						categories.add(invalidCategory);
 
-						Apply apply = PMMLUtil.createApply("if", setApply, feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
+						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF, setApply, feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
 
 						field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 					}

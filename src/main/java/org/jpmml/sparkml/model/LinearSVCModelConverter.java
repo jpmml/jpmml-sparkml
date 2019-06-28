@@ -27,6 +27,7 @@ import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.AbstractTransformation;
@@ -61,7 +62,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 
 			@Override
 			public Expression createExpression(FieldRef fieldRef){
-				return PMMLUtil.createApply("if", PMMLUtil.createApply("greaterThan", fieldRef, PMMLUtil.createConstant(threshold)), PMMLUtil.createConstant(1), PMMLUtil.createConstant(0));
+				return PMMLUtil.createApply(PMMLFunctions.IF, PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, fieldRef, PMMLUtil.createConstant(threshold)), PMMLUtil.createConstant(1), PMMLUtil.createConstant(0));
 			}
 		};
 
