@@ -27,11 +27,12 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.IndexFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class BinarizerConverter extends FeatureConverter<Binarizer> {
@@ -48,8 +49,8 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 
 		ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-		Apply apply = new Apply("if")
-			.addExpressions(PMMLUtil.createApply("lessOrEqual", continuousFeature.ref(), PMMLUtil.createConstant(transformer.getThreshold())))
+		Apply apply = new Apply(PMMLFunctions.IF)
+			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, continuousFeature.ref(), PMMLUtil.createConstant(transformer.getThreshold())))
 			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.DOUBLE, apply);

@@ -28,6 +28,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLUtil;
@@ -55,7 +56,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0; i < transformer.getK(); i++){
-			Apply apply = new Apply("sum");
+			Apply apply = new Apply(PMMLFunctions.SUM);
 
 			for(int j = 0; j < features.size(); j++){
 				Feature feature = features.get(j);
@@ -66,7 +67,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
 				Double coefficient = pc.apply(j, i);
 				if(!ValueUtil.isOne(coefficient)){
-					expression = PMMLUtil.createApply("*", expression, PMMLUtil.createConstant(coefficient));
+					expression = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, expression, PMMLUtil.createConstant(coefficient));
 				}
 
 				apply.addExpressions(expression);

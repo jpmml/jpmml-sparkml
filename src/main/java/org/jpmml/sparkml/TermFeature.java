@@ -29,6 +29,7 @@ import org.dmg.pmml.DefineFunction;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.ParameterField;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
@@ -73,11 +74,9 @@ public class TermFeature extends Feature {
 			List<ParameterField> parameterFields = new ArrayList<>(defineFunction.getParameterFields());
 			parameterFields.add(weightField);
 
-			Apply apply = PMMLUtil.createApply("*", defineFunction.getExpression(), new FieldRef(weightField.getName()));
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.getExpression(), new FieldRef(weightField.getName()));
 
-			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, parameterFields)
-				.setDataType(DataType.DOUBLE)
-				.setExpression(apply);
+			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, DataType.DOUBLE, parameterFields, apply);
 
 			encoder.addDefineFunction(weightedDefineFunction);
 		}
