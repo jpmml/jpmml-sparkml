@@ -79,13 +79,13 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](https://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **1.5.3** (25 May, 2019).
+The current version is **1.5.4** (28 June, 2019).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>1.5.3</version>
+	<version>1.5.4</version>
 </dependency>
 ```
 
