@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.Model;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.CategoricalLabel;
@@ -57,8 +58,10 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 	}
 
 	@Override
-	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
-		List<OutputField> result = super.registerOutputFields(label, encoder);
+	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
+		GeneralizedLinearRegressionModel model = getTransformer();
+
+		List<OutputField> result = super.registerOutputFields(label, pmmlModel, encoder);
 
 		MiningFunction miningFunction = getMiningFunction();
 		switch(miningFunction){

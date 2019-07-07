@@ -62,7 +62,9 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 
 			@Override
 			public Expression createExpression(FieldRef fieldRef){
-				return PMMLUtil.createApply(PMMLFunctions.IF, PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, fieldRef, PMMLUtil.createConstant(threshold)), PMMLUtil.createConstant(1), PMMLUtil.createConstant(0));
+				return PMMLUtil.createApply(PMMLFunctions.IF)
+					.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, fieldRef, PMMLUtil.createConstant(threshold)))
+					.addExpressions(PMMLUtil.createConstant(1), PMMLUtil.createConstant(0));
 			}
 		};
 

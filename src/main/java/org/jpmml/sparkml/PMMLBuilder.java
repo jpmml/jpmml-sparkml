@@ -159,20 +159,24 @@ public class PMMLBuilder {
 
 		{
 			throw new IllegalArgumentException("Expected a pipeline with one or more models, got a pipeline with zero models");
-		}
+		} // End if
 
-		for(FieldName postProcessorName : postProcessorNames){
-			DerivedField derivedField = derivedFields.get(postProcessorName);
+		if(postProcessorNames.size() > 0){
+			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
-			encoder.removeDerivedField(postProcessorName);
+			Output output = ModelUtil.ensureOutput(finalModel);
 
-			Output output = ModelUtil.ensureOutput(model);
+			for(FieldName postProcessorName : postProcessorNames){
+				DerivedField derivedField = derivedFields.get(postProcessorName);
 
-			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getOpType(), derivedField.getDataType())
-				.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
-				.setExpression(derivedField.getExpression());
+				encoder.removeDerivedField(postProcessorName);
 
-			output.addOutputFields(outputField);
+				OutputField outputField = new OutputField(derivedField.getName(), derivedField.getOpType(), derivedField.getDataType())
+					.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
+					.setExpression(derivedField.getExpression());
+
+				output.addOutputFields(outputField);
+			}
 		}
 
 		PMML pmml = encoder.encodePMML(model);
