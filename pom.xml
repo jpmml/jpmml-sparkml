@@ -42,7 +42,20 @@
 		<url>https://github.com/jpmml/jpmml-sparkml/issues</url>
 	</issueManagement>
 
+	<repositories>
+		<repository>
+			<id>azureedge</id>
+			<name>MMLSpark azureedge</name>
+			<url>https://mmlspark.azureedge.net/maven</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
+		<dependency>
+			<groupId>com.microsoft.ml.spark</groupId>
+			<artifactId>mmlspark_2.11</artifactId>
+			<version>0.16</version>
+		</dependency>
 		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
@@ -60,6 +73,13 @@
 			<artifactId>spark-mllib_2.11</artifactId>
 			<version>2.4.0</version>
 			<scope>provided</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.jpmml</groupId>
+			<artifactId>jpmml-lightgbm</artifactId>
+			<version>1.2.0</version>
 		</dependency>
 
 		<dependency>
