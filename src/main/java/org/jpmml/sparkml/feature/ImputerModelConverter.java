@@ -72,7 +72,7 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
-			Field<?> field = encoder.getField(feature.getName());
+			Field<?> field = feature.getField();
 
 			if(field instanceof DataField){
 				DataField dataField = (DataField)field;
