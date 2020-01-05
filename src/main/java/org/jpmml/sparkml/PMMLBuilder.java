@@ -80,6 +80,10 @@ public class PMMLBuilder {
 		setPipelineModel(pipelineModel);
 	}
 
+	public PMMLBuilder(StructType schema, PipelineStage pipelineStage){
+		throw new IllegalArgumentException("Expected a fitted pipeline model (class " + PipelineModel.class.getName() + "), got a pipeline stage (" + (pipelineStage != null ? ("class " + (pipelineStage.getClass()).getName()) : null) + ")");
+	}
+
 	public PMML build(){
 		StructType schema = getSchema();
 		PipelineModel pipelineModel = getPipelineModel();
