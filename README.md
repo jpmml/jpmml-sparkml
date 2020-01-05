@@ -3,9 +3,23 @@ JPMML-SparkML
 
 Java library and command-line application for converting Apache Spark ML pipelines to PMML.
 
+# Table of Contents #
+
+* [Features](#features)
+* [Prerequisites](#prerequisites)
+* [Installation](#installation)
+  * [Library](#library)
+  * [Example application](#example-application)
+* [Usage](#usage)
+  * [Library](#library-1)
+  * [Example application](#example-application-1)
+* [Documentation](#documentation)
+* [License](#license)
+* [Additional information](#additional-information)
+
 # Features #
 
-* Supported Spark ML `PipelineStage` types:
+* Supported pipeline stage types:
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
@@ -73,7 +87,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Installation #
 
-## Library ##
+### Library
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](https://repo1.maven.org/maven2/org/jpmml/).
 
@@ -102,7 +116,7 @@ JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](ht
 
 This conflict is documented in [SPARK-15526](https://issues.apache.org/jira/browse/SPARK-15526).
 
-### Modifying Apache Spark installation ###
+##### Modifying Apache Spark installation
 
 The embodiment of the legacy version of the JPMML-Model library:
 
@@ -111,7 +125,7 @@ The embodiment of the legacy version of the JPMML-Model library:
 
 Removing these two JAR files will solve all conflicts for all applications forever.
 
-### Compile-time conflict resolution ###
+##### Compile-time conflict resolution
 
 Excluding the legacy version of the JPMML-Model library:
 ```xml
@@ -129,7 +143,7 @@ Excluding the legacy version of the JPMML-Model library:
 </dependency>
 ```
 
-### Run-time conflict resolution ###
+##### Run-time conflict resolution
 
 Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/) to relocate all `org.dmg.pmml.*` and `org.jpmml.*` classes of the latest and greatest version of the JPMML-Model library to a different namespace (aka "shading"):
 ```xml
@@ -162,7 +176,7 @@ Using the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plug
 
 The downside of shading is that such relocated classes are incompatible with other JPMML APIs. For example, the `PMMLBuilder#build()` builder method would start returning `org.shaded.dmg.pmml.PMML` object instances, which are not valid substitutes for `org.dmg.pmml.PMML` object instances.
 
-## Example application ##
+### Example application
 
 Enter the project root directory and build using [Apache Maven](https://maven.apache.org/):
 ```
@@ -175,7 +189,7 @@ The build produces two JAR files:
 
 # Usage #
 
-## Library ##
+### Library
 
 Fitting a Spark ML pipeline that only makes use of supported Transformer types:
 ```java
@@ -205,7 +219,7 @@ PMML pmml = new PMMLBuilder(schema, pipelineModel)
 JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
 ```
 
-## Example application ##
+### Example application
 
 The example application JAR file contains an executable class `org.jpmml.sparkml.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
 
