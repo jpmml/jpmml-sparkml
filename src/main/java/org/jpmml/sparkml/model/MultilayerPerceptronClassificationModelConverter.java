@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
@@ -55,7 +54,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 		List<OutputField> result = super.registerOutputFields(label, pmmlModel, encoder);
 
-		if(!(model instanceof HasProbabilityCol)){
+		if(!hasProbabilityCol(model)){
 			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
 			result = new ArrayList<>(result);

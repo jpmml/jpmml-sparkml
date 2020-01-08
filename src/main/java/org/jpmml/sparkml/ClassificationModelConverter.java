@@ -85,7 +85,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		List<OutputField> result = new ArrayList<>();
 
-		if(model instanceof HasProbabilityCol){
+		if(hasProbabilityCol(model)){
 			HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)model;
 
 			String probabilityCol = hasProbabilityCol.getProbabilityCol();
