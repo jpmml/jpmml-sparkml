@@ -49,12 +49,6 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 		String strategy = transformer.getStrategy();
 		Dataset<Row> surrogateDF = transformer.surrogateDF();
 
-		String[] inputCols = transformer.getInputCols();
-		String[] outputCols = transformer.getOutputCols();
-		if(inputCols.length != outputCols.length){
-			throw new IllegalArgumentException();
-		}
-
 		MissingValueTreatmentMethod missingValueTreatmentMethod = parseStrategy(strategy);
 
 		List<Row> surrogateRows = surrogateDF.collectAsList();
@@ -66,10 +60,8 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < inputCols.length; i++){
-			String inputCol = inputCols[i];
-			String outputCol = outputCols[i];
-
+		String[] inputCols = transformer.getInputCols();
+		for(String inputCol : inputCols){
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
 			Field<?> field = feature.getField();
@@ -94,25 +86,6 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 		}
 
 		return result;
-	}
-
-	@Override
-	public void registerFeatures(SparkMLEncoder encoder){
-		ImputerModel transformer = getTransformer();
-
-		List<Feature> features = encodeFeatures(encoder);
-
-		String[] outputCols = transformer.getOutputCols();
-		if(outputCols.length != features.size()){
-			throw new IllegalArgumentException();
-		}
-
-		for(int i = 0; i < features.size(); i++){
-			String outputCol = outputCols[i];
-			Feature feature = features.get(i);
-
-			encoder.putFeatures(outputCol, Collections.singletonList(feature));
-		}
 	}
 
 	static

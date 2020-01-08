@@ -74,7 +74,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 					// XXX
 					inputCol = name.getValue();
 
-					features = OneHotEncoderConverter.encodeFeature(categoricalFeature.getEncoder(), categoricalFeature, categoricalFeature.getValues(), false);
+					features = (List)OneHotEncoderConverter.encodeFeature(categoricalFeature.getEncoder(), categoricalFeature, categoricalFeature.getValues(), false);
 				}
 			} // End if
 

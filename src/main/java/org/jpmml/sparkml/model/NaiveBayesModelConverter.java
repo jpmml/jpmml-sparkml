@@ -20,7 +20,6 @@ package org.jpmml.sparkml.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.apache.spark.ml.classification.NaiveBayesModel;
 import org.apache.spark.ml.linalg.Matrix;
@@ -55,7 +54,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 				throw new IllegalArgumentException("Model type " + modelType + " is not supported");
 		}
 
-		try {
+		if(model.isSet(model.thresholds())){
 			double[] thresholds = model.getThresholds();
 
 			for(int i = 0; i < thresholds.length; i++){
@@ -65,8 +64,6 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 					throw new IllegalArgumentException("Non-zero thresholds are not supported");
 				}
 			}
-		} catch(NoSuchElementException nsee){
-			// Ignored
 		}
 
 		Vector pi = model.pi();
@@ -80,8 +77,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 
 		scala.collection.Iterator<Vector> thetaRows = theta.rowIter();
 
-		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), null)
-			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
+		List<RegressionTable> regressionTables = new ArrayList<>();
 
 		for(int i = 0; i < categoricalLabel.size(); i++){
 			Object targetCategory = categoricalLabel.getValue(i);
@@ -94,8 +90,11 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 			RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, intercepts.get(i))
 				.setTargetCategory(targetCategory);
 
-			regressionModel.addRegressionTables(regressionTable);
+			regressionTables.add(regressionTable);
 		}
+
+		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), regressionTables)
+			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
 
 		return regressionModel;
 	}

@@ -51,8 +51,6 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 	public MiningModel encodeModel(Schema schema){
 		LinearSVCModel model = getTransformer();
 
-		double threshold = model.getThreshold();
-
 		List<Feature> features = new ArrayList<>(schema.getFeatures());
 		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
 
@@ -63,7 +61,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 			@Override
 			public Expression createExpression(FieldRef fieldRef){
 				return PMMLUtil.createApply(PMMLFunctions.IF)
-					.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, fieldRef, PMMLUtil.createConstant(threshold)))
+					.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, fieldRef, PMMLUtil.createConstant(model.getThreshold())))
 					.addExpressions(PMMLUtil.createConstant(1), PMMLUtil.createConstant(0));
 			}
 		};
