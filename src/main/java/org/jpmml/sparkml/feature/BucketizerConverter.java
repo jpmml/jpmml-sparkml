@@ -19,7 +19,6 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.Bucketizer;
@@ -27,6 +26,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
+import org.dmg.pmml.FieldName;
 import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
@@ -45,33 +45,62 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Bucketizer transformer = getTransformer();
 
-		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
+		String[] inputCols;
+		String[] outputCols;
+		double[][] splitsArray;
 
-		ContinuousFeature continuousFeature = feature.toContinuousFeature();
+		if(hasInputCol(transformer)){
+			inputCols = new String[]{transformer.getInputCol()};
+			outputCols = new String[]{transformer.getOutputCol()};
+			splitsArray = new double[][]{transformer.getSplits()};
+		} else
 
-		Discretize discretize = new Discretize(continuousFeature.getName())
-			.setDataType(DataType.INTEGER);
+		if(hasInputCols(transformer)){
+			inputCols = transformer.getInputCols();
+			outputCols = transformer.getOutputCols();
+			splitsArray = transformer.getSplitsArray();
+		} else
 
-		List<Integer> categories = new ArrayList<>();
-
-		double[] splits = transformer.getSplits();
-		for(int i = 0; i < (splits.length - 1); i++){
-			Integer category = i;
-
-			categories.add(category);
-
-			Interval interval = new Interval((i < (splits.length - 2)) ? Interval.Closure.CLOSED_OPEN : Interval.Closure.CLOSED_CLOSED)
-				.setLeftMargin(formatMargin(splits[i]))
-				.setRightMargin(formatMargin(splits[i + 1]));
-
-			DiscretizeBin discretizeBin = new DiscretizeBin(category, interval);
-
-			discretize.addDiscretizeBins(discretizeBin);
+		{
+			throw new IllegalArgumentException();
 		}
 
-		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.INTEGER, discretize);
+		List<Feature> result = new ArrayList<>();
 
-		return Collections.singletonList(new IndexFeature(encoder, derivedField, categories));
+		for(int i = 0; i < inputCols.length; i++){
+			String inputCol = inputCols[i];
+			String outputCol = outputCols[i];
+			double[] splits = splitsArray[i];
+
+			Feature feature = encoder.getOnlyFeature(inputCol);
+
+			ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+			Discretize discretize = new Discretize(continuousFeature.getName())
+				.setDataType(DataType.INTEGER);
+
+			List<Integer> categories = new ArrayList<>();
+
+			for(int j = 0; j < (splits.length - 1); j++){
+				Integer category = j;
+
+				categories.add(category);
+
+				Interval interval = new Interval((j < (splits.length - 2)) ? Interval.Closure.CLOSED_OPEN : Interval.Closure.CLOSED_CLOSED)
+					.setLeftMargin(formatMargin(splits[j]))
+					.setRightMargin(formatMargin(splits[j + 1]));
+
+				DiscretizeBin discretizeBin = new DiscretizeBin(category, interval);
+
+				discretize.addDiscretizeBins(discretizeBin);
+			}
+
+			DerivedField derivedField = encoder.createDerivedField(FieldName.create(outputCol), OpType.CATEGORICAL, DataType.INTEGER, discretize);
+
+			result.add(new IndexFeature(encoder, derivedField, categories));
+		}
+
+		return result;
 	}
 
 	static
