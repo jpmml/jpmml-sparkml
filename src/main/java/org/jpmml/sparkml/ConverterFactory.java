@@ -65,7 +65,7 @@ public class ConverterFactory {
 
 			converter = converterConstructor.newInstance(transformer);
 		} catch(ReflectiveOperationException roe){
-			throw new IllegalArgumentException(roe);
+			throw new IllegalArgumentException("Transformer class " + clazz.getName() + " is not supported", roe);
 		}
 
 		if(converter != null){
@@ -188,8 +188,8 @@ public class ConverterFactory {
 				continue;
 			}
 
-			if(clazz == null || !(Transformer.class).isAssignableFrom(clazz)){
-				throw new IllegalArgumentException("Expected " + Transformer.class.getName() + " subclass, got " + (clazz != null ? clazz.getName() : null));
+			if(!(Transformer.class).isAssignableFrom(clazz)){
+				throw new IllegalArgumentException("Transformer class " + clazz.getName() + " is not a subclass of " + Transformer.class.getName());
 			} // End if
 
 			Class<? extends TransformerConverter<?>> converterClazz;
@@ -202,8 +202,8 @@ public class ConverterFactory {
 				continue;
 			}
 
-			if(converterClazz == null || !(TransformerConverter.class).isAssignableFrom(converterClazz)){
-				throw new IllegalArgumentException("Expected " + TransformerConverter.class.getName() + " subclass, got " + (converterClazz != null ? converterClazz.getName() : null));
+			if(!(TransformerConverter.class).isAssignableFrom(converterClazz)){
+				throw new IllegalArgumentException("Transformer converter class " + converterClazz.getName() + " is not a subclass of " + TransformerConverter.class.getName());
 			}
 
 			ConverterFactory.converters.put(clazz, converterClazz);

@@ -28,9 +28,11 @@ import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 
@@ -47,15 +49,17 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 	}
 
 	@Override
-	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		String predictionCol = model.getPredictionCol();
 
-		OutputField predictedField = ModelUtil.createPredictedField(FieldName.create(predictionCol), OpType.CONTINUOUS, label.getDataType());
+		OutputField predictedOutputField = ModelUtil.createPredictedField(FieldName.create(predictionCol), OpType.CONTINUOUS, label.getDataType());
+
+		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, true);
 
 		encoder.putOnlyFeature(predictionCol, new ContinuousFeature(encoder, predictedField));
 
-		return Collections.singletonList(predictedField);
+		return Collections.emptyList();
 	}
 }

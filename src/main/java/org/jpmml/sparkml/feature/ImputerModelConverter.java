@@ -28,8 +28,10 @@ import org.apache.spark.sql.Row;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.MissingValueTreatmentMethod;
+import org.dmg.pmml.Value;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.MissingValueDecorator;
+import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -70,22 +72,18 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
-			Field<?> field = encoder.getField(feature.getName());
+			Field<?> field = feature.getField();
 
 			if(field instanceof DataField){
 				DataField dataField = (DataField)field;
 
 				Object surrogate = surrogateRow.getAs(inputCol);
 
-				MissingValueDecorator missingValueDecorator = new MissingValueDecorator()
-					.setMissingValueReplacement(surrogate)
-					.setMissingValueTreatment(missingValueTreatmentMethod);
+				encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatmentMethod, surrogate));
 
 				if(missingValue != null && !missingValue.isNaN()){
-					missingValueDecorator.addValues(missingValue);
+					PMMLUtil.addValues(dataField, Collections.singletonList(missingValue), Value.Property.MISSING);
 				}
-
-				encoder.addDecorator(feature.getName(), missingValueDecorator);
 			} else
 
 			{

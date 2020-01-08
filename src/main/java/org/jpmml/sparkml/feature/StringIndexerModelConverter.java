@@ -30,9 +30,9 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
-import org.dmg.pmml.MiningField;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
+import org.dmg.pmml.Value;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
@@ -82,32 +82,23 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			switch(handleInvalid){
 				case "keep":
 					{
-						invalidValueDecorator = new InvalidValueDecorator(){
+						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_IS, invalidCategory);
 
-							@Override
-							public void decorate(DataField dataField, MiningField miningField){
-								super.decorate(dataField, miningField);
-
-								miningField.setInvalidValueReplacement(invalidCategory);
-							}
-						}
-							.setInvalidValueTreatment(InvalidValueTreatmentMethod.AS_IS)
-							.addValues(invalidCategory);
+						PMMLUtil.addValues(dataField, Collections.singletonList(invalidCategory), Value.Property.INVALID);
 
 						categories.add(invalidCategory);
 					}
 					break;
 				case "error":
 					{
-						invalidValueDecorator = new InvalidValueDecorator()
-							.setInvalidValueTreatment(InvalidValueTreatmentMethod.RETURN_INVALID);
+						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.RETURN_INVALID, null);
 					}
 					break;
 				default:
 					throw new IllegalArgumentException("Invalid value handling strategy " + handleInvalid + " is not supported");
 			}
 
-			encoder.addDecorator(dataField.getName(), invalidValueDecorator);
+			encoder.addDecorator(dataField, invalidValueDecorator);
 		} else
 
 		if(field instanceof DerivedField){
@@ -123,7 +114,9 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 						categories.add(invalidCategory);
 
-						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF, setApply, feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
+						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF)
+							.addExpressions(setApply)
+							.addExpressions(feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
 
 						field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 					}
