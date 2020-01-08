@@ -26,7 +26,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Discretize;
 import org.dmg.pmml.DiscretizeBin;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.Interval;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
@@ -46,18 +45,15 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 		Bucketizer transformer = getTransformer();
 
 		String[] inputCols;
-		String[] outputCols;
 		double[][] splitsArray;
 
 		if(hasInputCol(transformer)){
 			inputCols = new String[]{transformer.getInputCol()};
-			outputCols = new String[]{transformer.getOutputCol()};
 			splitsArray = new double[][]{transformer.getSplits()};
 		} else
 
 		if(hasInputCols(transformer)){
 			inputCols = transformer.getInputCols();
-			outputCols = transformer.getOutputCols();
 			splitsArray = transformer.getSplitsArray();
 		} else
 
@@ -69,7 +65,6 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 
 		for(int i = 0; i < inputCols.length; i++){
 			String inputCol = inputCols[i];
-			String outputCol = outputCols[i];
 			double[] splits = splitsArray[i];
 
 			Feature feature = encoder.getOnlyFeature(inputCol);
@@ -95,7 +90,7 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 				discretize.addDiscretizeBins(discretizeBin);
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(FieldName.create(outputCol), OpType.CATEGORICAL, DataType.INTEGER, discretize);
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, discretize);
 
 			result.add(new IndexFeature(encoder, derivedField, categories));
 		}

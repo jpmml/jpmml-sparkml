@@ -57,7 +57,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < numFeatures; i++){
+		for(int i = 0, length = numFeatures; i < length; i++){
 			Feature feature = features.get(i);
 
 			Map<Double, Integer> categoryMap = categoryMaps.get(i);
@@ -81,7 +81,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 				MapValues mapValues = PMMLUtil.createMapValues(feature.getName(), categories, values)
 					.setDataType(DataType.INTEGER);
 
-				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
+				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 
 				result.add(new CategoricalFeature(encoder, derivedField, values));
 			} else
