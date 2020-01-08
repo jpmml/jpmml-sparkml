@@ -33,7 +33,6 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
@@ -160,7 +159,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		return result;
 	}
 
-	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model model, SparkMLEncoder encoder){
 		return null;
 	}
 
@@ -171,25 +170,15 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 		org.dmg.pmml.Model model = encodeModel(schema);
 
-		List<OutputField> sparkOutputFields = registerOutputFields(label, encoder);
+		List<OutputField> sparkOutputFields = registerOutputFields(label, model, encoder);
 		if(sparkOutputFields != null && sparkOutputFields.size() > 0){
-			Output output;
+			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
-			if(model instanceof MiningModel){
-				MiningModel miningModel = (MiningModel)model;
-
-				org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(miningModel);
-
-				output = ModelUtil.ensureOutput(finalModel);
-			} else
-
-			{
-				output = ModelUtil.ensureOutput(model);
-			}
+			Output output = ModelUtil.ensureOutput(finalModel);
 
 			List<OutputField> outputFields = output.getOutputFields();
 
-			outputFields.addAll(0, sparkOutputFields);
+			outputFields.addAll(sparkOutputFields);
 		}
 
 		return model;

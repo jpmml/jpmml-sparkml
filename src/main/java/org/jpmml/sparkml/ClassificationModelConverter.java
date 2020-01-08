@@ -31,11 +31,13 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
@@ -56,32 +58,32 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 	}
 
 	@Override
-	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
 		List<Integer> categories = LabelUtil.createTargetCategories(categoricalLabel.size());
 
-		List<OutputField> result = new ArrayList<>();
-
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, categoricalLabel.getDataType())
+		OutputField pmmlPredictedOutputField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, categoricalLabel.getDataType())
 			.setFinalResult(false);
 
-		result.add(pmmlPredictedField);
+		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, true);
 
 		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
 			.setDataType(DataType.DOUBLE);
 
-		OutputField predictedField = new OutputField(FieldName.create(predictionCol), OpType.CONTINUOUS, DataType.DOUBLE)
+		OutputField predictedOutputField = new OutputField(FieldName.create(predictionCol), OpType.CONTINUOUS, DataType.DOUBLE)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(mapValues);
 
-		result.add(predictedField);
+		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, true);
 
 		encoder.putOnlyFeature(predictionCol, new IndexFeature(encoder, predictedField, categories));
+
+		List<OutputField> result = new ArrayList<>();
 
 		if(model instanceof HasProbabilityCol){
 			HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)model;
@@ -100,6 +102,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 				features.add(new ContinuousFeature(encoder, probabilityField));
 			}
 
+			// XXX
 			encoder.putFeatures(probabilityCol, features);
 		}
 

@@ -80,6 +80,10 @@ public class PMMLBuilder {
 		setPipelineModel(pipelineModel);
 	}
 
+	public PMMLBuilder(StructType schema, PipelineStage pipelineStage){
+		throw new IllegalArgumentException("Expected a fitted pipeline model (class " + PipelineModel.class.getName() + "), got a pipeline stage (" + (pipelineStage != null ? ("class " + (pipelineStage.getClass()).getName()) : null) + ")");
+	}
+
 	public PMML build(){
 		StructType schema = getSchema();
 		PipelineModel pipelineModel = getPipelineModel();
@@ -139,7 +143,7 @@ public class PMMLBuilder {
 			} else
 
 			{
-				throw new IllegalArgumentException("Expected a " + FeatureConverter.class.getName() + " or " + ModelConverter.class.getName() + " instance, got " + converter);
+				throw new IllegalArgumentException("Expected a subclass of " + FeatureConverter.class.getName() + " or " + ModelConverter.class.getName() + ", got " + (converter != null ? ("class " + (converter.getClass()).getName()) : null));
 			}
 		}
 
@@ -159,20 +163,24 @@ public class PMMLBuilder {
 
 		{
 			throw new IllegalArgumentException("Expected a pipeline with one or more models, got a pipeline with zero models");
-		}
+		} // End if
 
-		for(FieldName postProcessorName : postProcessorNames){
-			DerivedField derivedField = derivedFields.get(postProcessorName);
+		if(postProcessorNames.size() > 0){
+			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
-			encoder.removeDerivedField(postProcessorName);
+			Output output = ModelUtil.ensureOutput(finalModel);
 
-			Output output = ModelUtil.ensureOutput(model);
+			for(FieldName postProcessorName : postProcessorNames){
+				DerivedField derivedField = derivedFields.get(postProcessorName);
 
-			OutputField outputField = new OutputField(derivedField.getName(), derivedField.getOpType(), derivedField.getDataType())
-				.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
-				.setExpression(derivedField.getExpression());
+				encoder.removeDerivedField(postProcessorName);
 
-			output.addOutputFields(outputField);
+				OutputField outputField = new OutputField(derivedField.getName(), derivedField.getOpType(), derivedField.getDataType())
+					.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
+					.setExpression(derivedField.getExpression());
+
+				output.addOutputFields(outputField);
+			}
 		}
 
 		PMML pmml = encoder.encodePMML(model);

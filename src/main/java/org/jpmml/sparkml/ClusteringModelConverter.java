@@ -18,7 +18,7 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.Model;
@@ -31,6 +31,7 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
+import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
@@ -52,28 +53,26 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	}
 
 	@Override
-	public List<OutputField> registerOutputFields(Label label, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model pmmlModel, SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		List<Integer> clusters = LabelUtil.createTargetCategories(getNumberOfClusters());
 
-		List<OutputField> result = new ArrayList<>();
-
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, DataType.STRING)
+		OutputField pmmlPredictedOutputField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, DataType.STRING)
 			.setFinalResult(false);
 
-		result.add(pmmlPredictedField);
+		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, true);
 
-		OutputField predictedField = new OutputField(FieldName.create(predictionCol), OpType.CATEGORICAL, DataType.INTEGER)
+		OutputField predictedOutputField = new OutputField(FieldName.create(predictionCol), OpType.CATEGORICAL, DataType.INTEGER)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(new FieldRef(pmmlPredictedField.getName()));
 
-		result.add(predictedField);
+		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, true);
 
 		encoder.putOnlyFeature(predictionCol, new IndexFeature(encoder, predictedField, clusters));
 
-		return result;
+		return Collections.emptyList();
 	}
 }

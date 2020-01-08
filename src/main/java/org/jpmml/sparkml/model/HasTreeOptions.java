@@ -18,13 +18,26 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.jpmml.converter.HasNativeConfiguration;
 import org.jpmml.sparkml.HasSparkMLOptions;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
-public interface HasTreeOptions extends HasSparkMLOptions {
+public interface HasTreeOptions extends HasSparkMLOptions, HasNativeConfiguration {
 
 	/**
 	 * @see TreeModelCompactor
 	 */
 	String OPTION_COMPACT = "compact";
+
+	@Override
+	default
+	public Map<String, ?> getNativeConfiguration(){
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put(HasTreeOptions.OPTION_COMPACT, Boolean.FALSE);
+
+		return result;
+	}
 }

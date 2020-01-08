@@ -481,7 +481,12 @@ public class ExpressionTranslator {
 
 	static
 	private String formatMessage(Expression expression){
-		return "Spark SQL function \'" + String.valueOf(expression) + "\' (Java class " + (expression.getClass()).getName() + ") is not supported";
+
+		if(expression == null){
+			return null;
+		}
+
+		return "Spark SQL function \'" + expression + "\' (class " + (expression.getClass()).getName() + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");
