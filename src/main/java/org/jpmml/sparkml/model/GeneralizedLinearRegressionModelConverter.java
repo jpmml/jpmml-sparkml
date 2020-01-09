@@ -38,7 +38,7 @@ import org.jpmml.sparkml.RegressionModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
 
-public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> implements HasRegressionOptions {
+public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> implements HasRegressionTableOptions {
 
 	public GeneralizedLinearRegressionModelConverter(GeneralizedLinearRegressionModel model){
 		super(model);

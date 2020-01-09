@@ -23,7 +23,7 @@ import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
+public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionTableOptions {
 
 	public NaiveBayesModelConverter(NaiveBayesModel model){
 		super(model);

@@ -35,7 +35,7 @@ import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class LinearSVCModelConverter extends ClassificationModelConverter<LinearSVCModel> implements HasRegressionOptions {
+public class LinearSVCModelConverter extends ClassificationModelConverter<LinearSVCModel> implements HasRegressionTableOptions {
 
 	public LinearSVCModelConverter(LinearSVCModel model){
 		super(model);

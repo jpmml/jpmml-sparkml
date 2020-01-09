@@ -23,7 +23,7 @@ import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.RegressionModelConverter;
 
-public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> implements HasRegressionOptions {
+public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> implements HasRegressionTableOptions {
 
 	public LinearRegressionModelConverter(LinearRegressionModel model){
 		super(model);

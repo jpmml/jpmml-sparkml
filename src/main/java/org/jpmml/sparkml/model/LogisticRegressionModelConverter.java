@@ -24,7 +24,7 @@ import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> implements HasRegressionOptions {
+public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> implements HasRegressionTableOptions {
 
 	public LogisticRegressionModelConverter(LogisticRegressionModel model){
 		super(model);

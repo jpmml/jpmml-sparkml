@@ -46,7 +46,7 @@ import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.IntegrationTest;
 import org.jpmml.evaluator.IntegrationTestBatch;
 import org.jpmml.evaluator.PMMLEquivalence;
-import org.jpmml.sparkml.model.HasRegressionOptions;
+import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -151,7 +151,7 @@ public class ConverterTest extends IntegrationTest {
 				}
 
 				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
-					.putOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, 3)
+					.putOption(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3)
 					.verify(dataset, precision, zeroThreshold);
 
 				PMML pmml = pmmlBuilder.build();
