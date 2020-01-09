@@ -21,8 +21,6 @@ package org.jpmml.sparkml;
 import java.util.List;
 
 import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.param.shared.HasInputCol;
-import org.apache.spark.ml.param.shared.HasInputCols;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasOutputCols;
 import org.dmg.pmml.FieldName;
@@ -42,7 +40,9 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	public void registerFeatures(SparkMLEncoder encoder){
 		Transformer transformer = getTransformer();
 
-		if(hasOutputCol(transformer)){
+		OutputMode outputMode = getOutputMode();
+
+		if((OutputMode.SINGLE).equals(outputMode)){
 			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
 
 			String outputCol = hasOutputCol.getOutputCol();
@@ -52,7 +52,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			encoder.putFeatures(outputCol, features);
 		} else
 
-		if(hasOutputCols(transformer)){
+		if((OutputMode.MULTIPLE).equals(outputMode)){
 			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
 
 			String[] outputCols = hasOutputCols.getOutputCols();
@@ -79,52 +79,24 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 		}
 	}
 
-	static
-	public boolean hasInputCol(Transformer transformer){
-
-		if(transformer instanceof HasInputCol){
-			HasInputCol hasInputCol = (HasInputCol)transformer;
-
-			return transformer.isSet(hasInputCol.inputCol());
-		}
-
-		return false;
-	}
-
-	static
-	public boolean hasInputCols(Transformer transformer){
-
-		if(transformer instanceof HasInputCols){
-			HasInputCols hasInputCols = (HasInputCols)transformer;
-
-			return transformer.isSet(hasInputCols.inputCols());
-		}
-
-		return false;
-	}
-
-	static
-	public boolean hasOutputCol(Transformer transformer){
+	protected OutputMode getOutputMode(){
+		T transformer = getTransformer();
 
 		if(transformer instanceof HasOutputCol){
-			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+			return OutputMode.SINGLE;
+		} else
 
-			return transformer.isSet(hasOutputCol.outputCol());
+		if(transformer instanceof HasOutputCols){
+			return OutputMode.MULTIPLE;
 		}
 
-		return false;
+		return null;
 	}
 
 	static
-	public boolean hasOutputCols(Transformer transformer){
-
-		if(transformer instanceof HasOutputCols){
-			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
-
-			return transformer.isSet(hasOutputCols.outputCols());
-		}
-
-		return false;
+	protected enum OutputMode {
+		SINGLE,
+		MULTIPLE,
 	}
 
 	static
@@ -135,7 +107,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	static
 	public <T extends Transformer & HasOutputCol & HasOutputCols> FieldName formatName(T transformer, int index){
 
-		if(hasOutputCols(transformer)){
+		if(transformer.isSet(transformer.outputCols())){
 			return FieldName.create(transformer.getOutputCols()[index]);
 		} // End if
 

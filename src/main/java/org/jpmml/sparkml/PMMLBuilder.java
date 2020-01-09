@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 import javax.xml.bind.JAXBException;
 
 import com.google.common.collect.Iterables;
-import org.apache.spark.ml.Model;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
@@ -123,7 +122,7 @@ public class PMMLBuilder {
 				models.add(model);
 
 				hasPredictionCol:
-				if(ModelConverter.hasPredictionCol((Model<?>)transformer)){
+				if(transformer instanceof HasPredictionCol){
 					HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
 
 					// XXX
@@ -134,7 +133,7 @@ public class PMMLBuilder {
 					predictionColumns.add(hasPredictionCol.getPredictionCol());
 				} // End if
 
-				if(ModelConverter.hasProbabilityCol((Model<?>)transformer)){
+				if(transformer instanceof HasProbabilityCol){
 					HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)transformer;
 
 					probabilityColumns.add(hasProbabilityCol.getProbabilityCol());

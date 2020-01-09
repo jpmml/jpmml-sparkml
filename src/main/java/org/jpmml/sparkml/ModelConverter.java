@@ -27,7 +27,6 @@ import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.Field;
@@ -66,7 +65,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 		Label label = null;
 
-		if(hasLabelCol(model)){
+		if(model instanceof HasLabelCol){
 			HasLabelCol hasLabelCol = (HasLabelCol)model;
 
 			String labelCol = hasLabelCol.getLabelCol();
@@ -183,42 +182,6 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		}
 
 		return model;
-	}
-
-	static
-	public boolean hasLabelCol(Model<?> model){
-
-		if(model instanceof HasLabelCol){
-			HasLabelCol hasLabelCol = (HasLabelCol)model;
-
-			return model.isSet(hasLabelCol.labelCol());
-		}
-
-		return false;
-	}
-
-	static
-	public boolean hasPredictionCol(Model<?> model){
-
-		if(model instanceof HasPredictionCol){
-			HasPredictionCol hasPredictionCol = (HasPredictionCol)model;
-
-			return model.isSet(hasPredictionCol.predictionCol());
-		}
-
-		return false;
-	}
-
-	static
-	public boolean hasProbabilityCol(Model<?> model){
-
-		if(model instanceof HasProbabilityCol){
-			HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)model;
-
-			return model.isSet(hasProbabilityCol.probabilityCol());
-		}
-
-		return false;
 	}
 
 	static
