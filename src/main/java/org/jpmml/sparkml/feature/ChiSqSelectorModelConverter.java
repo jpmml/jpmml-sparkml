@@ -36,9 +36,12 @@ public class ChiSqSelectorModelConverter extends FeatureConverter<ChiSqSelectorM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		ChiSqSelectorModel transformer = getTransformer();
 
-		int[] indices = (int[])(transformer.selectedFeatures()).clone();
+		int[] indices = transformer.selectedFeatures();
+		if(indices.length > 0){
+			indices = indices.clone();
 
-		Arrays.sort(indices);
+			Arrays.sort(indices);
+		}
 
 		return encoder.getFeatures(transformer.getFeaturesCol(), indices);
 	}

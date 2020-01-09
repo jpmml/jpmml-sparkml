@@ -18,9 +18,6 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.spark.ml.classification.LinearSVCModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.Expression;
@@ -31,17 +28,14 @@ import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.AbstractTransformation;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
-import org.jpmml.sparkml.VectorUtil;
 
-public class LinearSVCModelConverter extends ClassificationModelConverter<LinearSVCModel> implements HasRegressionOptions {
+public class LinearSVCModelConverter extends ClassificationModelConverter<LinearSVCModel> implements HasRegressionTableOptions {
 
 	public LinearSVCModelConverter(LinearSVCModel model){
 		super(model);
@@ -51,26 +45,18 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 	public MiningModel encodeModel(Schema schema){
 		LinearSVCModel model = getTransformer();
 
-		double threshold = model.getThreshold();
-
-		List<Feature> features = new ArrayList<>(schema.getFeatures());
-		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
-
-		RegressionTableUtil.simplify(this, null, features, coefficients);
-
 		Transformation transformation = new AbstractTransformation(){
 
 			@Override
 			public Expression createExpression(FieldRef fieldRef){
-				return PMMLUtil.createApply(PMMLFunctions.IF)
-					.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, fieldRef, PMMLUtil.createConstant(threshold)))
-					.addExpressions(PMMLUtil.createConstant(1), PMMLUtil.createConstant(0));
+				return PMMLUtil.createApply(PMMLFunctions.THRESHOLD)
+					.addExpressions(fieldRef, PMMLUtil.createConstant(model.getThreshold()));
 			}
 		};
 
-		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE).toEmptySchema();
+		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);
 
-		RegressionModel regressionModel = RegressionModelUtil.createRegression(features, coefficients, model.intercept(), RegressionModel.NormalizationMethod.NONE, segmentSchema)
+		RegressionModel regressionModel = LinearModelUtil.createRegression(this, model.coefficients(), model.intercept(), segmentSchema)
 			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("margin"), OpType.CONTINUOUS, DataType.DOUBLE, transformation));
 
 		return MiningModelUtil.createBinaryLogisticClassification(regressionModel, 1d, 0d, RegressionModel.NormalizationMethod.NONE, false, schema);

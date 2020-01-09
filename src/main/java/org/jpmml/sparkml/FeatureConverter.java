@@ -21,6 +21,8 @@ package org.jpmml.sparkml;
 import java.util.List;
 
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.param.shared.HasInputCol;
+import org.apache.spark.ml.param.shared.HasInputCols;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasOutputCols;
 import org.dmg.pmml.FieldName;
@@ -40,7 +42,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	public void registerFeatures(SparkMLEncoder encoder){
 		Transformer transformer = getTransformer();
 
-		if(transformer instanceof HasOutputCol){
+		if(hasOutputCol(transformer)){
 			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
 
 			String outputCol = hasOutputCol.getOutputCol();
@@ -50,7 +52,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			encoder.putFeatures(outputCol, features);
 		} else
 
-		if(transformer instanceof HasOutputCols){
+		if(hasOutputCols(transformer)){
 			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
 
 			String[] outputCols = hasOutputCols.getOutputCols();
@@ -78,12 +80,85 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	}
 
 	static
+	public boolean hasInputCol(Transformer transformer){
+
+		if(transformer instanceof HasInputCol){
+			HasInputCol hasInputCol = (HasInputCol)transformer;
+
+			return transformer.isSet(hasInputCol.inputCol());
+		}
+
+		return false;
+	}
+
+	static
+	public boolean hasInputCols(Transformer transformer){
+
+		if(transformer instanceof HasInputCols){
+			HasInputCols hasInputCols = (HasInputCols)transformer;
+
+			return transformer.isSet(hasInputCols.inputCols());
+		}
+
+		return false;
+	}
+
+	static
+	public boolean hasOutputCol(Transformer transformer){
+
+		if(transformer instanceof HasOutputCol){
+			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+
+			if(transformer instanceof HasOutputCols){
+				HasOutputCols hasOutputCols = (HasOutputCols)transformer;
+
+				return transformer.isSet(hasOutputCols.outputCols()) ? false : true;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	static
+	public boolean hasOutputCols(Transformer transformer){
+
+		if(transformer instanceof HasOutputCols){
+			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
+
+			return transformer.isSet(hasOutputCols.outputCols());
+		}
+
+		return false;
+	}
+
+	static
 	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer){
 		return FieldName.create(transformer.getOutputCol());
 	}
 
 	static
-	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer, int index){
-		return FieldName.create(transformer.getOutputCol() + "[" + index + "]");
+	public <T extends Transformer & HasOutputCol & HasOutputCols> FieldName formatName(T transformer, int index){
+
+		if(hasOutputCols(transformer)){
+			return FieldName.create(transformer.getOutputCols()[index]);
+		} // End if
+
+		if(index != 0){
+			throw new IllegalArgumentException();
+		}
+
+		return FieldName.create(transformer.getOutputCol());
+	}
+
+	static
+	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer, int index, int length){
+
+		if(length > 1){
+			return FieldName.create(transformer.getOutputCol() + "[" + index + "]");
+		}
+
+		return FieldName.create(transformer.getOutputCol());
 	}
 }

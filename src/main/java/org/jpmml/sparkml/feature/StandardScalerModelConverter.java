@@ -68,10 +68,10 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < features.size(); i++){
+		for(int i = 0, length = features.size(); i < length; i++){
 			Feature feature = features.get(i);
 
-			FieldName name = formatName(transformer, i);
+			FieldName name = formatName(transformer, i, length);
 
 			Expression expression = null;
 

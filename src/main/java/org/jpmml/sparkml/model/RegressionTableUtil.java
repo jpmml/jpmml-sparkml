@@ -44,10 +44,10 @@ public class RegressionTableUtil {
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasRegressionOptions> void simplify(C converter, Object identifier, List<Feature> features, List<Double> coefficients){
+	public <C extends ModelConverter<?> & HasRegressionTableOptions> void simplify(C converter, Object identifier, List<Feature> features, List<Double> coefficients){
 		SchemaUtil.checkSize(coefficients.size(), features);
 
-		Integer lookupThreshold = (Integer)converter.getOption(HasRegressionOptions.OPTION_LOOKUP_THRESHOLD, null);
+		Integer lookupThreshold = (Integer)converter.getOption(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, null);
 		if(lookupThreshold == null){
 			return;
 		}

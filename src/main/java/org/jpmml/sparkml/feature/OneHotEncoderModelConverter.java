@@ -39,19 +39,17 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoderModel transformer = getTransformer();
 
-		String[] inputCols = transformer.getInputCols();
-
 		boolean dropLast = transformer.getDropLast();
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < inputCols.length; i++){
-			CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(inputCols[i]);
+		String[] inputCols = transformer.getInputCols();
+		for(String inputCol : inputCols){
+			CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(inputCol);
 
 			List<?> values = categoricalFeature.getValues();
 
-			// XXX
-			List<BinaryFeature> binaryFeatures = (List)OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, values, dropLast);
+			List<BinaryFeature> binaryFeatures = OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, values, dropLast);
 
 			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature.getName(), categoricalFeature.getDataType(), binaryFeatures));
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2020 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,21 +18,9 @@
  */
 package org.jpmml.sparkml.model;
 
-import org.apache.spark.ml.regression.LinearRegressionModel;
-import org.dmg.pmml.regression.RegressionModel;
-import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.RegressionModelConverter;
+import org.jpmml.sparkml.HasSparkMLOptions;
 
-public class LinearRegressionModelConverter extends RegressionModelConverter<LinearRegressionModel> implements HasRegressionTableOptions {
+public interface HasPredictionModelOptions extends HasSparkMLOptions {
 
-	public LinearRegressionModelConverter(LinearRegressionModel model){
-		super(model);
-	}
-
-	@Override
-	public RegressionModel encodeModel(Schema schema){
-		LinearRegressionModel model = getTransformer();
-
-		return LinearModelUtil.createRegression(this, model.coefficients(), model.intercept(), schema);
-	}
+	String OPTION_KEEP_PREDICTIONCOL = "keep_predictionCol";
 }

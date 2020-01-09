@@ -58,7 +58,7 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < features.size(); i++){
+		for(int i = 0, length = features.size(); i < length; i++){
 			Feature feature = features.get(i);
 
 			ContinuousFeature continuousFeature = feature.toContinuousFeature();
@@ -76,7 +76,7 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 				expression = PMMLUtil.createApply(PMMLFunctions.ADD, expression, PMMLUtil.createConstant(rescaleConstant));
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, expression);
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
 			result.add(new ContinuousFeature(encoder, derivedField));
 		}

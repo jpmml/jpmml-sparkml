@@ -55,7 +55,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < transformer.getK(); i++){
+		for(int i = 0, length = transformer.getK(); i < length; i++){
 			Apply apply = new Apply(PMMLFunctions.SUM);
 
 			for(int j = 0; j < features.size(); j++){
@@ -73,7 +73,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 				apply.addExpressions(expression);
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
 			result.add(new ContinuousFeature(encoder, derivedField));
 		}

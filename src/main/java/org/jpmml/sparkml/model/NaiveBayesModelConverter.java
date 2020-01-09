@@ -18,26 +18,12 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import org.apache.spark.ml.classification.NaiveBayesModel;
-import org.apache.spark.ml.linalg.Matrix;
-import org.apache.spark.ml.linalg.Vector;
-import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.regression.RegressionModel;
-import org.dmg.pmml.regression.RegressionTable;
-import org.jpmml.converter.CategoricalLabel;
-import org.jpmml.converter.Feature;
-import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
-import org.jpmml.sparkml.MatrixUtil;
-import org.jpmml.sparkml.VectorUtil;
 
-public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
+public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionTableOptions {
 
 	public NaiveBayesModelConverter(NaiveBayesModel model){
 		super(model);
@@ -55,7 +41,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 				throw new IllegalArgumentException("Model type " + modelType + " is not supported");
 		}
 
-		try {
+		if(model.isSet(model.thresholds())){
 			double[] thresholds = model.getThresholds();
 
 			for(int i = 0; i < thresholds.length; i++){
@@ -65,37 +51,10 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 					throw new IllegalArgumentException("Non-zero thresholds are not supported");
 				}
 			}
-		} catch(NoSuchElementException nsee){
-			// Ignored
 		}
 
-		Vector pi = model.pi();
-		Matrix theta = model.theta();
-
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
-
-		MatrixUtil.checkRows(categoricalLabel.size(), theta);
-
-		List<Double> intercepts = VectorUtil.toList(pi);
-
-		scala.collection.Iterator<Vector> thetaRows = theta.rowIter();
-
-		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), null)
-			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
-
-		for(int i = 0; i < categoricalLabel.size(); i++){
-			Object targetCategory = categoricalLabel.getValue(i);
-
-			List<Feature> features = new ArrayList<>(schema.getFeatures());
-			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(thetaRows.next()));
-
-			RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
-
-			RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, intercepts.get(i))
-				.setTargetCategory(targetCategory);
-
-			regressionModel.addRegressionTables(regressionTable);
-		}
+		RegressionModel regressionModel = LinearModelUtil.createSoftmaxClassification(this, model.theta(), model.pi(), schema)
+			.setOutput(null);
 
 		return regressionModel;
 	}
