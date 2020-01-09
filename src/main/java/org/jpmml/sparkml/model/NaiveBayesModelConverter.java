@@ -18,23 +18,10 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.spark.ml.classification.NaiveBayesModel;
-import org.apache.spark.ml.linalg.Matrix;
-import org.apache.spark.ml.linalg.Vector;
-import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.regression.RegressionModel;
-import org.dmg.pmml.regression.RegressionTable;
-import org.jpmml.converter.CategoricalLabel;
-import org.jpmml.converter.Feature;
-import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
-import org.jpmml.sparkml.MatrixUtil;
-import org.jpmml.sparkml.VectorUtil;
 
 public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionOptions {
 
@@ -66,35 +53,8 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 			}
 		}
 
-		Vector pi = model.pi();
-		Matrix theta = model.theta();
-
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
-
-		MatrixUtil.checkRows(categoricalLabel.size(), theta);
-
-		List<Double> intercepts = VectorUtil.toList(pi);
-
-		scala.collection.Iterator<Vector> thetaRows = theta.rowIter();
-
-		List<RegressionTable> regressionTables = new ArrayList<>();
-
-		for(int i = 0; i < categoricalLabel.size(); i++){
-			Object targetCategory = categoricalLabel.getValue(i);
-
-			List<Feature> features = new ArrayList<>(schema.getFeatures());
-			List<Double> coefficients = new ArrayList<>(VectorUtil.toList(thetaRows.next()));
-
-			RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
-
-			RegressionTable regressionTable = RegressionModelUtil.createRegressionTable(features, coefficients, intercepts.get(i))
-				.setTargetCategory(targetCategory);
-
-			regressionTables.add(regressionTable);
-		}
-
-		RegressionModel regressionModel = new RegressionModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), regressionTables)
-			.setNormalizationMethod(RegressionModel.NormalizationMethod.SOFTMAX);
+		RegressionModel regressionModel = LinearModelUtil.createSoftmaxClassification(this, model.theta(), model.pi(), schema)
+			.setOutput(null);
 
 		return regressionModel;
 	}

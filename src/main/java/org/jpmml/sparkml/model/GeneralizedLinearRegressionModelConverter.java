@@ -98,16 +98,16 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		}
 
 		List<Feature> features = new ArrayList<>(schema.getFeatures());
-		List<Double> coefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
+		List<Double> featureCoefficients = new ArrayList<>(VectorUtil.toList(model.coefficients()));
 
-		RegressionTableUtil.simplify(this, targetCategory, features, coefficients);
+		RegressionTableUtil.simplify(this, targetCategory, features, featureCoefficients);
 
 		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
 
-		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, coefficients, model.intercept(), targetCategory);
+		GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, featureCoefficients, model.intercept(), targetCategory);
 
 		return generalRegressionModel;
 	}
