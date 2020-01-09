@@ -23,11 +23,8 @@ import java.util.List;
 
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.Model;
-import org.dmg.pmml.OutputField;
 import org.dmg.pmml.neural_network.NeuralEntity;
 import org.dmg.pmml.neural_network.NeuralInputs;
 import org.dmg.pmml.neural_network.NeuralLayer;
@@ -35,34 +32,16 @@ import org.dmg.pmml.neural_network.NeuralNetwork;
 import org.dmg.pmml.neural_network.Neuron;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.neural_network.NeuralNetworkUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
-import org.jpmml.sparkml.SparkMLEncoder;
 
 public class MultilayerPerceptronClassificationModelConverter extends ClassificationModelConverter<MultilayerPerceptronClassificationModel> {
 
 	public MultilayerPerceptronClassificationModelConverter(MultilayerPerceptronClassificationModel model){
 		super(model);
-	}
-
-	@Override
-	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		MultilayerPerceptronClassificationModel model = getTransformer();
-
-		List<OutputField> result = super.registerOutputFields(label, pmmlModel, encoder);
-
-		if(!(model instanceof HasProbabilityCol)){
-			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
-
-			result = new ArrayList<>(result);
-			result.addAll(ModelUtil.createProbabilityFields(DataType.DOUBLE, categoricalLabel.getValues()));
-		}
-
-		return result;
 	}
 
 	@Override
