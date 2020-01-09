@@ -35,6 +35,7 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
 public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -54,9 +55,11 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 		String predictionCol = model.getPredictionCol();
 
+		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
+
 		OutputField predictedOutputField = ModelUtil.createPredictedField(FieldName.create(predictionCol), OpType.CONTINUOUS, label.getDataType());
 
-		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, true);
+		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, keepPredictionCol);
 
 		encoder.putOnlyFeature(predictionCol, new ContinuousFeature(encoder, predictedField));
 

@@ -44,6 +44,7 @@ import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
 public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
@@ -67,10 +68,12 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		String predictionCol = model.getPredictionCol();
 
+		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
+
 		OutputField pmmlPredictedOutputField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, categoricalLabel.getDataType())
 			.setFinalResult(false);
 
-		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, true);
+		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, keepPredictionCol);
 
 		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
 			.setDataType(DataType.DOUBLE);
@@ -79,7 +82,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(mapValues);
 
-		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, true);
+		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, keepPredictionCol);
 
 		encoder.putOnlyFeature(predictionCol, new IndexFeature(encoder, predictedField, categories));
 
