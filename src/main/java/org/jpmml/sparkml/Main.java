@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import com.beust.jcommander.JCommander;
@@ -36,6 +38,9 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.MetroJAXBUtil;
+import org.jpmml.sparkml.model.HasPredictionModelOptions;
+import org.jpmml.sparkml.model.HasRegressionTableOptions;
+import org.jpmml.sparkml.model.HasTreeOptions;
 
 public class Main {
 
@@ -67,6 +72,34 @@ public class Main {
 	)
 	private File output = null;
 
+	/**
+	 * @see HasPredictionModelOptions#OPTION_KEEP_PREDICTIONCOL
+	 */
+	@Parameter (
+		names = "--keep_predictionCol",
+		arity = 1,
+		hidden = true
+	)
+	private Boolean keepPredictionCol = Boolean.TRUE;
+
+	/**
+	 * @see HasTreeOptions#OPTION_COMPACT
+	 */
+	@Parameter (
+		names = "--compact",
+		arity = 1,
+		hidden = true
+	)
+	private Boolean compact = Boolean.TRUE;
+
+	/**
+	 * @see HasRegressionTableOptions#OPTION_LOOKUP_THRESHOLD
+	 */
+	@Parameter (
+		names = "--lookup_threshold",
+		hidden = true
+	)
+	private Integer lookupThreshold = null;
 
 	static
 	public void main(String... args) throws Exception {
@@ -140,7 +173,13 @@ public class Main {
 
 		PipelineModel pipelineModel = PipelineModel.load(pipelineDir.getAbsolutePath());
 
+		Map<String, Object> options = new LinkedHashMap<>();
+		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
+		options.put(HasTreeOptions.OPTION_COMPACT, this.compact);
+		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, this.lookupThreshold);
+
 		PMML pmml = new PMMLBuilder(schema, pipelineModel)
+			.putOptions(options)
 			.build();
 
 		try(OutputStream os = new FileOutputStream(this.output)){
