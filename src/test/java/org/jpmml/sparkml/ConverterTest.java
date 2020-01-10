@@ -44,7 +44,6 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
-import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.IntegrationTest;
 import org.jpmml.evaluator.IntegrationTestBatch;
@@ -58,6 +57,13 @@ public class ConverterTest extends IntegrationTest {
 
 	public ConverterTest(){
 		super(new PMMLEquivalence(1e-14, 1e-14));
+	}
+
+	public Map<String, Object> getOptions(String name, String dataset){
+		Map<String, Object> options = new LinkedHashMap<>();
+		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3);
+
+		return options;
 	}
 
 	@Override
@@ -144,6 +150,8 @@ public class ConverterTest extends IntegrationTest {
 					dataset = dataset.sample(false, 0.05d, 63317);
 				}
 
+				Map<String, Object> options = getOptions(getName(), getDataset());
+
 				double precision = 1e-14;
 				double zeroThreshold = 1e-14;
 
@@ -151,17 +159,6 @@ public class ConverterTest extends IntegrationTest {
 				if(("NaiveBayes").equals(getName()) && (getDataset()).equals("Audit")){
 					precision = 1e-10;
 					zeroThreshold = 1e-10;
-				}
-
-				Map<String, Object> options = new LinkedHashMap<>();
-				options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3);
-
-				if(("LogisticRegression").equals(getName()) && ("Audit").equals(getDataset())){
-					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
-				} // End if
-
-				if(("LinearRegression").equals(getName()) && ("Auto").equals(getDataset())){
-					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
 				}
 
 				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
