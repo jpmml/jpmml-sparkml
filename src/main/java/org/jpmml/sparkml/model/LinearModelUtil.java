@@ -24,6 +24,8 @@ import java.util.List;
 import org.apache.spark.ml.linalg.Matrix;
 import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.Model;
+import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.regression.RegressionModel.NormalizationMethod;
 import org.dmg.pmml.regression.RegressionTable;
@@ -32,6 +34,7 @@ import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.MatrixUtil;
 import org.jpmml.sparkml.ModelConverter;
@@ -43,31 +46,54 @@ public class LinearModelUtil {
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasRegressionTableOptions> RegressionModel createRegression(C converter, Vector coefficients, double intercept, Schema schema){
+	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createRegression(C converter, Vector coefficients, double intercept, Schema schema){
 		ContinuousLabel continuousLabel = (ContinuousLabel)schema.getLabel();
+
+		String representation = (String)converter.getOption(HasRegressionTableOptions.OPTION_REPRESENTATION, null);
 
 		List<Feature> features = new ArrayList<>(schema.getFeatures());
 		List<Double> featureCoefficients = new ArrayList<>(VectorUtil.toList(coefficients));
 
 		RegressionTableUtil.simplify(converter, null, features, featureCoefficients);
+
+		if(representation != null && (GeneralRegressionModel.class.getSimpleName()).equalsIgnoreCase(representation)){
+			GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.REGRESSION, MiningFunction.REGRESSION, ModelUtil.createMiningSchema(continuousLabel), null, null, null);
+
+			GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, featureCoefficients, intercept, null);
+
+			return generalRegressionModel;
+		}
 
 		return RegressionModelUtil.createRegression(features, featureCoefficients, intercept, NormalizationMethod.NONE, schema);
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasRegressionTableOptions> RegressionModel createBinaryLogisticClassification(C converter, Vector coefficients, double intercept, Schema schema){
+	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createBinaryLogisticClassification(C converter, Vector coefficients, double intercept, Schema schema){
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+
+		String representation = (String)converter.getOption(HasRegressionTableOptions.OPTION_REPRESENTATION, null);
 
 		List<Feature> features = new ArrayList<>(schema.getFeatures());
 		List<Double> featureCoefficients = new ArrayList<>(VectorUtil.toList(coefficients));
 
 		RegressionTableUtil.simplify(converter, null, features, featureCoefficients);
 
+		if(representation != null && (GeneralRegressionModel.class.getSimpleName()).equalsIgnoreCase(representation)){
+			Object targetCategory = categoricalLabel.getValue(1);
+
+			GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(categoricalLabel), null, null, null)
+				.setLinkFunction(GeneralRegressionModel.LinkFunction.LOGIT);
+
+			GeneralRegressionModelUtil.encodeRegressionTable(generalRegressionModel, features, featureCoefficients, intercept, targetCategory);
+
+			return generalRegressionModel;
+		}
+
 		return RegressionModelUtil.createBinaryLogisticClassification(features, featureCoefficients, intercept, RegressionModel.NormalizationMethod.LOGIT, true, schema);
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasRegressionTableOptions> RegressionModel createSoftmaxClassification(C converter, Matrix coefficients, Vector intercepts, Schema schema){
+	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createSoftmaxClassification(C converter, Matrix coefficients, Vector intercepts, Schema schema){
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
 		MatrixUtil.checkRows(categoricalLabel.size(), coefficients);

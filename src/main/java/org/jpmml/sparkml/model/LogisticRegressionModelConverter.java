@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.classification.LogisticRegressionModel;
-import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.Model;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
@@ -31,23 +31,23 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 	}
 
 	@Override
-	public RegressionModel encodeModel(Schema schema){
+	public Model encodeModel(Schema schema){
 		LogisticRegressionModel model = getTransformer();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 
 		if(categoricalLabel.size() == 2){
-			RegressionModel regressionModel = LinearModelUtil.createBinaryLogisticClassification(this, model.coefficients(), model.intercept(), schema)
+			Model linearModel = LinearModelUtil.createBinaryLogisticClassification(this, model.coefficients(), model.intercept(), schema)
 				.setOutput(null);
 
-			return regressionModel;
+			return linearModel;
 		} else
 
 		if(categoricalLabel.size() > 2){
-			RegressionModel regressionModel = LinearModelUtil.createSoftmaxClassification(this, model.coefficientMatrix(), model.interceptVector(), schema)
+			Model linearModel = LinearModelUtil.createSoftmaxClassification(this, model.coefficientMatrix(), model.interceptVector(), schema)
 				.setOutput(null);
 
-			return regressionModel;
+			return linearModel;
 		} else
 
 		{

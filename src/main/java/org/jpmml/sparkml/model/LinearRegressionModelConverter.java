@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.regression.LinearRegressionModel;
-import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.RegressionModelConverter;
 
@@ -30,7 +30,7 @@ public class LinearRegressionModelConverter extends RegressionModelConverter<Lin
 	}
 
 	@Override
-	public RegressionModel encodeModel(Schema schema){
+	public Model encodeModel(Schema schema){
 		LinearRegressionModel model = getTransformer();
 
 		return LinearModelUtil.createRegression(this, model.coefficients(), model.intercept(), schema);

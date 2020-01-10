@@ -23,4 +23,6 @@ import org.jpmml.sparkml.HasSparkMLOptions;
 public interface HasRegressionTableOptions extends HasSparkMLOptions {
 
 	String OPTION_LOOKUP_THRESHOLD = "lookup_threshold";
+
+	String OPTION_REPRESENTATION = "representation";
 }

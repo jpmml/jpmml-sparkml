@@ -25,7 +25,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.io.ByteStreams;
@@ -42,6 +44,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.evaluator.ArchiveBatch;
 import org.jpmml.evaluator.IntegrationTest;
 import org.jpmml.evaluator.IntegrationTestBatch;
@@ -150,8 +153,19 @@ public class ConverterTest extends IntegrationTest {
 					zeroThreshold = 1e-10;
 				}
 
+				Map<String, Object> options = new LinkedHashMap<>();
+				options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3);
+
+				if(("LogisticRegression").equals(getName()) && ("Audit").equals(getDataset())){
+					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+				} // End if
+
+				if(("LinearRegression").equals(getName()) && ("Auto").equals(getDataset())){
+					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+				}
+
 				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
-					.putOption(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3)
+					.putOptions(options)
 					.verify(dataset, precision, zeroThreshold);
 
 				PMML pmml = pmmlBuilder.build();
