@@ -18,11 +18,26 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Map;
+
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.evaluator.PMMLEquivalence;
+import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.Test;
 
 public class RegressionTest extends ConverterTest {
+
+	@Override
+	public Map<String, Object> getOptions(String name, String dataset){
+		Map<String, Object> options = super.getOptions(name, dataset);
+
+		if(("LinearRegression").equals(name) && ("Auto").equals(dataset)){
+			options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+		}
+
+		return options;
+	}
 
 	@Test
 	public void evaluateDecisionTreeAuto() throws Exception {

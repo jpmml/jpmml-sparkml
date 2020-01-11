@@ -25,7 +25,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.io.ByteStreams;
@@ -55,6 +57,13 @@ public class ConverterTest extends IntegrationTest {
 
 	public ConverterTest(){
 		super(new PMMLEquivalence(1e-14, 1e-14));
+	}
+
+	public Map<String, Object> getOptions(String name, String dataset){
+		Map<String, Object> options = new LinkedHashMap<>();
+		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3);
+
+		return options;
 	}
 
 	@Override
@@ -141,6 +150,8 @@ public class ConverterTest extends IntegrationTest {
 					dataset = dataset.sample(false, 0.05d, 63317);
 				}
 
+				Map<String, Object> options = getOptions(getName(), getDataset());
+
 				double precision = 1e-14;
 				double zeroThreshold = 1e-14;
 
@@ -151,7 +162,7 @@ public class ConverterTest extends IntegrationTest {
 				}
 
 				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
-					.putOption(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 3)
+					.putOptions(options)
 					.verify(dataset, precision, zeroThreshold);
 
 				PMML pmml = pmmlBuilder.build();

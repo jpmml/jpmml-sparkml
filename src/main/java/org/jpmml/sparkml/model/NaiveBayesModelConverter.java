@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.classification.NaiveBayesModel;
-import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
@@ -30,7 +30,7 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 	}
 
 	@Override
-	public RegressionModel encodeModel(Schema schema){
+	public Model encodeModel(Schema schema){
 		NaiveBayesModel model = getTransformer();
 
 		String modelType = model.getModelType();
@@ -53,9 +53,9 @@ public class NaiveBayesModelConverter extends ClassificationModelConverter<Naive
 			}
 		}
 
-		RegressionModel regressionModel = LinearModelUtil.createSoftmaxClassification(this, model.theta(), model.pi(), schema)
+		Model linearModel = LinearModelUtil.createSoftmaxClassification(this, model.theta(), model.pi(), schema)
 			.setOutput(null);
 
-		return regressionModel;
+		return linearModel;
 	}
 }

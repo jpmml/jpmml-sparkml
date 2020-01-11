@@ -76,7 +76,7 @@ public class Main {
 	 * @see HasPredictionModelOptions#OPTION_KEEP_PREDICTIONCOL
 	 */
 	@Parameter (
-		names = "--keep_predictionCol",
+		names = "--X-keep_predictionCol",
 		arity = 1,
 		hidden = true
 	)
@@ -86,7 +86,7 @@ public class Main {
 	 * @see HasTreeOptions#OPTION_COMPACT
 	 */
 	@Parameter (
-		names = "--compact",
+		names = "--X-compact",
 		arity = 1,
 		hidden = true
 	)
@@ -96,10 +96,20 @@ public class Main {
 	 * @see HasRegressionTableOptions#OPTION_LOOKUP_THRESHOLD
 	 */
 	@Parameter (
-		names = "--lookup_threshold",
+		names = "--X-lookup_threshold",
 		hidden = true
 	)
 	private Integer lookupThreshold = null;
+
+	/**
+	 * @see HasRegressionTableOptions#OPTION_REPRESENTATION
+	 */
+	@Parameter (
+		names = "--X-representation",
+		hidden = true
+	)
+	private String representation = null;
+
 
 	static
 	public void main(String... args) throws Exception {
@@ -177,6 +187,7 @@ public class Main {
 		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
 		options.put(HasTreeOptions.OPTION_COMPACT, this.compact);
 		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, this.lookupThreshold);
+		options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, this.representation);
 
 		PMML pmml = new PMMLBuilder(schema, pipelineModel)
 			.putOptions(options)

@@ -23,6 +23,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
+import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.mining.MiningModel;
@@ -56,9 +57,9 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 
 		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);
 
-		RegressionModel regressionModel = LinearModelUtil.createRegression(this, model.coefficients(), model.intercept(), segmentSchema)
+		Model linearModel = LinearModelUtil.createRegression(this, model.coefficients(), model.intercept(), segmentSchema)
 			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("margin"), OpType.CONTINUOUS, DataType.DOUBLE, transformation));
 
-		return MiningModelUtil.createBinaryLogisticClassification(regressionModel, 1d, 0d, RegressionModel.NormalizationMethod.NONE, false, schema);
+		return MiningModelUtil.createBinaryLogisticClassification(linearModel, 1d, 0d, RegressionModel.NormalizationMethod.NONE, false, schema);
 	}
 }

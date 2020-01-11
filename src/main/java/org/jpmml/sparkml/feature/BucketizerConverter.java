@@ -47,12 +47,12 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 		String[] inputCols;
 		double[][] splitsArray;
 
-		if(hasInputCol(transformer)){
+		if(transformer.isSet(transformer.inputCol())){
 			inputCols = new String[]{transformer.getInputCol()};
 			splitsArray = new double[][]{transformer.getSplits()};
 		} else
 
-		if(hasInputCols(transformer)){
+		if(transformer.isSet(transformer.inputCols())){
 			inputCols = transformer.getInputCols();
 			splitsArray = transformer.getSplitsArray();
 		} else
@@ -96,6 +96,23 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 		}
 
 		return result;
+	}
+
+	@Override
+	protected OutputMode getOutputMode(){
+		Bucketizer transformer = getTransformer();
+
+		if(transformer.isSet(transformer.inputCol())){
+			return OutputMode.SINGLE;
+		} else
+
+		if(transformer.isSet(transformer.inputCols())){
+			return OutputMode.MULTIPLE;
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	static
