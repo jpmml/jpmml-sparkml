@@ -179,6 +179,7 @@ spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-
 
 # Documentation #
 
+* [Deploying Apache Spark ML pipeline models on Openscoring REST web service](https://openscoring.io/blog/2020/02/16/deploying_sparkml_pipeline_openscoring_rest/)
 * [Converting Apache Spark ML pipeline models to PMML documents](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
 
 # License #
