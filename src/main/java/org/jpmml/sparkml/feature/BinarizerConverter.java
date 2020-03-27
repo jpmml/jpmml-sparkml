@@ -18,8 +18,8 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.Binarizer;
@@ -45,16 +45,41 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Binarizer transformer = getTransformer();
 
-		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
+		Double threshold = transformer.getThreshold();
 
-		ContinuousFeature continuousFeature = feature.toContinuousFeature();
+		InOutMode inputMode = getInputMode();
 
-		Apply apply = new Apply(PMMLFunctions.IF)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, continuousFeature.ref(), PMMLUtil.createConstant(transformer.getThreshold())))
-			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
+		List<Feature> result = new ArrayList<>();
 
-		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.DOUBLE, apply);
+		String[] inputCols = inputMode.getInputCols(transformer);
+		for(int i = 0; i < inputCols.length; i++){
+			String inputCol = inputCols[i];
 
-		return Collections.singletonList(new IndexFeature(encoder, derivedField, Arrays.asList(0d, 1d)));
+			Feature feature = encoder.getOnlyFeature(inputCol);
+
+			ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+			Apply apply = new Apply(PMMLFunctions.IF)
+				.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, continuousFeature.ref(), PMMLUtil.createConstant(threshold)))
+				.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
+
+			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.DOUBLE, apply);
+
+			result.add(new IndexFeature(encoder, derivedField, Arrays.asList(0d, 1d)));
+		}
+
+		return result;
+	}
+
+	@Override
+	protected InOutMode getInputMode(){
+		Binarizer transformer = getTransformer();
+
+		return getInputMode(transformer);
+	}
+
+	@Override
+	public InOutMode getOutputMode(){
+		return getInputMode();
 	}
 }
