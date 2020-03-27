@@ -31,10 +31,10 @@ import org.dmg.pmml.OpType;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.IndexFeature;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class BucketizerConverter extends FeatureConverter<Bucketizer> {
+public class BucketizerConverter extends MultiFeatureConverter<Bucketizer> {
 
 	public BucketizerConverter(Bucketizer transformer){
 		super(transformer);
@@ -98,18 +98,6 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 		}
 
 		return result;
-	}
-
-	@Override
-	protected InOutMode getInputMode(){
-		Bucketizer transformer = getTransformer();
-
-		return getInputMode(transformer);
-	}
-
-	@Override
-	protected InOutMode getOutputMode(){
-		return getInputMode();
 	}
 
 	static

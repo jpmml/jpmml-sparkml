@@ -84,7 +84,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	}
 
 	static
-	protected enum InOutMode {
+	public enum InOutMode {
 		SINGLE(){
 
 			@Override
@@ -135,20 +135,6 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 	static
 	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer){
-		return FieldName.create(transformer.getOutputCol());
-	}
-
-	static
-	public <T extends Transformer & HasOutputCol & HasOutputCols> FieldName formatName(T transformer, int index){
-
-		if(transformer.isSet(transformer.outputCols())){
-			return FieldName.create(transformer.getOutputCols()[index]);
-		} // End if
-
-		if(index != 0){
-			throw new IllegalArgumentException();
-		}
-
 		return FieldName.create(transformer.getOutputCol());
 	}
 

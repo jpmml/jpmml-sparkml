@@ -38,10 +38,10 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.InvalidValueDecorator;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class StringIndexerModelConverter extends FeatureConverter<StringIndexerModel> {
+public class StringIndexerModelConverter extends MultiFeatureConverter<StringIndexerModel> {
 
 	public StringIndexerModelConverter(StringIndexerModel transformer){
 		super(transformer);
@@ -150,17 +150,5 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 		}
 
 		return result;
-	}
-
-	@Override
-	protected InOutMode getInputMode(){
-		StringIndexerModel transformer = getTransformer();
-
-		return getInputMode(transformer);
-	}
-
-	@Override
-	protected InOutMode getOutputMode(){
-		return getInputMode();
 	}
 }

@@ -32,10 +32,10 @@ import org.dmg.pmml.Value;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.MissingValueDecorator;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
+public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 
 	public ImputerModelConverter(ImputerModel transformer){
 		super(transformer);
@@ -88,18 +88,6 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 		}
 
 		return result;
-	}
-
-	@Override
-	protected InOutMode getInputMode(){
-		ImputerModel transformer = getTransformer();
-
-		return getInputMode(transformer);
-	}
-
-	@Override
-	protected InOutMode getOutputMode(){
-		return getInputMode();
 	}
 
 	static

@@ -25,11 +25,11 @@ import java.util.regex.Pattern;
 import org.apache.spark.ml.feature.StopWordsRemover;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.DocumentFeature;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.TermUtil;
 
-public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover> {
+public class StopWordsRemoverConverter extends MultiFeatureConverter<StopWordsRemover> {
 
 	public StopWordsRemoverConverter(StopWordsRemover transformer){
 		super(transformer);
@@ -75,17 +75,5 @@ public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover
 		}
 
 		return result;
-	}
-
-	@Override
-	protected InOutMode getInputMode(){
-		StopWordsRemover transformer = getTransformer();
-
-		return getInputMode(transformer);
-	}
-
-	@Override
-	protected InOutMode getOutputMode(){
-		return getInputMode();
 	}
 }

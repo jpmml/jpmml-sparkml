@@ -28,10 +28,10 @@ import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.sparkml.BinarizedCategoricalFeature;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderModel> {
+public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEncoderModel> {
 
 	public OneHotEncoderModelConverter(OneHotEncoderModel transformer){
 		super(transformer);
@@ -93,18 +93,6 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 				encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
 			}
 		}
-	}
-
-	@Override
-	protected InOutMode getInputMode(){
-		OneHotEncoderModel transformer = getTransformer();
-
-		return getInputMode(transformer);
-	}
-
-	@Override
-	protected InOutMode getOutputMode(){
-		return getInputMode();
 	}
 
 	static

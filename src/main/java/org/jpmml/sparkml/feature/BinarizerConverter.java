@@ -32,10 +32,10 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.PMMLUtil;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class BinarizerConverter extends FeatureConverter<Binarizer> {
+public class BinarizerConverter extends MultiFeatureConverter<Binarizer> {
 
 	public BinarizerConverter(Binarizer transformer){
 		super(transformer);
@@ -69,17 +69,5 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 		}
 
 		return result;
-	}
-
-	@Override
-	protected InOutMode getInputMode(){
-		Binarizer transformer = getTransformer();
-
-		return getInputMode(transformer);
-	}
-
-	@Override
-	public InOutMode getOutputMode(){
-		return getInputMode();
 	}
 }
