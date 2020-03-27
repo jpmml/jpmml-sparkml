@@ -25,6 +25,7 @@ import org.apache.spark.ml.feature.OneHotEncoderModel;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.sparkml.BinarizedCategoricalFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -39,19 +40,64 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoderModel transformer = getTransformer();
 
+		String[] inputCols;
+
+		if(transformer.isSet(transformer.inputCol())){
+			inputCols = new String[]{transformer.getInputCol()};
+		} else
+
+		if(transformer.isSet(transformer.inputCols())){
+			inputCols = transformer.getInputCols();
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
+
 		boolean dropLast = transformer.getDropLast();
 
 		List<Feature> result = new ArrayList<>();
 
-		String[] inputCols = transformer.getInputCols();
 		for(String inputCol : inputCols){
 			CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(inputCol);
 
 			List<?> values = categoricalFeature.getValues();
 
-			List<BinaryFeature> binaryFeatures = OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, values, dropLast);
+			List<BinaryFeature> binaryFeatures = OneHotEncoderModelConverter.encodeFeature(encoder, categoricalFeature, values, dropLast);
 
 			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature.getName(), categoricalFeature.getDataType(), binaryFeatures));
+		}
+
+		return result;
+	}
+
+	@Override
+	protected OutputMode getOutputMode(){
+		OneHotEncoderModel transformer = getTransformer();
+
+		if(transformer.isSet(transformer.inputCol())){
+			return OutputMode.SINGLE;
+		} else
+
+		if(transformer.isSet(transformer.inputCols())){
+			return OutputMode.MULTIPLE;
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
+	}
+
+	static
+	public List<BinaryFeature> encodeFeature(PMMLEncoder encoder, Feature feature, List<?> values, boolean dropLast){
+		List<BinaryFeature> result = new ArrayList<>();
+
+		if(dropLast){
+			values = values.subList(0, values.size() - 1);
+		}
+
+		for(Object value : values){
+			result.add(new BinaryFeature(encoder, feature, value));
 		}
 
 		return result;

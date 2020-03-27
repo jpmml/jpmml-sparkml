@@ -58,9 +58,22 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 
 		Row surrogateRow = surrogateRows.get(0);
 
+		String[] inputCols;
+
+		if(transformer.isSet(transformer.inputCol())){
+			inputCols = new String[]{transformer.getInputCol()};
+		} else
+
+		if(transformer.isSet(transformer.inputCols())){
+			inputCols = transformer.getInputCols();
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
+
 		List<Feature> result = new ArrayList<>();
 
-		String[] inputCols = transformer.getInputCols();
 		for(String inputCol : inputCols){
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
@@ -86,6 +99,23 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 		}
 
 		return result;
+	}
+
+	@Override
+	protected OutputMode getOutputMode(){
+		ImputerModel transformer = getTransformer();
+
+		if(transformer.isSet(transformer.inputCol())){
+			return OutputMode.SINGLE;
+		} else
+
+		if(transformer.isSet(transformer.inputCols())){
+			return OutputMode.MULTIPLE;
+		} else
+
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	static

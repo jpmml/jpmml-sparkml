@@ -100,7 +100,7 @@ public class ClassificationTest extends ConverterTest {
 
 	@Test
 	public void evaluateNeuralNetworkIris() throws Exception {
-		evaluate("NeuralNetwork", "Iris", new PMMLEquivalence(1e-13, 1e-13));
+		evaluate("NeuralNetwork", "Iris", new PMMLEquivalence(5e-13, 5e-13));
 	}
 
 	@Test
