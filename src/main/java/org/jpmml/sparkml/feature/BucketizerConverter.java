@@ -44,16 +44,18 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Bucketizer transformer = getTransformer();
 
+		InOutMode inputMode = getInputMode();
+
 		String[] inputCols;
 		double[][] splitsArray;
 
-		if(transformer.isSet(transformer.inputCol())){
-			inputCols = new String[]{transformer.getInputCol()};
+		if((InOutMode.SINGLE).equals(inputMode)){
+			inputCols = inputMode.getInputCols(transformer);
 			splitsArray = new double[][]{transformer.getSplits()};
 		} else
 
-		if(transformer.isSet(transformer.inputCols())){
-			inputCols = transformer.getInputCols();
+		if((InOutMode.MULTIPLE).equals(inputMode)){
+			inputCols = inputMode.getInputCols(transformer);
 			splitsArray = transformer.getSplitsArray();
 		} else
 
@@ -99,20 +101,15 @@ public class BucketizerConverter extends FeatureConverter<Bucketizer> {
 	}
 
 	@Override
-	protected OutputMode getOutputMode(){
+	protected InOutMode getInputMode(){
 		Bucketizer transformer = getTransformer();
 
-		if(transformer.isSet(transformer.inputCol())){
-			return OutputMode.SINGLE;
-		} else
+		return getInputMode(transformer);
+	}
 
-		if(transformer.isSet(transformer.inputCols())){
-			return OutputMode.MULTIPLE;
-		} else
-
-		{
-			throw new IllegalArgumentException();
-		}
+	@Override
+	protected InOutMode getOutputMode(){
+		return getInputMode();
 	}
 
 	static

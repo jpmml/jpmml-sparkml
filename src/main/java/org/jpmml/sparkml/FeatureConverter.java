@@ -21,6 +21,8 @@ package org.jpmml.sparkml;
 import java.util.List;
 
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.param.shared.HasInputCol;
+import org.apache.spark.ml.param.shared.HasInputCols;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasOutputCols;
 import org.dmg.pmml.FieldName;
@@ -40,9 +42,9 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	public void registerFeatures(SparkMLEncoder encoder){
 		Transformer transformer = getTransformer();
 
-		OutputMode outputMode = getOutputMode();
+		InOutMode outputMode = getOutputMode();
 
-		if((OutputMode.SINGLE).equals(outputMode)){
+		if((InOutMode.SINGLE).equals(outputMode)){
 			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
 
 			String outputCol = hasOutputCol.getOutputCol();
@@ -61,7 +63,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			encoder.putFeatures(outputCol, features);
 		} else
 
-		if((OutputMode.MULTIPLE).equals(outputMode)){
+		if((InOutMode.MULTIPLE).equals(outputMode)){
 			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
 
 			String[] outputCols = hasOutputCols.getOutputCols();
@@ -88,24 +90,64 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 		}
 	}
 
-	protected OutputMode getOutputMode(){
+	protected InOutMode getInputMode(){
+		throw new IllegalArgumentException();
+	}
+
+	protected InOutMode getOutputMode(){
 		T transformer = getTransformer();
 
-		if(transformer instanceof HasOutputCol){
-			return OutputMode.SINGLE;
-		} else
-
-		if(transformer instanceof HasOutputCols){
-			return OutputMode.MULTIPLE;
-		}
-
-		return null;
+		return getOutputMode(transformer);
 	}
 
 	static
-	protected enum OutputMode {
-		SINGLE,
-		MULTIPLE,
+	protected enum InOutMode {
+		SINGLE(){
+
+			@Override
+			public <T extends Transformer & HasInputCol & HasInputCols> String[] getInputCols(T transformer){
+				return new String[]{transformer.getInputCol()};
+			}
+
+			@Override
+			public <T extends Transformer> String[] getOutputCols(T transformer){
+
+				if(transformer instanceof HasOutputCol){
+					HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+
+					return new String[]{hasOutputCol.getOutputCol()};
+				}
+
+				throw new IllegalArgumentException();
+			}
+		},
+
+		MULTIPLE(){
+
+			@Override
+			public <T extends Transformer & HasInputCol & HasInputCols> String[] getInputCols(T transformer){
+				return transformer.getInputCols();
+			}
+
+			@Override
+			public <T extends Transformer> String[] getOutputCols(T transformer){
+
+				if(transformer instanceof HasOutputCols){
+					HasOutputCols hasOutputCols = (HasOutputCols)transformer;
+
+					return hasOutputCols.getOutputCols();
+				}
+
+				throw new IllegalArgumentException();
+			}
+		},
+		;
+
+		abstract
+		public <T extends Transformer & HasInputCol & HasInputCols> String[] getInputCols(T transformer);
+
+		abstract
+		public <T extends Transformer> String[] getOutputCols(T transformer);
 	}
 
 	static
@@ -135,5 +177,33 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 		}
 
 		return FieldName.create(transformer.getOutputCol());
+	}
+
+	static
+	protected <T extends HasInputCol & HasInputCols> InOutMode getInputMode(T transformer){
+
+		if(transformer.isSet(transformer.inputCol())){
+			return InOutMode.SINGLE;
+		} else
+
+		if(transformer.isSet(transformer.inputCols())){
+			return InOutMode.MULTIPLE;
+		}
+
+		throw new IllegalArgumentException();
+	}
+
+	static
+	protected <T extends Transformer> InOutMode getOutputMode(T transformer){
+
+		if(transformer instanceof HasOutputCol){
+			return InOutMode.SINGLE;
+		} else
+
+		if(transformer instanceof HasOutputCols){
+			return InOutMode.MULTIPLE;
+		}
+
+		return null;
 	}
 }

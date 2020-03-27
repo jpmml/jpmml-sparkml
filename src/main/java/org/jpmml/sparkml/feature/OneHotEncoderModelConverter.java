@@ -40,24 +40,13 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		OneHotEncoderModel transformer = getTransformer();
 
-		String[] inputCols;
-
-		if(transformer.isSet(transformer.inputCol())){
-			inputCols = new String[]{transformer.getInputCol()};
-		} else
-
-		if(transformer.isSet(transformer.inputCols())){
-			inputCols = transformer.getInputCols();
-		} else
-
-		{
-			throw new IllegalArgumentException();
-		}
-
 		boolean dropLast = transformer.getDropLast();
+
+		InOutMode inputMode = getInputMode();
 
 		List<Feature> result = new ArrayList<>();
 
+		String[] inputCols = inputMode.getInputCols(transformer);
 		for(String inputCol : inputCols){
 			CategoricalFeature categoricalFeature = (CategoricalFeature)encoder.getOnlyFeature(inputCol);
 
@@ -72,20 +61,15 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 	}
 
 	@Override
-	protected OutputMode getOutputMode(){
+	protected InOutMode getInputMode(){
 		OneHotEncoderModel transformer = getTransformer();
 
-		if(transformer.isSet(transformer.inputCol())){
-			return OutputMode.SINGLE;
-		} else
+		return getInputMode(transformer);
+	}
 
-		if(transformer.isSet(transformer.inputCols())){
-			return OutputMode.MULTIPLE;
-		} else
-
-		{
-			throw new IllegalArgumentException();
-		}
+	@Override
+	protected InOutMode getOutputMode(){
+		return getInputMode();
 	}
 
 	static
