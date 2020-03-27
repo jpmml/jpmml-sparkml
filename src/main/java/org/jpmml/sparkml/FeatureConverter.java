@@ -50,15 +50,6 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			String outputCol = hasOutputCol.getOutputCol();
 
 			List<Feature> features = encodeFeatures(encoder);
-			if(features.size() == 1){
-				Feature feature = features.get(0);
-
-				if(feature instanceof BinarizedCategoricalFeature){
-					BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)feature;
-
-					features = (List)binarizedCategoricalFeature.getBinaryFeatures();
-				}
-			}
 
 			encoder.putFeatures(outputCol, features);
 		} else
@@ -77,15 +68,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 				String outputCol = outputCols[i];
 				Feature feature = features.get(i);
 
-				if(feature instanceof BinarizedCategoricalFeature){
-					BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)feature;
-
-					encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
-				} else
-
-				{
-					encoder.putOnlyFeature(outputCol, feature);
-				}
+				encoder.putOnlyFeature(outputCol, feature);
 			}
 		}
 	}

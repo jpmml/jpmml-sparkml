@@ -21,6 +21,7 @@ package org.jpmml.sparkml.feature;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Iterables;
 import org.apache.spark.ml.feature.OneHotEncoderModel;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
@@ -58,6 +59,40 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 		}
 
 		return result;
+	}
+
+	@Override
+	public void registerFeatures(SparkMLEncoder encoder){
+		OneHotEncoderModel transformer = getTransformer();
+
+		List<Feature> features = encodeFeatures(encoder);
+
+		InOutMode outputMode = getOutputMode();
+
+		if((InOutMode.SINGLE).equals(outputMode)){
+			String outputCol = transformer.getOutputCol();
+
+			BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)Iterables.getOnlyElement(features);
+
+			encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
+		} else
+
+		if((InOutMode.MULTIPLE).equals(outputMode)){
+			String[] outputCols = transformer.getOutputCols();
+
+			if(outputCols.length != features.size()){
+				throw new IllegalArgumentException("Expected " + outputCols.length + " features, got " + features.size() + " features");
+			}
+
+			for(int i = 0; i < outputCols.length; i++){
+				String outputCol = outputCols[i];
+				Feature feature = features.get(i);
+
+				BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)feature;
+
+				encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
+			}
+		}
 	}
 
 	@Override
