@@ -18,7 +18,7 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -39,30 +39,53 @@ public class StopWordsRemoverConverter extends FeatureConverter<StopWordsRemover
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StopWordsRemover transformer = getTransformer();
 
-		DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(transformer.getInputCol());
-
-		Pattern pattern = Pattern.compile(documentFeature.getWordSeparatorRE());
-
-		DocumentFeature.StopWordSet stopWordSet = new DocumentFeature.StopWordSet(transformer.getCaseSensitive());
-
+		boolean caseSensitive = transformer.getCaseSensitive();
 		String[] stopWords = transformer.getStopWords();
-		for(String stopWord : stopWords){
-			String[] stopTokens = pattern.split(stopWord);
 
-			// Skip multi-token stopwords. See https://issues.apache.org/jira/browse/SPARK-18374
-			if(stopTokens.length > 1){
-				continue;
-			} // End if
+		InOutMode inputMode = getInputMode();
 
-			if(TermUtil.hasPunctuation(stopWord)){
-				throw new IllegalArgumentException("Punctuated stop words (" + stopWord + ") are not supported");
+		List<Feature> result = new ArrayList<>();
+
+		String[] inputCols = inputMode.getInputCols(transformer);
+		for(String inputCol : inputCols){
+			DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(inputCol);
+
+			Pattern pattern = Pattern.compile(documentFeature.getWordSeparatorRE());
+
+			DocumentFeature.StopWordSet stopWordSet = new DocumentFeature.StopWordSet(caseSensitive);
+
+			for(String stopWord : stopWords){
+				String[] stopTokens = pattern.split(stopWord);
+
+				// Skip multi-token stopwords. See https://issues.apache.org/jira/browse/SPARK-18374
+				if(stopTokens.length > 1){
+					continue;
+				} // End if
+
+				if(TermUtil.hasPunctuation(stopWord)){
+					throw new IllegalArgumentException("Punctuated stop words (" + stopWord + ") are not supported");
+				}
+
+				stopWordSet.add(stopWord);
 			}
 
-			stopWordSet.add(stopWord);
+			documentFeature.addStopWordSet(stopWordSet);
+
+			result.add(documentFeature);
 		}
 
-		documentFeature.addStopWordSet(stopWordSet);
+		return result;
+	}
 
-		return Collections.singletonList(documentFeature);
+	@Override
+	protected InOutMode getInputMode(){
+		StopWordsRemover transformer = getTransformer();
+
+		return getInputMode(transformer);
+	}
+
+	@Override
+	protected InOutMode getOutputMode(){
+		return getInputMode();
 	}
 }
