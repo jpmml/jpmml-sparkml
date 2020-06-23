@@ -110,12 +110,12 @@ public class ConverterFactory {
 
 	static
 	public void checkApplicationClasspath(){
-		String string = "<PMML xmlns=\"http://www.dmg.org/PMML-4_3\"/>";
+		String string = "<PMML xmlns=\"http://www.dmg.org/PMML-4_4\"/>";
 
 		try {
 			JAXBUtil.unmarshalPMML(new StreamSource(new StringReader(string)));
 		} catch(JAXBException je){
-			throw new IllegalArgumentException("Expected JPMML-Model version 1.4.X, got a legacy version. See https://issues.apache.org/jira/browse/SPARK-15526", je);
+			throw new IllegalArgumentException("Expected JPMML-Model version 1.5.X, got a legacy version. See https://issues.apache.org/jira/browse/SPARK-15526", je);
 		}
 	}
 

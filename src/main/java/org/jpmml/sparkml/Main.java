@@ -37,7 +37,7 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
-import org.jpmml.model.MetroJAXBUtil;
+import org.jpmml.model.metro.MetroJAXBUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
