@@ -48,7 +48,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 	public NeuralNetwork encodeModel(Schema schema){
 		MultilayerPerceptronClassificationModel model = getTransformer();
 
-		int[] layers = model.layers();
+		int[] layers = model.getLayers();
 		Vector weights = model.weights();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
