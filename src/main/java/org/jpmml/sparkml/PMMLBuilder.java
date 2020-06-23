@@ -62,7 +62,7 @@ import org.dmg.pmml.VerificationField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.model.MetroJAXBUtil;
+import org.jpmml.model.metro.MetroJAXBUtil;
 
 public class PMMLBuilder {
 

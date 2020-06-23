@@ -21,7 +21,7 @@ package org.jpmml.sparkml;
 import java.util.Map;
 
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
-import org.jpmml.evaluator.PMMLEquivalence;
+import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.Test;
 

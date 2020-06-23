@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import com.google.common.base.Equivalence;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.MoreFiles;
@@ -44,10 +45,11 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
-import org.jpmml.evaluator.ArchiveBatch;
-import org.jpmml.evaluator.IntegrationTest;
-import org.jpmml.evaluator.IntegrationTestBatch;
-import org.jpmml.evaluator.PMMLEquivalence;
+import org.jpmml.evaluator.ResultField;
+import org.jpmml.evaluator.testing.ArchiveBatch;
+import org.jpmml.evaluator.testing.IntegrationTest;
+import org.jpmml.evaluator.testing.IntegrationTestBatch;
+import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -67,18 +69,12 @@ public class ConverterTest extends IntegrationTest {
 	}
 
 	@Override
-	protected ArchiveBatch createBatch(String name, String dataset, Predicate<FieldName> predicate){
-		Predicate<FieldName> excludePredictionFields = excludeFields(FieldName.create("prediction"), FieldName.create("pmml(prediction)"));
+	protected ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
+		Predicate<ResultField> excludePredictionFields = excludeFields(FieldName.create("prediction"), FieldName.create("pmml(prediction)"));
 
-		if(predicate == null){
-			predicate = excludePredictionFields;
-		} else
+		predicate = predicate.and(excludePredictionFields);
 
-		{
-			predicate = predicate.and(excludePredictionFields);
-		}
-
-		ArchiveBatch result = new IntegrationTestBatch(name, dataset, predicate){
+		ArchiveBatch result = new IntegrationTestBatch(name, dataset, predicate, equivalence){
 
 			@Override
 			public IntegrationTest getIntegrationTest(){
@@ -155,10 +151,11 @@ public class ConverterTest extends IntegrationTest {
 				double precision = 1e-14;
 				double zeroThreshold = 1e-14;
 
-				// XXX
-				if(("NaiveBayes").equals(getName()) && (getDataset()).equals("Audit")){
-					precision = 1e-10;
-					zeroThreshold = 1e-10;
+				if(equivalence instanceof PMMLEquivalence){
+					PMMLEquivalence pmmlEquivalence = (PMMLEquivalence)equivalence;
+
+					precision = pmmlEquivalence.getPrecision();
+					zeroThreshold = pmmlEquivalence.getZeroThreshold();
 				}
 
 				PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
@@ -167,7 +164,7 @@ public class ConverterTest extends IntegrationTest {
 
 				PMML pmml = pmmlBuilder.build();
 
-				ensureValidity(pmml);
+				validatePMML(pmml);
 
 				for(File tmpResource : tmpResources){
 					MoreFiles.deleteRecursively(tmpResource.toPath());
