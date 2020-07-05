@@ -19,9 +19,13 @@
 package org.jpmml.sparkml;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
+import com.google.common.base.Equivalence;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
+import org.jpmml.evaluator.ResultField;
+import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.Test;
@@ -29,14 +33,29 @@ import org.junit.Test;
 public class RegressionTest extends SparkMLTest {
 
 	@Override
-	public Map<String, Object> getOptions(String name, String dataset){
-		Map<String, Object> options = super.getOptions(name, dataset);
+	public ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
+		predicate = excludePredictionFields(predicate);
 
-		if(("LinearRegression").equals(name) && ("Auto").equals(dataset)){
-			options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
-		}
+		ArchiveBatch result = new SparkMLTestBatch(name, dataset, predicate, equivalence){
 
-		return options;
+			@Override
+			public RegressionTest getIntegrationTest(){
+				return RegressionTest.this;
+			}
+
+			@Override
+			public Map<String, Object> getOptions(String name, String dataset){
+				Map<String, Object> options = super.getOptions(name, dataset);
+
+				if(("LinearRegression").equals(name) && ("Auto").equals(dataset)){
+					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+				}
+
+				return options;
+			}
+		};
+
+		return result;
 	}
 
 	@Test
