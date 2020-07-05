@@ -26,7 +26,7 @@ import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.Test;
 
-public class RegressionTest extends ConverterTest {
+public class RegressionTest extends SparkMLTest {
 
 	@Override
 	public Map<String, Object> getOptions(String name, String dataset){

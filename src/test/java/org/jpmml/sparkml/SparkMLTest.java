@@ -55,9 +55,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 abstract
-public class ConverterTest extends IntegrationTest {
+public class SparkMLTest extends IntegrationTest {
 
-	public ConverterTest(){
+	public SparkMLTest(){
 		super(new PMMLEquivalence(1e-14, 1e-14));
 	}
 
@@ -78,7 +78,7 @@ public class ConverterTest extends IntegrationTest {
 
 			@Override
 			public IntegrationTest getIntegrationTest(){
-				return ConverterTest.this;
+				return SparkMLTest.this;
 			}
 
 			@Override
@@ -114,7 +114,7 @@ public class ConverterTest extends IntegrationTest {
 					ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
 
 					MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
-					mlReader.session(ConverterTest.sparkSession);
+					mlReader.session(SparkMLTest.sparkSession);
 
 					pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 				}
@@ -130,7 +130,7 @@ public class ConverterTest extends IntegrationTest {
 						ByteStreams.copy(is, os);
 					}
 
-					dataset = ConverterTest.sparkSession.read()
+					dataset = SparkMLTest.sparkSession.read()
 						.format("csv")
 						.option("header", true)
 						.option("inferSchema", false)
@@ -180,13 +180,13 @@ public class ConverterTest extends IntegrationTest {
 	@BeforeClass
 	static
 	public void createSparkSession(){
-		ConverterTest.sparkSession = SparkSessionUtil.createSparkSession();
+		SparkMLTest.sparkSession = SparkSessionUtil.createSparkSession();
 	}
 
 	@AfterClass
 	static
 	public void destroySparkSession(){
-		ConverterTest.sparkSession = SparkSessionUtil.destroySparkSession(ConverterTest.sparkSession);
+		SparkMLTest.sparkSession = SparkSessionUtil.destroySparkSession(SparkMLTest.sparkSession);
 	}
 
 	public static SparkSession sparkSession = null;

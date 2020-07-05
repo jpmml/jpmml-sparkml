@@ -21,7 +21,7 @@ package org.jpmml.sparkml;
 import org.dmg.pmml.FieldName;
 import org.junit.Test;
 
-public class ClusteringTest extends ConverterTest {
+public class ClusteringTest extends SparkMLTest {
 
 	@Test
 	public void evaluateKMeansIris() throws Exception {
