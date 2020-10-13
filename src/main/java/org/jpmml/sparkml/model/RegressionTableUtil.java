@@ -33,6 +33,7 @@ import org.dmg.pmml.OpType;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.SchemaUtil;
@@ -105,7 +106,7 @@ public class RegressionTableUtil {
 			.setDefaultValue(0d)
 			.setDataType(DataType.DOUBLE);
 
-		DerivedField derivedField = encoder.createDerivedField(FieldName.create("lookup(" + name.getValue() + (identifier != null ? (", " + identifier) : "") + ")"), OpType.CONTINUOUS, DataType.DOUBLE, mapValues);
+		DerivedField derivedField = encoder.createDerivedField(identifier != null ? FieldNameUtil.create("lookup", name, identifier) : FieldNameUtil.create("lookup", name), OpType.CONTINUOUS, DataType.DOUBLE, mapValues);
 
 		featureIt.add(new ContinuousFeature(encoder, derivedField));
 		coefficientIt.add(1d);

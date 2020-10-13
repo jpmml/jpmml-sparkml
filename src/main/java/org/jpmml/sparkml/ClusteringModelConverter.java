@@ -32,6 +32,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
 import org.jpmml.converter.DerivedOutputField;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
@@ -60,7 +61,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		String predictionCol = model.getPredictionCol();
 
-		OutputField pmmlPredictedOutputField = ModelUtil.createPredictedField(FieldName.create("pmml(" + predictionCol + ")"), OpType.CATEGORICAL, DataType.STRING)
+		OutputField pmmlPredictedOutputField = ModelUtil.createPredictedField(FieldNameUtil.create("pmml", predictionCol), OpType.CATEGORICAL, DataType.STRING)
 			.setFinalResult(false);
 
 		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, true);

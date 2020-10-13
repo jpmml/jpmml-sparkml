@@ -152,7 +152,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			}
 		}
 
-		Schema result = new Schema(label, features);
+		Schema result = new Schema(encoder, label, features);
 
 		checkSchema(result);
 

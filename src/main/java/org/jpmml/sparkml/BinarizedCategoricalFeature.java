@@ -19,21 +19,22 @@
 package org.jpmml.sparkml;
 
 import java.util.List;
+import java.util.Objects;
 
-import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.jpmml.converter.BinaryFeature;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
+import org.jpmml.model.ToStringHelper;
 
 public class BinarizedCategoricalFeature extends Feature {
 
 	private List<BinaryFeature> binaryFeatures = null;
 
 
-	public BinarizedCategoricalFeature(PMMLEncoder encoder, FieldName name, DataType dataType, List<BinaryFeature> binaryFeatures){
-		super(encoder, name, dataType);
+	public BinarizedCategoricalFeature(PMMLEncoder encoder, CategoricalFeature categoricalFeature, List<BinaryFeature> binaryFeatures){
+		super(encoder, categoricalFeature.getName(), categoricalFeature.getDataType());
 
 		setBinaryFeatures(binaryFeatures);
 	}
@@ -43,16 +44,39 @@ public class BinarizedCategoricalFeature extends Feature {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public int hashCode(){
+		return (31 * super.hashCode()) + Objects.hashCode(this.getBinaryFeatures());
+	}
+
+	@Override
+	public boolean equals(Object object){
+
+		if(object instanceof BinarizedCategoricalFeature){
+			BinarizedCategoricalFeature that = (BinarizedCategoricalFeature)object;
+
+			return super.equals(that) && Objects.equals(this.getBinaryFeatures(), that.getBinaryFeatures());
+		}
+
+		return false;
+	}
+
+	@Override
+	protected ToStringHelper toStringHelper(){
+		return super.toStringHelper()
+			.add("binaryFeatures", getBinaryFeatures());
+	}
+
 	public List<BinaryFeature> getBinaryFeatures(){
 		return this.binaryFeatures;
 	}
 
 	private void setBinaryFeatures(List<BinaryFeature> binaryFeatures){
 
-		if(binaryFeatures == null || binaryFeatures.size() < 1){
+		if(binaryFeatures != null && binaryFeatures.size() < 1){
 			throw new IllegalArgumentException();
 		}
 
-		this.binaryFeatures = binaryFeatures;
+		this.binaryFeatures = Objects.requireNonNull(binaryFeatures);
 	}
 }

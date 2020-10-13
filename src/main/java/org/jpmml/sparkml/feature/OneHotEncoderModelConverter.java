@@ -51,7 +51,7 @@ public class OneHotEncoderModelConverter extends FeatureConverter<OneHotEncoderM
 
 			List<BinaryFeature> binaryFeatures = OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, values, dropLast);
 
-			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature.getName(), categoricalFeature.getDataType(), binaryFeatures));
+			result.add(new BinarizedCategoricalFeature(encoder, categoricalFeature, binaryFeatures));
 		}
 
 		return result;

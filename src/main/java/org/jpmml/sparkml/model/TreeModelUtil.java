@@ -138,7 +138,7 @@ public class TreeModelUtil {
 
 					ImpurityCalculator impurityCalculator = leafNode.impurityStats();
 
-					node.setRecordCount(impurityCalculator.count());
+					node.setRecordCount(ValueUtil.narrow(impurityCalculator.count()));
 
 					List<ScoreDistribution> scoreDistributions = scoreDistributionManager.createScoreDistribution(this.categoricalLabel, impurityCalculator.stats());
 

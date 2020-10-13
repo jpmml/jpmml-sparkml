@@ -28,7 +28,7 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FeatureUtil;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
@@ -59,7 +59,7 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 		if(transformer.getToLowercase()){
 			Apply apply = PMMLUtil.createApply(PMMLFunctions.LOWERCASE, feature.ref());
 
-			field = encoder.createDerivedField(FeatureUtil.createName("lowercase", feature), OpType.CATEGORICAL, DataType.STRING, apply);
+			field = encoder.createDerivedField(FieldNameUtil.create("lowercase", feature), OpType.CATEGORICAL, DataType.STRING, apply);
 		}
 
 		return Collections.singletonList(new DocumentFeature(encoder, field, transformer.getPattern()));
