@@ -119,7 +119,7 @@ public class TreeModelUtil {
 				}
 			};
 
-			treeModel = encodeTreeModel(model, predicateManager, MiningFunction.REGRESSION, scoreEncoder, schema);
+			treeModel = encodeTreeModel(MiningFunction.REGRESSION, scoreEncoder, model, predicateManager, schema);
 		} else
 
 		if(model instanceof DecisionTreeClassificationModel){
@@ -148,7 +148,7 @@ public class TreeModelUtil {
 				}
 			};
 
-			treeModel = encodeTreeModel(model, predicateManager, MiningFunction.CLASSIFICATION, scoreEncoder, schema);
+			treeModel = encodeTreeModel(MiningFunction.CLASSIFICATION, scoreEncoder, model, predicateManager, schema);
 		} else
 
 		{
@@ -166,8 +166,8 @@ public class TreeModelUtil {
 	}
 
 	static
-	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(M model, PredicateManager predicateManager, MiningFunction miningFunction, ScoreEncoder scoreEncoder, Schema schema){
-		Node root = encodeNode(True.INSTANCE, model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
+	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(MiningFunction miningFunction, ScoreEncoder scoreEncoder, M model, PredicateManager predicateManager, Schema schema){
+		Node root = encodeNode(True.INSTANCE, scoreEncoder, model.rootNode(), predicateManager, new CategoryManager(), schema);
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
@@ -176,7 +176,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeNode(Predicate predicate, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, ScoreEncoder scoreEncoder, Schema schema){
+	private Node encodeNode(Predicate predicate, ScoreEncoder scoreEncoder, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, Schema schema){
 
 		if(sparkNode instanceof org.apache.spark.ml.tree.LeafNode){
 			org.apache.spark.ml.tree.LeafNode leafNode = (org.apache.spark.ml.tree.LeafNode)sparkNode;
@@ -295,8 +295,8 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			Node leftChild = encodeNode(leftPredicate, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
-			Node rightChild = encodeNode(rightPredicate, internalNode.rightChild(), predicateManager, rightCategoryManager, scoreEncoder, schema);
+			Node leftChild = encodeNode(leftPredicate, scoreEncoder, internalNode.leftChild(), predicateManager, leftCategoryManager, schema);
+			Node rightChild = encodeNode(rightPredicate, scoreEncoder, internalNode.rightChild(), predicateManager, rightCategoryManager, schema);
 
 			Node result = new BranchNode(null, predicate)
 				.addNodes(leftChild, rightChild);
