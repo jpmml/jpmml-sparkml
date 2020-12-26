@@ -39,6 +39,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.sql.SparkSession;
 import org.jpmml.model.JAXBUtil;
 
 public class ConverterFactory {
@@ -99,7 +100,17 @@ public class ConverterFactory {
 
 	static
 	public void checkVersion(){
-		SparkContext sparkContext = SparkContext.getOrCreate();
+		SparkSession sparkSession;
+
+		try {
+			sparkSession = SparkSession.active();
+		} catch(IllegalStateException ise){
+			logger.warn("Failed to check Apache Spark ML version", ise);
+
+			return;
+		}
+
+		SparkContext sparkContext = sparkSession.sparkContext();
 
 		int[] version = parseVersion(sparkContext.version());
 
