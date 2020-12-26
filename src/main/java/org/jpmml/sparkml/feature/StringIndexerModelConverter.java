@@ -35,7 +35,7 @@ import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.Value;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FeatureUtil;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.InvalidValueDecorator;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
@@ -118,7 +118,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 							.addExpressions(setApply)
 							.addExpressions(feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
 
-						field = encoder.createDerivedField(FeatureUtil.createName("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
+						field = encoder.createDerivedField(FieldNameUtil.create("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 					}
 					break;
 				case "error":

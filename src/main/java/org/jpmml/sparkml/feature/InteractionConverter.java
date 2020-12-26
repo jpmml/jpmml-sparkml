@@ -27,6 +27,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.InteractionFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -74,7 +75,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 					// XXX
 					inputCol = name.getValue();
 
-					features = (List)OneHotEncoderConverter.encodeFeature(categoricalFeature.getEncoder(), categoricalFeature, categoricalFeature.getValues(), false);
+					features = (List)OneHotEncoderConverter.encodeFeature(encoder, categoricalFeature, categoricalFeature.getValues(), false);
 				}
 			} // End if
 
@@ -94,7 +95,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				for(Feature left : result){
 
 					for(Feature right : features){
-						interactionFeatures.add(new InteractionFeature(encoder, FieldName.create(sb.toString() + "[" + index + "]"), DataType.DOUBLE, Arrays.asList(left, right)));
+						interactionFeatures.add(new InteractionFeature(encoder, FieldNameUtil.select(FieldName.create(sb.toString()), index), DataType.DOUBLE, Arrays.asList(left, right)));
 
 						index++;
 					}

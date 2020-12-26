@@ -41,6 +41,8 @@ import org.jpmml.model.metro.MetroJAXBUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
 
@@ -150,38 +152,62 @@ public class Main {
 		StructType schema;
 
 		try(InputStream is = new FileInputStream(this.schemaInput)){
+			logger.info("Loading schema..");
+
 			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
 
+			long begin = System.currentTimeMillis();
 			schema = (StructType)DataType.fromJson(json);
+			long end = System.currentTimeMillis();
+
+			logger.info("Loaded schema in {} ms.", (end - begin));
+		} catch(Exception e){
+			logger.error("Failed to load schema", e);
+
+			throw e;
 		}
 
-		File pipelineDir = this.pipelineInput;
+		PipelineModel pipelineModel;
 
-		zipFile:
-		{
-			ZipFile zipFile;
+		try {
+			logger.info("Loading pipeline model..");
 
-			try {
-				zipFile = new ZipFile(pipelineDir);
-			} catch(IOException ioe){
-				break zipFile;
-			}
+			File pipelineDir = this.pipelineInput;
 
-			try {
-				pipelineDir = File.createTempFile("PipelineModel", "");
-				if(!pipelineDir.delete()){
-					throw new IOException();
+			zipFile:
+			{
+				ZipFile zipFile;
+
+				try {
+					zipFile = new ZipFile(pipelineDir);
+				} catch(IOException ioe){
+					break zipFile;
 				}
 
-				pipelineDir.mkdirs();
+				try {
+					pipelineDir = File.createTempFile("PipelineModel", "");
+					if(!pipelineDir.delete()){
+						throw new IOException();
+					}
 
-				ZipUtil.uncompress(zipFile, pipelineDir);
-			} finally {
-				zipFile.close();
+					pipelineDir.mkdirs();
+
+					ZipUtil.uncompress(zipFile, pipelineDir);
+				} finally {
+					zipFile.close();
+				}
 			}
-		}
 
-		PipelineModel pipelineModel = PipelineModel.load(pipelineDir.getAbsolutePath());
+			long begin = System.currentTimeMillis();
+			pipelineModel = PipelineModel.load(pipelineDir.getAbsolutePath());
+			long end = System.currentTimeMillis();
+
+			logger.info("Loaded pipeline model in {} ms.", (end - begin));
+		} catch(Exception e){
+			logger.error("Failed to load pipeline model", e);
+
+			throw e;
+		}
 
 		Map<String, Object> options = new LinkedHashMap<>();
 		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
@@ -189,12 +215,36 @@ public class Main {
 		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, this.lookupThreshold);
 		options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, this.representation);
 
-		PMML pmml = new PMMLBuilder(schema, pipelineModel)
-			.putOptions(options)
-			.build();
+		PMML pmml;
+
+		try {
+			logger.info("Converting pipeline model to PMML..");
+
+			long begin = System.currentTimeMillis();
+			pmml = new PMMLBuilder(schema, pipelineModel)
+				.putOptions(options)
+				.build();
+			long end = System.currentTimeMillis();
+
+			logger.info("Converted pipeline to PMML in {} ms.", (end - begin));
+		} catch(Exception e){
+			logger.info("Failed to convert pipeline to PMML", e);
+
+			throw e;
+		}
 
 		try(OutputStream os = new FileOutputStream(this.output)){
+			logger.info("Marshalling PMML..");
+
+			long begin = System.currentTimeMillis();
 			MetroJAXBUtil.marshalPMML(pmml, os);
+			long end = System.currentTimeMillis();
+
+			logger.info("Marshalled PMML in {} ms.", (end - begin));
+		} catch(Exception e){
+			logger.error("Failed to marshal PMML", e);
+
+			throw e;
 		}
 	}
 
@@ -221,4 +271,6 @@ public class Main {
 	public void setOutput(File output){
 		this.output = output;
 	}
+
+	private static final Logger logger = LoggerFactory.getLogger(Main.class);
 }
