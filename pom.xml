@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>jpmml-converter</artifactId>
-			<version>1.4.3</version>
+			<version>1.4.5</version>
 		</dependency>
 
 		<dependency>
@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-evaluator-testing</artifactId>
-			<version>1.5.3</version>
+			<version>1.5.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
