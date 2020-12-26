@@ -19,23 +19,42 @@
 package org.jpmml.sparkml;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
+import com.google.common.base.Equivalence;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
+import org.jpmml.evaluator.ResultField;
+import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.junit.Test;
 
-public class ClassificationTest extends ConverterTest {
+public class ClassificationTest extends SparkMLTest {
 
 	@Override
-	public Map<String, Object> getOptions(String name, String dataset){
-		Map<String, Object> options = super.getOptions(name, dataset);
+	public ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
+		predicate = excludePredictionFields(predicate);
 
-		if(("LogisticRegression").equals(name) && ("Audit").equals(dataset)){
-			options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
-		}
+		ArchiveBatch result = new SparkMLTestBatch(name, dataset, predicate, equivalence){
 
-		return options;
+			@Override
+			public ClassificationTest getIntegrationTest(){
+				return ClassificationTest.this;
+			}
+
+			@Override
+			public Map<String, Object> getOptions(String name, String dataset){
+				Map<String, Object> options = super.getOptions(name, dataset);
+
+				if(("LogisticRegression").equals(name) && ("Audit").equals(dataset)){
+					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+				}
+
+				return options;
+			}
+		};
+
+		return result;
 	}
 
 	@Test

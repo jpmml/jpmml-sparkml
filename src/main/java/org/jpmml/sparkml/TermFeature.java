@@ -33,6 +33,7 @@ import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.ParameterField;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.model.ToStringHelper;
@@ -47,7 +48,7 @@ public class TermFeature extends Feature {
 
 
 	public TermFeature(PMMLEncoder encoder, DefineFunction defineFunction, Feature feature, String value){
-		super(encoder, FieldName.create(defineFunction.getName() + "(" + value + ")"), defineFunction.getDataType());
+		super(encoder, FieldNameUtil.create(defineFunction.getName(), value), defineFunction.getDataType());
 
 		setDefineFunction(defineFunction);
 
@@ -61,7 +62,7 @@ public class TermFeature extends Feature {
 	}
 
 	public WeightedTermFeature toWeightedTermFeature(Number weight){
-		PMMLEncoder encoder = ensureEncoder();
+		PMMLEncoder encoder = getEncoder();
 
 		DefineFunction defineFunction = getDefineFunction();
 

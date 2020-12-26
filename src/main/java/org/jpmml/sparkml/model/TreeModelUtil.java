@@ -55,6 +55,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.ScoreDistributionManager;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
@@ -67,24 +68,26 @@ public class TreeModelUtil {
 	static
 	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, Schema schema){
 		PredicateManager predicateManager = new PredicateManager();
+		ScoreDistributionManager scoreDistributionManager = new ScoreDistributionManager();
 
-		return encodeDecisionTree(converter, predicateManager, schema);
+		return encodeDecisionTree(converter, predicateManager, scoreDistributionManager, schema);
 	}
 
 	static
-	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, PredicateManager predicateManager, Schema schema){
-		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, schema);
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
+		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, scoreDistributionManager, schema);
 	}
 
 	static
 	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, Schema schema){
 		PredicateManager predicateManager = new PredicateManager();
+		ScoreDistributionManager scoreDistributionManager = new ScoreDistributionManager();
 
-		return encodeDecisionTreeEnsemble(converter, predicateManager, schema);
+		return encodeDecisionTreeEnsemble(converter, predicateManager, scoreDistributionManager, schema);
 	}
 
 	static
-	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, PredicateManager predicateManager, Schema schema){
+	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
 		M model = converter.getTransformer();
 
 		Schema segmentSchema = schema.toAnonymousSchema();
@@ -93,7 +96,7 @@ public class TreeModelUtil {
 
 		T[] trees = model.trees();
 		for(T tree : trees){
-			TreeModel treeModel = encodeDecisionTree(converter, tree, predicateManager, segmentSchema);
+			TreeModel treeModel = encodeDecisionTree(converter, tree, predicateManager, scoreDistributionManager, segmentSchema);
 
 			treeModels.add(treeModel);
 		}
@@ -102,7 +105,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(ModelConverter<?> converter, M model, PredicateManager predicateManager, Schema schema){
+	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(ModelConverter<?> converter, M model, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
 		TreeModel treeModel;
 
 		if(model instanceof DecisionTreeRegressionModel){
@@ -116,7 +119,7 @@ public class TreeModelUtil {
 				}
 			};
 
-			treeModel = encodeTreeModel(model, predicateManager, MiningFunction.REGRESSION, scoreEncoder, schema);
+			treeModel = encodeTreeModel(MiningFunction.REGRESSION, scoreEncoder, model, predicateManager, schema);
 		} else
 
 		if(model instanceof DecisionTreeClassificationModel){
@@ -135,22 +138,17 @@ public class TreeModelUtil {
 
 					ImpurityCalculator impurityCalculator = leafNode.impurityStats();
 
-					node.setRecordCount(impurityCalculator.count());
+					node.setRecordCount(ValueUtil.narrow(impurityCalculator.count()));
 
-					List<ScoreDistribution> scoreDistributions = node.getScoreDistributions();
+					List<ScoreDistribution> scoreDistributions = scoreDistributionManager.createScoreDistribution(this.categoricalLabel, impurityCalculator.stats());
 
-					double[] stats = impurityCalculator.stats();
-					for(int i = 0; i < stats.length; i++){
-						ScoreDistribution scoreDistribution = new ScoreDistribution(this.categoricalLabel.getValue(i), stats[i]);
-
-						scoreDistributions.add(scoreDistribution);
-					}
+					(node.getScoreDistributions()).addAll(scoreDistributions);
 
 					return node;
 				}
 			};
 
-			treeModel = encodeTreeModel(model, predicateManager, MiningFunction.CLASSIFICATION, scoreEncoder, schema);
+			treeModel = encodeTreeModel(MiningFunction.CLASSIFICATION, scoreEncoder, model, predicateManager, schema);
 		} else
 
 		{
@@ -168,8 +166,8 @@ public class TreeModelUtil {
 	}
 
 	static
-	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(M model, PredicateManager predicateManager, MiningFunction miningFunction, ScoreEncoder scoreEncoder, Schema schema){
-		Node root = encodeNode(True.INSTANCE, model.rootNode(), predicateManager, new CategoryManager(), scoreEncoder, schema);
+	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(MiningFunction miningFunction, ScoreEncoder scoreEncoder, M model, PredicateManager predicateManager, Schema schema){
+		Node root = encodeNode(True.INSTANCE, scoreEncoder, model.rootNode(), predicateManager, new CategoryManager(), schema);
 
 		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
@@ -178,7 +176,7 @@ public class TreeModelUtil {
 	}
 
 	static
-	private Node encodeNode(Predicate predicate, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, ScoreEncoder scoreEncoder, Schema schema){
+	private Node encodeNode(Predicate predicate, ScoreEncoder scoreEncoder, org.apache.spark.ml.tree.Node sparkNode, PredicateManager predicateManager, CategoryManager categoryManager, Schema schema){
 
 		if(sparkNode instanceof org.apache.spark.ml.tree.LeafNode){
 			org.apache.spark.ml.tree.LeafNode leafNode = (org.apache.spark.ml.tree.LeafNode)sparkNode;
@@ -284,8 +282,8 @@ public class TreeModelUtil {
 					leftCategoryManager = categoryManager.fork(name, leftValues);
 					rightCategoryManager = categoryManager.fork(name, rightValues);
 
-					leftPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, leftValues);
-					rightPredicate = predicateManager.createSimpleSetPredicate(categoricalFeature, rightValues);
+					leftPredicate = predicateManager.createPredicate(categoricalFeature, leftValues);
+					rightPredicate = predicateManager.createPredicate(categoricalFeature, rightValues);
 				} else
 
 				{
@@ -297,8 +295,8 @@ public class TreeModelUtil {
 				throw new IllegalArgumentException();
 			}
 
-			Node leftChild = encodeNode(leftPredicate, internalNode.leftChild(), predicateManager, leftCategoryManager, scoreEncoder, schema);
-			Node rightChild = encodeNode(rightPredicate, internalNode.rightChild(), predicateManager, rightCategoryManager, scoreEncoder, schema);
+			Node leftChild = encodeNode(leftPredicate, scoreEncoder, internalNode.leftChild(), predicateManager, leftCategoryManager, schema);
+			Node rightChild = encodeNode(rightPredicate, scoreEncoder, internalNode.rightChild(), predicateManager, rightCategoryManager, schema);
 
 			Node result = new BranchNode(null, predicate)
 				.addNodes(leftChild, rightChild);
