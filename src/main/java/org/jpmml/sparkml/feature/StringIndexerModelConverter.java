@@ -30,6 +30,7 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
+import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.Value;
@@ -37,6 +38,7 @@ import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.InvalidValueDecorator;
+import org.jpmml.converter.MissingValueDecorator;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -78,6 +80,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			DataField dataField = (DataField)field;
 
 			InvalidValueDecorator invalidValueDecorator;
+			MissingValueDecorator missingValueDecorator;
 
 			switch(handleInvalid){
 				case "keep":
@@ -87,6 +90,10 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 						PMMLUtil.addValues(dataField, Collections.singletonList(invalidCategory), Value.Property.INVALID);
 
 						categories.add(invalidCategory);
+
+						missingValueDecorator = new MissingValueDecorator(MissingValueTreatmentMethod.AS_VALUE, invalidCategory);
+
+						encoder.addDecorator(dataField, missingValueDecorator);
 					}
 					break;
 				case "error":
