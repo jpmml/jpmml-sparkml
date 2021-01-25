@@ -157,6 +157,16 @@ import org.jpmml.sparkml.PMMLBuilder
 val pmml = new PMMLBuilder(irisSchema, pipelineModel).build()
 ```
 
+The representation of individual Spark ML pipeline stages can be customized via conversion options:
+```scala
+import org.jpmml.sparkml.PMMLBuilder
+import org.jpmml.sparkml.model.HasTreeOptions
+
+val dtClassifierModel = pipelineModel.stages(1)
+
+val pmml = new PMMLBuilder(irisSchema, pipelineModel).putOption(dtClassifierModel, HasTreeOptions.OPTION_COMPACT, false).putOption(dtClassifierModel, HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, true).build()
+```
+
 Viewing the in-memory PMML class model object:
 ```scala
 import javax.xml.transform.stream.StreamResult
