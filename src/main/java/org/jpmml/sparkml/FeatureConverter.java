@@ -27,6 +27,8 @@ import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasOutputCols;
 import org.dmg.pmml.FieldName;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FieldNameUtil;
+import org.jpmml.converter.SchemaUtil;
 
 abstract
 public class FeatureConverter<T extends Transformer> extends TransformerConverter<T> {
@@ -60,9 +62,8 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			String[] outputCols = hasOutputCols.getOutputCols();
 
 			List<Feature> features = encodeFeatures(encoder);
-			if(outputCols.length != features.size()){
-				throw new IllegalArgumentException("Expected " + outputCols.length + " features, got " + features.size() + " features");
-			}
+
+			SchemaUtil.checkSize(outputCols.length, features);
 
 			for(int i = 0; i < outputCols.length; i++){
 				String outputCol = outputCols[i];

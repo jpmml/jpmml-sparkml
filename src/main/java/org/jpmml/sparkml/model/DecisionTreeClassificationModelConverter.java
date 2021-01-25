@@ -19,14 +19,22 @@
 package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class DecisionTreeClassificationModelConverter extends ClassificationModelConverter<DecisionTreeClassificationModel> implements HasTreeOptions {
+public class DecisionTreeClassificationModelConverter extends ClassificationModelConverter<DecisionTreeClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public DecisionTreeClassificationModelConverter(DecisionTreeClassificationModel model){
 		super(model);
+	}
+
+	@Override
+	public Vector getFeatureImportances(){
+		DecisionTreeClassificationModel model = getTransformer();
+
+		return model.featureImportances();
 	}
 
 	@Override

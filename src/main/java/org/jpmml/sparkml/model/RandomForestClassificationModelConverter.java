@@ -21,6 +21,7 @@ package org.jpmml.sparkml.model;
 import java.util.List;
 
 import org.apache.spark.ml.classification.RandomForestClassificationModel;
+import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segmentation;
@@ -30,10 +31,17 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> implements HasTreeOptions {
+public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public RandomForestClassificationModelConverter(RandomForestClassificationModel model){
 		super(model);
+	}
+
+	@Override
+	public Vector getFeatureImportances(){
+		RandomForestClassificationModel model = getTransformer();
+
+		return model.featureImportances();
 	}
 
 	@Override

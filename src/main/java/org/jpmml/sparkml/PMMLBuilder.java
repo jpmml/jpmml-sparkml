@@ -61,8 +61,11 @@ import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.VerificationField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.metro.MetroJAXBUtil;
+import org.jpmml.sparkml.model.HasFeatureImportances;
+import org.jpmml.sparkml.model.HasTreeOptions;
 
 public class PMMLBuilder {
 
@@ -121,6 +124,29 @@ public class PMMLBuilder {
 
 				models.add(model);
 
+				featureImportances:
+				if(modelConverter instanceof HasFeatureImportances){
+					HasFeatureImportances hasFeatureImportances = (HasFeatureImportances)modelConverter;
+
+					Boolean estimateFeatureImportances = (Boolean)modelConverter.getOption(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.FALSE);
+					if(!estimateFeatureImportances){
+						break featureImportances;
+					}
+
+					List<Double> featureImportances = VectorUtil.toList(hasFeatureImportances.getFeatureImportances());
+
+					List<Feature> features = modelConverter.getFeatures(encoder);
+
+					SchemaUtil.checkSize(featureImportances.size(), features);
+
+					for(int i = 0; i < featureImportances.size(); i++){
+						Double featureImportance = featureImportances.get(i);
+						Feature feature = features.get(i);
+
+						encoder.addFeatureImportance(model, feature.getName(), featureImportance);
+					}
+				} // End if
+
 				hasPredictionCol:
 				if(transformer instanceof HasPredictionCol){
 					HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
@@ -153,19 +179,19 @@ public class PMMLBuilder {
 
 		org.dmg.pmml.Model model;
 
+		if(models.size() == 0){
+			model = null;
+		} else
+
 		if(models.size() == 1){
 			model = Iterables.getOnlyElement(models);
 		} else
 
-		if(models.size() > 1){
-			model = MiningModelUtil.createModelChain(models);
-		} else
-
 		{
-			throw new IllegalArgumentException("Expected a pipeline with one or more models, got a pipeline with zero models");
+			model = MiningModelUtil.createModelChain(models);
 		} // End if
 
-		if(postProcessorNames.size() > 0){
+		if((model != null) && (postProcessorNames.size() > 0)){
 			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
 			Output output = ModelUtil.ensureOutput(finalModel);
@@ -185,7 +211,7 @@ public class PMMLBuilder {
 
 		PMML pmml = encoder.encodePMML(model);
 
-		if((predictionColumns.size() > 0 || probabilityColumns.size() > 0) && (verification != null)){
+		if((model != null) && (predictionColumns.size() > 0 || probabilityColumns.size() > 0) && (verification != null)){
 			Dataset<Row> dataset = verification.getDataset();
 			Dataset<Row> transformedDataset = verification.getTransformedDataset();
 			Double precision = verification.getPrecision();

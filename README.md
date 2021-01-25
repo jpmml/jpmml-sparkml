@@ -133,32 +133,45 @@ The build produces two JAR files:
 
 ### Library
 
-Fitting a Spark ML pipeline that only makes use of supported Transformer types:
-```java
-DataFrame irisData = ...;
+Fitting a Spark ML pipeline:
+```scala
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.classification.DecisionTreeClassifier
+import org.apache.spark.ml.feature.RFormula
 
-StructType schema = irisData.schema();
+val irisData = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("Iris.csv")
+val irisSchema = irisData.schema
 
-RFormula formula = new RFormula()
-	.setFormula("Species ~ .");
+val rFormula = new RFormula().setFormula("Species ~ .")
+val dtClassifier = new DecisionTreeClassifier().setLabelCol(rFormula.getLabelCol).setFeaturesCol(rFormula.getFeaturesCol)
+val pipeline = new Pipeline().setStages(Array(rFormula, dtClassifier))
 
-DecisionTreeClassifier classifier = new DecisionTreeClassifier()
-	.setLabelCol(formula.getLabelCol())
-	.setFeaturesCol(formula.getFeaturesCol());
-
-Pipeline pipeline = new Pipeline()
-	.setStages(new PipelineStage[]{formula, classifier});
-
-PipelineModel pipelineModel = pipeline.fit(irisData);
+val pipelineModel = pipeline.fit(irisData)
 ```
 
-Converting the Spark ML pipeline to PMML using the `org.jpmml.sparkml.PMMLBuilder` builder class:
-```java
-PMML pmml = new PMMLBuilder(schema, pipelineModel)
-	.build();
+Converting the fitted Spark ML pipeline to an in-memory PMML class model object:
+```scala
+import org.jpmml.sparkml.PMMLBuilder
 
-// Viewing the result
-JAXBUtil.marshalPMML(pmml, new StreamResult(System.out));
+val pmml = new PMMLBuilder(irisSchema, pipelineModel).build()
+```
+
+The representation of individual Spark ML pipeline stages can be customized via conversion options:
+```scala
+import org.jpmml.sparkml.PMMLBuilder
+import org.jpmml.sparkml.model.HasTreeOptions
+
+val dtClassifierModel = pipelineModel.stages(1)
+
+val pmml = new PMMLBuilder(irisSchema, pipelineModel).putOption(dtClassifierModel, HasTreeOptions.OPTION_COMPACT, false).putOption(dtClassifierModel, HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, true).build()
+```
+
+Viewing the in-memory PMML class model object:
+```scala
+import javax.xml.transform.stream.StreamResult
+import org.jpmml.model.JAXBUtil
+
+JAXBUtil.marshalPMML(pmml, new StreamResult(System.out))
 ```
 
 ### Example application
