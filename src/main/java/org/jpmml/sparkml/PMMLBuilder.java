@@ -61,8 +61,10 @@ import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.VerificationField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.metro.MetroJAXBUtil;
+import org.jpmml.sparkml.model.HasFeatureImportances;
 
 public class PMMLBuilder {
 
@@ -120,6 +122,23 @@ public class PMMLBuilder {
 				org.dmg.pmml.Model model = modelConverter.registerModel(encoder);
 
 				models.add(model);
+
+				if(modelConverter instanceof HasFeatureImportances){
+					HasFeatureImportances hasFeatureImportances = (HasFeatureImportances)modelConverter;
+
+					List<Double> featureImportances = VectorUtil.toList(hasFeatureImportances.getFeatureImportances());
+
+					List<Feature> features = modelConverter.getFeatures(encoder);
+
+					SchemaUtil.checkSize(featureImportances.size(), features);
+
+					for(int i = 0; i < featureImportances.size(); i++){
+						Double featureImportance = featureImportances.get(i);
+						Feature feature = features.get(i);
+
+						encoder.addFeatureImportance(model, feature.getName(), featureImportance);
+					}
+				} // End if
 
 				hasPredictionCol:
 				if(transformer instanceof HasPredictionCol){

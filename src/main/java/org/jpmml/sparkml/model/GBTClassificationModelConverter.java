@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.google.common.primitives.Doubles;
 import org.apache.spark.ml.classification.GBTClassificationModel;
+import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
@@ -35,10 +36,17 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
-public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> implements HasTreeOptions {
+public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public GBTClassificationModelConverter(GBTClassificationModel model){
 		super(model);
+	}
+
+	@Override
+	public Vector getFeatureImportances(){
+		GBTClassificationModel model = getTransformer();
+
+		return model.featureImportances();
 	}
 
 	@Override

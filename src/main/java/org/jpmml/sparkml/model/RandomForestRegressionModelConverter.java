@@ -20,6 +20,7 @@ package org.jpmml.sparkml.model;
 
 import java.util.List;
 
+import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.RandomForestRegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.mining.MiningModel;
@@ -30,10 +31,17 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
 
-public class RandomForestRegressionModelConverter extends RegressionModelConverter<RandomForestRegressionModel> implements HasTreeOptions {
+public class RandomForestRegressionModelConverter extends RegressionModelConverter<RandomForestRegressionModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public RandomForestRegressionModelConverter(RandomForestRegressionModel model){
 		super(model);
+	}
+
+	@Override
+	public Vector getFeatureImportances(){
+		RandomForestRegressionModel model = getTransformer();
+
+		return model.featureImportances();
 	}
 
 	@Override

@@ -61,6 +61,17 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 	public org.dmg.pmml.Model encodeModel(Schema schema);
 
 	public Schema encodeSchema(SparkMLEncoder encoder){
+		Label label = getLabel(encoder);
+		List<Feature> features = getFeatures(encoder);
+
+		Schema result = new Schema(encoder, label, features);
+
+		checkSchema(result);
+
+		return result;
+	}
+
+	public Label getLabel(SparkMLEncoder encoder){
 		T model = getTransformer();
 
 		Label label = null;
@@ -139,6 +150,12 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			SchemaUtil.checkSize(numClasses, categoricalLabel);
 		}
 
+		return label;
+	}
+
+	public List<Feature> getFeatures(SparkMLEncoder encoder){
+		T model = getTransformer();
+
 		String featuresCol = model.getFeaturesCol();
 
 		List<Feature> features = encoder.getFeatures(featuresCol);
@@ -152,11 +169,7 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 			}
 		}
 
-		Schema result = new Schema(encoder, label, features);
-
-		checkSchema(result);
-
-		return result;
+		return features;
 	}
 
 	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model model, SparkMLEncoder encoder){
