@@ -18,15 +18,23 @@
  */
 package org.jpmml.sparkml.model;
 
+import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.RegressionModelConverter;
 
-public class DecisionTreeRegressionModelConverter extends RegressionModelConverter<DecisionTreeRegressionModel> implements HasTreeOptions {
+public class DecisionTreeRegressionModelConverter extends RegressionModelConverter<DecisionTreeRegressionModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public DecisionTreeRegressionModelConverter(DecisionTreeRegressionModel model){
 		super(model);
+	}
+
+	@Override
+	public Vector getFeatureImportances(){
+		DecisionTreeRegressionModel model = getTransformer();
+
+		return model.featureImportances();
 	}
 
 	@Override

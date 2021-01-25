@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Villu Ruusmann
+ * Copyright (c) 2021 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,28 +18,9 @@
  */
 package org.jpmml.sparkml.model;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.spark.ml.linalg.Vector;
 
-import org.jpmml.converter.HasNativeConfiguration;
-import org.jpmml.sparkml.HasSparkMLOptions;
-import org.jpmml.sparkml.visitors.TreeModelCompactor;
+public interface HasFeatureImportances {
 
-public interface HasTreeOptions extends HasSparkMLOptions, HasNativeConfiguration {
-
-	/**
-	 * @see TreeModelCompactor
-	 */
-	String OPTION_COMPACT = "compact";
-
-	String OPTION_ESTIMATE_FEATURE_IMPORTANCES = "estimate_featureImportances";
-
-	@Override
-	default
-	public Map<String, ?> getNativeConfiguration(){
-		Map<String, Object> result = new LinkedHashMap<>();
-		result.put(HasTreeOptions.OPTION_COMPACT, Boolean.FALSE);
-
-		return result;
-	}
+	Vector getFeatureImportances();
 }

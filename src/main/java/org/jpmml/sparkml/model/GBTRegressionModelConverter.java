@@ -21,6 +21,7 @@ package org.jpmml.sparkml.model;
 import java.util.List;
 
 import com.google.common.primitives.Doubles;
+import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.GBTRegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.mining.MiningModel;
@@ -31,10 +32,17 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.RegressionModelConverter;
 
-public class GBTRegressionModelConverter extends RegressionModelConverter<GBTRegressionModel> implements HasTreeOptions {
+public class GBTRegressionModelConverter extends RegressionModelConverter<GBTRegressionModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public GBTRegressionModelConverter(GBTRegressionModel model){
 		super(model);
+	}
+
+	@Override
+	public Vector getFeatureImportances(){
+		GBTRegressionModel model = getTransformer();
+
+		return model.featureImportances();
 	}
 
 	@Override

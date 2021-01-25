@@ -39,6 +39,7 @@ import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelEncoder;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.WildcardFeature;
 
 public class SparkMLEncoder extends ModelEncoder {
@@ -124,10 +125,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		List<Feature> existingFeatures = this.columnFeatures.get(column);
 
 		if(existingFeatures != null && existingFeatures.size() > 0){
-
-			if(features.size() != existingFeatures.size()){
-				throw new IllegalArgumentException("Expected " + existingFeatures.size() + " feature(s), got " + features.size() + " feature(s)");
-			}
+			SchemaUtil.checkSize(existingFeatures.size(), features);
 
 			for(int i = 0; i < existingFeatures.size(); i++){
 				Feature existingFeature = existingFeatures.get(i);
