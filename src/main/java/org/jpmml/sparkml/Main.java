@@ -95,6 +95,16 @@ public class Main {
 	private Boolean compact = Boolean.TRUE;
 
 	/**
+	 * @see HasTreeOptions#OPTION_ESTIMATE_FEATURE_IMPORTANCES
+	 */
+	@Parameter (
+		names = "--X-estimate_featureImportances",
+		arity = 1,
+		hidden = true
+	)
+	private Boolean estimateFeatureImportances = Boolean.FALSE;
+
+	/**
 	 * @see HasRegressionTableOptions#OPTION_LOOKUP_THRESHOLD
 	 */
 	@Parameter (
@@ -212,6 +222,7 @@ public class Main {
 		Map<String, Object> options = new LinkedHashMap<>();
 		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
 		options.put(HasTreeOptions.OPTION_COMPACT, this.compact);
+		options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, this.estimateFeatureImportances);
 		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, this.lookupThreshold);
 		options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, this.representation);
 

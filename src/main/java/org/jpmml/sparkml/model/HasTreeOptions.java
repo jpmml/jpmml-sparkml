@@ -32,6 +32,8 @@ public interface HasTreeOptions extends HasSparkMLOptions, HasNativeConfiguratio
 	 */
 	String OPTION_COMPACT = "compact";
 
+	String OPTION_ESTIMATE_FEATURE_IMPORTANCES = "estimate_featureImportances";
+
 	@Override
 	default
 	public Map<String, ?> getNativeConfiguration(){

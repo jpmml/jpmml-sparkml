@@ -65,6 +65,7 @@ import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.model.metro.MetroJAXBUtil;
 import org.jpmml.sparkml.model.HasFeatureImportances;
+import org.jpmml.sparkml.model.HasTreeOptions;
 
 public class PMMLBuilder {
 
@@ -123,8 +124,14 @@ public class PMMLBuilder {
 
 				models.add(model);
 
+				featureImportances:
 				if(modelConverter instanceof HasFeatureImportances){
 					HasFeatureImportances hasFeatureImportances = (HasFeatureImportances)modelConverter;
+
+					Boolean estimateFeatureImportances = (Boolean)modelConverter.getOption(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.FALSE);
+					if(!estimateFeatureImportances){
+						break featureImportances;
+					}
 
 					List<Double> featureImportances = VectorUtil.toList(hasFeatureImportances.getFeatureImportances());
 
