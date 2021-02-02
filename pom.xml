@@ -71,19 +71,7 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>jpmml-converter</artifactId>
-			<version>1.4.5</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jpmml</groupId>
-					<artifactId>pmml-model</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-model</artifactId>
-			<version>1.5.11</version>
+			<version>1.4.6</version>
 		</dependency>
 
 		<dependency>
