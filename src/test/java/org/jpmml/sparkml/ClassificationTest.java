@@ -74,12 +74,12 @@ public class ClassificationTest extends SparkMLTest {
 
 	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
-		evaluate("LogisticRegression", "Audit", new PMMLEquivalence(5e-10, 5e-10));
+		evaluate("LogisticRegression", "Audit", new PMMLEquivalence(5e-9, 5e-9));
 	}
 
 	@Test
 	public void evaluateModelChainAudit() throws Exception {
-		evaluate("ModelChain", "Audit");
+		evaluate("ModelChain", "Audit", new PMMLEquivalence(5e-13, 5e-13));
 	}
 
 	@Test
