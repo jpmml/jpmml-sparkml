@@ -85,7 +85,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X or 3.0.X.
+* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X or 3.1.X.
 
 # Installation #
 
@@ -113,7 +113,8 @@ Compatibility matrix:
 | 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | Archived |
 | 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Active |
 | 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Active |
-| 3.0.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
+| 3.0.X | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Active |
+| 3.1.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
 
 JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of Apache Spark version 2.0.X, 2.1.X and 2.2.X distributions.
 
@@ -193,6 +194,7 @@ spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-
 
 # Documentation #
 
+* [Converting logistic regression models to PMML documents](https://openscoring.io/blog/2020/01/19/converting_logistic_regression_pmml/#apache-spark)
 * [Deploying Apache Spark ML pipeline models on Openscoring REST web service](https://openscoring.io/blog/2020/02/16/deploying_sparkml_pipeline_openscoring_rest/)
 * [Converting Apache Spark ML pipeline models to PMML documents](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
 
