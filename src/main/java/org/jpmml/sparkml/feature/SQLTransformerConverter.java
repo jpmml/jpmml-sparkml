@@ -24,18 +24,21 @@ import java.util.List;
 import org.apache.spark.ml.feature.SQLTransformer;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.expressions.Alias;
-import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.Visitor;
+import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.StringFeature;
+import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.ExpressionTranslator;
 import org.jpmml.sparkml.FeatureConverter;
@@ -65,15 +68,6 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		for(Expression expression : expressions){
-
-			if(expression instanceof AttributeReference){
-				AttributeReference attributeReference = (AttributeReference)expression;
-
-				String name = attributeReference.name();
-
-				encoder.getOnlyFeature(name);
-			}
-
 			String name;
 
 			DataType dataType = DatasetUtil.translateDataType(expression.dataType());
@@ -108,6 +102,19 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 			}
 
 			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
+
+			Visitor visitor = new AbstractVisitor(){
+
+				@Override
+				public VisitorAction visit(FieldRef fieldRef){
+					FieldName name = fieldRef.getField();
+
+					encoder.getOnlyFeature(name.getValue());
+
+					return super.visit(fieldRef);
+				}
+			};
+			visitor.applyTo(pmmlExpression);
 
 			DerivedField derivedField = encoder.createDerivedField(FieldName.create(name), opType, dataType, pmmlExpression);
 
