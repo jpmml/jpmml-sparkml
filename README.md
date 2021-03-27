@@ -50,7 +50,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
       * RegExp functions `regexp_replace` and `rlike`.
       * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `substring`, `trim`, `ucase` and `upper`.
       * Type cast functions `boolean`, `cast`, `double`, `int` and `string`.
-      * Value functions `in`, `isnull`, `isnotnull`, `negative` and `positive`.
+      * Value functions `in`, `isnan`, `isnull`, `isnotnull`, `negative` and `positive`.
     * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
     * [`feature.StopWordsRemover`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StopWordsRemover.html)
     * [`feature.StringIndexerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)

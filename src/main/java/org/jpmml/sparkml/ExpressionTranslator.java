@@ -51,6 +51,7 @@ import org.apache.spark.sql.catalyst.expressions.Greatest;
 import org.apache.spark.sql.catalyst.expressions.Hypot;
 import org.apache.spark.sql.catalyst.expressions.If;
 import org.apache.spark.sql.catalyst.expressions.In;
+import org.apache.spark.sql.catalyst.expressions.IsNaN;
 import org.apache.spark.sql.catalyst.expressions.IsNotNull;
 import org.apache.spark.sql.catalyst.expressions.IsNull;
 import org.apache.spark.sql.catalyst.expressions.Least;
@@ -384,6 +385,10 @@ public class ExpressionTranslator {
 
 			DataType dataType;
 
+			if(value == null){
+				dataType = null;
+			} else
+
 			// XXX
 			if(value instanceof Decimal){
 				Decimal decimal = (Decimal)value;
@@ -518,6 +523,11 @@ public class ExpressionTranslator {
 
 			if(expression instanceof Lower){
 				return PMMLUtil.createApply(PMMLFunctions.LOWERCASE, translateInternal(child));
+			} else
+
+			if(expression instanceof IsNaN){
+				// XXX
+				return PMMLUtil.createApply(PMMLFunctions.ISNOTVALID, translateInternal(child));
 			} else
 
 			if(expression instanceof IsNotNull){

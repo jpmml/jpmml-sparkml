@@ -266,6 +266,17 @@ public class ExpressionTranslatorTest {
 		checkValue("SPARKSQL", "upper(\"SparkSql\")");
 	}
 
+	@Test
+	public void evaluateValueExpression(){
+		checkValue(true, "isnan(cast(\"NaN\" as double))");
+
+		checkValue(true, "isnull(NULL)");
+		checkValue(false, "isnull(0)");
+
+		checkValue(false, "isnotnull(NULL)");
+		checkValue(true, "isnotnull(0)");
+	}
+
 	static
 	private Object evaluate(String sqlExpression){
 		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
