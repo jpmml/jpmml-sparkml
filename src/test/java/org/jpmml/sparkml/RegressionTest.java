@@ -28,6 +28,7 @@ import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
+import org.jpmml.sparkml.model.HasTreeOptions;
 import org.junit.Test;
 
 public class RegressionTest extends SparkMLTest {
@@ -49,6 +50,10 @@ public class RegressionTest extends SparkMLTest {
 
 				if(("LinearRegression").equals(name) && ("Auto").equals(dataset)){
 					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+				} // End if
+
+				if(("DecisionTree").equals(name) || ("GBT").equals(name) || ("RandomForest").equals(name)){
+					options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.TRUE);
 				}
 
 				return options;
