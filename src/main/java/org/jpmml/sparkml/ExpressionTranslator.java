@@ -44,6 +44,7 @@ import org.apache.spark.sql.catalyst.expressions.If;
 import org.apache.spark.sql.catalyst.expressions.In;
 import org.apache.spark.sql.catalyst.expressions.IsNotNull;
 import org.apache.spark.sql.catalyst.expressions.IsNull;
+import org.apache.spark.sql.catalyst.expressions.Length;
 import org.apache.spark.sql.catalyst.expressions.LessThan;
 import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.Literal;
@@ -301,6 +302,14 @@ public class ExpressionTranslator {
 			return apply;
 		} else
 
+		if(expression instanceof Length){
+			Length length = (Length)expression;
+
+			Expression child = length.child();
+
+			return PMMLUtil.createApply(PMMLFunctions.STRINGLENGTH, translateInternal(child));
+		} else
+
 		if(expression instanceof Literal){
 			Literal literal = (Literal)expression;
 
@@ -386,7 +395,7 @@ public class ExpressionTranslator {
 			int lenValue = ValueUtil.asInt((Number)len.value());
 
 			// XXX
-			lenValue = Math.min(lenValue, 65536);
+			lenValue = Math.min(lenValue, MAX_STRING_LENGTH);
 
 			return PMMLUtil.createApply(PMMLFunctions.SUBSTRING)
 				.addExpressions(translateInternal(str))
@@ -490,4 +499,6 @@ public class ExpressionTranslator {
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");
+
+	private static final int MAX_STRING_LENGTH = 65536;
 }

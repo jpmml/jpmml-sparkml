@@ -210,8 +210,14 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void evaluateStringExpression(){
+		checkValue(10, "char_length(\"Spark SQL \")");
+		checkValue(10, "character_length(\"Spark SQL \")");
+
 		checkValue("SparkSQL", "concat(\"Spark\", \"SQL\")");
 
+		checkValue(10, "length(\"Spark SQL \")");
+
+		checkValue("sparksql", "lcase(\"SparkSql\")");
 		checkValue("sparksql", "lower(\"SparkSql\")");
 
 		checkValue("k SQL", "substr(\"Spark SQL\", 5)");
@@ -228,6 +234,7 @@ public class ExpressionTranslatorTest {
 
 		checkValue("SparkSQL", "trim(\"    SparkSQL   \")");
 
+		checkValue("SPARKSQL", "ucase(\"SparkSql\")");
 		checkValue("SPARKSQL", "upper(\"SparkSql\")");
 	}
 
