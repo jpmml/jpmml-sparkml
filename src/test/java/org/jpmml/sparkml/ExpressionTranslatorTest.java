@@ -193,6 +193,21 @@ public class ExpressionTranslatorTest {
 	}
 
 	@Test
+	public void evaluateTrigonometricExpression(){
+		checkValue(1.0d, "cos(0)");
+		checkValue(0.0d, "acos(1.0)");
+		checkValue(1.0d, "cosh(0)");
+
+		checkValue(0.0d, "sin(0)");
+		checkValue(0.0d, "asin(0.0)");
+		checkValue(0.0d, "sinh(0)");
+
+		checkValue(0.0d, "tan(0)");
+		checkValue(0.0d, "atan(0.0)");
+		checkValue(0.0d, "tanh(0)");
+	}
+
+	@Test
 	public void evaluateRegexExpression(){
 		checkValue(true, "\"\\abc\" rlike \"^\\abc$\"");
 

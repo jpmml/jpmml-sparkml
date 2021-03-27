@@ -22,9 +22,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.spark.sql.catalyst.expressions.Abs;
+import org.apache.spark.sql.catalyst.expressions.Acos;
 import org.apache.spark.sql.catalyst.expressions.Add;
 import org.apache.spark.sql.catalyst.expressions.Alias;
 import org.apache.spark.sql.catalyst.expressions.And;
+import org.apache.spark.sql.catalyst.expressions.Asin;
+import org.apache.spark.sql.catalyst.expressions.Atan;
 import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
@@ -33,6 +36,8 @@ import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
 import org.apache.spark.sql.catalyst.expressions.Ceil;
 import org.apache.spark.sql.catalyst.expressions.Concat;
+import org.apache.spark.sql.catalyst.expressions.Cos;
+import org.apache.spark.sql.catalyst.expressions.Cosh;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
 import org.apache.spark.sql.catalyst.expressions.Exp;
@@ -58,10 +63,14 @@ import org.apache.spark.sql.catalyst.expressions.Pow;
 import org.apache.spark.sql.catalyst.expressions.RLike;
 import org.apache.spark.sql.catalyst.expressions.RegExpReplace;
 import org.apache.spark.sql.catalyst.expressions.Rint;
+import org.apache.spark.sql.catalyst.expressions.Sin;
+import org.apache.spark.sql.catalyst.expressions.Sinh;
 import org.apache.spark.sql.catalyst.expressions.Sqrt;
 import org.apache.spark.sql.catalyst.expressions.StringTrim;
 import org.apache.spark.sql.catalyst.expressions.Substring;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
+import org.apache.spark.sql.catalyst.expressions.Tan;
+import org.apache.spark.sql.catalyst.expressions.Tanh;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
 import org.apache.spark.sql.catalyst.expressions.UnaryPositive;
@@ -411,8 +420,28 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply(PMMLFunctions.ABS, translateInternal(child));
 			} else
 
+			if(expression instanceof Acos){
+				return PMMLUtil.createApply(PMMLFunctions.ACOS, translateInternal(child));
+			} else
+
+			if(expression instanceof Asin){
+				return PMMLUtil.createApply(PMMLFunctions.ASIN, translateInternal(child));
+			} else
+
+			if(expression instanceof Atan){
+				return PMMLUtil.createApply(PMMLFunctions.ATAN, translateInternal(child));
+			} else
+
 			if(expression instanceof Ceil){
 				return PMMLUtil.createApply(PMMLFunctions.CEIL, translateInternal(child));
+			} else
+
+			if(expression instanceof Cos){
+				return PMMLUtil.createApply(PMMLFunctions.COS, translateInternal(child));
+			} else
+
+			if(expression instanceof Cosh){
+				return PMMLUtil.createApply(PMMLFunctions.COSH, translateInternal(child));
 			} else
 
 			if(expression instanceof Exp){
@@ -451,8 +480,24 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply(PMMLFunctions.RINT, translateInternal(child));
 			} else
 
+			if(expression instanceof Sin){
+				return PMMLUtil.createApply(PMMLFunctions.SIN, translateInternal(child));
+			} else
+
+			if(expression instanceof Sinh){
+				return PMMLUtil.createApply(PMMLFunctions.SINH, translateInternal(child));
+			} else
+
 			if(expression instanceof Sqrt){
 				return PMMLUtil.createApply(PMMLFunctions.SQRT, translateInternal(child));
+			} else
+
+			if(expression instanceof Tan){
+				return PMMLUtil.createApply(PMMLFunctions.TAN, translateInternal(child));
+			} else
+
+			if(expression instanceof Tanh){
+				return PMMLUtil.createApply(PMMLFunctions.TANH, translateInternal(child));
 			} else
 
 			if(expression instanceof UnaryMinus){
