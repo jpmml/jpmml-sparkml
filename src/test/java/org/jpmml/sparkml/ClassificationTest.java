@@ -79,7 +79,7 @@ public class ClassificationTest extends SparkMLTest implements Algorithms, Datas
 
 	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
-		evaluate(LOGISTIC_REGRESSION, AUDIT, new PMMLEquivalence(5e-10, 5e-10));
+		evaluate(LOGISTIC_REGRESSION, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE));
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ClassificationTest extends SparkMLTest implements Algorithms, Datas
 
 	@Test
 	public void evaluateNaiveBayesAudit() throws Exception {
-		evaluate(NAIVE_BAYES, AUDIT, new PMMLEquivalence(5e-10, 5e-10));
+		evaluate(NAIVE_BAYES, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE), new PMMLEquivalence(5e-11, 5e-11));
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class ClassificationTest extends SparkMLTest implements Algorithms, Datas
 
 	@Test
 	public void evaluateNeuralNetworkIris() throws Exception {
-		evaluate(NEURAL_NETWORK, IRIS, new PMMLEquivalence(1e-13, 1e-13));
+		evaluate(NEURAL_NETWORK, IRIS);
 	}
 
 	@Test
