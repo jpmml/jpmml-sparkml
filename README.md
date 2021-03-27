@@ -44,7 +44,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
       * Arithmetic operators `+`, `-`, `*` and `/`.
       * Comparison operators `<`, `<=`, `==`, `>=` and `>`.
       * Logical operators `and`, `or` and `not`.
-      * Math functions `abs`, `ceil`, `exp`, `floor`, `ln`, `log10`, `pow` and `rint`.
+      * Math functions `abs`, `ceil`, `exp`, `expm1`, `floor`, `hypot`, `ln`, `log10`, `log1p`, `pow` and `rint`.
       * Trigonometric functions `sin`, `asin`, `sinh`, `cos`, `acos`, `cosh`, `tan`, `atan`, `tanh`.
       * RegExp functions `regexp_replace` and `rlike`.
       * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `substring`, `trim`, `ucase` and `upper`.

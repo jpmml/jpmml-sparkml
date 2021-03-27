@@ -172,12 +172,18 @@ public class ExpressionTranslatorTest {
 
 		checkValue(1.0d, "exp(0)");
 
+		checkValue(0.0d, "expm1(0)");
+
 		checkValue(-1, "floor(double(-0.1))");
 		checkValue(5, "floor(5)");
+
+		checkValue(5.0d, "hypot(3, 4)");
 
 		checkValue(0.0d, "ln(1)");
 
 		checkValue(1.0d, "log10(10)");
+
+		checkValue(0.0d, "log1p(0)");
 
 		checkValue(1, "negative(-1)");
 		checkValue(-1, "negative(1)");

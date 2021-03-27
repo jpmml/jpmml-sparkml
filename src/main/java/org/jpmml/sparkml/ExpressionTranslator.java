@@ -31,6 +31,7 @@ import org.apache.spark.sql.catalyst.expressions.Atan;
 import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
+import org.apache.spark.sql.catalyst.expressions.BinaryMathExpression;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
 import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
@@ -41,10 +42,12 @@ import org.apache.spark.sql.catalyst.expressions.Cosh;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
 import org.apache.spark.sql.catalyst.expressions.Exp;
+import org.apache.spark.sql.catalyst.expressions.Expm1;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.expressions.Floor;
 import org.apache.spark.sql.catalyst.expressions.GreaterThan;
 import org.apache.spark.sql.catalyst.expressions.GreaterThanOrEqual;
+import org.apache.spark.sql.catalyst.expressions.Hypot;
 import org.apache.spark.sql.catalyst.expressions.If;
 import org.apache.spark.sql.catalyst.expressions.In;
 import org.apache.spark.sql.catalyst.expressions.IsNotNull;
@@ -55,6 +58,7 @@ import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.Literal;
 import org.apache.spark.sql.catalyst.expressions.Log;
 import org.apache.spark.sql.catalyst.expressions.Log10;
+import org.apache.spark.sql.catalyst.expressions.Log1p;
 import org.apache.spark.sql.catalyst.expressions.Lower;
 import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Not;
@@ -126,6 +130,30 @@ public class ExpressionTranslator {
 			String name = attributeReference.name();
 
 			return new FieldRef(FieldName.create(name));
+		} else
+
+		if(expression instanceof BinaryMathExpression){
+			BinaryMathExpression binaryMathExpression = (BinaryMathExpression)expression;
+
+			Expression left = binaryMathExpression.left();
+			Expression right = binaryMathExpression.right();
+
+			String function;
+
+			if(binaryMathExpression instanceof Hypot){
+				function = PMMLFunctions.HYPOT;
+			} else
+
+			if(binaryMathExpression instanceof Pow){
+				function = PMMLFunctions.POW;
+			} else
+
+			{
+				throw new IllegalArgumentException(formatMessage(binaryMathExpression));
+			}
+
+			return PMMLUtil.createApply(function)
+				.addExpressions(translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof BinaryOperator){
@@ -344,16 +372,6 @@ public class ExpressionTranslator {
 			return PMMLUtil.createConstant(value, dataType);
 		} else
 
-		if(expression instanceof Pow){
-			Pow pow = (Pow)expression;
-
-			Expression left = pow.left();
-			Expression right = pow.right();
-
-			return PMMLUtil.createApply(PMMLFunctions.POW)
-				.addExpressions(translateInternal(left), translateInternal(right));
-		} else
-
 		if(expression instanceof RegExpReplace){
 			RegExpReplace regexpReplace = (RegExpReplace)expression;
 
@@ -448,6 +466,10 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply(PMMLFunctions.EXP, translateInternal(child));
 			} else
 
+			if(expression instanceof Expm1){
+				return PMMLUtil.createApply(PMMLFunctions.EXPM1, translateInternal(child));
+			} else
+
 			if(expression instanceof Floor){
 				return PMMLUtil.createApply(PMMLFunctions.FLOOR, translateInternal(child));
 			} else
@@ -458,6 +480,10 @@ public class ExpressionTranslator {
 
 			if(expression instanceof Log10){
 				return PMMLUtil.createApply(PMMLFunctions.LOG10, translateInternal(child));
+			} else
+
+			if(expression instanceof Log1p){
+				return PMMLUtil.createApply(PMMLFunctions.LN1P, translateInternal(child));
 			} else
 
 			if(expression instanceof Lower){
