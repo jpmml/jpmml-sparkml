@@ -31,7 +31,7 @@ import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
 import org.junit.Test;
 
-public class RegressionTest extends SparkMLTest {
+public class RegressionTest extends SparkMLTest implements Algorithms, Datasets {
 
 	@Override
 	public ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
@@ -48,11 +48,11 @@ public class RegressionTest extends SparkMLTest {
 			public Map<String, Object> getOptions(String name, String dataset){
 				Map<String, Object> options = super.getOptions(name, dataset);
 
-				if(("LinearRegression").equals(name) && ("Auto").equals(dataset)){
+				if((LINEAR_REGRESION).equals(name) && (AUTO).equals(dataset)){
 					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
 				} // End if
 
-				if(("DecisionTree").equals(name) || ("GBT").equals(name) || ("RandomForest").equals(name)){
+				if((DECISION_TREE).equals(name) || (GBT).equals(name) || (RANDOM_FOREST).equals(name)){
 					options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.TRUE);
 				}
 
@@ -65,58 +65,58 @@ public class RegressionTest extends SparkMLTest {
 
 	@Test
 	public void evaluateDecisionTreeAuto() throws Exception {
-		evaluate("DecisionTree", "Auto");
+		evaluate(DECISION_TREE, AUTO);
 	}
 
 	@Test
 	public void evaluateGBTAuto() throws Exception {
-		evaluate("GBT", "Auto");
+		evaluate(GBT, AUTO);
 	}
 
 	@Test
 	public void evaluateGLMAuto() throws Exception {
-		evaluate("GLM", "Auto");
+		evaluate(GLM, AUTO);
 	}
 
 	@Test
 	public void evaluateLinearRegressionAuto() throws Exception {
 		FieldName[] transformFields = {FieldName.create("mpgBucket")};
 
-		evaluate("LinearRegression", "Auto", excludeFields(transformFields));
+		evaluate(LINEAR_REGRESION, AUTO, excludeFields(transformFields));
 	}
 
 	@Test
 	public void evaluateModelChainAuto() throws Exception {
-		evaluate("ModelChain", "Auto");
+		evaluate(MODEL_CHAIN, AUTO);
 	}
 
 	@Test
 	public void evaluateRandomForestAuto() throws Exception {
-		evaluate("RandomForest", "Auto");
+		evaluate(RANDOM_FOREST, AUTO);
 	}
 
 	@Test
 	public void evaluateDecisionTreeHousing() throws Exception {
-		evaluate("DecisionTree", "Housing");
+		evaluate(DECISION_TREE, HOUSING);
 	}
 
 	@Test
 	public void evaluateGLMHousing() throws Exception {
-		evaluate("GLM", "Housing");
+		evaluate(GLM, HOUSING);
 	}
 
 	@Test
 	public void evaluateLinearRegressionHousing() throws Exception {
-		evaluate("LinearRegression", "Housing");
+		evaluate(LINEAR_REGRESION, HOUSING);
 	}
 
 	@Test
 	public void evaluateRandomForestHousing() throws Exception {
-		evaluate("RandomForest", "Housing");
+		evaluate(RANDOM_FOREST, HOUSING);
 	}
 
 	@Test
 	public void evaluateGLMFormulaVisit() throws Exception {
-		evaluate("GLM", "Visit", new PMMLEquivalence(1e-12, 1e-12));
+		evaluate(GLM, VISIT, new PMMLEquivalence(1e-12, 1e-12));
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2021 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,16 +18,12 @@
  */
 package org.jpmml.sparkml;
 
-import org.dmg.pmml.FieldName;
-import org.jpmml.converter.FieldNameUtil;
-import org.junit.Test;
+interface Datasets {
 
-public class ClusteringTest extends SparkMLTest implements Algorithms, Datasets {
-
-	@Test
-	public void evaluateKMeansIris() throws Exception {
-		FieldName[] outputFields = {FieldNameUtil.create("pmml", "cluster")};
-
-		evaluate(K_MEANS, IRIS, excludeFields(outputFields));
-	}
+	String AUDIT = "Audit";
+	String AUTO = "Auto";
+	String HOUSING = "Housing";
+	String IRIS = "Iris";
+	String SENTIMENT = "Sentiment";
+	String VISIT = "Visit";
 }
