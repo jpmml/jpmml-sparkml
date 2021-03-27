@@ -214,6 +214,13 @@ public class ExpressionTranslatorTest {
 	}
 
 	@Test
+	public void translateAggregationExpression(){
+		checkValue(10, "greatest(10, 9, 2, 4, 3)");
+
+		checkValue(2, "least(10, 9, 2, 4, 3)");
+	}
+
+	@Test
 	public void evaluateRegexExpression(){
 		checkValue(true, "\"\\abc\" rlike \"^\\abc$\"");
 

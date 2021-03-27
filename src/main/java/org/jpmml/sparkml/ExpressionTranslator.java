@@ -47,11 +47,13 @@ import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.expressions.Floor;
 import org.apache.spark.sql.catalyst.expressions.GreaterThan;
 import org.apache.spark.sql.catalyst.expressions.GreaterThanOrEqual;
+import org.apache.spark.sql.catalyst.expressions.Greatest;
 import org.apache.spark.sql.catalyst.expressions.Hypot;
 import org.apache.spark.sql.catalyst.expressions.If;
 import org.apache.spark.sql.catalyst.expressions.In;
 import org.apache.spark.sql.catalyst.expressions.IsNotNull;
 import org.apache.spark.sql.catalyst.expressions.IsNull;
+import org.apache.spark.sql.catalyst.expressions.Least;
 import org.apache.spark.sql.catalyst.expressions.Length;
 import org.apache.spark.sql.catalyst.expressions.LessThan;
 import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
@@ -311,6 +313,20 @@ public class ExpressionTranslator {
 			return apply;
 		} else
 
+		if(expression instanceof Greatest){
+			Greatest greatest = (Greatest)expression;
+
+			List<Expression> children = JavaConversions.seqAsJavaList(greatest.children());
+
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.MAX);
+
+			for(Expression child : children){
+				apply.addExpressions(translateInternal(child));
+			}
+
+			return apply;
+		} else
+
 		if(expression instanceof If){
 			If _if = (If)expression;
 
@@ -334,6 +350,20 @@ public class ExpressionTranslator {
 
 			for(Expression element : elements){
 				apply.addExpressions(translateInternal(element));
+			}
+
+			return apply;
+		} else
+
+		if(expression instanceof Least){
+			Least least = (Least)expression;
+
+			List<Expression> children = JavaConversions.seqAsJavaList(least.children());
+
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.MIN);
+
+			for(Expression child : children){
+				apply.addExpressions(translateInternal(child));
 			}
 
 			return apply;
