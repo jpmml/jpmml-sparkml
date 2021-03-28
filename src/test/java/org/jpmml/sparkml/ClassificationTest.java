@@ -27,9 +27,10 @@ import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
+import org.jpmml.sparkml.model.HasTreeOptions;
 import org.junit.Test;
 
-public class ClassificationTest extends SparkMLTest {
+public class ClassificationTest extends SparkMLTest implements Algorithms, Datasets {
 
 	@Override
 	public ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
@@ -46,8 +47,12 @@ public class ClassificationTest extends SparkMLTest {
 			public Map<String, Object> getOptions(String name, String dataset){
 				Map<String, Object> options = super.getOptions(name, dataset);
 
-				if(("LogisticRegression").equals(name) && ("Audit").equals(dataset)){
+				if((LOGISTIC_REGRESSION).equals(name) && (AUDIT).equals(dataset)){
 					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
+				} // End if
+
+				if((DECISION_TREE).equals(name) || (GBT).equals(name) || (RANDOM_FOREST).equals(name)){
+					options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.TRUE);
 				}
 
 				return options;
@@ -59,91 +64,91 @@ public class ClassificationTest extends SparkMLTest {
 
 	@Test
 	public void evaluateDecisionTreeAudit() throws Exception {
-		evaluate("DecisionTree", "Audit");
+		evaluate(DECISION_TREE, AUDIT);
 	}
 
 	@Test
 	public void evaluateGBTAudit() throws Exception {
-		evaluate("GBT", "Audit");
+		evaluate(GBT, AUDIT);
 	}
 
 	@Test
 	public void evaluateGLMAudit() throws Exception {
-		evaluate("GLM", "Audit");
+		evaluate(GLM, AUDIT);
 	}
 
 	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
-		evaluate("LogisticRegression", "Audit", new PMMLEquivalence(5e-10, 5e-10));
+		evaluate(LOGISTIC_REGRESSION, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE));
 	}
 
 	@Test
 	public void evaluateModelChainAudit() throws Exception {
-		evaluate("ModelChain", "Audit");
+		evaluate(MODEL_CHAIN, AUDIT);
 	}
 
 	@Test
 	public void evaluateNaiveBayesAudit() throws Exception {
-		evaluate("NaiveBayes", "Audit", new PMMLEquivalence(5e-10, 5e-10));
+		evaluate(NAIVE_BAYES, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE), new PMMLEquivalence(1e-10, 1e-10));
 	}
 
 	@Test
 	public void evaluateNeuralNetworkAudit() throws Exception {
-		evaluate("NeuralNetwork", "Audit");
+		evaluate(NEURAL_NETWORK, AUDIT);
 	}
 
 	@Test
 	public void evaluateRandomForestAudit() throws Exception {
-		evaluate("RandomForest", "Audit");
+		evaluate(RANDOM_FOREST, AUDIT);
 	}
 
 	@Test
 	public void evaluateDecisionTreeIris() throws Exception {
-		evaluate("DecisionTree", "Iris");
+		evaluate(DECISION_TREE, IRIS);
 	}
 
 	@Test
 	public void evaluateLogisticRegressionIris() throws Exception {
-		evaluate("LogisticRegression", "Iris");
+		evaluate(LOGISTIC_REGRESSION, IRIS);
 	}
 
 	@Test
 	public void evaluateModelChainIris() throws Exception {
-		evaluate("ModelChain", "Iris");
+		evaluate(MODEL_CHAIN, IRIS);
 	}
 
 	@Test
 	public void evaluateNaiveBayesIris() throws Exception {
-		evaluate("NaiveBayes", "Iris");
+		evaluate(NAIVE_BAYES, IRIS);
 	}
 
 	@Test
 	public void evaluateNeuralNetworkIris() throws Exception {
-		evaluate("NeuralNetwork", "Iris", new PMMLEquivalence(5e-13, 5e-13));
+		evaluate(NEURAL_NETWORK, IRIS, new PMMLEquivalence(5e-13, 5e-13));
 	}
 
 	@Test
 	public void evaluateRandomForestIris() throws Exception {
-		evaluate("RandomForest", "Iris");
+		evaluate(RANDOM_FOREST, IRIS);
 	}
 
 	@Test
 	public void evaluateDecisionTreeSentiment() throws Exception {
-		evaluate("DecisionTree", "Sentiment");
+		evaluate(DECISION_TREE, SENTIMENT);
 	}
 
 	@Test
 	public void evaluateGLMSentiment() throws Exception {
-		evaluate("GLM", "Sentiment");
+		evaluate(GLM, SENTIMENT);
 	}
 
 	@Test
 	public void evaluateLinearSVCSentiment() throws Exception {
-		evaluate("LinearSVC", "Sentiment");
+		evaluate(LINEAR_SVC, SENTIMENT);
 	}
 
 	@Test
 	public void evaluateRandomForestSentiment() throws Exception {
-		evaluate("RandomForest", "Sentiment");
+		evaluate(RANDOM_FOREST, SENTIMENT);
 	}
 }

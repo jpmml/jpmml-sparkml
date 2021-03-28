@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.spark.ml.Model;
-import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.classification.ClassificationModel;
-import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataField;
@@ -48,7 +46,7 @@ import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
-public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionCol> extends TransformerConverter<T> {
+public class ModelConverter<T extends Model<T> & HasPredictionCol> extends TransformerConverter<T> {
 
 	public ModelConverter(T model){
 		super(model);
@@ -56,6 +54,9 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 
 	abstract
 	public MiningFunction getMiningFunction();
+
+	abstract
+	public List<Feature> getFeatures(SparkMLEncoder encoder);
 
 	abstract
 	public org.dmg.pmml.Model encodeModel(Schema schema);
@@ -151,25 +152,6 @@ public class ModelConverter<T extends Model<T> & HasFeaturesCol & HasPredictionC
 		}
 
 		return label;
-	}
-
-	public List<Feature> getFeatures(SparkMLEncoder encoder){
-		T model = getTransformer();
-
-		String featuresCol = model.getFeaturesCol();
-
-		List<Feature> features = encoder.getFeatures(featuresCol);
-
-		if(model instanceof PredictionModel){
-			PredictionModel<?, ?> predictionModel = (PredictionModel<?, ?>)model;
-
-			int numFeatures = predictionModel.numFeatures();
-			if(numFeatures != -1){
-				SchemaUtil.checkSize(numFeatures, features);
-			}
-		}
-
-		return features;
 	}
 
 	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model model, SparkMLEncoder encoder){

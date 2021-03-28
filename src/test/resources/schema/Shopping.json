@@ -1,0 +1,1 @@
+{"type":"struct","fields":[{"name":"transaction","type":"integer","nullable":true,"metadata":{}},{"name":"items","type":{"type":"array","elementType":"string","containsNull":false},"nullable":true,"metadata":{}}]}

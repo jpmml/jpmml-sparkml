@@ -32,6 +32,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
 import org.jpmml.converter.DerivedOutputField;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
@@ -51,6 +52,15 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 	@Override
 	public MiningFunction getMiningFunction(){
 		return MiningFunction.CLUSTERING;
+	}
+
+	@Override
+	public List<Feature> getFeatures(SparkMLEncoder encoder){
+		T model = getTransformer();
+
+		String featuresCol = model.getFeaturesCol();
+
+		return encoder.getFeatures(featuresCol);
 	}
 
 	@Override

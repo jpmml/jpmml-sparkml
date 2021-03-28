@@ -106,9 +106,16 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 		}
 
-		Dataset<Row> dataset;
+		Dataset<Row> dataset = null;
 
+		dataset:
 		try(InputStream is = open("/csv/" + getDataset() + ".csv")){
+
+			// XXX
+			if((Datasets.SHOPPING).equals(getDataset())){
+				break dataset;
+			}
+
 			File tmpCsvFile = File.createTempFile(getDataset(), ".csv");
 
 			tmpResources.add(tmpCsvFile);
@@ -146,8 +153,11 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 		}
 
 		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
-			.putOptions(options)
-			.verify(dataset, precision, zeroThreshold);
+			.putOptions(options);
+
+		if(dataset != null){
+			pmmlBuilder = pmmlBuilder.verify(dataset, precision, zeroThreshold);
+		}
 
 		PMML pmml = pmmlBuilder.build();
 

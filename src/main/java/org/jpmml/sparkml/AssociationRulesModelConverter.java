@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2021 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,16 +18,19 @@
  */
 package org.jpmml.sparkml;
 
-import org.dmg.pmml.FieldName;
-import org.jpmml.converter.FieldNameUtil;
-import org.junit.Test;
+import org.apache.spark.ml.Model;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.MiningFunction;
 
-public class ClusteringTest extends SparkMLTest implements Algorithms, Datasets {
+abstract
+public class AssociationRulesModelConverter<T extends Model<T> & HasPredictionCol> extends ModelConverter<T> {
 
-	@Test
-	public void evaluateKMeansIris() throws Exception {
-		FieldName[] outputFields = {FieldNameUtil.create("pmml", "cluster")};
+	public AssociationRulesModelConverter(T model){
+		super(model);
+	}
 
-		evaluate(K_MEANS, IRIS, excludeFields(outputFields));
+	@Override
+	public MiningFunction getMiningFunction(){
+		return MiningFunction.ASSOCIATION_RULES;
 	}
 }

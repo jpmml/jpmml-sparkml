@@ -56,8 +56,11 @@ public class ZipUtil {
 				File file = new File(dir, entry.getName());
 
 				File parentDir = file.getParentFile();
-				if(!parentDir.exists() && !parentDir.mkdirs()){
-					throw new IOException();
+				if(!parentDir.exists()){
+
+					if(!parentDir.mkdirs()){
+						throw new IOException(parentDir.getAbsolutePath());
+					}
 				}
 
 				try(OutputStream os = new FileOutputStream(file)){
