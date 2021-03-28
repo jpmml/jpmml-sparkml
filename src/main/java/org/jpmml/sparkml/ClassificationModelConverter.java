@@ -48,7 +48,7 @@ import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
-public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends PredictionModelConverter<T> {
 
 	public ClassificationModelConverter(T model){
 		super(model);

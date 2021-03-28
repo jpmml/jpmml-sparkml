@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2021 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -18,16 +18,18 @@
  */
 package org.jpmml.sparkml;
 
-import org.dmg.pmml.FieldName;
-import org.jpmml.converter.FieldNameUtil;
-import org.junit.Test;
+import org.dmg.pmml.Field;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
 
-public class ClusteringTest extends SparkMLTest implements Algorithms, Datasets {
+public class ItemSetFeature extends Feature {
 
-	@Test
-	public void evaluateKMeansIris() throws Exception {
-		FieldName[] outputFields = {FieldNameUtil.create("pmml", "cluster")};
+	public ItemSetFeature(SparkMLEncoder encoder, Field<?> field){
+		super(encoder, field.getName(), field.getDataType());
+	}
 
-		evaluate(K_MEANS, IRIS, excludeFields(outputFields));
+	@Override
+	public ContinuousFeature toContinuousFeature(){
+		throw new UnsupportedOperationException();
 	}
 }

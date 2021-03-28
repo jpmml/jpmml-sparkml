@@ -22,33 +22,46 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.spark.sql.catalyst.expressions.Abs;
+import org.apache.spark.sql.catalyst.expressions.Acos;
 import org.apache.spark.sql.catalyst.expressions.Add;
 import org.apache.spark.sql.catalyst.expressions.Alias;
 import org.apache.spark.sql.catalyst.expressions.And;
+import org.apache.spark.sql.catalyst.expressions.Asin;
+import org.apache.spark.sql.catalyst.expressions.Atan;
 import org.apache.spark.sql.catalyst.expressions.AttributeReference;
 import org.apache.spark.sql.catalyst.expressions.BinaryArithmetic;
 import org.apache.spark.sql.catalyst.expressions.BinaryComparison;
+import org.apache.spark.sql.catalyst.expressions.BinaryMathExpression;
 import org.apache.spark.sql.catalyst.expressions.BinaryOperator;
 import org.apache.spark.sql.catalyst.expressions.CaseWhen;
 import org.apache.spark.sql.catalyst.expressions.Cast;
 import org.apache.spark.sql.catalyst.expressions.Ceil;
 import org.apache.spark.sql.catalyst.expressions.Concat;
+import org.apache.spark.sql.catalyst.expressions.Cos;
+import org.apache.spark.sql.catalyst.expressions.Cosh;
 import org.apache.spark.sql.catalyst.expressions.Divide;
 import org.apache.spark.sql.catalyst.expressions.EqualTo;
 import org.apache.spark.sql.catalyst.expressions.Exp;
+import org.apache.spark.sql.catalyst.expressions.Expm1;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.expressions.Floor;
 import org.apache.spark.sql.catalyst.expressions.GreaterThan;
 import org.apache.spark.sql.catalyst.expressions.GreaterThanOrEqual;
+import org.apache.spark.sql.catalyst.expressions.Greatest;
+import org.apache.spark.sql.catalyst.expressions.Hypot;
 import org.apache.spark.sql.catalyst.expressions.If;
 import org.apache.spark.sql.catalyst.expressions.In;
+import org.apache.spark.sql.catalyst.expressions.IsNaN;
 import org.apache.spark.sql.catalyst.expressions.IsNotNull;
 import org.apache.spark.sql.catalyst.expressions.IsNull;
+import org.apache.spark.sql.catalyst.expressions.Least;
+import org.apache.spark.sql.catalyst.expressions.Length;
 import org.apache.spark.sql.catalyst.expressions.LessThan;
 import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual;
 import org.apache.spark.sql.catalyst.expressions.Literal;
 import org.apache.spark.sql.catalyst.expressions.Log;
 import org.apache.spark.sql.catalyst.expressions.Log10;
+import org.apache.spark.sql.catalyst.expressions.Log1p;
 import org.apache.spark.sql.catalyst.expressions.Lower;
 import org.apache.spark.sql.catalyst.expressions.Multiply;
 import org.apache.spark.sql.catalyst.expressions.Not;
@@ -57,10 +70,14 @@ import org.apache.spark.sql.catalyst.expressions.Pow;
 import org.apache.spark.sql.catalyst.expressions.RLike;
 import org.apache.spark.sql.catalyst.expressions.RegExpReplace;
 import org.apache.spark.sql.catalyst.expressions.Rint;
+import org.apache.spark.sql.catalyst.expressions.Sin;
+import org.apache.spark.sql.catalyst.expressions.Sinh;
 import org.apache.spark.sql.catalyst.expressions.Sqrt;
 import org.apache.spark.sql.catalyst.expressions.StringTrim;
 import org.apache.spark.sql.catalyst.expressions.Substring;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
+import org.apache.spark.sql.catalyst.expressions.Tan;
+import org.apache.spark.sql.catalyst.expressions.Tanh;
 import org.apache.spark.sql.catalyst.expressions.UnaryExpression;
 import org.apache.spark.sql.catalyst.expressions.UnaryMinus;
 import org.apache.spark.sql.catalyst.expressions.UnaryPositive;
@@ -116,6 +133,30 @@ public class ExpressionTranslator {
 			String name = attributeReference.name();
 
 			return new FieldRef(FieldName.create(name));
+		} else
+
+		if(expression instanceof BinaryMathExpression){
+			BinaryMathExpression binaryMathExpression = (BinaryMathExpression)expression;
+
+			Expression left = binaryMathExpression.left();
+			Expression right = binaryMathExpression.right();
+
+			String function;
+
+			if(binaryMathExpression instanceof Hypot){
+				function = PMMLFunctions.HYPOT;
+			} else
+
+			if(binaryMathExpression instanceof Pow){
+				function = PMMLFunctions.POW;
+			} else
+
+			{
+				throw new IllegalArgumentException(formatMessage(binaryMathExpression));
+			}
+
+			return PMMLUtil.createApply(function)
+				.addExpressions(translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof BinaryOperator){
@@ -273,6 +314,20 @@ public class ExpressionTranslator {
 			return apply;
 		} else
 
+		if(expression instanceof Greatest){
+			Greatest greatest = (Greatest)expression;
+
+			List<Expression> children = JavaConversions.seqAsJavaList(greatest.children());
+
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.MAX);
+
+			for(Expression child : children){
+				apply.addExpressions(translateInternal(child));
+			}
+
+			return apply;
+		} else
+
 		if(expression instanceof If){
 			If _if = (If)expression;
 
@@ -301,12 +356,38 @@ public class ExpressionTranslator {
 			return apply;
 		} else
 
+		if(expression instanceof Least){
+			Least least = (Least)expression;
+
+			List<Expression> children = JavaConversions.seqAsJavaList(least.children());
+
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.MIN);
+
+			for(Expression child : children){
+				apply.addExpressions(translateInternal(child));
+			}
+
+			return apply;
+		} else
+
+		if(expression instanceof Length){
+			Length length = (Length)expression;
+
+			Expression child = length.child();
+
+			return PMMLUtil.createApply(PMMLFunctions.STRINGLENGTH, translateInternal(child));
+		} else
+
 		if(expression instanceof Literal){
 			Literal literal = (Literal)expression;
 
 			Object value = literal.value();
 
 			DataType dataType;
+
+			if(value == null){
+				dataType = null;
+			} else
 
 			// XXX
 			if(value instanceof Decimal){
@@ -324,16 +405,6 @@ public class ExpressionTranslator {
 			}
 
 			return PMMLUtil.createConstant(value, dataType);
-		} else
-
-		if(expression instanceof Pow){
-			Pow pow = (Pow)expression;
-
-			Expression left = pow.left();
-			Expression right = pow.right();
-
-			return PMMLUtil.createApply(PMMLFunctions.POW)
-				.addExpressions(translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof RegExpReplace){
@@ -386,7 +457,7 @@ public class ExpressionTranslator {
 			int lenValue = ValueUtil.asInt((Number)len.value());
 
 			// XXX
-			lenValue = Math.min(lenValue, 65536);
+			lenValue = Math.min(lenValue, MAX_STRING_LENGTH);
 
 			return PMMLUtil.createApply(PMMLFunctions.SUBSTRING)
 				.addExpressions(translateInternal(str))
@@ -402,12 +473,36 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply(PMMLFunctions.ABS, translateInternal(child));
 			} else
 
+			if(expression instanceof Acos){
+				return PMMLUtil.createApply(PMMLFunctions.ACOS, translateInternal(child));
+			} else
+
+			if(expression instanceof Asin){
+				return PMMLUtil.createApply(PMMLFunctions.ASIN, translateInternal(child));
+			} else
+
+			if(expression instanceof Atan){
+				return PMMLUtil.createApply(PMMLFunctions.ATAN, translateInternal(child));
+			} else
+
 			if(expression instanceof Ceil){
 				return PMMLUtil.createApply(PMMLFunctions.CEIL, translateInternal(child));
 			} else
 
+			if(expression instanceof Cos){
+				return PMMLUtil.createApply(PMMLFunctions.COS, translateInternal(child));
+			} else
+
+			if(expression instanceof Cosh){
+				return PMMLUtil.createApply(PMMLFunctions.COSH, translateInternal(child));
+			} else
+
 			if(expression instanceof Exp){
 				return PMMLUtil.createApply(PMMLFunctions.EXP, translateInternal(child));
+			} else
+
+			if(expression instanceof Expm1){
+				return PMMLUtil.createApply(PMMLFunctions.EXPM1, translateInternal(child));
 			} else
 
 			if(expression instanceof Floor){
@@ -422,8 +517,17 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply(PMMLFunctions.LOG10, translateInternal(child));
 			} else
 
+			if(expression instanceof Log1p){
+				return PMMLUtil.createApply(PMMLFunctions.LN1P, translateInternal(child));
+			} else
+
 			if(expression instanceof Lower){
 				return PMMLUtil.createApply(PMMLFunctions.LOWERCASE, translateInternal(child));
+			} else
+
+			if(expression instanceof IsNaN){
+				// XXX
+				return PMMLUtil.createApply(PMMLFunctions.ISNOTVALID, translateInternal(child));
 			} else
 
 			if(expression instanceof IsNotNull){
@@ -442,8 +546,24 @@ public class ExpressionTranslator {
 				return PMMLUtil.createApply(PMMLFunctions.RINT, translateInternal(child));
 			} else
 
+			if(expression instanceof Sin){
+				return PMMLUtil.createApply(PMMLFunctions.SIN, translateInternal(child));
+			} else
+
+			if(expression instanceof Sinh){
+				return PMMLUtil.createApply(PMMLFunctions.SINH, translateInternal(child));
+			} else
+
 			if(expression instanceof Sqrt){
 				return PMMLUtil.createApply(PMMLFunctions.SQRT, translateInternal(child));
+			} else
+
+			if(expression instanceof Tan){
+				return PMMLUtil.createApply(PMMLFunctions.TAN, translateInternal(child));
+			} else
+
+			if(expression instanceof Tanh){
+				return PMMLUtil.createApply(PMMLFunctions.TANH, translateInternal(child));
 			} else
 
 			if(expression instanceof UnaryMinus){
@@ -490,4 +610,6 @@ public class ExpressionTranslator {
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");
+
+	private static final int MAX_STRING_LENGTH = 65536;
 }

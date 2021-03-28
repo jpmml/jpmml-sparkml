@@ -38,7 +38,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
-public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends PredictionModelConverter<T> {
 
 	public RegressionModelConverter(T model){
 		super(model);

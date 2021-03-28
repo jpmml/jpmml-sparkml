@@ -172,12 +172,18 @@ public class ExpressionTranslatorTest {
 
 		checkValue(1.0d, "exp(0)");
 
+		checkValue(0.0d, "expm1(0)");
+
 		checkValue(-1, "floor(double(-0.1))");
 		checkValue(5, "floor(5)");
+
+		checkValue(5.0d, "hypot(3, 4)");
 
 		checkValue(0.0d, "ln(1)");
 
 		checkValue(1.0d, "log10(10)");
+
+		checkValue(0.0d, "log1p(0)");
 
 		checkValue(1, "negative(-1)");
 		checkValue(-1, "negative(1)");
@@ -190,6 +196,28 @@ public class ExpressionTranslatorTest {
 		checkValue(12d, "rint(double(12.3456))");
 
 		checkValue(2.0d, "sqrt(4)");
+	}
+
+	@Test
+	public void evaluateTrigonometricExpression(){
+		checkValue(1.0d, "cos(0)");
+		checkValue(0.0d, "acos(1.0)");
+		checkValue(1.0d, "cosh(0)");
+
+		checkValue(0.0d, "sin(0)");
+		checkValue(0.0d, "asin(0.0)");
+		checkValue(0.0d, "sinh(0)");
+
+		checkValue(0.0d, "tan(0)");
+		checkValue(0.0d, "atan(0.0)");
+		checkValue(0.0d, "tanh(0)");
+	}
+
+	@Test
+	public void translateAggregationExpression(){
+		checkValue(10, "greatest(10, 9, 2, 4, 3)");
+
+		checkValue(2, "least(10, 9, 2, 4, 3)");
 	}
 
 	@Test
@@ -210,8 +238,14 @@ public class ExpressionTranslatorTest {
 
 	@Test
 	public void evaluateStringExpression(){
+		checkValue(10, "char_length(\"Spark SQL \")");
+		checkValue(10, "character_length(\"Spark SQL \")");
+
 		checkValue("SparkSQL", "concat(\"Spark\", \"SQL\")");
 
+		checkValue(10, "length(\"Spark SQL \")");
+
+		checkValue("sparksql", "lcase(\"SparkSql\")");
 		checkValue("sparksql", "lower(\"SparkSql\")");
 
 		checkValue("k SQL", "substr(\"Spark SQL\", 5)");
@@ -228,7 +262,19 @@ public class ExpressionTranslatorTest {
 
 		checkValue("SparkSQL", "trim(\"    SparkSQL   \")");
 
+		checkValue("SPARKSQL", "ucase(\"SparkSql\")");
 		checkValue("SPARKSQL", "upper(\"SparkSql\")");
+	}
+
+	@Test
+	public void evaluateValueExpression(){
+		checkValue(true, "isnan(cast(\"NaN\" as double))");
+
+		checkValue(true, "isnull(NULL)");
+		checkValue(false, "isnull(0)");
+
+		checkValue(false, "isnotnull(NULL)");
+		checkValue(true, "isnotnull(0)");
 	}
 
 	static
