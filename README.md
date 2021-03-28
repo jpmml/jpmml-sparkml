@@ -43,11 +43,13 @@ Java library and command-line application for converting Apache Spark ML pipelin
       * Arithmetic operators `+`, `-`, `*` and `/`.
       * Comparison operators `<`, `<=`, `==`, `>=` and `>`.
       * Logical operators `and`, `or` and `not`.
-      * Math functions `abs`, `ceil`, `exp`, `floor`, `ln`, `log10`, `pow` and `rint`.
+      * Math functions `abs`, `ceil`, `exp`, `expm1`, `floor`, `hypot`, `ln`, `log10`, `log1p`, `pow` and `rint`.
+      * Trigonometric functions `sin`, `asin`, `sinh`, `cos`, `acos`, `cosh`, `tan`, `atan`, `tanh`.
+      * Aggregation functions `greatest` and `least`.
       * RegExp functions `regexp_replace` and `rlike`.
-      * String functions `concat`, `lower`, `substring`, `trim` and `upper`.
+      * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `substring`, `trim`, `ucase` and `upper`.
       * Type cast functions `boolean`, `cast`, `double`, `int` and `string`.
-      * Value functions `in`, `isnull`, `isnotnull`, `negative` and `positive`.
+      * Value functions `in`, `isnan`, `isnull`, `isnotnull`, `negative` and `positive`.
     * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
     * [`feature.StopWordsRemover`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StopWordsRemover.html)
     * [`feature.StringIndexerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StringIndexerModel.html) (the result of fitting a `feature.StringIndexer`)
@@ -66,6 +68,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`classification.NaiveBayesModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/NaiveBayesModel.html)
     * [`classification.RandomForestClassificationModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/classification/RandomForestClassificationModel.html)
     * [`clustering.KMeansModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/clustering/KMeansModel.html)
+    * [`fpm.FPGrowthModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/fpm/FPGrowthModel.html)
     * [`regression.DecisionTreeRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/DecisionTreeRegressionModel.html)
     * [`regression.GBTRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GBTRegressionModel.html)
     * [`regression.GeneralizedLinearRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GeneralizedLinearRegressionModel.html)
@@ -193,6 +196,7 @@ spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-
 
 # Documentation #
 
+* [Converting logistic regression models to PMML documents](https://openscoring.io/blog/2020/01/19/converting_logistic_regression_pmml/#apache-spark)
 * [Deploying Apache Spark ML pipeline models on Openscoring REST web service](https://openscoring.io/blog/2020/02/16/deploying_sparkml_pipeline_openscoring_rest/)
 * [Converting Apache Spark ML pipeline models to PMML documents](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)
 
