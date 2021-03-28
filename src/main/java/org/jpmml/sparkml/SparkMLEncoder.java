@@ -34,13 +34,19 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMML;
+import org.dmg.pmml.Visitor;
+import org.dmg.pmml.VisitorAction;
+import org.dmg.pmml.association.Item;
 import org.jpmml.converter.BooleanFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.WildcardFeature;
+import org.jpmml.model.visitors.AbstractVisitor;
 
 public class SparkMLEncoder extends ModelEncoder {
 
@@ -54,6 +60,24 @@ public class SparkMLEncoder extends ModelEncoder {
 	public SparkMLEncoder(StructType schema, ConverterFactory converterFactory){
 		setSchema(schema);
 		setConverterFactory(converterFactory);
+	}
+
+	@Override
+	public PMML encodePMML(Model model){
+		PMML pmml = super.encodePMML(model);
+
+		Visitor visitor = new AbstractVisitor(){
+
+			@Override
+			public VisitorAction visit(Item item){
+				item.setField(null);
+
+				return super.visit(item);
+			}
+		};
+		visitor.applyTo(pmml);
+
+		return pmml;
 	}
 
 	public boolean hasFeatures(String column){

@@ -18,18 +18,18 @@
  */
 package org.jpmml.sparkml;
 
-interface Algorithms {
+import org.dmg.pmml.Field;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
 
-	String DECISION_TREE = "DecisionTree";
-	String FP_GROWTH = "FPGrowth";
-	String GBT = "GBT";
-	String GLM = "GLM";
-	String K_MEANS = "KMeans";
-	String LINEAR_REGRESION = "LinearRegression";
-	String LINEAR_SVC = "LinearSVC";
-	String LOGISTIC_REGRESSION = "LogisticRegression";
-	String MODEL_CHAIN = "ModelChain";
-	String NAIVE_BAYES = "NaiveBayes";
-	String NEURAL_NETWORK = "NeuralNetwork";
-	String RANDOM_FOREST = "RandomForest";
+public class ItemSetFeature extends Feature {
+
+	public ItemSetFeature(SparkMLEncoder encoder, Field<?> field){
+		super(encoder, field.getName(), field.getDataType());
+	}
+
+	@Override
+	public ContinuousFeature toContinuousFeature(){
+		throw new UnsupportedOperationException();
+	}
 }

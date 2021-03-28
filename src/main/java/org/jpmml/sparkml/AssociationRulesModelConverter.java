@@ -18,18 +18,19 @@
  */
 package org.jpmml.sparkml;
 
-interface Algorithms {
+import org.apache.spark.ml.Model;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.MiningFunction;
 
-	String DECISION_TREE = "DecisionTree";
-	String FP_GROWTH = "FPGrowth";
-	String GBT = "GBT";
-	String GLM = "GLM";
-	String K_MEANS = "KMeans";
-	String LINEAR_REGRESION = "LinearRegression";
-	String LINEAR_SVC = "LinearSVC";
-	String LOGISTIC_REGRESSION = "LogisticRegression";
-	String MODEL_CHAIN = "ModelChain";
-	String NAIVE_BAYES = "NaiveBayes";
-	String NEURAL_NETWORK = "NeuralNetwork";
-	String RANDOM_FOREST = "RandomForest";
+abstract
+public class AssociationRulesModelConverter<T extends Model<T> & HasPredictionCol> extends ModelConverter<T> {
+
+	public AssociationRulesModelConverter(T model){
+		super(model);
+	}
+
+	@Override
+	public MiningFunction getMiningFunction(){
+		return MiningFunction.ASSOCIATION_RULES;
+	}
 }

@@ -28,6 +28,7 @@ interface Datasets {
 	String HOUSING = "Housing";
 	String IRIS = "Iris";
 	String SENTIMENT = "Sentiment";
+	String SHOPPING = "Shopping";
 	String VISIT = "Visit";
 
 	FieldName AUDIT_PROBABILITY_TRUE = FieldNameUtil.create("probability", 1);
