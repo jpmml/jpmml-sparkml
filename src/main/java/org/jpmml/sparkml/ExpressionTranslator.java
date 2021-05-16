@@ -98,14 +98,31 @@ import scala.collection.JavaConversions;
 
 public class ExpressionTranslator {
 
-	static
-	public org.dmg.pmml.Expression translate(Expression expression){
-		return translate(expression, true);
+	private SparkMLEncoder encoder = null;
+
+
+	private ExpressionTranslator(SparkMLEncoder encoder){
+		setEncoder(encoder);
+	}
+
+	public SparkMLEncoder getEncoder(){
+		return this.encoder;
+	}
+
+	private void setEncoder(SparkMLEncoder encoder){
+		this.encoder = encoder;
 	}
 
 	static
-	public org.dmg.pmml.Expression translate(Expression expression, boolean compact){
-		org.dmg.pmml.Expression pmmlExpression = translateInternal(expression);
+	public org.dmg.pmml.Expression translate(SparkMLEncoder encoder, Expression expression){
+		return translate(encoder, expression, true);
+	}
+
+	static
+	public org.dmg.pmml.Expression translate(SparkMLEncoder encoder, Expression expression, boolean compact){
+		ExpressionTranslator expressionTranslator = new ExpressionTranslator(encoder);
+
+		org.dmg.pmml.Expression pmmlExpression = expressionTranslator.translateInternal(expression);
 
 		if(compact){
 			ExpressionCompactor expressionCompactor = new ExpressionCompactor();
@@ -116,7 +133,6 @@ public class ExpressionTranslator {
 		return pmmlExpression;
 	}
 
-	static
 	private org.dmg.pmml.Expression translateInternal(Expression expression){
 
 		if(expression instanceof Alias){

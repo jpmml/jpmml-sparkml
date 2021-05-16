@@ -101,7 +101,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 			}
 
-			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
+			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
 
 			Visitor visitor = new AbstractVisitor(){
 

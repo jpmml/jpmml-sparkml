@@ -278,28 +278,26 @@ public class ExpressionTranslatorTest {
 	}
 
 	static
+	private org.dmg.pmml.Expression translate(String sqlExpression){
+		ConverterFactory converterFactory = new ConverterFactory(Collections.emptyMap());
+
+		SparkMLEncoder encoder = new SparkMLEncoder(ExpressionTranslatorTest.schema, converterFactory);
+
+		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
+
+		return ExpressionTranslator.translate(encoder, expression);
+	}
+
+	static
 	private Object evaluate(String sqlExpression){
-		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
+		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
 
 		return expression.eval(InternalRow.empty());
 	}
 
 	static
-	private org.dmg.pmml.Expression translate(String sqlExpression){
-		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
-
-		return ExpressionTranslator.translate(expression);
-	}
-
-	static
 	private Expression translateInternal(String sqlStatement){
-		StructType schema = new StructType()
-			.add("flag", DataTypes.BooleanType)
-			.add("x1", DataTypes.DoubleType)
-			.add("x2", DataTypes.DoubleType)
-			.add("status", DataTypes.IntegerType);
-
-		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, schema, sqlStatement);
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, ExpressionTranslatorTest.schema, sqlStatement);
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		if(expressions.size() != 1){
@@ -311,7 +309,11 @@ public class ExpressionTranslatorTest {
 
 	static
 	public void checkValue(Object expectedValue, String sqlExpression){
-		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
+		ConverterFactory converterFactory = new ConverterFactory(Collections.emptyMap());
+
+		SparkMLEncoder encoder = new SparkMLEncoder(ExpressionTranslatorTest.schema, converterFactory);
+
+		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
 
 		Object sparkValue = expression.eval(InternalRow.empty());
 
@@ -335,7 +337,7 @@ public class ExpressionTranslatorTest {
 			assertEquals(expectedValue, sparkValue);
 		}
 
-		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
+		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
 
 		EvaluationContext context = new VirtualEvaluationContext();
 		context.declareAll(Collections.emptyMap());
@@ -366,4 +368,10 @@ public class ExpressionTranslatorTest {
 	}
 
 	public static SparkSession sparkSession = null;
+
+	private static final StructType schema = new StructType()
+		.add("flag", DataTypes.BooleanType)
+		.add("x1", DataTypes.DoubleType)
+		.add("x2", DataTypes.DoubleType)
+		.add("status", DataTypes.IntegerType);
 }
