@@ -143,9 +143,12 @@ public class ExpressionTranslator {
 		if(expression instanceof Alias){
 			Alias alias = (Alias)expression;
 
+			String name = alias.name();
 			Expression child = alias.child();
 
-			return translateInternal(child);
+			org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+			return new AliasExpression(name, pmmlExpression);
 		} // End if
 
 		if(expression instanceof AttributeReference){
@@ -304,9 +307,9 @@ public class ExpressionTranslator {
 
 			Expression child = cast.child();
 
-			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
-
 			org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
 
 			if(pmmlExpression instanceof HasDataType){
 				HasDataType<?> hasDataType = (HasDataType<?>)pmmlExpression;
@@ -317,23 +320,21 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				FieldName name = FieldNameUtil.create((dataType.name()).toLowerCase(), formatExpression(child));
+				FieldName name;
 
-				OpType opType;
+				if(pmmlExpression instanceof AliasExpression){
+					AliasExpression aliasExpression = (AliasExpression)pmmlExpression;
 
-				// XXX
-				switch(dataType){
-					case INTEGER:
-					case FLOAT:
-					case DOUBLE:
-						opType = OpType.CONTINUOUS;
-						break;
-					default:
-						opType = OpType.CATEGORICAL;
-						break;
+					name = FieldName.create(aliasExpression.getName());
+				} else
+
+				{
+					name = FieldNameUtil.create((dataType.name()).toLowerCase(), ExpressionUtil.format(child));
 				}
 
-				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, pmmlExpression);
+				OpType opType = ExpressionUtil.getOpType(dataType);
+
+				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, AliasExpression.unwrap(pmmlExpression));
 
 				return new FieldRef(derivedField.getName());
 			}
@@ -639,18 +640,13 @@ public class ExpressionTranslator {
 	}
 
 	static
-	private String formatExpression(Expression expression){
-		return String.valueOf(expression);
-	}
-
-	static
 	private String formatMessage(Expression expression){
 
 		if(expression == null){
 			return null;
 		}
 
-		return "Spark SQL function \'" + formatExpression(expression) + "\' (class " + (expression.getClass()).getName() + ") is not supported";
+		return "Spark SQL function \'" + ExpressionUtil.format(expression) + "\' (class " + (expression.getClass()).getName() + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");

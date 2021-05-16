@@ -89,15 +89,15 @@ public class ExpressionTranslatorTest {
 	@Test
 	public void evaluateArithmeticExpression(){
 		checkValue(3, "1 + int(2)");
-		checkValue("3", "cast(1 + int(2) as string)");
+		checkValue("3", "cast(1 + int(2) as string) as int_string");
 		checkValue(3d, "cast(1.0 as double) + double(2.0)");
 
 		checkValue(1, "2 - int(1)");
-		checkValue("1", "cast(2 - int(1) as string)");
+		checkValue("1", "cast(2 - int(1) as string) as int_string");
 		checkValue(1d, "cast(2.0 as double) - double(1.0)");
 
 		checkValue(6, "2 * int(3)");
-		checkValue("6", "cast(2 * int(3) as string)");
+		checkValue("6", "cast(2 * int(3) as string) as int_string");
 		checkValue(6d, "cast(2.0 as double) * double(3.0)");
 
 		// "Always perform floating point division"
@@ -292,7 +292,11 @@ public class ExpressionTranslatorTest {
 
 		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
 
-		return ExpressionTranslator.translate(encoder, expression);
+		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
+
+		pmmlExpression = AliasExpression.unwrap(pmmlExpression);
+
+		return pmmlExpression;
 	}
 
 	static
@@ -345,6 +349,8 @@ public class ExpressionTranslatorTest {
 		}
 
 		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
+
+		pmmlExpression = AliasExpression.unwrap(pmmlExpression);
 
 		PMML pmml = encoder.encodePMML();
 
