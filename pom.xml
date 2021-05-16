@@ -72,6 +72,12 @@
 			<groupId>org.jpmml</groupId>
 			<artifactId>jpmml-converter</artifactId>
 			<version>1.4.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
