@@ -86,10 +86,13 @@ import org.apache.spark.sql.catalyst.expressions.Upper;
 import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
+import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
@@ -135,6 +138,7 @@ public class ExpressionTranslator {
 	}
 
 	private org.dmg.pmml.Expression translateInternal(Expression expression){
+		SparkMLEncoder encoder = getEncoder();
 
 		if(expression instanceof Alias){
 			Alias alias = (Alias)expression;
@@ -313,7 +317,25 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(formatMessage(cast));
+				FieldName name = FieldNameUtil.create((dataType.name()).toLowerCase(), formatExpression(child));
+
+				OpType opType;
+
+				// XXX
+				switch(dataType){
+					case INTEGER:
+					case FLOAT:
+					case DOUBLE:
+						opType = OpType.CONTINUOUS;
+						break;
+					default:
+						opType = OpType.CATEGORICAL;
+						break;
+				}
+
+				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, pmmlExpression);
+
+				return new FieldRef(derivedField.getName());
 			}
 		} else
 
@@ -617,13 +639,18 @@ public class ExpressionTranslator {
 	}
 
 	static
+	private String formatExpression(Expression expression){
+		return String.valueOf(expression);
+	}
+
+	static
 	private String formatMessage(Expression expression){
 
 		if(expression == null){
 			return null;
 		}
 
-		return "Spark SQL function \'" + expression + "\' (class " + (expression.getClass()).getName() + ") is not supported";
+		return "Spark SQL function \'" + formatExpression(expression) + "\' (class " + (expression.getClass()).getName() + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");

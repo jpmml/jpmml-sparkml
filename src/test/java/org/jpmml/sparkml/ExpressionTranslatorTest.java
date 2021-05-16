@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.InternalRow;
@@ -30,9 +31,12 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
+import org.dmg.pmml.PMML;
 import org.dmg.pmml.PMMLFunctions;
+import org.dmg.pmml.TransformationDictionary;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.evaluator.EvaluationContext;
 import org.jpmml.evaluator.ExpressionUtil;
@@ -85,12 +89,15 @@ public class ExpressionTranslatorTest {
 	@Test
 	public void evaluateArithmeticExpression(){
 		checkValue(3, "1 + int(2)");
+		checkValue("3", "cast(1 + int(2) as string)");
 		checkValue(3d, "cast(1.0 as double) + double(2.0)");
 
 		checkValue(1, "2 - int(1)");
+		checkValue("1", "cast(2 - int(1) as string)");
 		checkValue(1d, "cast(2.0 as double) - double(1.0)");
 
 		checkValue(6, "2 * int(3)");
+		checkValue("6", "cast(2 * int(3) as string)");
 		checkValue(6d, "cast(2.0 as double) * double(3.0)");
 
 		// "Always perform floating point division"
@@ -339,7 +346,28 @@ public class ExpressionTranslatorTest {
 
 		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
 
-		EvaluationContext context = new VirtualEvaluationContext();
+		PMML pmml = encoder.encodePMML();
+
+		EvaluationContext context = new VirtualEvaluationContext(){
+
+			@Override
+			public FieldValue resolve(FieldName name){
+				TransformationDictionary transformationDictionary = pmml.getTransformationDictionary();
+
+				if(transformationDictionary != null && transformationDictionary.hasDerivedFields()){
+					List<DerivedField> derivedFields = transformationDictionary.getDerivedFields();
+
+					for(DerivedField derivedField : derivedFields){
+
+						if(Objects.equals(derivedField.getName(), name)){
+							return ExpressionUtil.evaluate(derivedField, this);
+						}
+					}
+				}
+
+				return super.resolve(name);
+			}
+		};
 		context.declareAll(Collections.emptyMap());
 
 		FieldValue value = ExpressionUtil.evaluate(pmmlExpression, context);
