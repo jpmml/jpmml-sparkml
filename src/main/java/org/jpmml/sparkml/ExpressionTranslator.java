@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.sql.catalyst.expressions.Abs;
 import org.apache.spark.sql.catalyst.expressions.Acos;
@@ -110,7 +111,7 @@ public class ExpressionTranslator {
 	}
 
 	private void setEncoder(SparkMLEncoder encoder){
-		this.encoder = encoder;
+		this.encoder = Objects.requireNonNull(encoder);
 	}
 
 	static
