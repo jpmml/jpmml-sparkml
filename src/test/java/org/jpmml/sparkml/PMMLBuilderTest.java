@@ -38,14 +38,6 @@ public class PMMLBuilderTest {
 	public void construct(){
 		StructType schema = new StructType();
 
-		try {
-			PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, null);
-
-			fail();
-		} catch(IllegalArgumentException iae){
-			// Ignored
-		}
-
 		Model<?> model = new LogisticRegressionModel("lrm", new DenseVector(new double[0]), 0d);
 
 		try {

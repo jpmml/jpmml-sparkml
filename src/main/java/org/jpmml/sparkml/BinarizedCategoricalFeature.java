@@ -73,7 +73,7 @@ public class BinarizedCategoricalFeature extends Feature {
 
 	private void setBinaryFeatures(List<BinaryFeature> binaryFeatures){
 
-		if(binaryFeatures != null && binaryFeatures.size() < 1){
+		if(binaryFeatures != null && binaryFeatures.isEmpty()){
 			throw new IllegalArgumentException();
 		}
 

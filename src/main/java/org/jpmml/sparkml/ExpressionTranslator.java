@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.sql.catalyst.expressions.Abs;
 import org.apache.spark.sql.catalyst.expressions.Acos;
@@ -85,10 +86,13 @@ import org.apache.spark.sql.catalyst.expressions.Upper;
 import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
+import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
@@ -98,14 +102,31 @@ import scala.collection.JavaConversions;
 
 public class ExpressionTranslator {
 
-	static
-	public org.dmg.pmml.Expression translate(Expression expression){
-		return translate(expression, true);
+	private SparkMLEncoder encoder = null;
+
+
+	private ExpressionTranslator(SparkMLEncoder encoder){
+		setEncoder(encoder);
+	}
+
+	public SparkMLEncoder getEncoder(){
+		return this.encoder;
+	}
+
+	private void setEncoder(SparkMLEncoder encoder){
+		this.encoder = Objects.requireNonNull(encoder);
 	}
 
 	static
-	public org.dmg.pmml.Expression translate(Expression expression, boolean compact){
-		org.dmg.pmml.Expression pmmlExpression = translateInternal(expression);
+	public org.dmg.pmml.Expression translate(SparkMLEncoder encoder, Expression expression){
+		return translate(encoder, expression, true);
+	}
+
+	static
+	public org.dmg.pmml.Expression translate(SparkMLEncoder encoder, Expression expression, boolean compact){
+		ExpressionTranslator expressionTranslator = new ExpressionTranslator(encoder);
+
+		org.dmg.pmml.Expression pmmlExpression = expressionTranslator.translateInternal(expression);
 
 		if(compact){
 			ExpressionCompactor expressionCompactor = new ExpressionCompactor();
@@ -116,15 +137,18 @@ public class ExpressionTranslator {
 		return pmmlExpression;
 	}
 
-	static
 	private org.dmg.pmml.Expression translateInternal(Expression expression){
+		SparkMLEncoder encoder = getEncoder();
 
 		if(expression instanceof Alias){
 			Alias alias = (Alias)expression;
 
+			String name = alias.name();
 			Expression child = alias.child();
 
-			return translateInternal(child);
+			org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+			return new AliasExpression(name, pmmlExpression);
 		} // End if
 
 		if(expression instanceof AttributeReference){
@@ -283,9 +307,9 @@ public class ExpressionTranslator {
 
 			Expression child = cast.child();
 
-			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
-
 			org.dmg.pmml.Expression pmmlExpression = translateInternal(child);
+
+			DataType dataType = DatasetUtil.translateDataType(cast.dataType());
 
 			if(pmmlExpression instanceof HasDataType){
 				HasDataType<?> hasDataType = (HasDataType<?>)pmmlExpression;
@@ -296,7 +320,25 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(formatMessage(cast));
+				FieldName name;
+
+				if(pmmlExpression instanceof AliasExpression){
+					AliasExpression aliasExpression = (AliasExpression)pmmlExpression;
+
+					name = FieldName.create(aliasExpression.getName());
+				} else
+
+				{
+					name = FieldNameUtil.create((dataType.name()).toLowerCase(), ExpressionUtil.format(child));
+				}
+
+				OpType opType = ExpressionUtil.getOpType(dataType);
+
+				pmmlExpression = AliasExpression.unwrap(pmmlExpression);
+
+				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, pmmlExpression);
+
+				return new FieldRef(derivedField.getName());
 			}
 		} else
 
@@ -606,7 +648,7 @@ public class ExpressionTranslator {
 			return null;
 		}
 
-		return "Spark SQL function \'" + expression + "\' (class " + (expression.getClass()).getName() + ") is not supported";
+		return "Spark SQL function \'" + ExpressionUtil.format(expression) + "\' (class " + (expression.getClass()).getName() + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");

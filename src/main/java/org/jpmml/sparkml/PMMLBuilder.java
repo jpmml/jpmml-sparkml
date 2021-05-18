@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -362,12 +363,7 @@ public class PMMLBuilder {
 	}
 
 	public PMMLBuilder setSchema(StructType schema){
-
-		if(schema == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.schema = schema;
+		this.schema = Objects.requireNonNull(schema);
 
 		return this;
 	}
@@ -377,12 +373,7 @@ public class PMMLBuilder {
 	}
 
 	public PMMLBuilder setPipelineModel(PipelineModel pipelineModel){
-
-		if(pipelineModel == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.pipelineModel = pipelineModel;
+		this.pipelineModel = Objects.requireNonNull(pipelineModel);
 
 		return this;
 	}
@@ -392,12 +383,7 @@ public class PMMLBuilder {
 	}
 
 	private PMMLBuilder setOptions(Map<RegexKey, Map<String, Object>> options){
-
-		if(options == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.options = options;
+		this.options = Objects.requireNonNull(options);
 
 		return this;
 	}

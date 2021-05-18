@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -90,12 +91,7 @@ public class ConverterFactory {
 	}
 
 	private void setOptions(Map<RegexKey, ? extends Map<String, ?>> options){
-
-		if(options == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.options = options;
+		this.options = Objects.requireNonNull(options);
 	}
 
 	static
