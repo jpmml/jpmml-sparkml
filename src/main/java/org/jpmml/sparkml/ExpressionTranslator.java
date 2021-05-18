@@ -334,7 +334,9 @@ public class ExpressionTranslator {
 
 				OpType opType = ExpressionUtil.getOpType(dataType);
 
-				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, AliasExpression.unwrap(pmmlExpression));
+				pmmlExpression = AliasExpression.unwrap(pmmlExpression);
+
+				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, pmmlExpression);
 
 				return new FieldRef(derivedField.getName());
 			}

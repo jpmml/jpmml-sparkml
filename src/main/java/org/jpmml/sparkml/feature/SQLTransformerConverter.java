@@ -28,6 +28,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
@@ -68,53 +69,24 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 		List<Feature> result = new ArrayList<>();
 
-		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
-		for(Expression expression : expressions){
-			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
-
-			FieldName name;
-
-			if(pmmlExpression instanceof AliasExpression){
-				AliasExpression aliasExpression = (AliasExpression)pmmlExpression;
-
-				name = FieldName.create(aliasExpression.getName());
-			} else
-
-			{
-				name = FieldNameUtil.create("sql", ExpressionUtil.format(expression));
-			}
-
-			DataType dataType = DatasetUtil.translateDataType(expression.dataType());
-
-			OpType opType = ExpressionUtil.getOpType(dataType);
-
-			Visitor visitor = new AbstractVisitor(){
-
-				@Override
-				public VisitorAction visit(FieldRef fieldRef){
-					FieldName name = fieldRef.getField();
-
-					encoder.getOnlyFeature(name.getValue());
-
-					return super.visit(fieldRef);
-				}
-			};
-			visitor.applyTo(pmmlExpression);
-
-			DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, AliasExpression.unwrap(pmmlExpression));
+		List<Field<?>> fields = encodeLogicalPlan(encoder, logicalPlan);
+		for(Field<?> field : fields){
+			FieldName name = field.getName();
+			OpType opType = field.getOpType();
+			DataType dataType = field.getDataType();
 
 			Feature feature;
 
 			switch(dataType){
 				case STRING:
-					feature = new StringFeature(encoder, derivedField);
+					feature = new StringFeature(encoder, field);
 					break;
 				case INTEGER:
 				case DOUBLE:
-					feature = new ContinuousFeature(encoder, derivedField);
+					feature = new ContinuousFeature(encoder, field);
 					break;
 				case BOOLEAN:
-					feature = new BooleanFeature(encoder, derivedField);
+					feature = new BooleanFeature(encoder, field);
 					break;
 				default:
 					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
@@ -131,5 +103,81 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 	@Override
 	public void registerFeatures(SparkMLEncoder encoder){
 		encodeFeatures(encoder);
+	}
+
+	static
+	public List<Field<?>> encodeLogicalPlan(SparkMLEncoder encoder, LogicalPlan logicalPlan){
+		List<Field<?>> result = new ArrayList<>();
+
+		List<LogicalPlan> children = JavaConversions.seqAsJavaList(logicalPlan.children());
+		for(LogicalPlan child : children){
+			encodeLogicalPlan(encoder, child);
+		}
+
+		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
+		for(Expression expression : expressions){
+			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
+
+			if(pmmlExpression instanceof FieldRef){
+				FieldRef fieldRef = (FieldRef)pmmlExpression;
+
+				Field<?> field = ensureField(encoder, fieldRef.getField());
+				if(field != null){
+					result.add(field);
+
+					continue;
+				}
+			}
+
+			FieldName name = null;
+
+			if(pmmlExpression instanceof AliasExpression){
+				AliasExpression aliasExpression = (AliasExpression)pmmlExpression;
+
+				name = FieldName.create(aliasExpression.getName());
+			} else
+
+			{
+				name = FieldNameUtil.create("sql", ExpressionUtil.format(expression));
+			}
+
+			DataType dataType = DatasetUtil.translateDataType(expression.dataType());
+
+			OpType opType = ExpressionUtil.getOpType(dataType);
+
+			pmmlExpression = AliasExpression.unwrap(pmmlExpression);
+
+			Visitor visitor = new AbstractVisitor(){
+
+				@Override
+				public VisitorAction visit(FieldRef fieldRef){
+					ensureField(encoder, fieldRef.getField());
+
+					return super.visit(fieldRef);
+				}
+			};
+			visitor.applyTo(pmmlExpression);
+
+			DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, pmmlExpression);
+
+			result.add(derivedField);
+		}
+
+		return result;
+	}
+
+	static
+	private Field<?> ensureField(SparkMLEncoder encoder, FieldName name){
+
+		try {
+			return encoder.getField(name);
+		} catch(IllegalArgumentException pmmlIae){
+
+			try {
+				return encoder.createDataField(name);
+			} catch(IllegalArgumentException sparkIae){
+				return null;
+			}
+		}
 	}
 }
