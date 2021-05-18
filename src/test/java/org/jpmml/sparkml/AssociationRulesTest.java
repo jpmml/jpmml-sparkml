@@ -21,12 +21,12 @@ package org.jpmml.sparkml;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import com.google.common.collect.Iterables;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.association.AssociationModel;
 import org.jpmml.evaluator.ResultField;
 import org.junit.Test;
-import org.spark_project.guava.collect.Iterables;
 
 import static org.junit.Assert.assertTrue;
 

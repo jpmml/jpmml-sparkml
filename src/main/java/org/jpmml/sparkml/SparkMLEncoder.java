@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.common.collect.Iterables;
 import org.apache.spark.sql.types.BooleanType;
@@ -197,12 +198,7 @@ public class SparkMLEncoder extends ModelEncoder {
 	}
 
 	private void setSchema(StructType schema){
-
-		if(schema == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.schema = schema;
+		this.schema = Objects.requireNonNull(schema);
 	}
 
 	public ConverterFactory getConverterFactory(){
@@ -210,11 +206,6 @@ public class SparkMLEncoder extends ModelEncoder {
 	}
 
 	private void setConverterFactory(ConverterFactory converterFactory){
-
-		if(converterFactory == null){
-			throw new IllegalArgumentException();
-		}
-
-		this.converterFactory = converterFactory;
+		this.converterFactory = Objects.requireNonNull(converterFactory);
 	}
 }

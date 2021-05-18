@@ -40,6 +40,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
     * [`feature.RegexTokenizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RegexTokenizer.html)
     * [`feature.RFormulaModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
     * [`feature.SQLTransformer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/SQLTransformer.html)
+      * Subqueries.
       * Control flow expressions `case when` and `if`.
       * Arithmetic operators `+`, `-`, `*` and `/`.
       * Comparison operators `<`, `<=`, `==`, `>=` and `>`.
