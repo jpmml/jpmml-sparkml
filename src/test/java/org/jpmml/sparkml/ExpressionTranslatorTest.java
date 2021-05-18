@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.InternalRow;
@@ -30,9 +31,12 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
+import org.dmg.pmml.PMML;
 import org.dmg.pmml.PMMLFunctions;
+import org.dmg.pmml.TransformationDictionary;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.evaluator.EvaluationContext;
 import org.jpmml.evaluator.ExpressionUtil;
@@ -85,12 +89,15 @@ public class ExpressionTranslatorTest {
 	@Test
 	public void evaluateArithmeticExpression(){
 		checkValue(3, "1 + int(2)");
+		checkValue("3", "cast(1 + int(2) as string) as int_string");
 		checkValue(3d, "cast(1.0 as double) + double(2.0)");
 
 		checkValue(1, "2 - int(1)");
+		checkValue("1", "cast(2 - int(1) as string) as int_string");
 		checkValue(1d, "cast(2.0 as double) - double(1.0)");
 
 		checkValue(6, "2 * int(3)");
+		checkValue("6", "cast(2 * int(3) as string) as int_string");
 		checkValue(6d, "cast(2.0 as double) * double(3.0)");
 
 		// "Always perform floating point division"
@@ -278,28 +285,30 @@ public class ExpressionTranslatorTest {
 	}
 
 	static
+	private org.dmg.pmml.Expression translate(String sqlExpression){
+		ConverterFactory converterFactory = new ConverterFactory(Collections.emptyMap());
+
+		SparkMLEncoder encoder = new SparkMLEncoder(ExpressionTranslatorTest.schema, converterFactory);
+
+		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
+
+		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
+
+		pmmlExpression = AliasExpression.unwrap(pmmlExpression);
+
+		return pmmlExpression;
+	}
+
+	static
 	private Object evaluate(String sqlExpression){
-		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
+		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
 
 		return expression.eval(InternalRow.empty());
 	}
 
 	static
-	private org.dmg.pmml.Expression translate(String sqlExpression){
-		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
-
-		return ExpressionTranslator.translate(expression);
-	}
-
-	static
 	private Expression translateInternal(String sqlStatement){
-		StructType schema = new StructType()
-			.add("flag", DataTypes.BooleanType)
-			.add("x1", DataTypes.DoubleType)
-			.add("x2", DataTypes.DoubleType)
-			.add("status", DataTypes.IntegerType);
-
-		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, schema, sqlStatement);
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, ExpressionTranslatorTest.schema, sqlStatement);
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		if(expressions.size() != 1){
@@ -311,7 +320,11 @@ public class ExpressionTranslatorTest {
 
 	static
 	public void checkValue(Object expectedValue, String sqlExpression){
-		Expression expression = translateInternal("SELECT (" + sqlExpression + ") FROM __THIS__");
+		ConverterFactory converterFactory = new ConverterFactory(Collections.emptyMap());
+
+		SparkMLEncoder encoder = new SparkMLEncoder(ExpressionTranslatorTest.schema, converterFactory);
+
+		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
 
 		Object sparkValue = expression.eval(InternalRow.empty());
 
@@ -335,9 +348,32 @@ public class ExpressionTranslatorTest {
 			assertEquals(expectedValue, sparkValue);
 		}
 
-		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(expression);
+		org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
 
-		EvaluationContext context = new VirtualEvaluationContext();
+		pmmlExpression = AliasExpression.unwrap(pmmlExpression);
+
+		PMML pmml = encoder.encodePMML();
+
+		EvaluationContext context = new VirtualEvaluationContext(){
+
+			@Override
+			public FieldValue resolve(FieldName name){
+				TransformationDictionary transformationDictionary = pmml.getTransformationDictionary();
+
+				if(transformationDictionary != null && transformationDictionary.hasDerivedFields()){
+					List<DerivedField> derivedFields = transformationDictionary.getDerivedFields();
+
+					for(DerivedField derivedField : derivedFields){
+
+						if(Objects.equals(derivedField.getName(), name)){
+							return ExpressionUtil.evaluate(derivedField, this);
+						}
+					}
+				}
+
+				return super.resolve(name);
+			}
+		};
 		context.declareAll(Collections.emptyMap());
 
 		FieldValue value = ExpressionUtil.evaluate(pmmlExpression, context);
@@ -366,4 +402,10 @@ public class ExpressionTranslatorTest {
 	}
 
 	public static SparkSession sparkSession = null;
+
+	private static final StructType schema = new StructType()
+		.add("flag", DataTypes.BooleanType)
+		.add("x1", DataTypes.DoubleType)
+		.add("x2", DataTypes.DoubleType)
+		.add("status", DataTypes.IntegerType);
 }
