@@ -329,7 +329,7 @@ public class ExpressionTranslator {
 				} else
 
 				{
-					name = FieldNameUtil.create((dataType.name()).toLowerCase(), ExpressionUtil.format(child));
+					name = FieldNameUtil.create(dataType, ExpressionUtil.format(child));
 				}
 
 				OpType opType = ExpressionUtil.getOpType(dataType);
