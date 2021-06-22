@@ -114,9 +114,11 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 						categories.add(invalidCategory);
 
-						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF)
-							.addExpressions(setApply)
-							.addExpressions(feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
+						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF,
+							setApply,
+							feature.ref(),
+							PMMLUtil.createConstant(invalidCategory, dataType)
+						);
 
 						field = encoder.createDerivedField(FieldNameUtil.create("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 					}

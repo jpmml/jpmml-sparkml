@@ -38,10 +38,7 @@ public class AliasExpressionTest {
 
 		checkExpression(fieldRef, expression);
 
-		expression = new AliasExpression("parent",
-			PMMLUtil.createApply(PMMLFunctions.ADD)
-				.addExpressions(new AliasExpression("left child", fieldRef), new AliasExpression("right child", fieldRef))
-		);
+		expression = new AliasExpression("parent", PMMLUtil.createApply(PMMLFunctions.ADD, new AliasExpression("left child", fieldRef), new AliasExpression("right child", fieldRef)));
 
 		checkExpression(PMMLUtil.createApply(PMMLFunctions.ADD, fieldRef, fieldRef), expression);
 	}

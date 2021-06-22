@@ -179,8 +179,7 @@ public class ExpressionTranslator {
 				throw new IllegalArgumentException(formatMessage(binaryMathExpression));
 			}
 
-			return PMMLUtil.createApply(function)
-				.addExpressions(translateInternal(left), translateInternal(right));
+			return PMMLUtil.createApply(function, translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof BinaryOperator){
@@ -278,9 +277,10 @@ public class ExpressionTranslator {
 				Expression predicate = branch._1();
 				Expression value = branch._2();
 
-				Apply branchApply = PMMLUtil.createApply(PMMLFunctions.IF)
-					.addExpressions(translateInternal(predicate))
-					.addExpressions(translateInternal(value));
+				Apply branchApply = PMMLUtil.createApply(PMMLFunctions.IF,
+					translateInternal(predicate),
+					translateInternal(value)
+				);
 
 				if(apply == null){
 					apply = branchApply;
@@ -378,8 +378,11 @@ public class ExpressionTranslator {
 			Expression trueValue = _if.trueValue();
 			Expression falseValue = _if.falseValue();
 
-			return PMMLUtil.createApply(PMMLFunctions.IF, translateInternal(predicate))
-				.addExpressions(translateInternal(trueValue), translateInternal(falseValue));
+			return PMMLUtil.createApply(PMMLFunctions.IF,
+				translateInternal(predicate),
+				translateInternal(trueValue),
+				translateInternal(falseValue)
+			);
 		} else
 
 		if(expression instanceof In){
@@ -456,9 +459,7 @@ public class ExpressionTranslator {
 			Expression regexp = regexpReplace.regexp();
 			Expression rep = regexpReplace.rep();
 
-			return PMMLUtil.createApply(PMMLFunctions.REPLACE)
-				.addExpressions(translateInternal(subject))
-				.addExpressions(translateInternal(regexp), translateInternal(rep));
+			return PMMLUtil.createApply(PMMLFunctions.REPLACE, translateInternal(subject), translateInternal(regexp), translateInternal(rep));
 		} else
 
 		if(expression instanceof RLike){
@@ -467,9 +468,7 @@ public class ExpressionTranslator {
 			Expression left = rlike.left();
 			Expression right = rlike.right();
 
-			return PMMLUtil.createApply(PMMLFunctions.MATCHES)
-				.addExpressions(translateInternal(left))
-				.addExpressions(translateInternal(right));
+			return PMMLUtil.createApply(PMMLFunctions.MATCHES, translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof StringTrim){
@@ -501,9 +500,7 @@ public class ExpressionTranslator {
 			// XXX
 			lenValue = Math.min(lenValue, MAX_STRING_LENGTH);
 
-			return PMMLUtil.createApply(PMMLFunctions.SUBSTRING)
-				.addExpressions(translateInternal(str))
-				.addExpressions(PMMLUtil.createConstant(posValue), PMMLUtil.createConstant(lenValue));
+			return PMMLUtil.createApply(PMMLFunctions.SUBSTRING, translateInternal(str), PMMLUtil.createConstant(posValue), PMMLUtil.createConstant(lenValue));
 		} else
 
 		if(expression instanceof UnaryExpression){
