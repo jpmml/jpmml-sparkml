@@ -74,7 +74,7 @@ public class ImputerModelConverter extends FeatureConverter<ImputerModel> {
 				encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatmentMethod, surrogate));
 
 				if(missingValue != null && !missingValue.isNaN()){
-					PMMLUtil.addValues(dataField, Collections.singletonList(missingValue), Value.Property.MISSING);
+					PMMLUtil.addValues(dataField, Value.Property.MISSING, Collections.singletonList(missingValue));
 				}
 			} else
 

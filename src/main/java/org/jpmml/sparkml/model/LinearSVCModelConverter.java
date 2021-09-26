@@ -28,7 +28,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
-import org.jpmml.converter.AbstractTransformation;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
@@ -46,7 +46,12 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 	public MiningModel encodeModel(Schema schema){
 		LinearSVCModel model = getTransformer();
 
-		Transformation transformation = new AbstractTransformation(){
+		Transformation transformation = new Transformation(){
+
+			@Override
+			public FieldName getName(FieldName name){
+				return FieldNameUtil.create("threshold", name);
+			}
 
 			@Override
 			public Expression createExpression(FieldRef fieldRef){

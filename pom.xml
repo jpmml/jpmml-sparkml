@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>jpmml-converter</artifactId>
-			<version>1.4.7</version>
+			<version>1.4.9</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
