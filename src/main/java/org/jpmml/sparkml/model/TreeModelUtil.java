@@ -36,7 +36,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
-import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.SimplePredicate;
 import org.dmg.pmml.True;
 import org.dmg.pmml.Visitor;
@@ -140,9 +139,7 @@ public class TreeModelUtil {
 
 					node.setRecordCount(ValueUtil.narrow(impurityCalculator.count()));
 
-					List<ScoreDistribution> scoreDistributions = scoreDistributionManager.createScoreDistribution(this.categoricalLabel, impurityCalculator.stats());
-
-					(node.getScoreDistributions()).addAll(scoreDistributions);
+					scoreDistributionManager.addScoreDistributions(node, this.categoricalLabel.getValues(), impurityCalculator.stats());
 
 					return node;
 				}

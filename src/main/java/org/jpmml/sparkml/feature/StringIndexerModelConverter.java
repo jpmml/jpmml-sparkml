@@ -82,7 +82,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			switch(handleInvalid){
 				case "keep":
 					{
-						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_IS, invalidCategory);
+						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_VALUE, invalidCategory);
 
 						PMMLUtil.addValues(dataField, Value.Property.INVALID, Collections.singletonList(invalidCategory));
 

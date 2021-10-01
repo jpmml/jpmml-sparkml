@@ -427,12 +427,11 @@ public class ExpressionTranslator {
 			Literal literal = (Literal)expression;
 
 			Object value = literal.value();
+			if(value == null){
+				return PMMLUtil.createMissingConstant();
+			}
 
 			DataType dataType;
-
-			if(value == null){
-				dataType = null;
-			} else
 
 			// XXX
 			if(value instanceof Decimal){

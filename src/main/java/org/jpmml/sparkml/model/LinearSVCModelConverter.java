@@ -34,6 +34,7 @@ import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
+import org.jpmml.converter.transformations.AbstractTransformation;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
 public class LinearSVCModelConverter extends ClassificationModelConverter<LinearSVCModel> implements HasRegressionTableOptions {
@@ -46,7 +47,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 	public MiningModel encodeModel(Schema schema){
 		LinearSVCModel model = getTransformer();
 
-		Transformation transformation = new Transformation(){
+		Transformation transformation = new AbstractTransformation(){
 
 			@Override
 			public FieldName getName(FieldName name){
