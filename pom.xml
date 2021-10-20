@@ -10,7 +10,7 @@
 
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>1.7-SNAPSHOT</version>
+	<version>1.7.3</version>
 
 	<name>JPMML-SparkML</name>
 	<description>Java library and command-line application for converting Spark ML pipelines to PMML</description>
@@ -35,7 +35,7 @@
 		<connection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</connection>
 		<developerConnection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</developerConnection>
 		<url>git://github.com/jpmml/jpmml-sparkml.git</url>
-		<tag>HEAD</tag>
+		<tag>1.7.3</tag>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
