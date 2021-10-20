@@ -32,7 +32,6 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
-import org.dmg.pmml.Value;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
@@ -83,8 +82,6 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 				case "keep":
 					{
 						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_VALUE, invalidCategory);
-
-						PMMLUtil.addValues(dataField, Value.Property.INVALID, Collections.singletonList(invalidCategory));
 
 						categories.add(invalidCategory);
 					}
