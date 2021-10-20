@@ -49,9 +49,11 @@ public class BinarizerConverter extends FeatureConverter<Binarizer> {
 
 		ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-		Apply apply = new Apply(PMMLFunctions.IF)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, continuousFeature.ref(), PMMLUtil.createConstant(transformer.getThreshold())))
-			.addExpressions(PMMLUtil.createConstant(0d), PMMLUtil.createConstant(1d));
+		Apply apply = PMMLUtil.createApply(PMMLFunctions.IF,
+			PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, continuousFeature.ref(), PMMLUtil.createConstant(transformer.getThreshold())),
+			PMMLUtil.createConstant(0d),
+			PMMLUtil.createConstant(1d)
+		);
 
 		DerivedField derivedField = encoder.createDerivedField(formatName(transformer), OpType.CATEGORICAL, DataType.DOUBLE, apply);
 

@@ -144,7 +144,7 @@ public class PMMLBuilder {
 						Double featureImportance = featureImportances.get(i);
 						Feature feature = features.get(i);
 
-						encoder.addFeatureImportance(model, feature.getName(), featureImportance);
+						encoder.addFeatureImportance(model, feature, featureImportance);
 					}
 				} // End if
 

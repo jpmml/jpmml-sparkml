@@ -30,6 +30,7 @@ import org.apache.spark.sql.Row;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.OpType;
@@ -39,6 +40,7 @@ import org.dmg.pmml.association.Item;
 import org.dmg.pmml.association.ItemRef;
 import org.dmg.pmml.association.Itemset;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.AssociationRulesModelConverter;
@@ -64,9 +66,11 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 			itemsCol = itemsCol.substring(0, itemsCol.length() - 1);
 		}
 
-		DataField dataField = encoder.createDataField(FieldName.create(itemsCol), OpType.CATEGORICAL, DataType.STRING);
+		DataField transactionDataField = encoder.createDataField(FieldName.create("transaction"), OpType.CATEGORICAL, DataType.STRING);
 
-		Feature feature = new ItemSetFeature(encoder, dataField);
+		DataField itemDataField = encoder.createDataField(FieldName.create(itemsCol), OpType.CATEGORICAL, DataType.STRING);
+
+		Feature feature = new ItemSetFeature(encoder, itemDataField);
 
 		return Collections.singletonList(feature);
 	}
@@ -115,10 +119,12 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 		// XXX
 		int numberOfTransactions = 0;
 
-		MiningSchema miningSchema = new MiningSchema();
+		MiningField transactionMiningField = ModelUtil.createMiningField(FieldName.create("transaction"), MiningField.UsageType.GROUP);
 
-		AssociationModel associationModel = new AssociationModel(MiningFunction.ASSOCIATION_RULES, numberOfTransactions, model.getMinSupport(), model.getMinConfidence(), items.size(), itemsets.size(), associationRules.size(), miningSchema)
-			.setScorable(Boolean.FALSE);
+		MiningSchema miningSchema = new MiningSchema()
+			.addMiningFields(transactionMiningField);
+
+		AssociationModel associationModel = new AssociationModel(MiningFunction.ASSOCIATION_RULES, numberOfTransactions, model.getMinSupport(), model.getMinConfidence(), items.size(), itemsets.size(), associationRules.size(), miningSchema);
 
 		(associationModel.getItems()).addAll(items.values());
 		(associationModel.getItemsets()).addAll(itemsets.values());

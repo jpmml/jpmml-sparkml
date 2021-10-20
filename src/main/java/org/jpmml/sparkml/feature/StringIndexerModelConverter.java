@@ -32,7 +32,6 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
-import org.dmg.pmml.Value;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
@@ -82,9 +81,7 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 			switch(handleInvalid){
 				case "keep":
 					{
-						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_IS, invalidCategory);
-
-						PMMLUtil.addValues(dataField, Collections.singletonList(invalidCategory), Value.Property.INVALID);
+						invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_VALUE, invalidCategory);
 
 						categories.add(invalidCategory);
 					}
@@ -114,9 +111,11 @@ public class StringIndexerModelConverter extends FeatureConverter<StringIndexerM
 
 						categories.add(invalidCategory);
 
-						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF)
-							.addExpressions(setApply)
-							.addExpressions(feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
+						Apply apply = PMMLUtil.createApply(PMMLFunctions.IF,
+							setApply,
+							feature.ref(),
+							PMMLUtil.createConstant(invalidCategory, dataType)
+						);
 
 						field = encoder.createDerivedField(FieldNameUtil.create("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 					}

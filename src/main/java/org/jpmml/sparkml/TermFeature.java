@@ -72,12 +72,12 @@ public class TermFeature extends Feature {
 		if(weightedDefineFunction == null){
 			ParameterField weightField = new ParameterField(FieldName.create("weight"));
 
-			List<ParameterField> parameterFields = new ArrayList<>(defineFunction.getParameterFields());
-			parameterFields.add(weightField);
+			List<ParameterField> weightedParameterFields = new ArrayList<>(defineFunction.getParameterFields());
+			weightedParameterFields.add(weightField);
 
 			Apply apply = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.getExpression(), new FieldRef(weightField.getName()));
 
-			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, DataType.DOUBLE, parameterFields, apply);
+			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, DataType.DOUBLE, weightedParameterFields, apply);
 
 			encoder.addDefineFunction(weightedDefineFunction);
 		}
