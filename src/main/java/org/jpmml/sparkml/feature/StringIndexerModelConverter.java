@@ -20,7 +20,6 @@ package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.StringIndexerModel;
@@ -32,7 +31,6 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
-import org.dmg.pmml.Value;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
@@ -93,9 +91,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 				switch(handleInvalid){
 					case "keep":
 						{
-							invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_IS, invalidCategory);
-
-							PMMLUtil.addValues(dataField, Collections.singletonList(invalidCategory), Value.Property.INVALID);
+							invalidValueDecorator = new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_VALUE, invalidCategory);
 
 							categories.add(invalidCategory);
 						}

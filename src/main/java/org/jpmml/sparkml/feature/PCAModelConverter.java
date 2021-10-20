@@ -56,7 +56,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0, length = transformer.getK(); i < length; i++){
-			Apply apply = new Apply(PMMLFunctions.SUM);
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.SUM);
 
 			for(int j = 0; j < features.size(); j++){
 				Feature feature = features.get(j);
