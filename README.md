@@ -88,7 +88,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X or 3.1.X.
+* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X, 3.1.X or 3.2.X.
 
 # Installation #
 
@@ -96,13 +96,13 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](https://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **1.7.2** (18 May, 2021).
+The current version is **1.7.3** (20 October, 2021).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>1.7.2</version>
+	<version>1.7.3</version>
 </dependency>
 ```
 
@@ -114,10 +114,11 @@ Compatibility matrix:
 | 2.0.X | [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) | Archived |
 | 2.1.X | [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) | Archived |
 | 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | Archived |
-| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Active |
-| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Active |
+| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Archived |
+| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Archived |
 | 3.0.X | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Active |
-| 3.1.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
+| 3.1.X | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Active |
+| 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
 
 JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of Apache Spark version 2.0.X, 2.1.X and 2.2.X distributions.
 
@@ -131,8 +132,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-1.7-SNAPSHOT.jar` - Library JAR file.
-* `target/jpmml-sparkml-executable-1.7-SNAPSHOT.jar` - Example application JAR file.
+* `target/jpmml-sparkml-1.8-SNAPSHOT.jar` - Library JAR file.
+* `target/jpmml-sparkml-executable-1.8-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -187,12 +188,12 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.7-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.8-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.7-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.8-SNAPSHOT.jar --help
 ```
 
 # Documentation #
