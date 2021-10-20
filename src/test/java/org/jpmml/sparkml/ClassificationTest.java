@@ -79,12 +79,12 @@ public class ClassificationTest extends SparkMLTest implements Algorithms, Datas
 
 	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
-		evaluate(LOGISTIC_REGRESSION, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE), new PMMLEquivalence(5e-9, 5e-9));
+		evaluate(LOGISTIC_REGRESSION, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE), new PMMLEquivalence(1e-8, 1e-8));
 	}
 
 	@Test
 	public void evaluateModelChainAudit() throws Exception {
-		evaluate(MODEL_CHAIN, AUDIT, new PMMLEquivalence(5e-13, 5e-13));
+		evaluate(MODEL_CHAIN, AUDIT, new PMMLEquivalence(1e-9, 1e-9));
 	}
 
 	@Test

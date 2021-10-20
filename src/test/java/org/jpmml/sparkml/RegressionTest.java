@@ -102,7 +102,7 @@ public class RegressionTest extends SparkMLTest implements Algorithms, Datasets 
 
 	@Test
 	public void evaluateGLMHousing() throws Exception {
-		evaluate(GLM, HOUSING);
+		evaluate(GLM, HOUSING, new PMMLEquivalence(1e-12, 1e-12));
 	}
 
 	@Test

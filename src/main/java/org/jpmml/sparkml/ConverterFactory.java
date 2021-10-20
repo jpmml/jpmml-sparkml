@@ -234,7 +234,7 @@ public class ConverterFactory {
 		return String.valueOf(version[0]) + "." + String.valueOf(version[1]);
 	}
 
-	private static final int[] VERSION = {3, 1};
+	private static final int[] VERSION = {3, 2};
 
 	private static final Map<Class<? extends Transformer>, Class<? extends TransformerConverter<?>>> converters = new LinkedHashMap<>();
 

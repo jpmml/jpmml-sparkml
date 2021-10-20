@@ -100,7 +100,7 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 
 			ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
 
-			MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
+			MLReader<PipelineModel> mlReader = PipelineModel.read();
 			mlReader.session(SparkMLTest.sparkSession);
 
 			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
