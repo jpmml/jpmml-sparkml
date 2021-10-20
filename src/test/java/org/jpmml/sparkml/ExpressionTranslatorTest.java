@@ -62,26 +62,20 @@ public class ExpressionTranslatorTest {
 		FieldRef first = new FieldRef(FieldName.create("x1"));
 		FieldRef second = new FieldRef(FieldName.create("x2"));
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.AND)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.ISMISSING)
-				.addExpressions(first)
-			)
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.AND,
+			PMMLUtil.createApply(PMMLFunctions.ISMISSING, first),
 			// "not(isnotnull(..)) -> "isnull(..)"
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.ISMISSING)
-				.addExpressions(second)
-			);
+			PMMLUtil.createApply(PMMLFunctions.ISMISSING, second)
+		);
 
 		checkExpression(expected, string);
 
 		string = "(x1 <= 0) or (x2 >= 0)";
 
-		expected = PMMLUtil.createApply(PMMLFunctions.OR)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL)
-				.addExpressions(first, PMMLUtil.createConstant(0, DataType.DOUBLE))
-			)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATEROREQUAL)
-				.addExpressions(second, PMMLUtil.createConstant(0, DataType.DOUBLE))
-			);
+		expected = PMMLUtil.createApply(PMMLFunctions.OR,
+			PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, first, PMMLUtil.createConstant(0, DataType.DOUBLE)),
+			PMMLUtil.createApply(PMMLFunctions.GREATEROREQUAL, second, PMMLUtil.createConstant(0, DataType.DOUBLE))
+		);
 
 		checkExpression(expected, string);
 	}
@@ -109,16 +103,13 @@ public class ExpressionTranslatorTest {
 	public void translateArithmeticExpression(){
 		String string = "-((x1 - 1) / (x2 + 1))";
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.MULTIPLY)
-			.addExpressions(PMMLUtil.createConstant(-1))
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.DIVIDE)
-				.addExpressions(PMMLUtil.createApply(PMMLFunctions.SUBTRACT)
-					.addExpressions(new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(1, DataType.DOUBLE))
-				)
-				.addExpressions(PMMLUtil.createApply(PMMLFunctions.ADD)
-					.addExpressions(new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(1, DataType.DOUBLE))
-				)
-			);
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.MULTIPLY,
+			PMMLUtil.createConstant(-1),
+			PMMLUtil.createApply(PMMLFunctions.DIVIDE,
+				PMMLUtil.createApply(PMMLFunctions.SUBTRACT, new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(1, DataType.DOUBLE)),
+				PMMLUtil.createApply(PMMLFunctions.ADD, new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(1, DataType.DOUBLE))
+			)
+		);
 
 		checkExpression(expected, string);
 	}
@@ -132,18 +123,15 @@ public class ExpressionTranslatorTest {
 
 		Constant zero = PMMLUtil.createConstant(0, DataType.DOUBLE);
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.LESSTHAN)
-				.addExpressions(first, zero)
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF,
+			PMMLUtil.createApply(PMMLFunctions.LESSTHAN, first, zero),
+			first,
+			PMMLUtil.createApply(PMMLFunctions.IF,
+				PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, second, zero),
+				second,
+				zero
 			)
-			.addExpressions(first)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.IF)
-				.addExpressions(PMMLUtil.createApply(PMMLFunctions.GREATERTHAN)
-					.addExpressions(second, zero)
-				)
-				.addExpressions(second)
-				.addExpressions(zero)
-			);
+		);
 
 		checkExpression(expected, string);
 	}
@@ -152,17 +140,11 @@ public class ExpressionTranslatorTest {
 	public void translateIfExpression(){
 		String string = "if(status in (-1, 1), x1 != 0, x2 != 0)";
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.ISIN)
-				.addExpressions(new FieldRef(FieldName.create("status")))
-				.addExpressions(PMMLUtil.createConstant(-1), PMMLUtil.createConstant(1))
-			)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.NOTEQUAL)
-				.addExpressions(new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(0, DataType.DOUBLE))
-			)
-			.addExpressions(PMMLUtil.createApply(PMMLFunctions.NOTEQUAL)
-				.addExpressions(new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(0, DataType.DOUBLE))
-			);
+		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF,
+			PMMLUtil.createApply(PMMLFunctions.ISIN, new FieldRef(FieldName.create("status")), PMMLUtil.createConstant(-1), PMMLUtil.createConstant(1)),
+			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(0, DataType.DOUBLE)),
+			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(0, DataType.DOUBLE))
+		);
 
 		checkExpression(expected, string);
 	}

@@ -28,12 +28,13 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
-import org.jpmml.converter.AbstractTransformation;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.Transformation;
 import org.jpmml.converter.mining.MiningModelUtil;
+import org.jpmml.converter.transformations.AbstractTransformation;
 import org.jpmml.sparkml.ClassificationModelConverter;
 
 public class LinearSVCModelConverter extends ClassificationModelConverter<LinearSVCModel> implements HasRegressionTableOptions {
@@ -47,6 +48,11 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 		LinearSVCModel model = getTransformer();
 
 		Transformation transformation = new AbstractTransformation(){
+
+			@Override
+			public FieldName getName(FieldName name){
+				return FieldNameUtil.create("threshold", name);
+			}
 
 			@Override
 			public Expression createExpression(FieldRef fieldRef){
