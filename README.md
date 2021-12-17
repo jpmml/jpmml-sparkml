@@ -116,8 +116,11 @@ Compatibility matrix:
 | 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | Archived |
 | 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Archived |
 | 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Archived |
-| 3.0.X | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Active |
-| 3.1.X | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Active |
+| 3.0.X | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Archived |
+| 3.1.X | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Archived |
+| 3.2.X | [`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X) | Archived |
+| 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) | Active |
+| 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) | Active |
 | 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
 
 JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of Apache Spark version 2.0.X, 2.1.X and 2.2.X distributions.
@@ -132,8 +135,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-1.6-SNAPSHOT.jar` - Library JAR file.
-* `target/jpmml-sparkml-executable-1.6-SNAPSHOT.jar` - Example application JAR file.
+* `target/jpmml-sparkml-2.0-SNAPSHOT.jar` - Library JAR file.
+* `target/jpmml-sparkml-executable-2.0-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -188,12 +191,12 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.6-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.0-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.6-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.0-SNAPSHOT.jar --help
 ```
 
 # Documentation #
