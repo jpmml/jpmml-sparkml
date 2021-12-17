@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.ArchiveBatch;
@@ -80,7 +79,7 @@ public class RegressionTest extends SparkMLTest implements Algorithms, Datasets 
 
 	@Test
 	public void evaluateLinearRegressionAuto() throws Exception {
-		FieldName[] transformFields = {FieldName.create("mpgBucket")};
+		String[] transformFields = {"mpgBucket"};
 
 		evaluate(LINEAR_REGRESION, AUTO, excludeFields(transformFields));
 	}

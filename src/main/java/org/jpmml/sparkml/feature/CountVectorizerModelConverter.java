@@ -30,7 +30,6 @@ import com.google.common.base.Joiner;
 import org.apache.spark.ml.feature.CountVectorizerModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.ParameterField;
@@ -56,9 +55,9 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 		DocumentFeature documentFeature = (DocumentFeature)encoder.getOnlyFeature(transformer.getInputCol());
 
-		ParameterField documentField = new ParameterField(FieldName.create("document"));
+		ParameterField documentField = new ParameterField("document");
 
-		ParameterField termField = new ParameterField(FieldName.create("term"));
+		ParameterField termField = new ParameterField("term");
 
 		TextIndex textIndex = new TextIndex(documentField.getName(), new FieldRef(termField.getName()))
 			.setTokenize(Boolean.TRUE)

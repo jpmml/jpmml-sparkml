@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.Interaction;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
@@ -59,7 +58,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				if(feature instanceof CategoricalFeature){
 					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
-					FieldName name = categoricalFeature.getName();
+					String name = categoricalFeature.getName();
 
 					DataType dataType = categoricalFeature.getDataType();
 					switch(dataType){
@@ -73,7 +72,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 					}
 
 					// XXX
-					inputCol = name.getValue();
+					inputCol = name;
 
 					features = (List)OneHotEncoderModelConverter.encodeFeature(encoder, categoricalFeature, categoricalFeature.getValues(), false);
 				}
@@ -95,7 +94,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				for(Feature left : result){
 
 					for(Feature right : features){
-						interactionFeatures.add(new InteractionFeature(encoder, FieldNameUtil.select(FieldName.create(sb.toString()), index), DataType.DOUBLE, Arrays.asList(left, right)));
+						interactionFeatures.add(new InteractionFeature(encoder, FieldNameUtil.select(sb.toString(), index), DataType.DOUBLE, Arrays.asList(left, right)));
 
 						index++;
 					}

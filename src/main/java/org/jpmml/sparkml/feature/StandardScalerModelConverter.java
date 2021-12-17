@@ -28,7 +28,6 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
@@ -71,7 +70,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 		for(int i = 0, length = features.size(); i < length; i++){
 			Feature feature = features.get(i);
 
-			FieldName name = formatName(transformer, i, length);
+			String name = formatName(transformer, i, length);
 
 			Expression expression = null;
 

@@ -21,7 +21,6 @@ package org.jpmml.sparkml.model;
 import org.apache.spark.ml.classification.LinearSVCModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.Expression;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
@@ -50,7 +49,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 		Transformation transformation = new AbstractTransformation(){
 
 			@Override
-			public FieldName getName(FieldName name){
+			public String getName(String name){
 				return FieldNameUtil.create("threshold", name);
 			}
 
@@ -64,7 +63,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);
 
 		Model linearModel = LinearModelUtil.createRegression(this, model.coefficients(), model.intercept(), segmentSchema)
-			.setOutput(ModelUtil.createPredictedOutput(FieldName.create("margin"), OpType.CONTINUOUS, DataType.DOUBLE, transformation));
+			.setOutput(ModelUtil.createPredictedOutput("margin", OpType.CONTINUOUS, DataType.DOUBLE, transformation));
 
 		return MiningModelUtil.createBinaryLogisticClassification(linearModel, 1d, 0d, RegressionModel.NormalizationMethod.NONE, false, schema);
 	}

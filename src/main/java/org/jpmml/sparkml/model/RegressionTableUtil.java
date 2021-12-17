@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.BinaryFeature;
@@ -53,12 +52,12 @@ public class RegressionTableUtil {
 			return;
 		}
 
-		Map<FieldName, Long> countMap = features.stream()
+		Map<String, Long> countMap = features.stream()
 			.filter(feature -> (feature instanceof BinaryFeature))
 			.collect(Collectors.groupingBy(feature -> ((BinaryFeature)feature).getName(), Collectors.counting()));
 
-		Collection<? extends Map.Entry<FieldName, Long>> entries = countMap.entrySet();
-		for(Map.Entry<FieldName, Long> entry : entries){
+		Collection<? extends Map.Entry<String, Long>> entries = countMap.entrySet();
+		for(Map.Entry<String, Long> entry : entries){
 
 			if(entry.getValue() < lookupThreshold){
 				continue;
@@ -69,7 +68,7 @@ public class RegressionTableUtil {
 	}
 
 	static
-	private MapValues createMapValues(FieldName name, Object identifier, List<Feature> features, List<Double> coefficients){
+	private MapValues createMapValues(String name, Object identifier, List<Feature> features, List<Double> coefficients){
 		ListIterator<Feature> featureIt = features.listIterator();
 		ListIterator<Double> coefficientIt = coefficients.listIterator();
 

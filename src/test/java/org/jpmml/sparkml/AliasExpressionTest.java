@@ -19,7 +19,6 @@
 package org.jpmml.sparkml;
 
 import org.dmg.pmml.Expression;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.PMMLUtil;
@@ -32,7 +31,7 @@ public class AliasExpressionTest {
 
 	@Test
 	public void unwrap(){
-		FieldRef fieldRef = new FieldRef(FieldName.create("x"));
+		FieldRef fieldRef = new FieldRef("x");
 
 		Expression expression = new AliasExpression("parent", new AliasExpression("child", fieldRef));
 

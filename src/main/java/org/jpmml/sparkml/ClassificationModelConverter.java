@@ -28,7 +28,6 @@ import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
@@ -79,7 +78,7 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 		MapValues mapValues = PMMLUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
 			.setDataType(DataType.DOUBLE);
 
-		OutputField predictedOutputField = new OutputField(FieldName.create(predictionCol), OpType.CONTINUOUS, DataType.DOUBLE)
+		OutputField predictedOutputField = new OutputField(predictionCol, OpType.CONTINUOUS, DataType.DOUBLE)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(mapValues);
 

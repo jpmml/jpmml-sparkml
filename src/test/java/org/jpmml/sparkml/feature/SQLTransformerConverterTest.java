@@ -31,7 +31,6 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Field;
-import org.dmg.pmml.FieldName;
 import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -81,18 +80,18 @@ public class SQLTransformerConverterTest {
 
 		Collection<DataField> dataFields = (encoder.getDataFields()).values();
 		for(DataField dataField : dataFields){
-			FieldName name = dataField.getName();
+			String name = dataField.getName();
 
-			assertTrue(name.getValue(), dataFieldNames.remove(name.getValue()));
+			assertTrue(name, dataFieldNames.remove(name));
 		}
 
 		assertTrue(dataFieldNames.toString(), dataFieldNames.isEmpty());
 
 		Collection<DerivedField> derivedFields = (encoder.getDerivedFields()).values();
 		for(DerivedField derivedField : derivedFields){
-			FieldName name = derivedField.getName();
+			String name = derivedField.getName();
 
-			assertTrue(name.getValue(), derivedFieldNames.remove(name.getValue()));
+			assertTrue(name, derivedFieldNames.remove(name));
 		}
 
 		assertTrue(derivedFieldNames.toString(), derivedFieldNames.isEmpty());

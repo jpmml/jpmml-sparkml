@@ -26,7 +26,6 @@ import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
@@ -57,7 +56,7 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
 
-		OutputField predictedOutputField = ModelUtil.createPredictedField(FieldName.create(predictionCol), OpType.CONTINUOUS, label.getDataType());
+		OutputField predictedOutputField = ModelUtil.createPredictedField(predictionCol, OpType.CONTINUOUS, label.getDataType());
 
 		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, keepPredictionCol);
 

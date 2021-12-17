@@ -22,7 +22,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.HasFieldReference;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
@@ -183,7 +182,7 @@ public class TreeModelCompactor extends AbstractTreeModelTransformer {
 	}
 
 	private boolean isCategoricalField(HasFieldReference<?> hasFieldReference){
-		FieldName name = hasFieldReference.getField();
+		String name = hasFieldReference.getField();
 
 		java.util.function.Predicate<Node> predicate = new java.util.function.Predicate<Node>(){
 

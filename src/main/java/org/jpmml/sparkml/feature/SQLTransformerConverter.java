@@ -29,7 +29,6 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Field;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Visitor;
@@ -71,7 +70,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 		List<Field<?>> fields = encodeLogicalPlan(encoder, logicalPlan);
 		for(Field<?> field : fields){
-			FieldName name = field.getName();
+			String name = field.getName();
 			OpType opType = field.getOpType();
 			DataType dataType = field.getDataType();
 
@@ -92,7 +91,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 			}
 
-			encoder.putOnlyFeature(name.getValue(), feature);
+			encoder.putOnlyFeature(name, feature);
 
 			result.add(feature);
 		}
@@ -129,12 +128,12 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 				}
 			}
 
-			FieldName name = null;
+			String name;
 
 			if(pmmlExpression instanceof AliasExpression){
 				AliasExpression aliasExpression = (AliasExpression)pmmlExpression;
 
-				name = FieldName.create(aliasExpression.getName());
+				name = aliasExpression.getName();
 			} else
 
 			{
@@ -167,7 +166,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 	}
 
 	static
-	private Field<?> ensureField(SparkMLEncoder encoder, FieldName name){
+	private Field<?> ensureField(SparkMLEncoder encoder, String name){
 
 		try {
 			return encoder.getField(name);

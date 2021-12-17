@@ -25,9 +25,7 @@ import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasOutputCols;
-import org.dmg.pmml.FieldName;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.SchemaUtil;
 
 abstract
@@ -135,18 +133,18 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	}
 
 	static
-	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer){
-		return FieldName.create(transformer.getOutputCol());
+	public <T extends Transformer & HasOutputCol> String formatName(T transformer){
+		return transformer.getOutputCol();
 	}
 
 	static
-	public <T extends Transformer & HasOutputCol> FieldName formatName(T transformer, int index, int length){
+	public <T extends Transformer & HasOutputCol> String formatName(T transformer, int index, int length){
 
 		if(length > 1){
-			return FieldName.create(transformer.getOutputCol() + "[" + index + "]");
+			return transformer.getOutputCol() + ("[" + index + "]");
 		}
 
-		return FieldName.create(transformer.getOutputCol());
+		return transformer.getOutputCol();
 	}
 
 	static

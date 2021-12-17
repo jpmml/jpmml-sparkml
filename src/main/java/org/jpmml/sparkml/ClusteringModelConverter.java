@@ -25,7 +25,6 @@ import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
@@ -76,7 +75,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, true);
 
-		OutputField predictedOutputField = new OutputField(FieldName.create(predictionCol), OpType.CATEGORICAL, DataType.INTEGER)
+		OutputField predictedOutputField = new OutputField(predictionCol, OpType.CATEGORICAL, DataType.INTEGER)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(new FieldRef(pmmlPredictedField.getName()));
 

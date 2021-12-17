@@ -34,7 +34,6 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
@@ -95,7 +94,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		List<Feature> features = this.columnFeatures.get(column);
 
 		if(features == null){
-			FieldName name = FieldName.create(column);
+			String name = column;
 
 			DataField dataField = getDataField(name);
 			if(dataField == null){
@@ -165,10 +164,10 @@ public class SparkMLEncoder extends ModelEncoder {
 		this.columnFeatures.put(column, features);
 	}
 
-	public DataField createDataField(FieldName name){
+	public DataField createDataField(String name){
 		StructType schema = getSchema();
 
-		StructField field = schema.apply(name.getValue());
+		StructField field = schema.apply(name);
 
 		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
 

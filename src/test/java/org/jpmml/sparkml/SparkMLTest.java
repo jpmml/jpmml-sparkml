@@ -22,7 +22,6 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import org.apache.spark.sql.SparkSession;
-import org.dmg.pmml.FieldName;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.ArchiveBatch;
@@ -67,7 +66,7 @@ public class SparkMLTest extends IntegrationTest {
 
 	static
 	public Predicate<ResultField> excludePredictionFields(Predicate<ResultField> predicate){
-		Predicate<ResultField> excludePredictionFields = excludeFields(FieldName.create("prediction"), FieldNameUtil.create("pmml", "prediction"));
+		Predicate<ResultField> excludePredictionFields = excludeFields("prediction", FieldNameUtil.create("pmml", "prediction"));
 
 		return predicate.and(excludePredictionFields);
 	}

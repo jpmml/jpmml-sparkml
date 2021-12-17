@@ -23,7 +23,6 @@ import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
 import org.apache.spark.ml.param.shared.HasOutputCol;
 import org.apache.spark.ml.param.shared.HasOutputCols;
-import org.dmg.pmml.FieldName;
 
 abstract
 public class MultiFeatureConverter<T extends Transformer & HasInputCol & HasInputCols & HasOutputCol & HasOutputCols> extends FeatureConverter<T> {
@@ -45,16 +44,16 @@ public class MultiFeatureConverter<T extends Transformer & HasInputCol & HasInpu
 	}
 
 	static
-	public <T extends Transformer & HasOutputCol & HasOutputCols> FieldName formatName(T transformer, int index){
+	public <T extends Transformer & HasOutputCol & HasOutputCols> String formatName(T transformer, int index){
 
 		if(transformer.isSet(transformer.outputCols())){
-			return FieldName.create(transformer.getOutputCols()[index]);
+			return transformer.getOutputCols()[index];
 		} // End if
 
 		if(index != 0){
 			throw new IllegalArgumentException();
 		}
 
-		return FieldName.create(transformer.getOutputCol());
+		return transformer.getOutputCol();
 	}
 }

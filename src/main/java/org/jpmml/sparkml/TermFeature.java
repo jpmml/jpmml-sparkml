@@ -26,7 +26,6 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
@@ -70,7 +69,7 @@ public class TermFeature extends Feature {
 
 		DefineFunction weightedDefineFunction = encoder.getDefineFunction(name);
 		if(weightedDefineFunction == null){
-			ParameterField weightField = new ParameterField(FieldName.create("weight"));
+			ParameterField weightField = new ParameterField("weight");
 
 			List<ParameterField> weightedParameterFields = new ArrayList<>(defineFunction.getParameterFields());
 			weightedParameterFields.add(weightField);

@@ -29,7 +29,6 @@ import org.apache.spark.ml.fpm.FPGrowthModel;
 import org.apache.spark.sql.Row;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.MiningSchema;
@@ -66,9 +65,9 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 			itemsCol = itemsCol.substring(0, itemsCol.length() - 1);
 		}
 
-		DataField transactionDataField = encoder.createDataField(FieldName.create("transaction"), OpType.CATEGORICAL, DataType.STRING);
+		DataField transactionDataField = encoder.createDataField("transaction", OpType.CATEGORICAL, DataType.STRING);
 
-		DataField itemDataField = encoder.createDataField(FieldName.create(itemsCol), OpType.CATEGORICAL, DataType.STRING);
+		DataField itemDataField = encoder.createDataField(itemsCol, OpType.CATEGORICAL, DataType.STRING);
 
 		Feature feature = new ItemSetFeature(encoder, itemDataField);
 
@@ -119,7 +118,7 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 		// XXX
 		int numberOfTransactions = 0;
 
-		MiningField transactionMiningField = ModelUtil.createMiningField(FieldName.create("transaction"), MiningField.UsageType.GROUP);
+		MiningField transactionMiningField = ModelUtil.createMiningField("transaction", MiningField.UsageType.GROUP);
 
 		MiningSchema miningSchema = new MiningSchema()
 			.addMiningFields(transactionMiningField);

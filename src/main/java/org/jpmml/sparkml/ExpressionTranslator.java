@@ -87,7 +87,6 @@ import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
 import org.dmg.pmml.OpType;
@@ -156,7 +155,7 @@ public class ExpressionTranslator {
 
 			String name = attributeReference.name();
 
-			return new FieldRef(FieldName.create(name));
+			return new FieldRef(name);
 		} else
 
 		if(expression instanceof BinaryMathExpression){
@@ -320,12 +319,12 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				FieldName name;
+				String name;
 
 				if(pmmlExpression instanceof AliasExpression){
 					AliasExpression aliasExpression = (AliasExpression)pmmlExpression;
 
-					name = FieldName.create(aliasExpression.getName());
+					name = aliasExpression.getName();
 				} else
 
 				{

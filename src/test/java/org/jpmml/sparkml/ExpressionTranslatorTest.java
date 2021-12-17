@@ -32,7 +32,6 @@ import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.PMMLFunctions;
@@ -59,8 +58,8 @@ public class ExpressionTranslatorTest {
 	public void translateLogicalExpression(){
 		String string = "isnull(x1) and not(isnotnull(x2))";
 
-		FieldRef first = new FieldRef(FieldName.create("x1"));
-		FieldRef second = new FieldRef(FieldName.create("x2"));
+		FieldRef first = new FieldRef("x1");
+		FieldRef second = new FieldRef("x2");
 
 		Apply expected = PMMLUtil.createApply(PMMLFunctions.AND,
 			PMMLUtil.createApply(PMMLFunctions.ISMISSING, first),
@@ -106,8 +105,8 @@ public class ExpressionTranslatorTest {
 		Apply expected = PMMLUtil.createApply(PMMLFunctions.MULTIPLY,
 			PMMLUtil.createConstant(-1),
 			PMMLUtil.createApply(PMMLFunctions.DIVIDE,
-				PMMLUtil.createApply(PMMLFunctions.SUBTRACT, new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(1, DataType.DOUBLE)),
-				PMMLUtil.createApply(PMMLFunctions.ADD, new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(1, DataType.DOUBLE))
+				PMMLUtil.createApply(PMMLFunctions.SUBTRACT, new FieldRef("x1"), PMMLUtil.createConstant(1, DataType.DOUBLE)),
+				PMMLUtil.createApply(PMMLFunctions.ADD, new FieldRef("x2"), PMMLUtil.createConstant(1, DataType.DOUBLE))
 			)
 		);
 
@@ -118,8 +117,8 @@ public class ExpressionTranslatorTest {
 	public void translateCaseWhenExpression(){
 		String string = "CASE WHEN x1 < 0 THEN x1 WHEN x2 > 0 THEN x2 ELSE 0 END";
 
-		FieldRef first = new FieldRef(FieldName.create("x1"));
-		FieldRef second = new FieldRef(FieldName.create("x2"));
+		FieldRef first = new FieldRef("x1");
+		FieldRef second = new FieldRef("x2");
 
 		Constant zero = PMMLUtil.createConstant(0, DataType.DOUBLE);
 
@@ -141,9 +140,9 @@ public class ExpressionTranslatorTest {
 		String string = "if(status in (-1, 1), x1 != 0, x2 != 0)";
 
 		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF,
-			PMMLUtil.createApply(PMMLFunctions.ISIN, new FieldRef(FieldName.create("status")), PMMLUtil.createConstant(-1), PMMLUtil.createConstant(1)),
-			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef(FieldName.create("x1")), PMMLUtil.createConstant(0, DataType.DOUBLE)),
-			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef(FieldName.create("x2")), PMMLUtil.createConstant(0, DataType.DOUBLE))
+			PMMLUtil.createApply(PMMLFunctions.ISIN, new FieldRef("status"), PMMLUtil.createConstant(-1), PMMLUtil.createConstant(1)),
+			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef("x1"), PMMLUtil.createConstant(0, DataType.DOUBLE)),
+			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef("x2"), PMMLUtil.createConstant(0, DataType.DOUBLE))
 		);
 
 		checkExpression(expected, string);
@@ -339,7 +338,7 @@ public class ExpressionTranslatorTest {
 		EvaluationContext context = new VirtualEvaluationContext(){
 
 			@Override
-			public FieldValue resolve(FieldName name){
+			public FieldValue resolve(String name){
 				TransformationDictionary transformationDictionary = pmml.getTransformationDictionary();
 
 				if(transformationDictionary != null && transformationDictionary.hasDerivedFields()){

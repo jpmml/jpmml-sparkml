@@ -33,7 +33,6 @@ import org.apache.spark.ml.tree.Split;
 import org.apache.spark.ml.tree.TreeEnsembleModel;
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Predicate;
 import org.dmg.pmml.SimplePredicate;
@@ -264,7 +263,7 @@ public class TreeModelUtil {
 				if(feature instanceof CategoricalFeature){
 					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
-					FieldName name = categoricalFeature.getName();
+					String name = categoricalFeature.getName();
 
 					List<?> values = categoricalFeature.getValues();
 					if(values.size() != (leftCategories.length + rightCategories.length)){

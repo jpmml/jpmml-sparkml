@@ -18,7 +18,6 @@
  */
 package org.jpmml.sparkml;
 
-import org.dmg.pmml.FieldName;
 import org.jpmml.converter.FieldNameUtil;
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class ClusteringTest extends SparkMLTest implements Algorithms, Datasets 
 
 	@Test
 	public void evaluateKMeansIris() throws Exception {
-		FieldName[] outputFields = {FieldNameUtil.create("pmml", "cluster")};
+		String[] outputFields = {FieldNameUtil.create("pmml", "cluster")};
 
 		evaluate(K_MEANS, IRIS, excludeFields(outputFields));
 	}

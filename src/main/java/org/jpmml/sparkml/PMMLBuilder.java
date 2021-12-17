@@ -35,9 +35,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBException;
-
 import com.google.common.collect.Iterables;
+import jakarta.xml.bind.JAXBException;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
@@ -51,7 +50,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.FieldName;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.MiningSchema;
@@ -98,7 +96,7 @@ public class PMMLBuilder {
 
 		SparkMLEncoder encoder = new SparkMLEncoder(schema, converterFactory);
 
-		Map<FieldName, DerivedField> derivedFields = encoder.getDerivedFields();
+		Map<String, DerivedField> derivedFields = encoder.getDerivedFields();
 
 		List<org.dmg.pmml.Model> models = new ArrayList<>();
 
@@ -106,7 +104,7 @@ public class PMMLBuilder {
 		List<String> probabilityColumns = new ArrayList<>();
 
 		// Transformations preceding the last model
-		List<FieldName> preProcessorNames = Collections.emptyList();
+		List<String> preProcessorNames = Collections.emptyList();
 
 		Iterable<Transformer> transformers = getTransformers(pipelineModel);
 		for(Transformer transformer : transformers){
@@ -175,7 +173,7 @@ public class PMMLBuilder {
 		}
 
 		// Transformations following the last model
-		List<FieldName> postProcessorNames = new ArrayList<>(derivedFields.keySet());
+		List<String> postProcessorNames = new ArrayList<>(derivedFields.keySet());
 		postProcessorNames.removeAll(preProcessorNames);
 
 		org.dmg.pmml.Model model;
@@ -197,7 +195,7 @@ public class PMMLBuilder {
 
 			Output output = ModelUtil.ensureOutput(finalModel);
 
-			for(FieldName postProcessorName : postProcessorNames){
+			for(String postProcessorName : postProcessorNames){
 				DerivedField derivedField = derivedFields.get(postProcessorName);
 
 				encoder.removeDerivedField(postProcessorName);
@@ -228,9 +226,9 @@ public class PMMLBuilder {
 
 				switch(usageType){
 					case ACTIVE:
-						FieldName name = miningField.getName();
+						String name = miningField.getName();
 
-						inputColumns.add(name.getValue());
+						inputColumns.add(name);
 						break;
 					default:
 						break;
@@ -240,7 +238,7 @@ public class PMMLBuilder {
 			Map<VerificationField, List<?>> data = new LinkedHashMap<>();
 
 			for(String inputColumn : inputColumns){
-				VerificationField verificationField = ModelUtil.createVerificationField(FieldName.create(inputColumn));
+				VerificationField verificationField = ModelUtil.createVerificationField(inputColumn);
 
 				data.put(verificationField, getColumn(dataset, inputColumn));
 			}
