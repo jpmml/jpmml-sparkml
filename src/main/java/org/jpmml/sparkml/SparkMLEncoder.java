@@ -70,7 +70,7 @@ public class SparkMLEncoder extends ModelEncoder {
 
 			@Override
 			public VisitorAction visit(Item item){
-				item.setField(null);
+				item.setField((String)null);
 
 				return super.visit(item);
 			}
@@ -103,7 +103,7 @@ public class SparkMLEncoder extends ModelEncoder {
 
 			Feature feature;
 
-			DataType dataType = dataField.getDataType();
+			DataType dataType = dataField.requireDataType();
 			switch(dataType){
 				case STRING:
 					feature = new WildcardFeature(this, dataField);

@@ -337,7 +337,7 @@ public class ExpressionTranslator {
 
 				DerivedField derivedField = encoder.createDerivedField(name, opType, dataType, pmmlExpression);
 
-				return new FieldRef(derivedField.getName());
+				return new FieldRef(derivedField);
 			}
 		} else
 

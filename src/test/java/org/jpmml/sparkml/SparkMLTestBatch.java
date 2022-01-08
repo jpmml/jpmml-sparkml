@@ -43,6 +43,7 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
+import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.IntegrationTestBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;

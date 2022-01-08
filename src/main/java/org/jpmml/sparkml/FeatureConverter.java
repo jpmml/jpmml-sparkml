@@ -44,7 +44,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 		InOutMode outputMode = getOutputMode();
 
-		if((InOutMode.SINGLE).equals(outputMode)){
+		if(outputMode == InOutMode.SINGLE){
 			HasOutputCol hasOutputCol = (HasOutputCol)transformer;
 
 			String outputCol = hasOutputCol.getOutputCol();
@@ -54,7 +54,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 			encoder.putFeatures(outputCol, features);
 		} else
 
-		if((InOutMode.MULTIPLE).equals(outputMode)){
+		if(outputMode == InOutMode.MULTIPLE){
 			HasOutputCols hasOutputCols = (HasOutputCols)transformer;
 
 			String[] outputCols = hasOutputCols.getOutputCols();

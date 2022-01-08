@@ -34,7 +34,7 @@ public class DocumentFeature extends ObjectFeature {
 
 
 	public DocumentFeature(SparkMLEncoder encoder, Field<?> field, String wordSeparatorRE){
-		super(encoder, field.getName(), field.getDataType());
+		super(encoder, field.requireName(), field.getDataType());
 
 		setWordSeparatorRE(wordSeparatorRE);
 	}

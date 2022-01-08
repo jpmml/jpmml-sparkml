@@ -59,7 +59,7 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 		if(transformer.getToLowercase()){
 			Apply apply = PMMLUtil.createApply(PMMLFunctions.LOWERCASE, feature.ref());
 
-			field = encoder.createDerivedField(FieldNameUtil.create("lowercase", feature), OpType.CATEGORICAL, DataType.STRING, apply);
+			field = encoder.createDerivedField(FieldNameUtil.create(PMMLFunctions.LOWERCASE, feature), OpType.CATEGORICAL, DataType.STRING, apply);
 		}
 
 		return Collections.singletonList(new DocumentFeature(encoder, field, transformer.getPattern()));

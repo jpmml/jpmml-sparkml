@@ -104,8 +104,8 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 			Itemset consequentItemset = ensureItemset(feature, consequent, itemsets, items);
 
 			AssociationRule associationRule = new AssociationRule()
-				.setAntecedent(antecedentItemset.getId())
-				.setConsequent(consequentItemset.getId());
+				.setAntecedent(antecedentItemset.requireId())
+				.setConsequent(consequentItemset.requireId());
 
 			associationRule = associationRule
 				.setConfidence(confidence)
@@ -159,8 +159,8 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 					@Override
 					public int compare(ItemRef left, ItemRef right){
-						int leftId = Integer.parseInt(left.getItemRef());
-						int rightId = Integer.parseInt(right.getItemRef());
+						int leftId = Integer.parseInt(left.requireItemRef());
+						int rightId = Integer.parseInt(right.requireItemRef());
 
 						return Integer.compare(leftId, rightId);
 					}

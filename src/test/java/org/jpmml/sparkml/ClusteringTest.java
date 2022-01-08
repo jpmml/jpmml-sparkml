@@ -19,6 +19,7 @@
 package org.jpmml.sparkml;
 
 import org.jpmml.converter.FieldNameUtil;
+import org.jpmml.converter.testing.Datasets;
 import org.junit.Test;
 
 public class ClusteringTest extends SparkMLTest implements Algorithms, Datasets {

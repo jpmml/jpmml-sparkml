@@ -49,12 +49,12 @@ public class BucketizerConverter extends MultiFeatureConverter<Bucketizer> {
 		String[] inputCols;
 		double[][] splitsArray;
 
-		if((InOutMode.SINGLE).equals(inputMode)){
+		if(inputMode == InOutMode.SINGLE){
 			inputCols = inputMode.getInputCols(transformer);
 			splitsArray = new double[][]{transformer.getSplits()};
 		} else
 
-		if((InOutMode.MULTIPLE).equals(inputMode)){
+		if(inputMode == InOutMode.MULTIPLE){
 			inputCols = inputMode.getInputCols(transformer);
 			splitsArray = transformer.getSplitsArray();
 		} else

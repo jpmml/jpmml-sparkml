@@ -80,7 +80,7 @@ public class SQLTransformerConverterTest {
 
 		Collection<DataField> dataFields = (encoder.getDataFields()).values();
 		for(DataField dataField : dataFields){
-			String name = dataField.getName();
+			String name = dataField.requireName();
 
 			assertTrue(name, dataFieldNames.remove(name));
 		}
@@ -89,7 +89,7 @@ public class SQLTransformerConverterTest {
 
 		Collection<DerivedField> derivedFields = (encoder.getDerivedFields()).values();
 		for(DerivedField derivedField : derivedFields){
-			String name = derivedField.getName();
+			String name = derivedField.requireName();
 
 			assertTrue(name, derivedFieldNames.remove(name));
 		}

@@ -128,7 +128,7 @@ public class TreeModelUtil {
 
 				@Override
 				public Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode){
-					node = new ClassifierNode(null, node.getPredicate());
+					node = new ClassifierNode(null, node.requirePredicate());
 
 					int index = ValueUtil.asInt(leafNode.prediction());
 

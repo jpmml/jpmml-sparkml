@@ -23,6 +23,8 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
+import org.jpmml.converter.testing.Datasets;
+import org.jpmml.converter.testing.Fields;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
@@ -30,7 +32,7 @@ import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
 import org.junit.Test;
 
-public class ClassificationTest extends SparkMLTest implements Algorithms, Datasets {
+public class ClassificationTest extends SparkMLTest implements Algorithms, Datasets, Fields {
 
 	@Override
 	public ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){

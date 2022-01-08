@@ -59,7 +59,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 		ParameterField termField = new ParameterField("term");
 
-		TextIndex textIndex = new TextIndex(documentField.getName(), new FieldRef(termField.getName()))
+		TextIndex textIndex = new TextIndex(documentField, new FieldRef(termField))
 			.setTokenize(Boolean.TRUE)
 			.setWordSeparatorCharacterRE(documentFeature.getWordSeparatorRE())
 			.setLocalTermWeights(transformer.getBinary() ? TextIndex.LocalTermWeights.BINARY : null);
@@ -90,7 +90,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 			data.put("stem", Collections.singletonList(" "));
 			data.put("regex", Collections.singletonList("true"));
 
-			TextIndexNormalization textIndexNormalization = new TextIndexNormalization(null, PMMLUtil.createInlineTable(data))
+			TextIndexNormalization textIndexNormalization = new TextIndexNormalization(PMMLUtil.createInlineTable(data))
 				.setCaseSensitive(stopWordSet.isCaseSensitive())
 				.setRecursive(Boolean.TRUE); // Handles consecutive matches. See http://stackoverflow.com/a/25085385
 

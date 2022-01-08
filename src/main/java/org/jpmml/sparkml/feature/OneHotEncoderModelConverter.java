@@ -69,7 +69,7 @@ public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEnc
 
 		InOutMode outputMode = getOutputMode();
 
-		if((InOutMode.SINGLE).equals(outputMode)){
+		if(outputMode == InOutMode.SINGLE){
 			String outputCol = transformer.getOutputCol();
 
 			BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)Iterables.getOnlyElement(features);
@@ -77,7 +77,7 @@ public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEnc
 			encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
 		} else
 
-		if((InOutMode.MULTIPLE).equals(outputMode)){
+		if(outputMode == InOutMode.MULTIPLE){
 			String[] outputCols = transformer.getOutputCols();
 
 			if(outputCols.length != features.size()){

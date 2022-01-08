@@ -18,6 +18,8 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.Objects;
+
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.HasExpression;
 import org.dmg.pmml.PMMLObject;
@@ -42,9 +44,19 @@ public class AliasExpression extends Expression implements HasExpression<AliasEx
 	}
 
 	public AliasExpression setName(String name){
-		this.name = name;
+		this.name = Objects.requireNonNull(name);
 
 		return this;
+	}
+
+	@Override
+	public Expression requireExpression(){
+
+		if(this.expression == null){
+			throw new IllegalStateException();
+		}
+
+		return this.expression;
 	}
 
 	@Override
@@ -54,7 +66,7 @@ public class AliasExpression extends Expression implements HasExpression<AliasEx
 
 	@Override
 	public AliasExpression setExpression(Expression expression){
-		this.expression = expression;
+		this.expression = Objects.requireNonNull(expression);
 
 		return this;
 	}

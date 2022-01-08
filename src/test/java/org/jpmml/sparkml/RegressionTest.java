@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
+import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;

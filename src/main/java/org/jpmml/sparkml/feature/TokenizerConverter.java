@@ -48,7 +48,7 @@ public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 
 		Apply apply = PMMLUtil.createApply(PMMLFunctions.LOWERCASE, feature.ref());
 
-		DerivedField derivedField = encoder.createDerivedField(FieldNameUtil.create("lowercase", feature), OpType.CATEGORICAL, DataType.STRING, apply);
+		DerivedField derivedField = encoder.createDerivedField(FieldNameUtil.create(PMMLFunctions.LOWERCASE, feature), OpType.CATEGORICAL, DataType.STRING, apply);
 
 		return Collections.singletonList(new DocumentFeature(encoder, derivedField, "\\s+"));
 	}

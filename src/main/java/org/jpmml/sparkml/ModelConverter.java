@@ -91,7 +91,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 						if(feature instanceof BooleanFeature){
 							BooleanFeature booleanFeature = (BooleanFeature)feature;
 
-							label = new CategoricalLabel(booleanFeature.getName(), booleanFeature.getDataType(), booleanFeature.getValues());
+							label = new CategoricalLabel(booleanFeature);
 						} else
 
 						if(feature instanceof CategoricalFeature){
@@ -119,7 +119,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 							encoder.putOnlyFeature(labelCol, new IndexFeature(encoder, field, categories));
 
-							label = new CategoricalLabel(field.getName(), field.getDataType(), categories);
+							label = new CategoricalLabel(field.requireName(), field.getDataType(), categories);
 						} else
 
 						{
@@ -133,7 +133,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 						field.setDataType(DataType.DOUBLE);
 
-						label = new ContinuousLabel(field.getName(), field.getDataType());
+						label = new ContinuousLabel(field);
 					}
 					break;
 				default:

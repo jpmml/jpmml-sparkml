@@ -47,7 +47,7 @@ public class TermFeature extends Feature {
 
 
 	public TermFeature(PMMLEncoder encoder, DefineFunction defineFunction, Feature feature, String value){
-		super(encoder, FieldNameUtil.create(defineFunction.getName(), value), defineFunction.getDataType());
+		super(encoder, FieldNameUtil.create(defineFunction, value), defineFunction.getDataType());
 
 		setDefineFunction(defineFunction);
 
@@ -65,7 +65,7 @@ public class TermFeature extends Feature {
 
 		DefineFunction defineFunction = getDefineFunction();
 
-		String name = (defineFunction.getName()).replace("tf@", "tf-idf@");
+		String name = (defineFunction.requireName()).replace("tf@", "tf-idf@");
 
 		DefineFunction weightedDefineFunction = encoder.getDefineFunction(name);
 		if(weightedDefineFunction == null){
@@ -74,7 +74,7 @@ public class TermFeature extends Feature {
 			List<ParameterField> weightedParameterFields = new ArrayList<>(defineFunction.getParameterFields());
 			weightedParameterFields.add(weightField);
 
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.getExpression(), new FieldRef(weightField.getName()));
+			Apply apply = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.requireExpression(), new FieldRef(weightField));
 
 			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, DataType.DOUBLE, weightedParameterFields, apply);
 
@@ -91,7 +91,7 @@ public class TermFeature extends Feature {
 
 		Constant constant = PMMLUtil.createConstant(value, DataType.STRING);
 
-		return PMMLUtil.createApply(defineFunction.getName(), feature.ref(), constant);
+		return PMMLUtil.createApply(defineFunction, feature.ref(), constant);
 	}
 
 	@Override

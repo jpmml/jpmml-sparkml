@@ -50,7 +50,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 
 			@Override
 			public String getName(String name){
-				return FieldNameUtil.create("threshold", name);
+				return FieldNameUtil.create(PMMLFunctions.THRESHOLD, name);
 			}
 
 			@Override

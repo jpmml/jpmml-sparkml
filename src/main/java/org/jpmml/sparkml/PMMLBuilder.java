@@ -151,7 +151,7 @@ public class PMMLBuilder {
 					HasPredictionCol hasPredictionCol = (HasPredictionCol)transformer;
 
 					// XXX
-					if((transformer instanceof GeneralizedLinearRegressionModel) && (MiningFunction.CLASSIFICATION).equals(model.getMiningFunction())){
+					if((transformer instanceof GeneralizedLinearRegressionModel) && (model.requireMiningFunction() == MiningFunction.CLASSIFICATION)){
 						break hasPredictionCol;
 					}
 
@@ -200,9 +200,9 @@ public class PMMLBuilder {
 
 				encoder.removeDerivedField(postProcessorName);
 
-				OutputField outputField = new OutputField(derivedField.getName(), derivedField.getOpType(), derivedField.getDataType())
+				OutputField outputField = new OutputField(derivedField.requireName(), derivedField.requireOpType(), derivedField.requireDataType())
 					.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
-					.setExpression(derivedField.getExpression());
+					.setExpression(derivedField.requireExpression());
 
 				output.addOutputFields(outputField);
 			}
@@ -218,7 +218,7 @@ public class PMMLBuilder {
 
 			List<String> inputColumns = new ArrayList<>();
 
-			MiningSchema miningSchema = model.getMiningSchema();
+			MiningSchema miningSchema = model.requireMiningSchema();
 
 			List<MiningField> miningFields = miningSchema.getMiningFields();
 			for(MiningField miningField : miningFields){

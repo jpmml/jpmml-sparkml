@@ -25,6 +25,7 @@ import com.google.common.collect.Iterables;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.association.AssociationModel;
+import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.junit.Test;
 

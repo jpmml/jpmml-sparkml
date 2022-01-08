@@ -70,7 +70,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 		List<Field<?>> fields = encodeLogicalPlan(encoder, logicalPlan);
 		for(Field<?> field : fields){
-			String name = field.getName();
+			String name = field.requireName();
 			OpType opType = field.getOpType();
 			DataType dataType = field.getDataType();
 
@@ -120,7 +120,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 			if(pmmlExpression instanceof FieldRef){
 				FieldRef fieldRef = (FieldRef)pmmlExpression;
 
-				Field<?> field = ensureField(encoder, fieldRef.getField());
+				Field<?> field = ensureField(encoder, fieldRef.requireField());
 				if(field != null){
 					result.add(field);
 
@@ -150,7 +150,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 				@Override
 				public VisitorAction visit(FieldRef fieldRef){
-					ensureField(encoder, fieldRef.getField());
+					ensureField(encoder, fieldRef.requireField());
 
 					return super.visit(fieldRef);
 				}

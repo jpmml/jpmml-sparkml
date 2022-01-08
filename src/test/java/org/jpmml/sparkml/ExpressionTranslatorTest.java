@@ -346,7 +346,7 @@ public class ExpressionTranslatorTest {
 
 					for(DerivedField derivedField : derivedFields){
 
-						if(Objects.equals(derivedField.getName(), name)){
+						if(Objects.equals(derivedField.requireName(), name)){
 							return ExpressionUtil.evaluate(derivedField, this);
 						}
 					}
