@@ -51,15 +51,15 @@ import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 
 abstract
-public class SparkMLTestBatch extends ModelEncoderBatch {
+public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
-	public SparkMLTestBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+	public SparkMLEncoderBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
 		super(algorithm, dataset, columnFilter, equivalence);
 	}
 
 	@Override
 	abstract
-	public SparkMLTest getArchiveBatchTest();
+	public SparkMLEncoderBatchTest getArchiveBatchTest();
 
 	@Override
 	public List<Map<String, Object>> getOptionsMatrix(){
@@ -113,7 +113,7 @@ public class SparkMLTestBatch extends ModelEncoderBatch {
 			ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
 
 			MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
-			mlReader.session(SparkMLTest.sparkSession);
+			mlReader.session(SparkMLEncoderBatchTest.sparkSession);
 
 			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 		}
@@ -136,7 +136,7 @@ public class SparkMLTestBatch extends ModelEncoderBatch {
 				ByteStreams.copy(is, os);
 			}
 
-			dataset = SparkMLTest.sparkSession.read()
+			dataset = SparkMLEncoderBatchTest.sparkSession.read()
 				.format("csv")
 				.option("header", true)
 				.option("inferSchema", false)

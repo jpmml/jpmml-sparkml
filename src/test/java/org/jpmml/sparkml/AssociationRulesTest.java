@@ -31,14 +31,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class AssociationRulesTest extends SparkMLTest implements Algorithms, Datasets {
+public class AssociationRulesTest extends SparkMLEncoderBatchTest implements Algorithms, Datasets {
 
 	@Test
 	public void evaluateFPGrowthShopping() throws Exception {
 		Predicate<ResultField> predicate = (resultField -> true);
 		Equivalence<Object> equivalence = getEquivalence();
 
-		try(SparkMLTestBatch batch = (SparkMLTestBatch)createBatch(FP_GROWTH, SHOPPING, predicate, equivalence)){
+		try(SparkMLEncoderBatch batch = (SparkMLEncoderBatch)createBatch(FP_GROWTH, SHOPPING, predicate, equivalence)){
 			PMML pmml = batch.getPMML();
 
 			Model model = Iterables.getOnlyElement(pmml.getModels());

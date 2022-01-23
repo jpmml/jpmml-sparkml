@@ -22,7 +22,7 @@ import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.testing.Datasets;
 import org.junit.Test;
 
-public class ClusteringTest extends SparkMLTest implements Algorithms, Datasets {
+public class ClusteringTest extends SparkMLEncoderBatchTest implements Algorithms, Datasets {
 
 	@Test
 	public void evaluateKMeansIris() throws Exception {

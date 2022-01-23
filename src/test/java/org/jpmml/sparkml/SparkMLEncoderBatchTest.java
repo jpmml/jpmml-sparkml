@@ -30,21 +30,21 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 abstract
-public class SparkMLTest extends ModelEncoderBatchTest {
+public class SparkMLEncoderBatchTest extends ModelEncoderBatchTest {
 
-	public SparkMLTest(){
+	public SparkMLEncoderBatchTest(){
 		super(new PMMLEquivalence(1e-14, 1e-14));
 	}
 
 	@Override
-	public SparkMLTestBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
 		columnFilter = excludePredictionFields(columnFilter);
 
-		SparkMLTestBatch result = new SparkMLTestBatch(algorithm, dataset, columnFilter, equivalence){
+		SparkMLEncoderBatch result = new SparkMLEncoderBatch(algorithm, dataset, columnFilter, equivalence){
 
 			@Override
-			public SparkMLTest getArchiveBatchTest(){
-				return SparkMLTest.this;
+			public SparkMLEncoderBatchTest getArchiveBatchTest(){
+				return SparkMLEncoderBatchTest.this;
 			}
 		};
 
@@ -54,13 +54,13 @@ public class SparkMLTest extends ModelEncoderBatchTest {
 	@BeforeClass
 	static
 	public void createSparkSession(){
-		SparkMLTest.sparkSession = SparkSessionUtil.createSparkSession();
+		SparkMLEncoderBatchTest.sparkSession = SparkSessionUtil.createSparkSession();
 	}
 
 	@AfterClass
 	static
 	public void destroySparkSession(){
-		SparkMLTest.sparkSession = SparkSessionUtil.destroySparkSession(SparkMLTest.sparkSession);
+		SparkMLEncoderBatchTest.sparkSession = SparkSessionUtil.destroySparkSession(SparkMLEncoderBatchTest.sparkSession);
 	}
 
 	static
