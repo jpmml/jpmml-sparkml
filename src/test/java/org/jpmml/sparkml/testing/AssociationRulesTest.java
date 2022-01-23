@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class AssociationRulesTest extends LocalSparkMLEncoderBatchTest implements Algorithms, Datasets {
+public class AssociationRulesTest extends LocalSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
 
 	@Test
 	public void evaluateFPGrowthShopping() throws Exception {

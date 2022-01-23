@@ -18,7 +18,7 @@
  */
 package org.jpmml.sparkml.testing;
 
-interface Algorithms {
+interface SparkMLAlgorithms {
 
 	String DECISION_TREE = "DecisionTree";
 	String FP_GROWTH = "FPGrowth";
