@@ -40,6 +40,7 @@ import org.apache.spark.ml.util.MLReader;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
@@ -82,6 +83,13 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 	@Override
 	public PMML getPMML() throws Exception {
+		SparkMLEncoderBatchTest archiveBatchTest = getArchiveBatchTest();
+
+		SparkSession sparkSession = archiveBatchTest.getSparkSession();
+		if(sparkSession == null){
+			throw new IllegalStateException();
+		}
+
 		Equivalence<?> equivalence = getEquivalence();
 
 		List<File> tmpResources = new ArrayList<>();
@@ -115,7 +123,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 			ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
 
 			MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
-			mlReader.session(SparkMLEncoderBatchTest.sparkSession);
+			mlReader.session(sparkSession);
 
 			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 		}
@@ -138,7 +146,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				ByteStreams.copy(is, os);
 			}
 
-			dataset = SparkMLEncoderBatchTest.sparkSession.read()
+			dataset = sparkSession.read()
 				.format("csv")
 				.option("header", true)
 				.option("inferSchema", false)

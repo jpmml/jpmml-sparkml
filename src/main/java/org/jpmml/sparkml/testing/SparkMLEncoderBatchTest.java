@@ -22,13 +22,9 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import org.apache.spark.sql.SparkSession;
-import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.testing.ModelEncoderBatchTest;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
-import org.jpmml.sparkml.SparkSessionUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 abstract
 public class SparkMLEncoderBatchTest extends ModelEncoderBatchTest {
@@ -37,10 +33,11 @@ public class SparkMLEncoderBatchTest extends ModelEncoderBatchTest {
 		super(new PMMLEquivalence(1e-14, 1e-14));
 	}
 
+	abstract
+	public SparkSession getSparkSession();
+
 	@Override
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
-		columnFilter = excludePredictionFields(columnFilter);
-
 		SparkMLEncoderBatch result = new SparkMLEncoderBatch(algorithm, dataset, columnFilter, equivalence){
 
 			@Override
@@ -51,25 +48,4 @@ public class SparkMLEncoderBatchTest extends ModelEncoderBatchTest {
 
 		return result;
 	}
-
-	@BeforeClass
-	static
-	public void createSparkSession(){
-		SparkMLEncoderBatchTest.sparkSession = SparkSessionUtil.createSparkSession();
-	}
-
-	@AfterClass
-	static
-	public void destroySparkSession(){
-		SparkMLEncoderBatchTest.sparkSession = SparkSessionUtil.destroySparkSession(SparkMLEncoderBatchTest.sparkSession);
-	}
-
-	static
-	public Predicate<ResultField> excludePredictionFields(Predicate<ResultField> columnFilter){
-		Predicate<ResultField> excludePredictionFields = excludeFields("prediction", FieldNameUtil.create("pmml", "prediction"));
-
-		return columnFilter.and(excludePredictionFields);
-	}
-
-	public static SparkSession sparkSession = null;
 }
