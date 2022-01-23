@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.testing;
 
 import java.util.Map;
 import java.util.function.Predicate;

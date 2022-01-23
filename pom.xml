@@ -54,6 +54,18 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.jpmml</groupId>
+			<artifactId>pmml-converter-testing</artifactId>
+			<version>1.5.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jpmml</groupId>
+			<artifactId>pmml-evaluator-testing</artifactId>
+			<version>1.6.2</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.beust</groupId>
@@ -81,24 +93,10 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-converter-testing</artifactId>
-			<version>1.5.2</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-evaluator-testing</artifactId>
-			<version>1.6.2</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.2</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.testing;
 
 import java.util.function.Predicate;
 
@@ -26,6 +26,7 @@ import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.testing.ModelEncoderBatchTest;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.sparkml.SparkSessionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 

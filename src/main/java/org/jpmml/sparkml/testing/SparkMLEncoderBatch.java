@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.testing;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +48,8 @@ import org.jpmml.converter.testing.Datasets;
 import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.sparkml.PMMLBuilder;
+import org.jpmml.sparkml.ZipUtil;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 
 abstract
