@@ -71,8 +71,8 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 		List<Field<?>> fields = encodeLogicalPlan(encoder, logicalPlan);
 		for(Field<?> field : fields){
 			String name = field.requireName();
-			OpType opType = field.getOpType();
-			DataType dataType = field.getDataType();
+			DataType dataType = field.requireDataType();
+			OpType opType = field.requireOpType();
 
 			Feature feature;
 

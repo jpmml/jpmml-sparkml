@@ -25,7 +25,7 @@ import org.jpmml.converter.Feature;
 public class ItemSetFeature extends Feature {
 
 	public ItemSetFeature(SparkMLEncoder encoder, Field<?> field){
-		super(encoder, field.requireName(), field.getDataType());
+		super(encoder, field.requireName(), field.requireDataType());
 	}
 
 	@Override

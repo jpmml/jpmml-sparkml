@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-converter</artifactId>
-			<version>1.5.1</version>
+			<version>1.5.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -83,7 +83,14 @@
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-converter-testing</artifactId>
-			<version>1.5.1</version>
+			<version>1.5.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jpmml</groupId>
+			<artifactId>pmml-evaluator-testing</artifactId>
+			<version>1.6.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -192,9 +199,6 @@
 				<version>2.22.2</version>
 				<configuration>
 					<argLine>${jacoco.agent}</argLine>
-					<systemPropertyVariables>
-						<org.jpmml.evaluator.testing.IntegrationTestBatch.testKryoSerializability>false</org.jpmml.evaluator.testing.IntegrationTestBatch.testKryoSerializability>
-					</systemPropertyVariables>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 			</plugin>

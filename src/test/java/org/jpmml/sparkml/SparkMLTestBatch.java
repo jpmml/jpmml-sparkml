@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,27 +45,37 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.converter.testing.Datasets;
+import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
-import org.jpmml.evaluator.testing.IntegrationTestBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 
 abstract
-public class SparkMLTestBatch extends IntegrationTestBatch {
+public class SparkMLTestBatch extends ModelEncoderBatch {
 
-	public SparkMLTestBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
-		super(name, dataset, predicate, equivalence);
+	public SparkMLTestBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+		super(algorithm, dataset, columnFilter, equivalence);
 	}
 
 	@Override
 	abstract
-	public SparkMLTest getIntegrationTest();
+	public SparkMLTest getArchiveBatchTest();
 
-	public Map<String, Object> getOptions(String name, String dataset){
+	@Override
+	public List<Map<String, Object>> getOptionsMatrix(){
+		// XXX
 		Map<String, Object> options = new LinkedHashMap<>();
 		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 5);
 
-		return options;
+		return Collections.singletonList(options);
+	}
+
+	public String getSchemaJsonPath(){
+		return "/schema/" + getDataset() + ".json";
+	}
+
+	public String getPipelineZipPath(){
+		return "/pipeline/" + getAlgorithm() + getDataset() + ".zip";
 	}
 
 	@Override
@@ -75,7 +86,7 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 
 		StructType schema;
 
-		try(InputStream is = open("/schema/" + getDataset() + ".json")){
+		try(InputStream is = open(getSchemaJsonPath())){
 			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
 
 			schema = (StructType)DataType.fromJson(json);
@@ -83,8 +94,8 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 
 		PipelineModel pipelineModel;
 
-		try(InputStream is = open("/pipeline/" + getName() + getDataset() + ".zip")){
-			File tmpZipFile = File.createTempFile(getName() + getDataset(), ".zip");
+		try(InputStream is = open(getPipelineZipPath())){
+			File tmpZipFile = File.createTempFile(getAlgorithm() + getDataset(), ".zip");
 
 			tmpResources.add(tmpZipFile);
 
@@ -92,7 +103,7 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 				ByteStreams.copy(is, os);
 			}
 
-			File tmpPipelineDir = File.createTempFile(getName() + getDataset(), "");
+			File tmpPipelineDir = File.createTempFile(getAlgorithm() + getDataset(), "");
 			if(!tmpPipelineDir.delete()){
 				throw new IOException();
 			}
@@ -110,7 +121,7 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 		Dataset<Row> dataset = null;
 
 		dataset:
-		try(InputStream is = open("/csv/" + getDataset() + ".csv")){
+		try(InputStream is = open(getInputCsvPath())){
 
 			// XXX
 			if((Datasets.SHOPPING).equals(getDataset())){
@@ -141,7 +152,7 @@ public class SparkMLTestBatch extends IntegrationTestBatch {
 			dataset = dataset.sample(false, 0.05d, 63317);
 		}
 
-		Map<String, Object> options = getOptions(getName(), getDataset());
+		Map<String, Object> options = getOptions();
 
 		double precision = 1e-14;
 		double zeroThreshold = 1e-14;

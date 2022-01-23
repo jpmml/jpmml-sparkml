@@ -47,7 +47,7 @@ public class TermFeature extends Feature {
 
 
 	public TermFeature(PMMLEncoder encoder, DefineFunction defineFunction, Feature feature, String value){
-		super(encoder, FieldNameUtil.create(defineFunction, value), defineFunction.getDataType());
+		super(encoder, FieldNameUtil.create(defineFunction, value), defineFunction.requireDataType());
 
 		setDefineFunction(defineFunction);
 

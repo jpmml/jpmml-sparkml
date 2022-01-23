@@ -119,7 +119,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 							encoder.putOnlyFeature(labelCol, new IndexFeature(encoder, field, categories));
 
-							label = new CategoricalLabel(field.requireName(), field.getDataType(), categories);
+							label = new CategoricalLabel(field.requireName(), field.requireDataType(), categories);
 						} else
 
 						{

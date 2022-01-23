@@ -25,7 +25,6 @@ import com.google.common.base.Equivalence;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
-import org.jpmml.evaluator.testing.ArchiveBatch;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
@@ -34,25 +33,28 @@ import org.junit.Test;
 public class RegressionTest extends SparkMLTest implements Algorithms, Datasets {
 
 	@Override
-	public ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
-		predicate = excludePredictionFields(predicate);
+	public SparkMLTestBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+		columnFilter = excludePredictionFields(columnFilter);
 
-		ArchiveBatch result = new SparkMLTestBatch(name, dataset, predicate, equivalence){
+		SparkMLTestBatch result = new SparkMLTestBatch(algorithm, dataset, columnFilter, equivalence){
 
 			@Override
-			public RegressionTest getIntegrationTest(){
+			public RegressionTest getArchiveBatchTest(){
 				return RegressionTest.this;
 			}
 
 			@Override
-			public Map<String, Object> getOptions(String name, String dataset){
-				Map<String, Object> options = super.getOptions(name, dataset);
+			public Map<String, Object> getOptions(){
+				String algorithm = getAlgorithm();
+				String dataset = getDataset();
 
-				if((LINEAR_REGRESION).equals(name) && (AUTO).equals(dataset)){
+				Map<String, Object> options = super.getOptions();
+
+				if((LINEAR_REGRESION).equals(algorithm) && (AUTO).equals(dataset)){
 					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
 				} // End if
 
-				if((DECISION_TREE).equals(name) || (GBT).equals(name) || (RANDOM_FOREST).equals(name)){
+				if((DECISION_TREE).equals(algorithm) || (GBT).equals(algorithm) || (RANDOM_FOREST).equals(algorithm)){
 					options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.TRUE);
 				}
 

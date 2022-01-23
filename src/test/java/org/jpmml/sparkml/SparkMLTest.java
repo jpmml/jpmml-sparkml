@@ -23,28 +23,27 @@ import java.util.function.Predicate;
 import com.google.common.base.Equivalence;
 import org.apache.spark.sql.SparkSession;
 import org.jpmml.converter.FieldNameUtil;
+import org.jpmml.converter.testing.ModelEncoderBatchTest;
 import org.jpmml.evaluator.ResultField;
-import org.jpmml.evaluator.testing.ArchiveBatch;
-import org.jpmml.evaluator.testing.IntegrationTest;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 abstract
-public class SparkMLTest extends IntegrationTest {
+public class SparkMLTest extends ModelEncoderBatchTest {
 
 	public SparkMLTest(){
 		super(new PMMLEquivalence(1e-14, 1e-14));
 	}
 
 	@Override
-	protected ArchiveBatch createBatch(String name, String dataset, Predicate<ResultField> predicate, Equivalence<Object> equivalence){
-		predicate = excludePredictionFields(predicate);
+	public SparkMLTestBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+		columnFilter = excludePredictionFields(columnFilter);
 
-		ArchiveBatch result = new SparkMLTestBatch(name, dataset, predicate, equivalence){
+		SparkMLTestBatch result = new SparkMLTestBatch(algorithm, dataset, columnFilter, equivalence){
 
 			@Override
-			public SparkMLTest getIntegrationTest(){
+			public SparkMLTest getArchiveBatchTest(){
 				return SparkMLTest.this;
 			}
 		};
@@ -65,10 +64,10 @@ public class SparkMLTest extends IntegrationTest {
 	}
 
 	static
-	public Predicate<ResultField> excludePredictionFields(Predicate<ResultField> predicate){
+	public Predicate<ResultField> excludePredictionFields(Predicate<ResultField> columnFilter){
 		Predicate<ResultField> excludePredictionFields = excludeFields("prediction", FieldNameUtil.create("pmml", "prediction"));
 
-		return predicate.and(excludePredictionFields);
+		return columnFilter.and(excludePredictionFields);
 	}
 
 	public static SparkSession sparkSession = null;
