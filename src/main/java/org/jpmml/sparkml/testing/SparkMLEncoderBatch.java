@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,7 +46,6 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
-import org.jpmml.converter.testing.Datasets;
 import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
@@ -90,8 +90,6 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 			throw new IllegalStateException();
 		}
 
-		Equivalence<?> equivalence = getEquivalence();
-
 		List<File> tmpResources = new ArrayList<>();
 
 		StructType schema;
@@ -133,8 +131,9 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		dataset:
 		try(InputStream is = open(getInputCsvPath())){
 
-			// XXX
-			if((Datasets.SHOPPING).equals(getDataset())){
+			// XXX: Detect if the model is an association rules model, and if so, skip the generation of the ModelVerification element
+			List<String> names = Arrays.asList(schema.names());
+			if(names.contains("items") && names.contains("transaction")){
 				break dataset;
 			}
 
@@ -152,7 +151,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				.option("inferSchema", false)
 				.load(tmpCsvFile.getAbsolutePath());
 
-			StructField[] fields = schema.fields();
+			List<StructField> fields = Arrays.asList(schema.fields());
 			for(StructField field : fields){
 				Column column = dataset.apply(field.name()).cast(field.dataType());
 
@@ -164,20 +163,22 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 		Map<String, Object> options = getOptions();
 
-		double precision = 1e-14;
-		double zeroThreshold = 1e-14;
-
-		if(equivalence instanceof PMMLEquivalence){
-			PMMLEquivalence pmmlEquivalence = (PMMLEquivalence)equivalence;
-
-			precision = pmmlEquivalence.getPrecision();
-			zeroThreshold = pmmlEquivalence.getZeroThreshold();
-		}
-
 		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
 			.putOptions(options);
 
 		if(dataset != null){
+			Equivalence<?> equivalence = getEquivalence();
+
+			double precision = 1e-14;
+			double zeroThreshold = 1e-14;
+
+			if(equivalence instanceof PMMLEquivalence){
+				PMMLEquivalence pmmlEquivalence = (PMMLEquivalence)equivalence;
+
+				precision = pmmlEquivalence.getPrecision();
+				zeroThreshold = pmmlEquivalence.getZeroThreshold();
+			}
+
 			pmmlBuilder = pmmlBuilder.verify(dataset, precision, zeroThreshold);
 		}
 
