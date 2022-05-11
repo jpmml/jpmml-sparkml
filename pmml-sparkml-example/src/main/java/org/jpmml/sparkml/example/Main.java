@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.example;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,6 +38,8 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.metro.MetroJAXBUtil;
+import org.jpmml.sparkml.PMMLBuilder;
+import org.jpmml.sparkml.ZipUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;

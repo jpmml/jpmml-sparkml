@@ -11,9 +11,10 @@
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
 	<version>2.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
 	<name>JPMML-SparkML</name>
-	<description>Java library and command-line application for converting Spark ML pipelines to PMML</description>
+	<description>Java library and command-line application for converting Apache Spark ML pipelines to PMML</description>
 	<url>https://github.com/jpmml/jpmml-sparkml</url>
 
 	<licenses>
@@ -31,6 +32,11 @@
 		</developer>
 	</developers>
 
+	<modules>
+		<module>pmml-sparkml</module>
+		<module>pmml-sparkml-example</module>
+	</modules>
+
 	<scm>
 		<connection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</connection>
 		<developerConnection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</developerConnection>
@@ -42,70 +48,80 @@
 		<url>https://github.com/jpmml/jpmml-sparkml/issues</url>
 	</issueManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-converter</artifactId>
-			<version>1.5.3</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-converter-testing</artifactId>
-			<version>1.5.3</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-evaluator-testing</artifactId>
-			<version>1.6.3</version>
-			<scope>provided</scope>
-		</dependency>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml</artifactId>
+				<version>2.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-example</artifactId>
+				<version>2.0-SNAPSHOT</version>
+			</dependency>
 
-		<dependency>
-			<groupId>com.beust</groupId>
-			<artifactId>jcommander</artifactId>
-			<version>1.72</version>
-		</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-converter</artifactId>
+				<version>1.5.3</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-converter-testing</artifactId>
+				<version>1.5.3</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-evaluator-testing</artifactId>
+				<version>1.6.3</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
-			<version>3.0.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.12</artifactId>
-			<version>3.0.0</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+			<dependency>
+				<groupId>com.beust</groupId>
+				<artifactId>jcommander</artifactId>
+				<version>1.72</version>
+			</dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
-			<scope>test</scope>
-		</dependency>
+			<dependency>
+				<groupId>org.apache.spark</groupId>
+				<artifactId>spark-core_2.12</artifactId>
+				<version>3.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.spark</groupId>
+				<artifactId>spark-mllib_2.12</artifactId>
+				<version>3.0.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-client</artifactId>
-			<version>2.7.4</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-client</artifactId>
+				<version>2.7.4</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
@@ -116,18 +132,6 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-						</manifest>
-					</archive>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -146,37 +150,6 @@
 					<localCheckout>true</localCheckout>
 					<pushChanges>false</pushChanges>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<finalName>${project.artifactId}-executable-${project.version}</finalName>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.jpmml.sparkml.Main</mainClass>
-								</transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

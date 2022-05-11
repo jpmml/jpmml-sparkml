@@ -135,8 +135,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-2.0-SNAPSHOT.jar` - Library JAR file.
-* `target/jpmml-sparkml-executable-2.0-SNAPSHOT.jar` - Example application JAR file.
+* `pmml-sparkml/target/pmml-sparkml-2.0-SNAPSHOT.jar` - Library JAR file.
+* `pmml-sparkml-exampletarget/pmml-sparkml-example-executable-2.0-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -185,18 +185,18 @@ JAXBUtil.marshalPMML(pmml, new StreamResult(System.out))
 
 ### Example application
 
-The example application JAR file contains an executable class `org.jpmml.sparkml.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
+The example application JAR file contains an executable class `org.jpmml.sparkml.example.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
 
 The example application JAR file does not include Apache Spark runtime libraries. Therefore, this executable class must be executed using Apache Spark's `spark-submit` helper script.
 
-For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
+For example, converting a pair of Spark ML schema and pipeline serialization files `pmml-sparkml/src/test/resources/schema/Iris.json` and `pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.0-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.0-SNAPSHOT.jar --schema-input pmml-sparkml/src/test/resources/schema/Iris.json --pipeline-input pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.0-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.0-SNAPSHOT.jar --help
 ```
 
 # Documentation #
