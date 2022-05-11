@@ -220,6 +220,6 @@ public class TreeModelCompactor extends AbstractTreeModelTransformer {
 	}
 
 	private void addCategoricalField(Node node){
-		this.replacedPredicates.put(node, (SimpleSetPredicate)node.requirePredicate());
+		this.replacedPredicates.put(node, node.requirePredicate(SimpleSetPredicate.class));
 	}
 }
