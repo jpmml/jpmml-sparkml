@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
@@ -134,6 +135,11 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 			// XXX: Detect if the model is an association rules model, and if so, skip the generation of the ModelVerification element
 			List<String> names = Arrays.asList(schema.names());
 			if(names.contains("items") && names.contains("transaction")){
+				break dataset;
+			} // End if
+
+			// XXX
+			if(Objects.equals("XGBoost", getAlgorithm())){
 				break dataset;
 			}
 

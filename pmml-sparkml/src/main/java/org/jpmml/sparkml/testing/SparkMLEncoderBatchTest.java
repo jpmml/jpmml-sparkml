@@ -30,7 +30,11 @@ abstract
 public class SparkMLEncoderBatchTest extends ModelEncoderBatchTest {
 
 	public SparkMLEncoderBatchTest(){
-		super(new PMMLEquivalence(1e-14, 1e-14));
+		this(new PMMLEquivalence(1e-14, 1e-14));
+	}
+
+	public SparkMLEncoderBatchTest(Equivalence<Object> equivalence){
+		super(equivalence);
 	}
 
 	abstract
