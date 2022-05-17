@@ -31,11 +31,11 @@ import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
 import org.junit.Test;
 
-public class ClassificationTest extends LocalSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets, Fields {
+public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets, Fields {
 
 	@Override
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
-		columnFilter = excludePredictionFields(columnFilter);
+		columnFilter = columnFilter.and(excludePredictionFields());
 
 		SparkMLEncoderBatch result = new SparkMLEncoderBatch(algorithm, dataset, columnFilter, equivalence){
 

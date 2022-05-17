@@ -18,11 +18,13 @@
  */
 package org.jpmml.sparkml.xgboost.testing;
 
-import org.apache.spark.SparkContext;
-import org.apache.spark.sql.SparkSession;
-import org.jpmml.converter.FieldNameUtil;
+import java.util.function.Predicate;
+
+import com.google.common.base.Equivalence;
 import org.jpmml.converter.testing.Fields;
+import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.FloatEquivalence;
+import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,43 +37,31 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 	}
 
 	@Override
-	public SparkSession getSparkSession(){
-		return XGBoostTest.sparkSession;
+	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+		columnFilter = columnFilter.and(excludePredictionFields());
+
+		return super.createBatch(algorithm, dataset, columnFilter, equivalence);
 	}
 
 	@Test
 	public void evaluateAudit() throws Exception {
-		evaluate("XGBoost", "Audit", excludeFields("prediction", FieldNameUtil.create("pmml", "prediction"), Fields.AUDIT_PROBABILITY_FALSE));
+		evaluate("XGBoost", "Audit", excludeFields(Fields.AUDIT_PROBABILITY_FALSE));
 	}
 
 	@Test
 	public void evaluateAuto() throws Exception {
-		evaluate("XGBoost", "Auto", excludeFields("prediction"));
+		evaluate("XGBoost", "Auto");
 	}
 
 	@BeforeClass
 	static
 	public void createSparkSession(){
-		SparkSession.Builder builder = SparkSession.builder()
-			.appName("test")
-			.master("local[1]")
-			.config("spark.ui.enabled", false);
-
-		SparkSession sparkSession = builder.getOrCreate();
-
-		SparkContext sparkContext = sparkSession.sparkContext();
-		sparkContext.setLogLevel("ERROR");
-
-		XGBoostTest.sparkSession = sparkSession;
+		SparkMLEncoderBatchTest.createSparkSession();
 	}
 
 	@AfterClass
 	static
 	public void destroySparkSession(){
-		XGBoostTest.sparkSession.stop();
-
-		XGBoostTest.sparkSession = null;
+		SparkMLEncoderBatchTest.destroySparkSession();
 	}
-
-	private static SparkSession sparkSession = null;
 }

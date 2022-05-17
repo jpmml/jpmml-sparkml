@@ -18,9 +18,14 @@
  */
 package org.jpmml.sparkml.lightgbm.testing;
 
-import org.jpmml.converter.FieldNameUtil;
+import java.util.function.Predicate;
+
+import com.google.common.base.Equivalence;
+import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.IntegrationTest;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.evaluator.testing.SimpleArchiveBatch;
+import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.junit.Test;
 
 public class LightGBMTest extends IntegrationTest {
@@ -29,13 +34,20 @@ public class LightGBMTest extends IntegrationTest {
 		super(new PMMLEquivalence(1e-14, 1e-14));
 	}
 
+	@Override
+	public SimpleArchiveBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+		columnFilter = columnFilter.and(SparkMLEncoderBatchTest.excludePredictionFields());
+
+		return super.createBatch(algorithm, dataset, columnFilter, equivalence);
+	}
+
 	@Test
 	public void evaluateLightGBMAudit() throws Exception {
-		evaluate("LightGBM", "Audit", excludeFields("prediction", FieldNameUtil.create("pmml", "prediction")));
+		evaluate("LightGBM", "Audit");
 	}
 
 	@Test
 	public void evaluateLightGBMAuto() throws Exception {
-		evaluate("LightGBM", "Auto", excludeFields("prediction"));
+		evaluate("LightGBM", "Auto");
 	}
 }

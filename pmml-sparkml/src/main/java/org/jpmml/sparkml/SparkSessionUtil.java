@@ -28,9 +28,13 @@ public class SparkSessionUtil {
 
 	static
 	public SparkSession createSparkSession(){
+		return createSparkSession("local");
+	}
+
+	static
+	public SparkSession createSparkSession(String master){
 		SparkSession.Builder builder = SparkSession.builder()
-			.appName("test")
-			.master("local[1]")
+			.master(master)
 			.config("spark.ui.enabled", false);
 
 		SparkSession sparkSession = builder.getOrCreate();

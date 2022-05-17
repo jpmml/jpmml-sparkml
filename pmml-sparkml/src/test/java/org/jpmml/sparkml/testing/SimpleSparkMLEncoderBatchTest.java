@@ -21,45 +21,29 @@ package org.jpmml.sparkml.testing;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
-import org.apache.spark.sql.SparkSession;
-import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.evaluator.ResultField;
-import org.jpmml.sparkml.SparkSessionUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public class LocalSparkMLEncoderBatchTest extends SparkMLEncoderBatchTest {
-
-	@Override
-	public SparkSession getSparkSession(){
-		return LocalSparkMLEncoderBatchTest.sparkSession;
-	}
+abstract
+public class SimpleSparkMLEncoderBatchTest extends SparkMLEncoderBatchTest {
 
 	@Override
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
-		columnFilter = excludePredictionFields(columnFilter);
+		columnFilter = columnFilter.and(excludePredictionFields());
 
 		return super.createBatch(algorithm, dataset, columnFilter, equivalence);
-	}
-
-	static
-	public Predicate<ResultField> excludePredictionFields(Predicate<ResultField> columnFilter){
-		Predicate<ResultField> excludePredictionFields = excludeFields("prediction", FieldNameUtil.create("pmml", "prediction"));
-
-		return columnFilter.and(excludePredictionFields);
 	}
 
 	@BeforeClass
 	static
 	public void createSparkSession(){
-		LocalSparkMLEncoderBatchTest.sparkSession = SparkSessionUtil.createSparkSession();
+		SparkMLEncoderBatchTest.createSparkSession();
 	}
 
 	@AfterClass
 	static
 	public void destroySparkSession(){
-		LocalSparkMLEncoderBatchTest.sparkSession = SparkSessionUtil.destroySparkSession(LocalSparkMLEncoderBatchTest.sparkSession);
+		SparkMLEncoderBatchTest.destroySparkSession();
 	}
-
-	private static SparkSession sparkSession = null;
 }
