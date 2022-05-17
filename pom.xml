@@ -35,6 +35,7 @@
 	<modules>
 		<module>pmml-sparkml</module>
 		<module>pmml-sparkml-example</module>
+		<module>pmml-sparkml-lightgbm</module>
 		<module>pmml-sparkml-xgboost</module>
 	</modules>
 
@@ -59,6 +60,11 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-example</artifactId>
+				<version>2.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-lightgbm</artifactId>
 				<version>2.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -92,8 +98,20 @@
 
 			<dependency>
 				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-lightgbm</artifactId>
+				<version>1.4.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-xgboost</artifactId>
 				<version>1.7.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>synapseml-lightgbm_2.12</artifactId>
+				<version>[0.9.5,)</version>
 			</dependency>
 
 			<dependency>
