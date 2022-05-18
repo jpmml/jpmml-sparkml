@@ -6,6 +6,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 # Table of Contents #
 
 * [Features](#features)
+  * [Overview](#overview)
+  * [Supported libraries](#supported-libraries)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
   * [Library](#library)
@@ -19,7 +21,30 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Features #
 
-* Supported pipeline stage types:
+### Overview
+
+* Functionality:
+  * Thorough collection, analysis and encoding of feature information:
+    * Names.
+    * Data and operational types.
+    * Valid, invalid and missing value spaces.
+  * Pipeline extensions:
+    * Pruning.
+    * Model verification.
+  * Conversion options.
+* Extensibility:
+  * Rich Java APIs for developing custom converters.
+  * Automatic discovery and registration of custom converters based on `META-INF/sparkml2pmml.properties` resource files.
+  * Direct interfacing with other JPMML conversion libraries such as [JPMML-LightGBM](https://github.com/jpmml/jpmml-lightgbm) and [JPMML-XGBoost](https://github.com/jpmml/jpmml-xgboost).
+* Production quality:
+  * Complete test coverage.
+  * Fully compliant with the [JPMML-Evaluator](https://github.com/jpmml/jpmml-evaluator) library.
+
+### Supported libraries
+
+<details>
+  <summary>Apache Spark ML</summary>
+
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
@@ -82,13 +107,29 @@ Java library and command-line application for converting Apache Spark ML pipelin
   * Hyperparameter selectors and tuners:
     * [`tuning.CrossValidatorModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/tuning/CrossValidatorModel.html)
     * [`tuning.TrainValidationSplitModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/tuning/TrainValidationSplitModel.html)
-* Production quality:
-  * Complete test coverage.
-  * Fully compliant with the [JPMML-Evaluator](https://github.com/jpmml/jpmml-evaluator) library.
+</details>
+
+<details>
+  <summary>LightGBM</summary>
+
+  * Prediction models:
+    * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMClassificationModel.html)
+    * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressionModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMRegressionModel.html)
+</details>
+
+<details>
+  <summary>XGBoost</summary>
+
+  * Feature transformers:
+    * `org.jpmml.sparkml.xgboost.SparseToDenseTransformer`
+  * Prediction models:
+    * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
+    * [`ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostRegressionModel.html)
+</details>
 
 # Prerequisites #
 
-* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X, 3.1.X or 3.2.X.
+* Apache Spark 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X, 3.1.X or 3.2.X.
 
 # Installation #
 
@@ -116,16 +157,12 @@ Compatibility matrix:
 | 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | Archived |
 | 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Archived |
 | 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Archived |
-| 3.0.X | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Archived |
-| 3.1.X | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Archived |
-| 3.2.X | [`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X) | Archived |
+| ~~3.0.X~~ | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Archived |
+| ~~3.1.X~~ | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Archived |
+| ~~3.2.X~~ | [`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X) | Archived |
 | 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) | Active |
 | 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) | Active |
 | 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
-
-JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of Apache Spark version 2.0.X, 2.1.X and 2.2.X distributions.
-
-This conflict is documented in [SPARK-15526](https://issues.apache.org/jira/browse/SPARK-15526). For possible resolutions, please switch from this README.md file to the README.md file of some earlier JPMML-SparkML development branch.
 
 ### Example application
 
