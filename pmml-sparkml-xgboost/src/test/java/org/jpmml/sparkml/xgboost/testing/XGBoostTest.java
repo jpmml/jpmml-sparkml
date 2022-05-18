@@ -21,9 +21,14 @@ package org.jpmml.sparkml.xgboost.testing;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import org.dmg.pmml.PMML;
+import org.dmg.pmml.VerificationField;
+import org.dmg.pmml.Visitor;
+import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.testing.Fields;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.FloatEquivalence;
+import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.junit.AfterClass;
@@ -40,7 +45,35 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
 		columnFilter = columnFilter.and(excludePredictionFields());
 
-		return super.createBatch(algorithm, dataset, columnFilter, equivalence);
+		SparkMLEncoderBatch result = new SparkMLEncoderBatch(algorithm, dataset, columnFilter, equivalence){
+
+			@Override
+			public XGBoostTest getArchiveBatchTest(){
+				return XGBoostTest.this;
+			}
+
+			@Override
+			public PMML getPMML() throws Exception {
+				PMML pmml = super.getPMML();
+
+				Visitor visitor = new AbstractVisitor(){
+
+					@Override
+					public VisitorAction visit(VerificationField verificationField){
+						verificationField
+							.setPrecision(1e-5d)
+							.setZeroThreshold(1e-5d);
+
+						return super.visit(verificationField);
+					}
+				};
+				visitor.applyTo(pmml);
+
+				return pmml;
+			}
+		};
+
+		return result;
 	}
 
 	@Test

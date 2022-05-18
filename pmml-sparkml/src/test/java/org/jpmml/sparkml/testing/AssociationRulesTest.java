@@ -22,6 +22,9 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import com.google.common.collect.Iterables;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.association.AssociationModel;
@@ -32,6 +35,26 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 public class AssociationRulesTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
+
+	@Override
+	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
+		columnFilter = columnFilter.and(excludePredictionFields());
+
+		SparkMLEncoderBatch result = new SparkMLEncoderBatch(algorithm, dataset, columnFilter, equivalence){
+
+			@Override
+			public AssociationRulesTest getArchiveBatchTest(){
+				return AssociationRulesTest.this;
+			}
+
+			@Override
+			public Dataset<Row> getVerificationDataset(StructType schema, Dataset<Row> inputDataset){
+				return null;
+			}
+		};
+
+		return result;
+	}
 
 	@Test
 	public void evaluateFPGrowthShopping() throws Exception {

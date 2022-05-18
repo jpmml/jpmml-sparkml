@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
@@ -82,6 +81,18 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		return "/pipeline/" + getAlgorithm() + getDataset() + ".zip";
 	}
 
+	public Dataset<Row> getVerificationDataset(StructType schema, Dataset<Row> inputDataset){
+		List<StructField> fields = Arrays.asList(schema.fields());
+
+		for(StructField field : fields){
+			Column column = inputDataset.apply(field.name()).cast(field.dataType());
+
+			inputDataset = inputDataset.withColumn("tmp_" + field.name(), column).drop(field.name()).withColumnRenamed("tmp_" + field.name(), field.name());
+		}
+
+		return inputDataset.sample(false, 0.05d, 63317);
+	}
+
 	@Override
 	public PMML getPMML() throws Exception {
 		SparkMLEncoderBatchTest archiveBatchTest = getArchiveBatchTest();
@@ -127,22 +138,9 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
 		}
 
-		Dataset<Row> dataset = null;
+		Dataset<Row> inputDataset;
 
-		dataset:
 		try(InputStream is = open(getInputCsvPath())){
-
-			// XXX: Detect if the model is an association rules model, and if so, skip the generation of the ModelVerification element
-			List<String> names = Arrays.asList(schema.names());
-			if(names.contains("items") && names.contains("transaction")){
-				break dataset;
-			} // End if
-
-			// XXX
-			if(Objects.equals("XGBoost", getAlgorithm())){
-				break dataset;
-			}
-
 			File tmpCsvFile = File.createTempFile(getDataset(), ".csv");
 
 			tmpResources.add(tmpCsvFile);
@@ -151,20 +149,11 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				ByteStreams.copy(is, os);
 			}
 
-			dataset = sparkSession.read()
+			inputDataset = sparkSession.read()
 				.format("csv")
 				.option("header", true)
 				.option("inferSchema", false)
 				.load(tmpCsvFile.getAbsolutePath());
-
-			List<StructField> fields = Arrays.asList(schema.fields());
-			for(StructField field : fields){
-				Column column = dataset.apply(field.name()).cast(field.dataType());
-
-				dataset = dataset.withColumn("tmp_" + field.name(), column).drop(field.name()).withColumnRenamed("tmp_" + field.name(), field.name());
-			}
-
-			dataset = dataset.sample(false, 0.05d, 63317);
 		}
 
 		Map<String, Object> options = getOptions();
@@ -172,7 +161,8 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
 			.putOptions(options);
 
-		if(dataset != null){
+		Dataset<Row> verificationDataset = getVerificationDataset(schema, inputDataset);
+		if(verificationDataset != null){
 			Equivalence<?> equivalence = getEquivalence();
 
 			double precision = 1e-14;
@@ -185,7 +175,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				zeroThreshold = pmmlEquivalence.getZeroThreshold();
 			}
 
-			pmmlBuilder = pmmlBuilder.verify(dataset, precision, zeroThreshold);
+			pmmlBuilder = pmmlBuilder.verify(verificationDataset, precision, zeroThreshold);
 		}
 
 		PMML pmml = pmmlBuilder.build();
