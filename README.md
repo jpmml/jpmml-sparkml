@@ -132,8 +132,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-1.8-SNAPSHOT.jar` - Library JAR file.
-* `target/jpmml-sparkml-executable-1.8-SNAPSHOT.jar` - Example application JAR file.
+* `target/jpmml-sparkml-2.2-SNAPSHOT.jar` - Library JAR file.
+* `target/jpmml-sparkml-executable-2.2-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -188,12 +188,12 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.8-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.2-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-1.8-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.2-SNAPSHOT.jar --help
 ```
 
 # Documentation #
