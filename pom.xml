@@ -11,9 +11,10 @@
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
 	<version>2.2-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
 	<name>JPMML-SparkML</name>
-	<description>Java library and command-line application for converting Spark ML pipelines to PMML</description>
+	<description>Java library and command-line application for converting Apache Spark ML pipelines to PMML</description>
 	<url>https://github.com/jpmml/jpmml-sparkml</url>
 
 	<licenses>
@@ -31,6 +32,13 @@
 		</developer>
 	</developers>
 
+	<modules>
+		<module>pmml-sparkml</module>
+		<module>pmml-sparkml-example</module>
+		<module>pmml-sparkml-lightgbm</module>
+		<module>pmml-sparkml-xgboost</module>
+	</modules>
+
 	<scm>
 		<connection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</connection>
 		<developerConnection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</developerConnection>
@@ -42,66 +50,121 @@
 		<url>https://github.com/jpmml/jpmml-sparkml/issues</url>
 	</issueManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.beust</groupId>
-			<artifactId>jcommander</artifactId>
-			<version>1.72</version>
-		</dependency>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml</artifactId>
+				<version>2.2-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-example</artifactId>
+				<version>2.2-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-lightgbm</artifactId>
+				<version>2.2-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-xgboost</artifactId>
+				<version>2.2-SNAPSHOT</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
-			<version>3.2.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.12</artifactId>
-			<version>3.2.0</version>
-			<scope>provided</scope>
-		</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-converter</artifactId>
+				<version>1.5.3</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-converter-testing</artifactId>
+				<version>1.5.3</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-evaluator-testing</artifactId>
+				<version>1.6.3</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>jpmml-converter</artifactId>
-			<version>1.4.10</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-lightgbm</artifactId>
+				<version>1.4.3</version>
+			</dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
-			<scope>test</scope>
-		</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-xgboost</artifactId>
+				<version>1.7.0</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-client</artifactId>
-			<version>2.7.4</version>
-			<scope>test</scope>
-		</dependency>
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>synapseml-lightgbm_2.12</artifactId>
+				<version>[0.9.5,)</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-evaluator-testing</artifactId>
-			<version>1.5.16</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+			<dependency>
+				<groupId>com.beust</groupId>
+				<artifactId>jcommander</artifactId>
+				<version>1.72</version>
+			</dependency>
+
+			<dependency>
+				<groupId>ml.dmlc</groupId>
+				<artifactId>xgboost4j-spark_2.12</artifactId>
+				<version>[1.0.0,)</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.spark</groupId>
+				<artifactId>spark-core_2.12</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.spark</groupId>
+				<artifactId>spark-mllib_2.12</artifactId>
+				<version>3.2.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>jaxb-runtime</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-client</artifactId>
+				<version>2.7.4</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.10.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -109,20 +172,8 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.4.0</version>
 				<configuration>
 					<javadocVersion>1.8</javadocVersion>
 				</configuration>
@@ -132,53 +183,10 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.3</version>
 				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
 					<localCheckout>true</localCheckout>
 					<pushChanges>false</pushChanges>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<finalName>${project.artifactId}-executable-${project.version}</finalName>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.jpmml.sparkml.Main</mainClass>
-								</transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -186,16 +194,13 @@
 				<version>2.22.2</version>
 				<configuration>
 					<argLine>${jacoco.agent}</argLine>
-					<systemPropertyVariables>
-						<org.jpmml.evaluator.testing.IntegrationTestBatch.testKryoSerializability>false</org.jpmml.evaluator.testing.IntegrationTestBatch.testKryoSerializability>
-					</systemPropertyVariables>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.6</version>
+				<version>0.8.8</version>
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>

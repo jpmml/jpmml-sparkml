@@ -6,6 +6,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 # Table of Contents #
 
 * [Features](#features)
+  * [Overview](#overview)
+  * [Supported libraries](#supported-libraries)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
   * [Library](#library)
@@ -19,7 +21,30 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Features #
 
-* Supported pipeline stage types:
+### Overview
+
+* Functionality:
+  * Thorough collection, analysis and encoding of feature information:
+    * Names.
+    * Data and operational types.
+    * Valid, invalid and missing value spaces.
+  * Pipeline extensions:
+    * Pruning.
+    * Model verification.
+  * Conversion options.
+* Extensibility:
+  * Rich Java APIs for developing custom converters.
+  * Automatic discovery and registration of custom converters based on `META-INF/sparkml2pmml.properties` resource files.
+  * Direct interfacing with other JPMML conversion libraries such as [JPMML-LightGBM](https://github.com/jpmml/jpmml-lightgbm) and [JPMML-XGBoost](https://github.com/jpmml/jpmml-xgboost).
+* Production quality:
+  * Complete test coverage.
+  * Fully compliant with the [JPMML-Evaluator](https://github.com/jpmml/jpmml-evaluator) library.
+
+### Supported libraries
+
+<details>
+  <summary>Apache Spark ML</summary>
+
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
@@ -82,13 +107,29 @@ Java library and command-line application for converting Apache Spark ML pipelin
   * Hyperparameter selectors and tuners:
     * [`tuning.CrossValidatorModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/tuning/CrossValidatorModel.html)
     * [`tuning.TrainValidationSplitModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/tuning/TrainValidationSplitModel.html)
-* Production quality:
-  * Complete test coverage.
-  * Fully compliant with the [JPMML-Evaluator](https://github.com/jpmml/jpmml-evaluator) library.
+</details>
+
+<details>
+  <summary>LightGBM</summary>
+
+  * Prediction models:
+    * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMClassificationModel.html)
+    * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressionModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMRegressionModel.html)
+</details>
+
+<details>
+  <summary>XGBoost</summary>
+
+  * Feature transformers:
+    * `org.jpmml.sparkml.xgboost.SparseToDenseTransformer`
+  * Prediction models:
+    * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
+    * [`ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostRegressionModel.html)
+</details>
 
 # Prerequisites #
 
-* Apache Spark version 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X, 3.1.X or 3.2.X.
+* Apache Spark 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X, 3.1.X or 3.2.X.
 
 # Installation #
 
@@ -106,23 +147,29 @@ The current version is **1.8.0** (20 October, 2021).
 </dependency>
 ```
 
-Compatibility matrix:
+### Compatibility matrix
 
-| Apache Spark version | JPMML-SparkML branch | Status |
-|----------------------|----------------------|--------|
-| 1.5.X and 1.6.X | [`1.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.0.X) | Archived |
-| 2.0.X | [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) | Archived |
-| 2.1.X | [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) | Archived |
-| 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | Archived |
-| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Archived |
-| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Archived |
-| 3.0.X | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Active |
-| 3.1.X | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Active |
-| 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
+Active development branches:
 
-JPMML-SparkML depends on the latest and greatest version of the [JPMML-Model](https://github.com/jpmml/jpmml-model) library, which is in conflict with the legacy version that is part of Apache Spark version 2.0.X, 2.1.X and 2.2.X distributions.
+| Apache Spark version | JPMML-SparkML branch |
+|----------------------|----------------------|
+| 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) |
+| 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) |
+| 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
 
-This conflict is documented in [SPARK-15526](https://issues.apache.org/jira/browse/SPARK-15526). For possible resolutions, please switch from this README.md file to the README.md file of some earlier JPMML-SparkML development branch.
+Archived development branches:
+
+| Apache Spark version | JPMML-SparkML branch |
+|----------------------|----------------------|
+| 1.5.X and 1.6.X | [`1.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.0.X) |
+| 2.0.X | [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) |
+| 2.1.X | [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) |
+| 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) |
+| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) |
+| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) |
+| ~~3.0.X~~ | ~~[`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X)~~ |
+| ~~3.1.X~~ | ~~[`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X)~~ |
+| ~~3.2.X~~ | ~~[`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X)~~ |
 
 ### Example application
 
@@ -132,8 +179,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `target/jpmml-sparkml-2.2-SNAPSHOT.jar` - Library JAR file.
-* `target/jpmml-sparkml-executable-2.2-SNAPSHOT.jar` - Example application JAR file.
+* `pmml-sparkml/target/pmml-sparkml-2.2-SNAPSHOT.jar` - Library JAR file.
+* `pmml-sparkml-exampletarget/pmml-sparkml-example-executable-2.2-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -182,18 +229,18 @@ JAXBUtil.marshalPMML(pmml, new StreamResult(System.out))
 
 ### Example application
 
-The example application JAR file contains an executable class `org.jpmml.sparkml.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
+The example application JAR file contains an executable class `org.jpmml.sparkml.example.Main`, which can be used to convert a pair of serialized `org.apache.spark.sql.types.StructType` and `org.apache.spark.ml.PipelineModel` objects to PMML.
 
 The example application JAR file does not include Apache Spark runtime libraries. Therefore, this executable class must be executed using Apache Spark's `spark-submit` helper script.
 
-For example, converting a pair of Spark ML schema and pipeline serialization files `src/test/resources/schema/Iris.json` and `src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
+For example, converting a pair of Spark ML schema and pipeline serialization files `pmml-sparkml/src/test/resources/schema/Iris.json` and `pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.2-SNAPSHOT.jar --schema-input src/test/resources/schema/Iris.json --pipeline-input src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.2-SNAPSHOT.jar --schema-input pmml-sparkml/src/test/resources/schema/Iris.json --pipeline-input pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.Main target/jpmml-sparkml-executable-2.2-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.2-SNAPSHOT.jar --help
 ```
 
 # Documentation #
