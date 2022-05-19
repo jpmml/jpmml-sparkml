@@ -147,22 +147,29 @@ The current version is **1.6.6** (20 October, 2021).
 </dependency>
 ```
 
-Compatibility matrix:
+### Compatibility matrix
 
-| Apache Spark version | JPMML-SparkML branch | Status |
-|----------------------|----------------------|--------|
-| 1.5.X and 1.6.X | [`1.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.0.X) | Archived |
-| 2.0.X | [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) | Archived |
-| 2.1.X | [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) | Archived |
-| 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | Archived |
-| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | Archived |
-| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | Archived |
-| ~~3.0.X~~ | [`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X) | Archived |
-| ~~3.1.X~~ | [`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X) | Archived |
-| ~~3.2.X~~ | [`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X) | Archived |
-| 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) | Active |
-| 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) | Active |
-| 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | Active |
+Active development branches:
+
+| Apache Spark version | JPMML-SparkML branch |
+|----------------------|----------------------|
+| 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) |
+| 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) |
+| 3.2.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
+
+Archived development branches:
+
+| Apache Spark version | JPMML-SparkML branch |
+|----------------------|----------------------|
+| 1.5.X and 1.6.X | [`1.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.0.X) |
+| 2.0.X | [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) |
+| 2.1.X | [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) |
+| 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) |
+| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) |
+| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) |
+| ~~3.0.X~~ | ~~[`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X)~~ |
+| ~~3.1.X~~ | ~~[`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X)~~ |
+| ~~3.2.X~~ | ~~[`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X)~~ |
 
 ### Example application
 
