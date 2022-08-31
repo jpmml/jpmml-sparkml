@@ -58,6 +58,7 @@ import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.VerificationField;
+import org.dmg.pmml.mining.Segmentation;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.SchemaUtil;
@@ -187,7 +188,7 @@ public class PMMLBuilder {
 		} else
 
 		{
-			model = MiningModelUtil.createModelChain(models);
+			model = MiningModelUtil.createModelChain(models, Segmentation.MissingPredictionTreatment.CONTINUE);
 		} // End if
 
 		if((model != null) && (postProcessorNames.size() > 0)){

@@ -41,6 +41,7 @@ import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
@@ -184,14 +185,14 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 		Label label = schema.getLabel();
 		List<? extends Feature> features = schema.getFeatures();
 
-		if(label == null){
-			return;
-		}
+		if(label instanceof ScalarLabel){
+			ScalarLabel scalarLabel = (ScalarLabel)label;
 
-		for(Feature feature : features){
+			for(Feature feature : features){
 
-			if(Objects.equals(label.getName(), feature.getName())){
-				throw new IllegalArgumentException("Label column '" + label.getName() + "' is contained in the list of feature columns");
+				if(Objects.equals(scalarLabel.getName(), feature.getName())){
+					throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
+				}
 			}
 		}
 	}
