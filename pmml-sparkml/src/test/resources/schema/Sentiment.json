@@ -1,1 +1,1 @@
-{"type":"struct","fields":[{"name":"Sentence","type":"string","nullable":true,"metadata":{}},{"name":"Score","type":"integer","nullable":true,"metadata":{}}]}
+{"fields":[{"metadata":{},"name":"Sentence","nullable":true,"type":"string"},{"metadata":{},"name":"Score","nullable":true,"type":"integer"}],"type":"struct"}
