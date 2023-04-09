@@ -18,11 +18,19 @@
  */
 package org.jpmml.sparkml;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.io.Files;
+import com.google.common.io.MoreFiles;
 import org.apache.spark.sql.Column;
+import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -40,6 +48,52 @@ import org.dmg.pmml.DataType;
 public class DatasetUtil {
 
 	private DatasetUtil(){
+	}
+
+	static
+	public void storeSchema(Dataset<Row> dataset, File file) throws IOException {
+		StructType schema = dataset.schema();
+
+		try(OutputStream os = new FileOutputStream(file)){
+			String string = schema.json();
+
+			os.write(string.getBytes("UTF-8"));
+		}
+	}
+
+	static
+	public void storeCsv(Dataset<Row> dataset, File file) throws IOException {
+		File tmpDir = File.createTempFile("Dataset", "");
+		if(!tmpDir.delete()){
+			throw new IOException();
+		}
+
+		dataset = dataset.coalesce(1);
+
+		DataFrameWriter<Row> writer = dataset.write()
+			.format("csv")
+			.option("header", "true");
+
+		writer.save(tmpDir.getAbsolutePath());
+
+		FileFilter csvFileFilter = new FileFilter(){
+
+			@Override
+			public boolean accept(File file){
+				String name = file.getName();
+
+				return name.endsWith(".csv");
+			}
+		};
+
+		File[] csvFiles = tmpDir.listFiles(csvFileFilter);
+		if(csvFiles.length != 1){
+			throw new IOException();
+		}
+
+		Files.copy(csvFiles[0], file);
+
+		MoreFiles.deleteRecursively(tmpDir.toPath());
 	}
 
 	static

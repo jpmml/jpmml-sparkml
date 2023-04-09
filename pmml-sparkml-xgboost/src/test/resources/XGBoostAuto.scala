@@ -29,4 +29,4 @@ PipelineModelUtil.storeZip(pipelineModel, "pipelines/XGBoostAuto.zip")
 var xgbDf = pipelineModel.transform(df)
 xgbDf = xgbDf.selectExpr("prediction as mpg")
 
-xgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/XGBoostAuto")
+DatasetUtil.storeCsv(xgbDf, "csv/XGBoostAuto.csv")

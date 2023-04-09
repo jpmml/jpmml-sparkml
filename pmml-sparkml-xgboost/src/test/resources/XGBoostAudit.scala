@@ -38,4 +38,4 @@ xgbDf = xgbDf.selectExpr("prediction", "probability")
 xgbDf = xgbDf.withColumn("Adjusted", predLabel(xgbDf("prediction"))).drop("prediction")
 xgbDf = xgbDf.withColumn("probability(0)", vectorToColumn(xgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(xgbDf("probability"), lit(1))).drop("probability").drop("probability")
 
-xgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/XGBoostAudit")
+DatasetUtil.storeCsv(xgbDf, "csv/XGBoostAudit.csv")

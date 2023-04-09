@@ -25,4 +25,4 @@ PipelineModelUtil.storeZip(pipelineModel, "pipelines/LightGBMAuto.zip")
 var lgbDf = pipelineModel.transform(df)
 lgbDf = lgbDf.selectExpr("prediction as mpg")
 
-lgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/LightGBMAuto")
+DatasetUtil.storeCsv(lgbDf, "csv/LightGBMAuto.csv")

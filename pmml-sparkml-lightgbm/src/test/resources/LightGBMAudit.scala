@@ -34,4 +34,4 @@ lgbDf = lgbDf.selectExpr("prediction", "probability")
 lgbDf = lgbDf.withColumn("Adjusted", predLabel(lgbDf("prediction"))).drop("prediction")
 lgbDf = lgbDf.withColumn("probability(0)", vectorToColumn(lgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(lgbDf("probability"), lit(1))).drop("probability").drop("probability")
 
-lgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/LightGBMAudit")
+DatasetUtil.storeCsv(lgbDf, "csv/LightGBMAudit.csv")
