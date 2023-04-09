@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,17 +35,16 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.MoreFiles;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
@@ -79,15 +77,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		return "/pipeline/" + getAlgorithm() + getDataset() + ".zip";
 	}
 
-	public Dataset<Row> getVerificationDataset(StructType schema, Dataset<Row> inputDataset){
-		List<StructField> fields = Arrays.asList(schema.fields());
-
-		for(StructField field : fields){
-			Column column = inputDataset.apply(field.name()).cast(field.dataType());
-
-			inputDataset = inputDataset.withColumn("tmp_" + field.name(), column).drop(field.name()).withColumnRenamed("tmp_" + field.name(), field.name());
-		}
-
+	public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
 		return inputDataset.sample(false, 0.05d, 63317);
 	}
 
@@ -144,6 +134,8 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				.option("header", true)
 				.option("inferSchema", false)
 				.load(tmpCsvFile.getAbsolutePath());
+
+			inputDataset = DatasetUtil.castColumns(inputDataset, schema);
 		}
 
 		Map<String, Object> options = getOptions();
@@ -151,7 +143,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
 			.putOptions(options);
 
-		Dataset<Row> verificationDataset = getVerificationDataset(schema, inputDataset);
+		Dataset<Row> verificationDataset = getVerificationDataset(inputDataset);
 		if(verificationDataset != null){
 			Equivalence<?> equivalence = getEquivalence();
 

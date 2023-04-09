@@ -6,10 +6,10 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import org.jpmml.sparkml.PipelineModelUtil
+import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
-df = df.withColumn("AdjustedTmp", df("Adjusted").cast(StringType)).drop("Adjusted").withColumnRenamed("AdjustedTmp", "Adjusted")
+df = DatasetUtil.castColumn(df, "Adjusted", StringType)
 
 val cat_cols = Array("Education", "Employment", "Gender", "Marital", "Occupation")
 val cont_cols = Array("Age", "Hours", "Income")
@@ -26,11 +26,12 @@ val pipelineModel = pipeline.fit(df)
 
 PipelineModelUtil.storeZip(pipelineModel, "pipelines/LightGBMAudit.zip")
 
+val predLabel = udf{ (value: Float) => value.toInt.toString }
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index) }
 
 var lgbDf = pipelineModel.transform(df)
-lgbDf = lgbDf.selectExpr("prediction as Adjusted", "probability")
-lgbDf = lgbDf.withColumn("AdjustedTmp", lgbDf("Adjusted").cast(IntegerType).cast(StringType)).drop("Adjusted").withColumnRenamed("AdjustedTmp", "Adjusted")
-lgbDf = lgbDf.withColumn("probability(0)", vectorToColumn(lgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(lgbDf("probability"), lit(1))).drop("probability")
+lgbDf = lgbDf.selectExpr("prediction", "probability")
+lgbDf = lgbDf.withColumn("Adjusted", predLabel(lgbDf("prediction"))).drop("prediction")
+lgbDf = lgbDf.withColumn("probability(0)", vectorToColumn(lgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(lgbDf("probability"), lit(1))).drop("probability").drop("probability")
 
 lgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/LightGBMAudit")

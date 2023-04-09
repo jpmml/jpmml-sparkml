@@ -19,8 +19,10 @@
 package org.jpmml.sparkml;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -31,12 +33,44 @@ import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DoubleType;
 import org.apache.spark.sql.types.IntegralType;
 import org.apache.spark.sql.types.StringType;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataType;
 
 public class DatasetUtil {
 
 	private DatasetUtil(){
+	}
+
+	static
+	public Dataset<Row> castColumn(Dataset<Row> dataset, String name, org.apache.spark.sql.types.DataType sparkDataType){
+		Column column = dataset.apply(name).cast(sparkDataType);
+
+		String tmpName = "tmp_" + name;
+
+		return dataset.withColumn(tmpName, column).drop(name).withColumnRenamed(tmpName, name);
+	}
+
+	static
+	public Dataset<Row> castColumns(Dataset<Row> dataset, StructType schema){
+		StructType prevSchema = dataset.schema();
+
+		StructField[] fields = schema.fields();
+		for(StructField field : fields){
+			StructField prevField;
+
+			try {
+				prevField = prevSchema.apply(field.name());
+			} catch(IllegalArgumentException iae){
+				continue;
+			}
+
+			if(!Objects.equals(field.dataType(), prevField.dataType())){
+				dataset = castColumn(dataset, field.name(), field.dataType());
+			}
+		}
+
+		return dataset;
 	}
 
 	static

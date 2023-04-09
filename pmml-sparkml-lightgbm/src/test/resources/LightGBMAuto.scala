@@ -4,10 +4,10 @@ import com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressor
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.StringType
-import org.jpmml.sparkml.PipelineModelUtil
+import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Auto.csv")
-df = df.withColumn("originTmp", df("origin").cast(StringType)).drop("origin").withColumnRenamed("originTmp", "origin")
+df = DatasetUtil.castColumn(df, "origin", StringType)
 
 val cat_cols = Array("cylinders", "model_year", "origin")
 val cont_cols = Array("acceleration", "displacement", "horsepower", "weight")
