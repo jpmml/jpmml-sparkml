@@ -6,7 +6,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import org.jpmml.sparkml.PMMLBuilder
+import org.jpmml.sparkml.ZipUtil
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
 df = df.withColumn("AdjustedTmp", df("Adjusted").cast(StringType)).drop("Adjusted").withColumnRenamed("AdjustedTmp", "Adjusted")
@@ -24,6 +24,10 @@ val classifier = new LightGBMClassifier().setNumIterations(101).setLabelCol(labe
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, assembler, classifier))
 val pipelineModel = pipeline.fit(df)
 
+val tmpDir = Files.createTempDirectory("_jpmml_lightgbm_").toFile()
+pipelineModel.write.overwrite().save(tmpDir.getAbsolutePath())
+ZipUtil.compress(tmpDir, new File("pipelines/LightGBMAudt.zip"))
+
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index) }
 
 var lgbDf = pipelineModel.transform(df)
@@ -32,8 +36,3 @@ lgbDf = lgbDf.withColumn("AdjustedTmp", lgbDf("Adjusted").cast(IntegerType).cast
 lgbDf = lgbDf.withColumn("probability(0)", vectorToColumn(lgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(lgbDf("probability"), lit(1))).drop("probability")
 
 lgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/LightGBMAudit")
-
-//pipelineModel.save("pipeline/LightGBMAudit")
-
-val pmmlBytes = new PMMLBuilder(df.schema, pipelineModel).buildByteArray()
-Files.write(Paths.get("pmml/LightGBMAudit.pmml"), pmmlBytes)

@@ -4,7 +4,7 @@ import com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressor
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.StringType
-import org.jpmml.sparkml.PMMLBuilder
+import org.jpmml.sparkml.ZipUtil
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Auto.csv")
 df = df.withColumn("originTmp", df("origin").cast(StringType)).drop("origin").withColumnRenamed("originTmp", "origin")
@@ -20,11 +20,11 @@ val regressor = new LightGBMRegressor().setNumIterations(101).setLabelCol("mpg")
 val pipeline = new Pipeline().setStages(Array(indexer, assembler, regressor))
 val pipelineModel = pipeline.fit(df)
 
+val tmpDir = Files.createTempDirectory("_jpmml_lightgbm_").toFile()
+pipelineModel.write.overwrite().save(tmpDir.getAbsolutePath())
+ZipUtil.compress(tmpDir, new File("pipelines/LightGBMAuto.zip"))
+
 var lgbDf = pipelineModel.transform(df)
 lgbDf = lgbDf.selectExpr("prediction as mpg")
+
 lgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/LightGBMAuto")
-
-//pipelineModel.save("pipeline/LightGBMAuto")
-
-val pmmlBytes = new PMMLBuilder(df.schema, pipelineModel).buildByteArray()
-Files.write(Paths.get("pmml/LightGBMAuto.pmml"), pmmlBytes)

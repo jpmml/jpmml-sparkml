@@ -19,19 +19,65 @@
 package org.jpmml.sparkml;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import com.google.common.io.ByteStreams;
 
 public class ZipUtil {
 
 	private ZipUtil(){
+	}
+
+	static
+	public void compress(File dir, File file) throws Exception {
+		Path dirPath = Paths.get(dir.getAbsolutePath());
+
+		try(OutputStream os = new FileOutputStream(file)){
+			ZipOutputStream zos = new ZipOutputStream(os);
+
+			FileVisitor<Path> dirFileVisitor = new SimpleFileVisitor<Path>(){
+
+				@Override
+				public FileVisitResult visitFile(Path path, BasicFileAttributes mainAtts) throws IOException {
+					File dirFile = path.toFile();
+
+					Path relativePath = dirPath.relativize(path);
+
+					ZipEntry entry = new ZipEntry(relativePath.toString());
+					entry.setSize(dirFile.length());
+					entry.setTime(dirFile.lastModified());
+
+					zos.putNextEntry(entry);
+
+					try(InputStream is = new FileInputStream(dirFile)){
+						ByteStreams.copy(is, zos);
+					}
+
+					zos.closeEntry();
+
+					return FileVisitResult.CONTINUE;
+				}
+			};
+
+			Files.walkFileTree(dirPath, dirFileVisitor);
+
+			zos.finish();
+		}
 	}
 
 	static
