@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import ml.dmlc.xgboost4j.java.XGBoostError;
 import ml.dmlc.xgboost4j.scala.Booster;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.mining.MiningModel;
@@ -49,8 +48,8 @@ public class BoosterUtil {
 
 		try {
 			bytes = booster.toByteArray();
-		} catch(XGBoostError xe){
-			throw new RuntimeException(xe);
+		} catch(Exception e){
+			throw new RuntimeException(e);
 		}
 
 		Learner learner;
