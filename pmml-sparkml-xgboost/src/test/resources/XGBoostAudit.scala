@@ -1,3 +1,4 @@
+import java.io.File
 import java.nio.file.{Files, Paths}
 
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
@@ -11,6 +12,8 @@ import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
 df = DatasetUtil.castColumn(df, "Adjusted", StringType)
+
+DatasetUtil.storeSchema(df, new File("schema/Audit.json"))
 
 val cat_cols = Array("Education", "Employment", "Gender", "Marital", "Occupation")
 val cont_cols = Array("Age", "Hours", "Income")
@@ -28,7 +31,7 @@ val classifier = new XGBoostClassifier(Map("objective" -> "binary:logistic", "nu
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, ohe, assembler, sparse2dense, classifier))
 val pipelineModel = pipeline.fit(df)
 
-PipelineModelUtil.storeZip(pipelineModel, "pipelines/XGBoostAudit.zip")
+PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAudit.zip"))
 
 val predLabel = udf{ (value: Float) => value.toInt.toString }
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index).toFloat }
@@ -38,4 +41,4 @@ xgbDf = xgbDf.selectExpr("prediction", "probability")
 xgbDf = xgbDf.withColumn("Adjusted", predLabel(xgbDf("prediction"))).drop("prediction")
 xgbDf = xgbDf.withColumn("probability(0)", vectorToColumn(xgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(xgbDf("probability"), lit(1))).drop("probability").drop("probability")
 
-DatasetUtil.storeCsv(xgbDf, "csv/XGBoostAudit.csv")
+DatasetUtil.storeCsv(xgbDf, new File("csv/XGBoostAudit.csv"))

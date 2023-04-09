@@ -1,3 +1,4 @@
+import java.io.File
 import java.nio.file.{Files, Paths}
 
 import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor
@@ -9,6 +10,8 @@ import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Auto.csv")
 df = DatasetUtil.castColumn(df, "origin", StringType)
+
+DatasetUtil.storeSchema(df, new File("schema/Auto.json"))
 
 val cat_cols = Array("cylinders", "model_year", "origin")
 val cont_cols = Array("acceleration", "displacement", "horsepower", "weight")
@@ -24,9 +27,9 @@ val regressor = new XGBoostRegressor(Map("objective" -> "reg:squarederror", "num
 val pipeline = new Pipeline().setStages(Array(indexer, ohe, assembler, sparse2dense, regressor))
 val pipelineModel = pipeline.fit(df)
 
-PipelineModelUtil.storeZip(pipelineModel, "pipelines/XGBoostAuto.zip")
+PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAuto.zip"))
 
 var xgbDf = pipelineModel.transform(df)
 xgbDf = xgbDf.selectExpr("prediction as mpg")
 
-DatasetUtil.storeCsv(xgbDf, "csv/XGBoostAuto.csv")
+DatasetUtil.storeCsv(xgbDf, new File("csv/XGBoostAuto.csv"))
