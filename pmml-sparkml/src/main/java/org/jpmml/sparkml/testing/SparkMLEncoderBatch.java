@@ -20,7 +20,6 @@ package org.jpmml.sparkml.testing;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -37,7 +36,6 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.MoreFiles;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.util.MLReader;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -50,7 +48,7 @@ import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.PMMLBuilder;
-import org.jpmml.sparkml.ZipUtil;
+import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 
 abstract
@@ -123,19 +121,11 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				ByteStreams.copy(is, os);
 			}
 
-			File tmpPipelineDir = File.createTempFile(getAlgorithm() + getDataset(), "");
-			if(!tmpPipelineDir.delete()){
-				throw new IOException();
-			}
+			File tmpPipelineDir = PipelineModelUtil.uncompress(tmpZipFile);
 
 			tmpResources.add(tmpPipelineDir);
 
-			ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
-
-			MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
-			mlReader.session(sparkSession);
-
-			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
+			pipelineModel = PipelineModelUtil.load(sparkSession, tmpPipelineDir);
 		}
 
 		Dataset<Row> inputDataset;

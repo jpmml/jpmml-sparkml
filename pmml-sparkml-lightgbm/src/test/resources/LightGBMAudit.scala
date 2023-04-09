@@ -6,7 +6,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import org.jpmml.sparkml.ZipUtil
+import org.jpmml.sparkml.PipelineModelUtil
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
 df = df.withColumn("AdjustedTmp", df("Adjusted").cast(StringType)).drop("Adjusted").withColumnRenamed("AdjustedTmp", "Adjusted")
@@ -24,9 +24,7 @@ val classifier = new LightGBMClassifier().setNumIterations(101).setLabelCol(labe
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, assembler, classifier))
 val pipelineModel = pipeline.fit(df)
 
-val tmpDir = Files.createTempDirectory("_jpmml_lightgbm_").toFile()
-pipelineModel.write.overwrite().save(tmpDir.getAbsolutePath())
-ZipUtil.compress(tmpDir, new File("pipelines/LightGBMAudt.zip"))
+PipelineModelUtil.storeZip(pipelineModel, "pipelines/LightGBMAudit.zip")
 
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index) }
 

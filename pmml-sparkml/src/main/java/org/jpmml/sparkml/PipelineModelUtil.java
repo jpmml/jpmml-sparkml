@@ -37,14 +37,59 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import com.google.common.io.ByteStreams;
+import com.google.common.io.MoreFiles;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.util.MLReader;
+import org.apache.spark.ml.util.MLWriter;
+import org.apache.spark.sql.SparkSession;
 
-public class ZipUtil {
+public class PipelineModelUtil {
 
-	private ZipUtil(){
+	private PipelineModelUtil(){
 	}
 
 	static
-	public void compress(File dir, File file) throws Exception {
+	public PipelineModel load(SparkSession sparkSession, File dir) throws IOException {
+		MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
+		mlReader.session(sparkSession);
+
+		return mlReader.load(dir.getAbsolutePath());
+	}
+
+	static
+	public PipelineModel loadZip(SparkSession sparkSession, File file) throws IOException {
+		File tmpDir = uncompress(file);
+
+		PipelineModel pipelineModel = load(sparkSession, tmpDir);
+
+		MoreFiles.deleteRecursively(tmpDir.toPath());
+
+		return pipelineModel;
+	}
+
+	static
+	public void store(PipelineModel pipelineModel, File dir) throws IOException {
+		MLWriter mlWriter = new PipelineModel.PipelineModelWriter(pipelineModel);
+
+		mlWriter.save(dir.getAbsolutePath());
+	}
+
+	static
+	public void storeZip(PipelineModel pipelineModel, File file) throws IOException {
+		File tmpDir = File.createTempFile("PipelineModel", "");
+		if(!tmpDir.delete()){
+			throw new IOException();
+		}
+
+		store(pipelineModel, tmpDir);
+
+		compress(tmpDir, file);
+
+		MoreFiles.deleteRecursively(tmpDir.toPath());
+	}
+
+	static
+	public void compress(File dir, File file) throws IOException {
 		Path dirPath = Paths.get(dir.getAbsolutePath());
 
 		try(OutputStream os = new FileOutputStream(file)){
@@ -81,6 +126,23 @@ public class ZipUtil {
 	}
 
 	static
+	public File uncompress(File file) throws IOException {
+
+		try(ZipFile zipFile = new ZipFile(file)){
+			File tmpDir = File.createTempFile("PipelineModel", "");
+			if(!tmpDir.delete()){
+				throw new IOException();
+			}
+
+			tmpDir.mkdirs();
+
+			uncompress(zipFile, tmpDir);
+
+			return tmpDir;
+		}
+	}
+
+	static
 	public void uncompress(File file, File dir) throws IOException {
 
 		try(ZipFile zipFile = new ZipFile(file)){
@@ -89,7 +151,7 @@ public class ZipUtil {
 	}
 
 	static
-	public void uncompress(ZipFile zipFile, File dir) throws IOException {
+	private void uncompress(ZipFile zipFile, File dir) throws IOException {
 
 		for(Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements(); ){
 			ZipEntry entry = entries.nextElement();

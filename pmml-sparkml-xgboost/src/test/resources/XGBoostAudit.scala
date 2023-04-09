@@ -6,7 +6,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import org.jpmml.sparkml.ZipUtil
+import org.jpmml.sparkml.PipelineModelUtil
 import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
 var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
@@ -28,9 +28,7 @@ val classifier = new XGBoostClassifier(Map("objective" -> "binary:logistic", "nu
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, ohe, assembler, sparse2dense, classifier))
 val pipelineModel = pipeline.fit(df)
 
-val tmpDir = Files.createTempDirectory("_jpmml_xgboost_").toFile()
-pipelineModel.write.overwrite().save(tmpDir.getAbsolutePath())
-ZipUtil.compress(tmpDir, new File("pipelines/XGBoostAudit.zip"))
+PipelineModelUtil.storeZip(pipelineModel, "pipelines/XGBoostAudit.zip")
 
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index).toFloat }
 
