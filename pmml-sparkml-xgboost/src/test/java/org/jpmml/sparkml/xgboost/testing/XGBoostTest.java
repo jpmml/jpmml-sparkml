@@ -86,6 +86,11 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 		evaluate("XGBoost", "Auto");
 	}
 
+	@Test
+	public void evaluateIris() throws Exception {
+		evaluate("XGBoost", "Iris", new FloatEquivalence(16));
+	}
+
 	@BeforeClass
 	static
 	public void createSparkSession(){

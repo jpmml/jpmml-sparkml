@@ -1,5 +1,4 @@
 import java.io.File
-import java.nio.file.{Files, Paths}
 
 import com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressor
 import org.apache.spark.ml.Pipeline
@@ -7,7 +6,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.StringType
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil, PMMLBuilder}
 
-var df = DatasetUtil.loadCsv(new File("csv/Auto.csv"))
+var df = DatasetUtil.loadCsv(spark, new File("csv/Auto.csv"))
 df = DatasetUtil.castColumn(df, "origin", StringType)
 
 //DatasetUtil.storeSchema(df, new File("schema/Auto.json"))

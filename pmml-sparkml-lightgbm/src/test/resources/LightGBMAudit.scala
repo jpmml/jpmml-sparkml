@@ -1,15 +1,14 @@
 import java.io.File
-import java.nio.file.{Files, Paths}
 
 import com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassifier
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
-import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.types.StringType
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil, PMMLBuilder}
 
-var df = DatasetUtil.loadCsv(new File("csv/Audit.csv"))
+var df = DatasetUtil.loadCsv(spark, new File("csv/Audit.csv"))
 df = DatasetUtil.castColumn(df, "Adjusted", StringType)
 
 //DatasetUtil.storeSchema(df, new File("schema/Audit.json"))
@@ -22,7 +21,7 @@ val labelIndexer = new StringIndexer().setInputCol("Adjusted").setOutputCol("idx
 val indexer = new StringIndexer().setInputCols(cat_cols).setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
 val assembler = new VectorAssembler().setInputCols(indexer.getOutputCols ++ cont_cols).setOutputCol("featureVector")
 
-val classifier = new LightGBMClassifier().setNumIterations(101).setLabelCol(labelIndexer.getOutputCol).setFeaturesCol(assembler.getOutputCol)
+val classifier = new LightGBMClassifier().setObjective("binary").setNumIterations(101).setLabelCol(labelIndexer.getOutputCol).setFeaturesCol(assembler.getOutputCol)
 
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, assembler, classifier))
 val pipelineModel = pipeline.fit(df)

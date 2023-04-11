@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="JPMML-SparkML command-line application" version="2.0-SNAPSHOT"/>
-		<Timestamp>2023-04-09T20:53:43Z</Timestamp>
+		<Timestamp>2023-04-11T19:48:14Z</Timestamp>
 	</Header>
 	<DataDictionary>
 		<DataField name="cylinders" optype="categorical" dataType="integer">
@@ -48,12 +48,8 @@
 					<Extension name="minImportance" value="9.0"/>
 					<Extension name="maxImportance" value="432.0"/>
 					<row>
-						<data:name>model_year</data:name>
-						<data:importance>100.0</data:importance>
-					</row>
-					<row>
-						<data:name>origin</data:name>
-						<data:importance>74.0</data:importance>
+						<data:name>displacement</data:name>
+						<data:importance>254.0</data:importance>
 					</row>
 					<row>
 						<data:name>cylinders</data:name>
@@ -64,16 +60,20 @@
 						<data:importance>306.0</data:importance>
 					</row>
 					<row>
-						<data:name>horsepower</data:name>
-						<data:importance>256.0</data:importance>
-					</row>
-					<row>
-						<data:name>displacement</data:name>
-						<data:importance>254.0</data:importance>
-					</row>
-					<row>
 						<data:name>weight</data:name>
 						<data:importance>432.0</data:importance>
+					</row>
+					<row>
+						<data:name>origin</data:name>
+						<data:importance>74.0</data:importance>
+					</row>
+					<row>
+						<data:name>model_year</data:name>
+						<data:importance>100.0</data:importance>
+					</row>
+					<row>
+						<data:name>horsepower</data:name>
+						<data:importance>256.0</data:importance>
 					</row>
 				</InlineTable>
 			</Extension>

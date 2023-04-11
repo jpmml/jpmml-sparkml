@@ -1,5 +1,4 @@
 import java.io.File
-import java.nio.file.{Files, Paths}
 
 import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor
 import org.apache.spark.ml.Pipeline
@@ -8,7 +7,7 @@ import org.apache.spark.sql.types.StringType
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
-var df = DatasetUtil.loadCsv(new File("csv/Auto.csv"))
+var df = DatasetUtil.loadCsv(spark, new File("csv/Auto.csv"))
 df = DatasetUtil.castColumn(df, "origin", StringType)
 
 DatasetUtil.storeSchema(df, new File("schema/Auto.json"))

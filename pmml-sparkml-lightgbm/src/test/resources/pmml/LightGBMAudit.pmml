@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="JPMML-SparkML command-line application" version="2.0-SNAPSHOT"/>
-		<Timestamp>2023-04-09T20:53:59Z</Timestamp>
+		<Timestamp>2023-04-11T19:47:52Z</Timestamp>
 	</Header>
 	<DataDictionary>
 		<DataField name="Adjusted" optype="categorical" dataType="string">
@@ -78,28 +78,12 @@
 					<Extension name="minImportance" value="41.0"/>
 					<Extension name="maxImportance" value="1296.0"/>
 					<row>
-						<data:name>Employment</data:name>
-						<data:importance>41.0</data:importance>
-					</row>
-					<row>
-						<data:name>Gender</data:name>
-						<data:importance>59.0</data:importance>
-					</row>
-					<row>
-						<data:name>Marital</data:name>
-						<data:importance>59.0</data:importance>
-					</row>
-					<row>
 						<data:name>Education</data:name>
 						<data:importance>133.0</data:importance>
 					</row>
 					<row>
-						<data:name>Income</data:name>
-						<data:importance>1296.0</data:importance>
-					</row>
-					<row>
-						<data:name>Occupation</data:name>
-						<data:importance>117.0</data:importance>
+						<data:name>Marital</data:name>
+						<data:importance>59.0</data:importance>
 					</row>
 					<row>
 						<data:name>Hours</data:name>
@@ -108,6 +92,22 @@
 					<row>
 						<data:name>Age</data:name>
 						<data:importance>901.0</data:importance>
+					</row>
+					<row>
+						<data:name>Employment</data:name>
+						<data:importance>41.0</data:importance>
+					</row>
+					<row>
+						<data:name>Gender</data:name>
+						<data:importance>59.0</data:importance>
+					</row>
+					<row>
+						<data:name>Occupation</data:name>
+						<data:importance>117.0</data:importance>
+					</row>
+					<row>
+						<data:name>Income</data:name>
+						<data:importance>1296.0</data:importance>
 					</row>
 				</InlineTable>
 			</Extension>
