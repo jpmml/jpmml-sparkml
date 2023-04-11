@@ -20,13 +20,17 @@ package org.jpmml.sparkml;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
 import org.apache.spark.sql.Column;
@@ -51,14 +55,37 @@ public class DatasetUtil {
 	}
 
 	static
+	public StructType loadSchema(File file) throws IOException {
+
+		try(InputStream is = new FileInputStream(file)){
+			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
+
+			return (StructType)StructType.fromJson(json);
+		}
+	}
+
+	static
 	public void storeSchema(Dataset<Row> dataset, File file) throws IOException {
-		StructType schema = dataset.schema();
+		storeSchema(dataset.schema(), file);
+	}
+
+	static
+	public void storeSchema(StructType schema, File file) throws IOException {
 
 		try(OutputStream os = new FileOutputStream(file)){
 			String string = schema.json();
 
 			os.write(string.getBytes("UTF-8"));
 		}
+	}
+
+	static
+	public Dataset<Row> loadCsv(SparkSession sparkSession, File file) throws IOException {
+		return sparkSession.read()
+			.format("csv")
+			.option("header", true)
+			.option("inferSchema", true)
+			.load(file.getAbsolutePath());
 	}
 
 	static

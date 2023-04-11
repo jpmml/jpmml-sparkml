@@ -10,7 +10,7 @@ import org.apache.spark.sql.types.{IntegerType, StringType}
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
-var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
+var df = DatasetUtil.loadCsv(new File("csv/Audit.csv"))
 df = DatasetUtil.castColumn(df, "Adjusted", StringType)
 
 DatasetUtil.storeSchema(df, new File("schema/Audit.json"))

@@ -7,7 +7,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.StringType
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil, PMMLBuilder}
 
-var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Auto.csv")
+var df = DatasetUtil.loadCsv(new File("csv/Auto.csv"))
 df = DatasetUtil.castColumn(df, "origin", StringType)
 
 //DatasetUtil.storeSchema(df, new File("schema/Auto.json"))
