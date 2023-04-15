@@ -43,7 +43,6 @@ import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
@@ -142,17 +141,41 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 			}
 		}
 
-		if(model instanceof ClassificationModel){
-			ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
+		return label;
+	}
 
-			int numClasses = classificationModel.numClasses();
+	public void checkSchema(Schema schema){
+		Label label = schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
 
-			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
-
-			SchemaUtil.checkSize(numClasses, categoricalLabel);
+		MiningFunction miningFunction = getMiningFunction();
+		switch(miningFunction){
+			case ASSOCIATION_RULES:
+			case CLUSTERING:
+				if(label != null){
+					throw new IllegalArgumentException("Expected no label, got " + label);
+				}
+				break;
+			case CLASSIFICATION:
+			case REGRESSION:
+				if(label == null){
+					throw new IllegalArgumentException("Expected a label, got no label");
+				}
+				break;
+			default:
+				break;
 		}
 
-		return label;
+		if(label instanceof ScalarLabel){
+			ScalarLabel scalarLabel = (ScalarLabel)label;
+
+			for(Feature feature : features){
+
+				if(Objects.equals(scalarLabel.getName(), feature.getName())){
+					throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
+				}
+			}
+		}
 	}
 
 	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model model, SparkMLEncoder encoder){
@@ -178,22 +201,5 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 		}
 
 		return model;
-	}
-
-	static
-	private void checkSchema(Schema schema){
-		Label label = schema.getLabel();
-		List<? extends Feature> features = schema.getFeatures();
-
-		if(label instanceof ScalarLabel){
-			ScalarLabel scalarLabel = (ScalarLabel)label;
-
-			for(Feature feature : features){
-
-				if(Objects.equals(scalarLabel.getName(), feature.getName())){
-					throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
-				}
-			}
-		}
 	}
 }

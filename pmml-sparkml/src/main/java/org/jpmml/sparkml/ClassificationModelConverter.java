@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.PredictionModel;
+import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
 import org.apache.spark.ml.param.shared.HasLabelCol;
@@ -44,6 +45,8 @@ import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
@@ -53,9 +56,24 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 		super(model);
 	}
 
+	public int getNumberOfClasses(){
+		ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)getTransformer();
+
+		return classificationModel.numClasses();
+	}
+
 	@Override
 	public MiningFunction getMiningFunction(){
 		return MiningFunction.CLASSIFICATION;
+	}
+
+	@Override
+	public void checkSchema(Schema schema){
+		super.checkSchema(schema);
+
+		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+
+		SchemaUtil.checkSize(getNumberOfClasses(), categoricalLabel);
 	}
 
 	@Override
