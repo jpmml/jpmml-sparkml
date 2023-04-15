@@ -33,6 +33,17 @@ public class LightGBMClassificationModelConverter extends ClassificationModelCon
 	}
 
 	@Override
+	public int getNumberOfClasses(){
+		int numberOfClasses = super.getNumberOfClasses();
+
+		if(numberOfClasses == 1){
+			return 2;
+		}
+
+		return numberOfClasses;
+	}
+
+	@Override
 	public MiningModel encodeModel(Schema schema){
 		LightGBMClassificationModel model = getTransformer();
 
