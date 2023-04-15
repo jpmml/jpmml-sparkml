@@ -23,12 +23,13 @@ import java.util.List;
 import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasFeaturesCol;
+import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.SchemaUtil;
 
 abstract
-public class PredictionModelConverter<T extends PredictionModel<Vector, T> & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class PredictionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
 
 	public PredictionModelConverter(T model){
 		super(model);

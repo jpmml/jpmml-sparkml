@@ -21,12 +21,8 @@ package org.jpmml.sparkml;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.apache.spark.ml.param.shared.HasFeaturesCol;
-import org.apache.spark.ml.param.shared.HasLabelCol;
-import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MapValues;
@@ -50,16 +46,16 @@ import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
-public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends PredictionModelConverter<T> {
+public class ClassificationModelConverter<T extends ClassificationModel<Vector, T>> extends PredictionModelConverter<T> {
 
 	public ClassificationModelConverter(T model){
 		super(model);
 	}
 
 	public int getNumberOfClasses(){
-		ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)getTransformer();
+		T model = getTransformer();
 
-		return classificationModel.numClasses();
+		return model.numClasses();
 	}
 
 	@Override
