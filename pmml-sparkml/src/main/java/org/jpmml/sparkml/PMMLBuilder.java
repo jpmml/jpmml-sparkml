@@ -58,6 +58,7 @@ import org.dmg.pmml.OutputField;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.VerificationField;
+import org.dmg.pmml.mining.Segmentation;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.SchemaUtil;
@@ -187,10 +188,10 @@ public class PMMLBuilder {
 		} else
 
 		{
-			model = MiningModelUtil.createModelChain(models);
+			model = MiningModelUtil.createModelChain(models, Segmentation.MissingPredictionTreatment.CONTINUE);
 		} // End if
 
-		if((model != null) && (postProcessorNames.size() > 0)){
+		if((model != null) && !postProcessorNames.isEmpty()){
 			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
 			Output output = ModelUtil.ensureOutput(finalModel);
@@ -210,7 +211,7 @@ public class PMMLBuilder {
 
 		PMML pmml = encoder.encodePMML(model);
 
-		if((model != null) && (predictionColumns.size() > 0 || probabilityColumns.size() > 0) && (verification != null)){
+		if((model != null) && (!predictionColumns.isEmpty() || !probabilityColumns.isEmpty()) && (verification != null)){
 			Dataset<Row> dataset = verification.getDataset();
 			Dataset<Row> transformedDataset = verification.getTransformedDataset();
 			Double precision = verification.getPrecision();
@@ -467,9 +468,10 @@ public class PMMLBuilder {
 
 	static
 	private List<?> getVectorColumn(Dataset<Row> dataset, String name, int index){
-		List<Vector> column = (List<Vector>)getColumn(dataset, name);
+		List<?> column = getColumn(dataset, name);
 
 		return column.stream()
+			.map(Vector.class::cast)
 			.map(vector -> vector.apply(index))
 			.collect(Collectors.toList());
 	}

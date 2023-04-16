@@ -22,10 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,23 +32,19 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
 import com.google.common.io.MoreFiles;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.util.MLReader;
-import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
-import org.jpmml.sparkml.ZipUtil;
+import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 
 abstract
@@ -81,15 +75,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		return "/pipeline/" + getAlgorithm() + getDataset() + ".zip";
 	}
 
-	public Dataset<Row> getVerificationDataset(StructType schema, Dataset<Row> inputDataset){
-		List<StructField> fields = Arrays.asList(schema.fields());
-
-		for(StructField field : fields){
-			Column column = inputDataset.apply(field.name()).cast(field.dataType());
-
-			inputDataset = inputDataset.withColumn("tmp_" + field.name(), column).drop(field.name()).withColumnRenamed("tmp_" + field.name(), field.name());
-		}
-
+	public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
 		return inputDataset.sample(false, 0.05d, 63317);
 	}
 
@@ -107,61 +93,46 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		StructType schema;
 
 		try(InputStream is = open(getSchemaJsonPath())){
-			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
+			File tmpSchemaFile = toTmpFile(is, getDataset(), ".json");
 
-			schema = (StructType)DataType.fromJson(json);
+			tmpResources.add(tmpSchemaFile);
+
+			schema = DatasetUtil.loadSchema(tmpSchemaFile);
 		}
 
 		PipelineModel pipelineModel;
 
 		try(InputStream is = open(getPipelineZipPath())){
-			File tmpZipFile = File.createTempFile(getAlgorithm() + getDataset(), ".zip");
+			File tmpZipFile = toTmpFile(is, getAlgorithm() + getDataset(), ".zip");
 
 			tmpResources.add(tmpZipFile);
 
-			try(OutputStream os = new FileOutputStream(tmpZipFile)){
-				ByteStreams.copy(is, os);
-			}
-
-			File tmpPipelineDir = File.createTempFile(getAlgorithm() + getDataset(), "");
-			if(!tmpPipelineDir.delete()){
-				throw new IOException();
-			}
+			File tmpPipelineDir = PipelineModelUtil.uncompress(tmpZipFile);
 
 			tmpResources.add(tmpPipelineDir);
 
-			ZipUtil.uncompress(tmpZipFile, tmpPipelineDir);
-
-			MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
-			mlReader.session(sparkSession);
-
-			pipelineModel = mlReader.load(tmpPipelineDir.getAbsolutePath());
+			pipelineModel = PipelineModelUtil.load(sparkSession, tmpPipelineDir);
 		}
 
 		Dataset<Row> inputDataset;
 
 		try(InputStream is = open(getInputCsvPath())){
-			File tmpCsvFile = File.createTempFile(getDataset(), ".csv");
+			File tmpCsvFile = toTmpFile(is, getDataset(), ".csv");
 
 			tmpResources.add(tmpCsvFile);
 
-			try(OutputStream os = new FileOutputStream(tmpCsvFile)){
-				ByteStreams.copy(is, os);
-			}
-
-			inputDataset = sparkSession.read()
-				.format("csv")
-				.option("header", true)
-				.option("inferSchema", false)
-				.load(tmpCsvFile.getAbsolutePath());
+			inputDataset = DatasetUtil.loadCsv(sparkSession, tmpCsvFile);
 		}
+
+
+		inputDataset = DatasetUtil.castColumns(inputDataset, schema);
 
 		Map<String, Object> options = getOptions();
 
 		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
 			.putOptions(options);
 
-		Dataset<Row> verificationDataset = getVerificationDataset(schema, inputDataset);
+		Dataset<Row> verificationDataset = getVerificationDataset(inputDataset);
 		if(verificationDataset != null){
 			Equivalence<?> equivalence = getEquivalence();
 
@@ -187,5 +158,16 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		}
 
 		return pmml;
+	}
+
+	static
+	private File toTmpFile(InputStream is, String prefix, String suffix) throws IOException {
+		File tmpFile = File.createTempFile(prefix, suffix);
+
+		try(OutputStream os = new FileOutputStream(tmpFile)){
+			ByteStreams.copy(is, os);
+		}
+
+		return tmpFile;
 	}
 }

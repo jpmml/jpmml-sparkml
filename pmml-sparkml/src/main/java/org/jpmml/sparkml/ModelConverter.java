@@ -22,27 +22,15 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.spark.ml.Model;
-import org.apache.spark.ml.classification.ClassificationModel;
-import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.DataField;
-import org.dmg.pmml.DataType;
-import org.dmg.pmml.Field;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
-import org.jpmml.converter.BooleanFeature;
-import org.jpmml.converter.CategoricalFeature;
-import org.jpmml.converter.CategoricalLabel;
-import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
-import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
@@ -73,85 +61,41 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 	}
 
 	public Label getLabel(SparkMLEncoder encoder){
-		T model = getTransformer();
+		return null;
+	}
 
-		Label label = null;
+	public void checkSchema(Schema schema){
+		Label label = schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
 
-		if(model instanceof HasLabelCol){
-			HasLabelCol hasLabelCol = (HasLabelCol)model;
+		MiningFunction miningFunction = getMiningFunction();
+		switch(miningFunction){
+			case ASSOCIATION_RULES:
+			case CLUSTERING:
+				if(label != null){
+					throw new IllegalArgumentException("Expected no label, got " + label);
+				}
+				break;
+			case CLASSIFICATION:
+			case REGRESSION:
+				if(label == null){
+					throw new IllegalArgumentException("Expected a label, got no label");
+				}
+				break;
+			default:
+				break;
+		}
 
-			String labelCol = hasLabelCol.getLabelCol();
+		if(label instanceof ScalarLabel){
+			ScalarLabel scalarLabel = (ScalarLabel)label;
 
-			Feature feature = encoder.getOnlyFeature(labelCol);
+			for(Feature feature : features){
 
-			MiningFunction miningFunction = getMiningFunction();
-			switch(miningFunction){
-				case CLASSIFICATION:
-					{
-						if(feature instanceof BooleanFeature){
-							BooleanFeature booleanFeature = (BooleanFeature)feature;
-
-							label = new CategoricalLabel(booleanFeature);
-						} else
-
-						if(feature instanceof CategoricalFeature){
-							CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
-
-							DataField dataField = (DataField)categoricalFeature.getField();
-
-							label = new CategoricalLabel(dataField);
-						} else
-
-						if(feature instanceof ContinuousFeature){
-							ContinuousFeature continuousFeature = (ContinuousFeature)feature;
-
-							int numClasses = 2;
-
-							if(model instanceof ClassificationModel){
-								ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
-
-								numClasses = classificationModel.numClasses();
-							}
-
-							List<Integer> categories = LabelUtil.createTargetCategories(numClasses);
-
-							Field<?> field = encoder.toCategorical(continuousFeature.getName(), categories);
-
-							encoder.putOnlyFeature(labelCol, new IndexFeature(encoder, field, categories));
-
-							label = new CategoricalLabel(field.requireName(), field.requireDataType(), categories);
-						} else
-
-						{
-							throw new IllegalArgumentException("Expected a categorical or categorical-like continuous feature, got " + feature);
-						}
-					}
-					break;
-				case REGRESSION:
-					{
-						Field<?> field = encoder.toContinuous(feature.getName());
-
-						field.setDataType(DataType.DOUBLE);
-
-						label = new ContinuousLabel(field);
-					}
-					break;
-				default:
-					throw new IllegalArgumentException("Mining function " + miningFunction + " is not supported");
+				if(Objects.equals(scalarLabel.getName(), feature.getName())){
+					throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
+				}
 			}
 		}
-
-		if(model instanceof ClassificationModel){
-			ClassificationModel<?, ?> classificationModel = (ClassificationModel<?, ?>)model;
-
-			int numClasses = classificationModel.numClasses();
-
-			CategoricalLabel categoricalLabel = (CategoricalLabel)label;
-
-			SchemaUtil.checkSize(numClasses, categoricalLabel);
-		}
-
-		return label;
 	}
 
 	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model model, SparkMLEncoder encoder){
@@ -166,7 +110,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 		org.dmg.pmml.Model model = encodeModel(schema);
 
 		List<OutputField> sparkOutputFields = registerOutputFields(label, model, encoder);
-		if(sparkOutputFields != null && sparkOutputFields.size() > 0){
+		if(sparkOutputFields != null && !sparkOutputFields.isEmpty()){
 			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
 			Output output = ModelUtil.ensureOutput(finalModel);
@@ -179,20 +123,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 		return model;
 	}
 
-	static
-	private void checkSchema(Schema schema){
-		Label label = schema.getLabel();
-		List<? extends Feature> features = schema.getFeatures();
-
-		if(label == null){
-			return;
-		}
-
-		for(Feature feature : features){
-
-			if(Objects.equals(label.getName(), feature.getName())){
-				throw new IllegalArgumentException("Label column '" + label.getName() + "' is contained in the list of feature columns");
-			}
-		}
+	public T getModel(){
+		return getObject();
 	}
 }

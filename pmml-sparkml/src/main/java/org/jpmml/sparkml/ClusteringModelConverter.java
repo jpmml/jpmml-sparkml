@@ -55,7 +55,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 	@Override
 	public List<Feature> getFeatures(SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		String featuresCol = model.getFeaturesCol();
 
@@ -64,7 +64,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model pmmlModel, SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		List<Integer> clusters = LabelUtil.createTargetCategories(getNumberOfClusters());
 

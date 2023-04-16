@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="JPMML-SparkML command-line application" version="2.1-SNAPSHOT"/>
-		<Timestamp>2022-05-19T07:58:35Z</Timestamp>
+		<Timestamp>2023-04-16T13:21:08Z</Timestamp>
 	</Header>
 	<DataDictionary>
 		<DataField name="cylinders" optype="categorical" dataType="integer">
@@ -48,8 +48,20 @@
 					<Extension name="minImportance" value="9.0"/>
 					<Extension name="maxImportance" value="432.0"/>
 					<row>
+						<data:name>model_year</data:name>
+						<data:importance>100.0</data:importance>
+					</row>
+					<row>
+						<data:name>horsepower</data:name>
+						<data:importance>256.0</data:importance>
+					</row>
+					<row>
 						<data:name>cylinders</data:name>
 						<data:importance>9.0</data:importance>
+					</row>
+					<row>
+						<data:name>displacement</data:name>
+						<data:importance>254.0</data:importance>
 					</row>
 					<row>
 						<data:name>acceleration</data:name>
@@ -60,20 +72,8 @@
 						<data:importance>74.0</data:importance>
 					</row>
 					<row>
-						<data:name>displacement</data:name>
-						<data:importance>254.0</data:importance>
-					</row>
-					<row>
-						<data:name>horsepower</data:name>
-						<data:importance>256.0</data:importance>
-					</row>
-					<row>
 						<data:name>weight</data:name>
 						<data:importance>432.0</data:importance>
-					</row>
-					<row>
-						<data:name>model_year</data:name>
-						<data:importance>100.0</data:importance>
 					</row>
 				</InlineTable>
 			</Extension>
@@ -89,7 +89,7 @@
 		<Output>
 			<OutputField name="prediction" optype="continuous" dataType="double"/>
 		</Output>
-		<Segmentation multipleModelMethod="sum">
+		<Segmentation multipleModelMethod="sum" missingPredictionTreatment="returnMissing">
 			<Segment id="1">
 				<True/>
 				<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction">

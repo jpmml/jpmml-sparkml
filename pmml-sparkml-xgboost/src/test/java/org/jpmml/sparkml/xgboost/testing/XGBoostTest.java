@@ -61,8 +61,8 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 					@Override
 					public VisitorAction visit(VerificationField verificationField){
 						verificationField
-							.setPrecision(1e-5d)
-							.setZeroThreshold(1e-5d);
+							.setPrecision(1e-6d)
+							.setZeroThreshold(1e-6d);
 
 						return super.visit(verificationField);
 					}
@@ -84,6 +84,11 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 	@Test
 	public void evaluateAuto() throws Exception {
 		evaluate("XGBoost", "Auto");
+	}
+
+	@Test
+	public void evaluateIris() throws Exception {
+		evaluate("XGBoost", "Iris", new FloatEquivalence(16));
 	}
 
 	@BeforeClass

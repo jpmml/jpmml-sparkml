@@ -44,7 +44,7 @@ public class LinearSVCModelConverter extends ClassificationModelConverter<Linear
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		LinearSVCModel model = getTransformer();
+		LinearSVCModel model = getModel();
 
 		Transformation transformation = new AbstractTransformation(){
 

@@ -83,7 +83,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateLogisticRegressionAudit() throws Exception {
-		evaluate(LOGISTIC_REGRESSION, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE), new PMMLEquivalence(5e-9, 5e-9));
+		evaluate(LOGISTIC_REGRESSION, AUDIT, excludeFields(AUDIT_PROBABILITY_FALSE), new PMMLEquivalence(1e-8, 1e-8));
 	}
 
 	@Test

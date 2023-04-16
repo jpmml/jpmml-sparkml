@@ -148,7 +148,7 @@ public class SparkMLEncoder extends ModelEncoder {
 	public void putFeatures(String column, List<Feature> features){
 		List<Feature> existingFeatures = this.columnFeatures.get(column);
 
-		if(existingFeatures != null && existingFeatures.size() > 0){
+		if(existingFeatures != null && !existingFeatures.isEmpty()){
 			SchemaUtil.checkSize(existingFeatures.size(), features);
 
 			for(int i = 0; i < existingFeatures.size(); i++){

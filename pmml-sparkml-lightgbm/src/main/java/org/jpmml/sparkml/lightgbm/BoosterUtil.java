@@ -44,7 +44,7 @@ public class BoosterUtil {
 
 	static
 	public <C extends ModelConverter<M>, M extends Model<M> & HasPredictionCol & LightGBMModelMethods> MiningModel encodeModel(C converter, Schema schema){
-		M model = converter.getTransformer();
+		M model = converter.getModel();
 
 		GBDT gbdt = BoosterUtil.getGBDT(model);
 

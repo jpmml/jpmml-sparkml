@@ -36,9 +36,9 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.neural_network.NeuralNetworkUtil;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class MultilayerPerceptronClassificationModelConverter extends ClassificationModelConverter<MultilayerPerceptronClassificationModel> {
+public class MultilayerPerceptronClassificationModelConverter extends ProbabilisticClassificationModelConverter<MultilayerPerceptronClassificationModel> {
 
 	public MultilayerPerceptronClassificationModelConverter(MultilayerPerceptronClassificationModel model){
 		super(model);
@@ -46,7 +46,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Classifica
 
 	@Override
 	public NeuralNetwork encodeModel(Schema schema){
-		MultilayerPerceptronClassificationModel model = getTransformer();
+		MultilayerPerceptronClassificationModel model = getModel();
 
 		int[] layers = model.getLayers();
 		Vector weights = model.weights();

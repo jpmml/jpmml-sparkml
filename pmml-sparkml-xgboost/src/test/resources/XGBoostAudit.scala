@@ -1,16 +1,18 @@
-import java.nio.file.{Files, Paths}
+import java.io.File
 
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
-import org.apache.spark.sql.types.{IntegerType, StringType}
-import org.jpmml.sparkml.PMMLBuilder
+import org.apache.spark.sql.types.StringType
+import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
-var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Audit.csv")
-df = df.withColumn("AdjustedTmp", df("Adjusted").cast(StringType)).drop("Adjusted").withColumnRenamed("AdjustedTmp", "Adjusted")
+var df = DatasetUtil.loadCsv(spark, new File("csv/Audit.csv"))
+df = DatasetUtil.castColumn(df, "Adjusted", StringType)
+
+DatasetUtil.storeSchema(df, new File("schema/Audit.json"))
 
 val cat_cols = Array("Education", "Employment", "Gender", "Marital", "Occupation")
 val cont_cols = Array("Age", "Hours", "Income")
@@ -28,16 +30,14 @@ val classifier = new XGBoostClassifier(Map("objective" -> "binary:logistic", "nu
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, ohe, assembler, sparse2dense, classifier))
 val pipelineModel = pipeline.fit(df)
 
+PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAudit.zip"))
+
+val predLabel = udf{ (value: Float) => value.toInt.toString }
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index).toFloat }
 
 var xgbDf = pipelineModel.transform(df)
-xgbDf = xgbDf.selectExpr("prediction as Adjusted", "probability")
-xgbDf = xgbDf.withColumn("AdjustedTmp", xgbDf("Adjusted").cast(IntegerType).cast(StringType)).drop("Adjusted").withColumnRenamed("AdjustedTmp", "Adjusted")
-xgbDf = xgbDf.withColumn("probability(0)", vectorToColumn(xgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(xgbDf("probability"), lit(1))).drop("probability")
+xgbDf = xgbDf.selectExpr("prediction", "probability")
+xgbDf = xgbDf.withColumn("Adjusted", predLabel(xgbDf("prediction"))).drop("prediction")
+xgbDf = xgbDf.withColumn("probability(0)", vectorToColumn(xgbDf("probability"), lit(0))).withColumn("probability(1)", vectorToColumn(xgbDf("probability"), lit(1))).drop("probability").drop("probability")
 
-xgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/XGBoostAudit")
-
-pipelineModel.save("pipeline/XGBoostAudit")
-
-//val pmmlBytes = new PMMLBuilder(df.schema, pipelineModel).buildByteArray()
-//Files.write(Paths.get("pmml/XGBoostAudit.pmml"), pmmlBytes)
+DatasetUtil.storeCsv(xgbDf, new File("csv/XGBoostAudit.csv"))

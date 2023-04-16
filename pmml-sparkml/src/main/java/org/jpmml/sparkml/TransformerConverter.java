@@ -25,13 +25,13 @@ import org.apache.spark.ml.Transformer;
 abstract
 public class TransformerConverter<T extends Transformer> {
 
-	private T transformer = null;
+	private T object = null;
 
 	private Map<String, ?> options = null;
 
 
-	public TransformerConverter(T transformer){
-		setTransformer(transformer);
+	public TransformerConverter(T object){
+		setObject(object);
 	}
 
 	public Object getOption(String key, Object defaultValue){
@@ -44,12 +44,12 @@ public class TransformerConverter<T extends Transformer> {
 		return defaultValue;
 	}
 
-	public T getTransformer(){
-		return this.transformer;
+	public T getObject(){
+		return this.object;
 	}
 
-	private void setTransformer(T transformer){
-		this.transformer = transformer;
+	private void setObject(T object){
+		this.object = object;
 	}
 
 	public Map<String, ?> getOptions(){

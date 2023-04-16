@@ -50,4 +50,9 @@ public class LightGBMTest extends IntegrationTest {
 	public void evaluateLightGBMAuto() throws Exception {
 		evaluate("LightGBM", "Auto");
 	}
+
+	@Test
+	public void evaluateLightGBMIris() throws Exception {
+		evaluate("LightGBM", "Iris");
+	}
 }

@@ -1,0 +1,1 @@
+{"type":"struct","fields":[{"name":"Sepal_Length","type":"double","nullable":true,"metadata":{}},{"name":"Sepal_Width","type":"double","nullable":true,"metadata":{}},{"name":"Petal_Length","type":"double","nullable":true,"metadata":{}},{"name":"Petal_Width","type":"double","nullable":true,"metadata":{}},{"name":"Species","type":"string","nullable":true,"metadata":{}}]}

@@ -31,7 +31,7 @@ public class LightGBMRegressionModelConverter extends RegressionModelConverter<L
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		LightGBMRegressionModel model = getTransformer();
+		LightGBMRegressionModel model = getModel();
 
 		return BoosterUtil.encodeModel(this, schema);
 	}

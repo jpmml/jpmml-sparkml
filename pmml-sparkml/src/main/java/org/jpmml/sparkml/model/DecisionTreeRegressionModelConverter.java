@@ -32,7 +32,7 @@ public class DecisionTreeRegressionModelConverter extends RegressionModelConvert
 
 	@Override
 	public Vector getFeatureImportances(){
-		DecisionTreeRegressionModel model = getTransformer();
+		DecisionTreeRegressionModel model = getModel();
 
 		return model.featureImportances();
 	}

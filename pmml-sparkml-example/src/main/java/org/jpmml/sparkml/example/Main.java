@@ -21,25 +21,24 @@ package org.jpmml.sparkml.example;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.zip.ZipFile;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.io.CharStreams;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.metro.MetroJAXBUtil;
 import org.jpmml.sparkml.PMMLBuilder;
-import org.jpmml.sparkml.ZipUtil;
+import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
@@ -161,6 +160,9 @@ public class Main {
 	}
 
 	private void run() throws Exception {
+		SparkSession sparkSession = SparkSession.builder()
+			.getOrCreate();
+
 		StructType schema;
 
 		try(InputStream is = new FileInputStream(this.schemaInput)){
@@ -184,34 +186,12 @@ public class Main {
 		try {
 			logger.info("Loading pipeline model..");
 
-			File pipelineDir = this.pipelineInput;
-
-			zipFile:
-			{
-				ZipFile zipFile;
-
-				try {
-					zipFile = new ZipFile(pipelineDir);
-				} catch(IOException ioe){
-					break zipFile;
-				}
-
-				try {
-					pipelineDir = File.createTempFile("PipelineModel", "");
-					if(!pipelineDir.delete()){
-						throw new IOException();
-					}
-
-					pipelineDir.mkdirs();
-
-					ZipUtil.uncompress(zipFile, pipelineDir);
-				} finally {
-					zipFile.close();
-				}
+			if(this.pipelineInput.isFile()){
+				this.pipelineInput = PipelineModelUtil.uncompress(this.pipelineInput);
 			}
 
 			long begin = System.currentTimeMillis();
-			pipelineModel = PipelineModel.load(pipelineDir.getAbsolutePath());
+			pipelineModel = PipelineModelUtil.load(sparkSession, this.pipelineInput);
 			long end = System.currentTimeMillis();
 
 			logger.info("Loaded pipeline model in {} ms.", (end - begin));
