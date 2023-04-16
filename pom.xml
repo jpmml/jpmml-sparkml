@@ -244,4 +244,23 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>no-openmp</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>com.microsoft.azure</groupId>
+						<artifactId>synapseml-lightgbm_2.12</artifactId>
+						<version>[0.9.5, 0.10.2]</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+		</profile>
+	</profiles>
 </project>
