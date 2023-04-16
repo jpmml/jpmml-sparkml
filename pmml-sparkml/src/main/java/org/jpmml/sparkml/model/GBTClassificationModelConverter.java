@@ -33,9 +33,9 @@ import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> implements HasFeatureImportances, HasTreeOptions {
+public class GBTClassificationModelConverter extends ProbabilisticClassificationModelConverter<GBTClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public GBTClassificationModelConverter(GBTClassificationModel model){
 		super(model);

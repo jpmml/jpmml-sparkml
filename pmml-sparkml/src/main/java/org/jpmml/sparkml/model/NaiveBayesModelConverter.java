@@ -21,9 +21,9 @@ package org.jpmml.sparkml.model;
 import org.apache.spark.ml.classification.NaiveBayesModel;
 import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class NaiveBayesModelConverter extends ClassificationModelConverter<NaiveBayesModel> implements HasRegressionTableOptions {
+public class NaiveBayesModelConverter extends ProbabilisticClassificationModelConverter<NaiveBayesModel> implements HasRegressionTableOptions {
 
 	public NaiveBayesModelConverter(NaiveBayesModel model){
 		super(model);

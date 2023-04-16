@@ -24,9 +24,9 @@ import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class LightGBMClassificationModelConverter extends ClassificationModelConverter<LightGBMClassificationModel> {
+public class LightGBMClassificationModelConverter extends ProbabilisticClassificationModelConverter<LightGBMClassificationModel> {
 
 	public LightGBMClassificationModelConverter(LightGBMClassificationModel model){
 		super(model);

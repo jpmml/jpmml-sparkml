@@ -22,9 +22,9 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class DecisionTreeClassificationModelConverter extends ClassificationModelConverter<DecisionTreeClassificationModel> implements HasFeatureImportances, HasTreeOptions {
+public class DecisionTreeClassificationModelConverter extends ProbabilisticClassificationModelConverter<DecisionTreeClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public DecisionTreeClassificationModelConverter(DecisionTreeClassificationModel model){
 		super(model);

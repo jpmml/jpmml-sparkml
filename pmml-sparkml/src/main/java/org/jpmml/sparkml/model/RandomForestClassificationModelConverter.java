@@ -29,9 +29,9 @@ import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> implements HasFeatureImportances, HasTreeOptions {
+public class RandomForestClassificationModelConverter extends ProbabilisticClassificationModelConverter<RandomForestClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public RandomForestClassificationModelConverter(RandomForestClassificationModel model){
 		super(model);
