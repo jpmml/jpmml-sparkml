@@ -29,9 +29,9 @@ import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class RandomForestClassificationModelConverter extends ClassificationModelConverter<RandomForestClassificationModel> implements HasFeatureImportances, HasTreeOptions {
+public class RandomForestClassificationModelConverter extends ProbabilisticClassificationModelConverter<RandomForestClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public RandomForestClassificationModelConverter(RandomForestClassificationModel model){
 		super(model);
@@ -39,7 +39,7 @@ public class RandomForestClassificationModelConverter extends ClassificationMode
 
 	@Override
 	public Vector getFeatureImportances(){
-		RandomForestClassificationModel model = getTransformer();
+		RandomForestClassificationModel model = getModel();
 
 		return model.featureImportances();
 	}
@@ -49,7 +49,7 @@ public class RandomForestClassificationModelConverter extends ClassificationMode
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, schema);
 
 		MiningModel miningModel = new MiningModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema.getLabel()))
-			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, treeModels));
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, Segmentation.MissingPredictionTreatment.RETURN_MISSING, treeModels));
 
 		return miningModel;
 	}

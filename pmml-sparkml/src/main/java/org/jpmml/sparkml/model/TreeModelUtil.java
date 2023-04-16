@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml.model;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,7 +74,7 @@ public class TreeModelUtil {
 
 	static
 	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
-		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, scoreDistributionManager, schema);
+		return encodeDecisionTree(converter, converter.getModel(), predicateManager, scoreDistributionManager, schema);
 	}
 
 	static
@@ -86,7 +87,7 @@ public class TreeModelUtil {
 
 	static
 	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
-		M model = converter.getTransformer();
+		M model = converter.getModel();
 
 		Schema segmentSchema = schema.toAnonymousSchema();
 
@@ -128,17 +129,35 @@ public class TreeModelUtil {
 
 				@Override
 				public Node encode(Node node, org.apache.spark.ml.tree.LeafNode leafNode){
-					node = new ClassifierNode(null, node.requirePredicate());
-
-					int index = ValueUtil.asInt(leafNode.prediction());
-
-					node.setScore(this.categoricalLabel.getValue(index));
-
 					ImpurityCalculator impurityCalculator = leafNode.impurityStats();
 
-					node.setRecordCount(ValueUtil.narrow(impurityCalculator.count()));
+					double[] stats = impurityCalculator.stats();
 
-					scoreDistributionManager.addScoreDistributions(node, this.categoricalLabel.getValues(), impurityCalculator.stats());
+					List<Number> recordCounts = new AbstractList<Number>(){
+
+						@Override
+						public int size(){
+							return stats.length;
+						}
+
+						@Override
+						public Number get(int index){
+							double stat = stats[index];
+
+							return ValueUtil.narrow(stat);
+						}
+					};
+
+					double totalRecordCount = impurityCalculator.count();
+
+					int maxIndex = ValueUtil.asInt(leafNode.prediction());
+
+					Object score = this.categoricalLabel.getValue(maxIndex);
+
+					node = new ClassifierNode(score, node.requirePredicate())
+						.setRecordCount(ValueUtil.narrow(totalRecordCount));
+
+					scoreDistributionManager.addScoreDistributions(node, this.categoricalLabel.getValues(), recordCounts, null);
 
 					return node;
 				}

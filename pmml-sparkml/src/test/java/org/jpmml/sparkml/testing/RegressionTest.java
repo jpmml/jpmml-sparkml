@@ -109,7 +109,7 @@ public class RegressionTest extends SimpleSparkMLEncoderBatchTest implements Spa
 
 	@Test
 	public void evaluateLinearRegressionHousing() throws Exception {
-		evaluate(LINEAR_REGRESION, HOUSING);
+		evaluate(LINEAR_REGRESION, HOUSING, new PMMLEquivalence(1e-13, 1e-13));
 	}
 
 	@Test

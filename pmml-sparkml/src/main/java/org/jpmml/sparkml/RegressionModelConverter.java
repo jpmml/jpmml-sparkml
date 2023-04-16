@@ -21,11 +21,8 @@ package org.jpmml.sparkml;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.apache.spark.ml.param.shared.HasFeaturesCol;
-import org.apache.spark.ml.param.shared.HasLabelCol;
-import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.apache.spark.ml.regression.RegressionModel;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
@@ -34,10 +31,11 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.ScalarLabel;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
-public class RegressionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends PredictionModelConverter<T> {
+public class RegressionModelConverter<T extends RegressionModel<Vector, T>> extends PredictionModelConverter<T> {
 
 	public RegressionModelConverter(T model){
 		super(model);
@@ -50,13 +48,15 @@ public class RegressionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
+
+		ScalarLabel scalarLabel = (ScalarLabel)label;
 
 		String predictionCol = model.getPredictionCol();
 
 		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
 
-		OutputField predictedOutputField = ModelUtil.createPredictedField(predictionCol, OpType.CONTINUOUS, label.getDataType());
+		OutputField predictedOutputField = ModelUtil.createPredictedField(predictionCol, OpType.CONTINUOUS, scalarLabel.getDataType());
 
 		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, keepPredictionCol);
 

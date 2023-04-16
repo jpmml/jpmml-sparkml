@@ -46,7 +46,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 	@Override
 	public MiningFunction getMiningFunction(){
-		GeneralizedLinearRegressionModel model = getTransformer();
+		GeneralizedLinearRegressionModel model = getModel();
 
 		String family = model.getFamily();
 		switch(family){
@@ -59,7 +59,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		GeneralizedLinearRegressionModel model = getTransformer();
+		GeneralizedLinearRegressionModel model = getModel();
 
 		List<OutputField> result = super.registerOutputFields(label, pmmlModel, encoder);
 
@@ -80,7 +80,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 	@Override
 	public GeneralRegressionModel encodeModel(Schema schema){
-		GeneralizedLinearRegressionModel model = getTransformer();
+		GeneralizedLinearRegressionModel model = getModel();
 
 		Object targetCategory = null;
 

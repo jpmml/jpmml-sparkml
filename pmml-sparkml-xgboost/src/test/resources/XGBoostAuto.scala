@@ -1,14 +1,16 @@
-import java.nio.file.{Files, Paths}
+import java.io.File
 
-import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor
+import ml.dmlc.xgboost4j.scala.spark.{TrackerConf, XGBoostRegressor}
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.StringType
-import org.jpmml.sparkml.PMMLBuilder
+import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
-var df = spark.read.option("header", "true").option("inferSchema", "true").csv("csv/Auto.csv")
-df = df.withColumn("originTmp", df("origin").cast(StringType)).drop("origin").withColumnRenamed("originTmp", "origin")
+var df = DatasetUtil.loadCsv(spark, new File("csv/Auto.csv"))
+df = DatasetUtil.castColumn(df, "origin", StringType)
+
+DatasetUtil.storeSchema(df, new File("schema/Auto.json"))
 
 val cat_cols = Array("cylinders", "model_year", "origin")
 val cont_cols = Array("acceleration", "displacement", "horsepower", "weight")
@@ -19,16 +21,15 @@ val assembler = new VectorAssembler().setInputCols(ohe.getOutputCols ++ cont_col
 
 val sparse2dense = new SparseToDenseTransformer().setInputCol(assembler.getOutputCol).setOutputCol("denseFeatureVec")
 
-val regressor = new XGBoostRegressor(Map("objective" -> "reg:squarederror", "num_round" -> 101, "num_workers" -> 1, "skip_clean_checkpoint" -> true)).setLabelCol("mpg").setFeaturesCol(sparse2dense.getOutputCol)
+val trackerConf = TrackerConf(0, "scala")
+val regressor = new XGBoostRegressor(Map("objective" -> "reg:squarederror", "num_round" -> 101, "num_workers" -> 1, "skip_clean_checkpoint" -> true, "tracker_conf" -> trackerConf)).setLabelCol("mpg").setFeaturesCol(sparse2dense.getOutputCol)
 
 val pipeline = new Pipeline().setStages(Array(indexer, ohe, assembler, sparse2dense, regressor))
 val pipelineModel = pipeline.fit(df)
 
+PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAuto.zip"))
+
 var xgbDf = pipelineModel.transform(df)
 xgbDf = xgbDf.selectExpr("prediction as mpg")
-xgbDf.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save("csv/XGBoostAuto")
 
-pipelineModel.save("pipeline/XGBoostAuto")
-
-//val pmmlBytes = new PMMLBuilder(df.schema, pipelineModel).buildByteArray()
-//Files.write(Paths.get("pmml/XGBoostAuto.pmml"), pmmlBytes)
+DatasetUtil.storeCsv(xgbDf, new File("csv/XGBoostAuto.csv"))

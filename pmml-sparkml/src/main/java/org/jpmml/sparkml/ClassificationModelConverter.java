@@ -18,15 +18,11 @@
  */
 package org.jpmml.sparkml;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.apache.spark.ml.PredictionModel;
+import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.apache.spark.ml.param.shared.HasFeaturesCol;
-import org.apache.spark.ml.param.shared.HasLabelCol;
-import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.MiningFunction;
@@ -35,22 +31,28 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
 import org.jpmml.converter.CategoricalLabel;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DerivedOutputField;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
-public class ClassificationModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends PredictionModelConverter<T> {
+public class ClassificationModelConverter<T extends ClassificationModel<Vector, T>> extends PredictionModelConverter<T> {
 
 	public ClassificationModelConverter(T model){
 		super(model);
+	}
+
+	public int getNumberOfClasses(){
+		T model = getModel();
+
+		return model.numClasses();
 	}
 
 	@Override
@@ -59,8 +61,17 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 	}
 
 	@Override
+	public void checkSchema(Schema schema){
+		super.checkSchema(schema);
+
+		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+
+		SchemaUtil.checkSize(getNumberOfClasses(), categoricalLabel);
+	}
+
+	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 
@@ -86,29 +97,6 @@ public class ClassificationModelConverter<T extends PredictionModel<Vector, T> &
 
 		encoder.putOnlyFeature(predictionCol, new IndexFeature(encoder, predictedField, categories));
 
-		List<OutputField> result = new ArrayList<>();
-
-		if(model instanceof HasProbabilityCol){
-			HasProbabilityCol hasProbabilityCol = (HasProbabilityCol)model;
-
-			String probabilityCol = hasProbabilityCol.getProbabilityCol();
-
-			List<Feature> features = new ArrayList<>();
-
-			for(int i = 0; i < categoricalLabel.size(); i++){
-				Object value = categoricalLabel.getValue(i);
-
-				OutputField probabilityField = ModelUtil.createProbabilityField(FieldNameUtil.create(probabilityCol, value), DataType.DOUBLE, value);
-
-				result.add(probabilityField);
-
-				features.add(new ContinuousFeature(encoder, probabilityField));
-			}
-
-			// XXX
-			encoder.putFeatures(probabilityCol, features);
-		}
-
-		return result;
+		return Collections.emptyList();
 	}
 }

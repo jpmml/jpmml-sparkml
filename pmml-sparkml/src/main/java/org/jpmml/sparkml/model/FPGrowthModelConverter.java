@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.spark.ml.fpm.FPGrowthModel;
 import org.apache.spark.sql.Row;
@@ -42,6 +43,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
+import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.AssociationRulesModelConverter;
 import org.jpmml.sparkml.ItemSetFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -56,7 +58,7 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 	@Override
 	public List<Feature> getFeatures(SparkMLEncoder encoder){
-		FPGrowthModel model = getTransformer();
+		FPGrowthModel model = getModel();
 
 		String itemsCol = model.getItemsCol();
 
@@ -76,7 +78,7 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 	@Override
 	public AssociationModel encodeModel(Schema schema){
-		FPGrowthModel model = getTransformer();
+		FPGrowthModel model = getModel();
 
 		List<? extends Feature> features = schema.getFeatures();
 
@@ -91,8 +93,8 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 		List<Row> associationRuleRows = (model.associationRules()).collectAsList();
 		for(Row associationRuleRow : associationRuleRows){
-			List<String> antecedent = JavaConversions.seqAsJavaList((Seq)associationRuleRow.apply(0));
-			List<String> consequent = JavaConversions.seqAsJavaList((Seq)associationRuleRow.apply(1));
+			List<String> antecedent = formatValues(JavaConversions.seqAsJavaList((Seq<?>)associationRuleRow.apply(0)));
+			List<String> consequent = formatValues(JavaConversions.seqAsJavaList((Seq<?>)associationRuleRow.apply(1)));
 
 			Double confidence = (Double)associationRuleRow.apply(2);
 
@@ -173,5 +175,12 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 		}
 
 		return itemset;
+	}
+
+	static
+	public List<String> formatValues(List<?> values){
+		return values.stream()
+			.map(value -> ValueUtil.asString(value))
+			.collect(Collectors.toList());
 	}
 }

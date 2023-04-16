@@ -165,6 +165,7 @@ public class ConverterFactory {
 		}
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	static
 	private void init(ClassLoader classLoader, Properties properties){
 
@@ -178,10 +179,10 @@ public class ConverterFactory {
 
 			logger.trace("Mapping transformer class " + key + " to transformer converter class " + value);
 
-			Class<? extends Transformer> clazz;
+			Class<?> clazz;
 
 			try {
-				clazz = (Class)classLoader.loadClass(key);
+				clazz = classLoader.loadClass(key);
 			} catch(ClassNotFoundException cnfe){
 				logger.warn("Failed to load transformer class", cnfe);
 
@@ -192,10 +193,10 @@ public class ConverterFactory {
 				throw new IllegalArgumentException("Transformer class " + clazz.getName() + " is not a subclass of " + Transformer.class.getName());
 			} // End if
 
-			Class<? extends TransformerConverter<?>> converterClazz;
+			Class<?> converterClazz;
 
 			try {
-				converterClazz = (Class)classLoader.loadClass(value);
+				converterClazz = classLoader.loadClass(value);
 			} catch(ClassNotFoundException cnfe){
 				logger.warn("Failed to load transformer converter class", cnfe);
 
@@ -206,7 +207,7 @@ public class ConverterFactory {
 				throw new IllegalArgumentException("Transformer converter class " + converterClazz.getName() + " is not a subclass of " + TransformerConverter.class.getName());
 			}
 
-			ConverterFactory.converters.put(clazz, converterClazz);
+			ConverterFactory.converters.put((Class)clazz, (Class)converterClazz);
 		}
 	}
 

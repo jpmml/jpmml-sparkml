@@ -22,9 +22,9 @@ import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.dmg.pmml.Model;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.Schema;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class LogisticRegressionModelConverter extends ClassificationModelConverter<LogisticRegressionModel> implements HasRegressionTableOptions {
+public class LogisticRegressionModelConverter extends ProbabilisticClassificationModelConverter<LogisticRegressionModel> implements HasRegressionTableOptions {
 
 	public LogisticRegressionModelConverter(LogisticRegressionModel model){
 		super(model);
@@ -32,7 +32,7 @@ public class LogisticRegressionModelConverter extends ClassificationModelConvert
 
 	@Override
 	public Model encodeModel(Schema schema){
-		LogisticRegressionModel model = getTransformer();
+		LogisticRegressionModel model = getModel();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 

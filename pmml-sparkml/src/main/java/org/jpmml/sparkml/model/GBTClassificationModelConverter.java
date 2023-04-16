@@ -33,9 +33,9 @@ import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.sparkml.ClassificationModelConverter;
+import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class GBTClassificationModelConverter extends ClassificationModelConverter<GBTClassificationModel> implements HasFeatureImportances, HasTreeOptions {
+public class GBTClassificationModelConverter extends ProbabilisticClassificationModelConverter<GBTClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
 	public GBTClassificationModelConverter(GBTClassificationModel model){
 		super(model);
@@ -43,14 +43,14 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 
 	@Override
 	public Vector getFeatureImportances(){
-		GBTClassificationModel model = getTransformer();
+		GBTClassificationModel model = getModel();
 
 		return model.featureImportances();
 	}
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		GBTClassificationModel model = getTransformer();
+		GBTClassificationModel model = getModel();
 
 		String lossType = model.getLossType();
 		switch(lossType){
@@ -65,7 +65,7 @@ public class GBTClassificationModelConverter extends ClassificationModelConverte
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, segmentSchema);
 
 		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema.getLabel()))
-			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, treeModels, Doubles.asList(model.treeWeights())))
+			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, Segmentation.MissingPredictionTreatment.RETURN_MISSING, treeModels, Doubles.asList(model.treeWeights())))
 			.setOutput(ModelUtil.createPredictedOutput("gbtValue", OpType.CONTINUOUS, DataType.DOUBLE));
 
 		return MiningModelUtil.createBinaryLogisticClassification(miningModel, 2d, 0d, RegressionModel.NormalizationMethod.LOGIT, false, schema);

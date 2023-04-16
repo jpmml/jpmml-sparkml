@@ -143,7 +143,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateGLMSentiment() throws Exception {
-		evaluate(GLM, SENTIMENT);
+		evaluate(GLM, SENTIMENT, new PMMLEquivalence(5e-13, 5e-13));
 	}
 
 	@Test

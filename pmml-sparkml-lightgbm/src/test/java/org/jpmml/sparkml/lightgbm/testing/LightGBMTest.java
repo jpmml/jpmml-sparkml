@@ -52,6 +52,11 @@ public class LightGBMTest extends SparkMLEncoderBatchTest {
 		evaluate("LightGBM", "Auto");
 	}
 
+	@Test
+	public void evaluateLightGBMIris() throws Exception {
+		evaluate("LightGBM", "Iris");
+	}
+
 	@BeforeClass
 	static
 	public void createSparkSession(){
