@@ -137,13 +137,13 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](https://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **2.2.0** (19 May, 2022).
+The current version is **2.2.1** (16 April, 2023).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml</artifactId>
-	<version>2.2.0</version>
+	<version>2.2.1</version>
 </dependency>
 ```
 
@@ -180,8 +180,8 @@ mvn clean install
 ```
 
 The build produces two JAR files:
-* `pmml-sparkml/target/pmml-sparkml-2.2-SNAPSHOT.jar` - Library JAR file.
-* `pmml-sparkml-exampletarget/pmml-sparkml-example-executable-2.2-SNAPSHOT.jar` - Example application JAR file.
+* `pmml-sparkml/target/pmml-sparkml-2.3-SNAPSHOT.jar` - Library JAR file.
+* `pmml-sparkml-exampletarget/pmml-sparkml-example-executable-2.3-SNAPSHOT.jar` - Example application JAR file.
 
 # Usage #
 
@@ -236,12 +236,12 @@ The example application JAR file does not include Apache Spark runtime libraries
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `pmml-sparkml/src/test/resources/schema/Iris.json` and `pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
 ```
-spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.2-SNAPSHOT.jar --schema-input pmml-sparkml/src/test/resources/schema/Iris.json --pipeline-input pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.3-SNAPSHOT.jar --schema-input pmml-sparkml/src/test/resources/schema/Iris.json --pipeline-input pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
 ```
-spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.2-SNAPSHOT.jar --help
+spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-2.3-SNAPSHOT.jar --help
 ```
 
 # Documentation #
