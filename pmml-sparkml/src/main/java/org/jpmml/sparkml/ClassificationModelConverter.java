@@ -50,7 +50,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 	}
 
 	public int getNumberOfClasses(){
-		T model = getTransformer();
+		T model = getModel();
 
 		return model.numClasses();
 	}
@@ -71,7 +71,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
 

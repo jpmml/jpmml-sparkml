@@ -52,7 +52,7 @@ public class XGBoostRegressionModelConverter extends PredictionModelConverter<XG
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		XGBoostRegressionModel model = getTransformer();
+		XGBoostRegressionModel model = getModel();
 
 		Booster booster = model.nativeBooster();
 
@@ -61,7 +61,7 @@ public class XGBoostRegressionModelConverter extends PredictionModelConverter<XG
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		XGBoostRegressionModel model = getTransformer();
+		XGBoostRegressionModel model = getModel();
 
 		ScalarLabel scalarLabel = (ScalarLabel)label;
 

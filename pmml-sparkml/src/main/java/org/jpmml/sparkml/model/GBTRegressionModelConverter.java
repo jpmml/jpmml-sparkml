@@ -40,14 +40,14 @@ public class GBTRegressionModelConverter extends RegressionModelConverter<GBTReg
 
 	@Override
 	public Vector getFeatureImportances(){
-		GBTRegressionModel model = getTransformer();
+		GBTRegressionModel model = getModel();
 
 		return model.featureImportances();
 	}
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		GBTRegressionModel model = getTransformer();
+		GBTRegressionModel model = getModel();
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, schema);
 

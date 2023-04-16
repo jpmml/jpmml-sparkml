@@ -46,7 +46,7 @@ public class MultilayerPerceptronClassificationModelConverter extends Probabilis
 
 	@Override
 	public NeuralNetwork encodeModel(Schema schema){
-		MultilayerPerceptronClassificationModel model = getTransformer();
+		MultilayerPerceptronClassificationModel model = getModel();
 
 		int[] layers = model.getLayers();
 		Vector weights = model.weights();

@@ -43,7 +43,7 @@ public class ProbabilisticClassificationModelConverter<T extends ProbabilisticCl
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		List<OutputField> result = super.registerOutputFields(label, pmmlModel, encoder);
 

@@ -48,7 +48,7 @@ public class RegressionModelConverter<T extends RegressionModel<Vector, T>> exte
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		ScalarLabel scalarLabel = (ScalarLabel)label;
 

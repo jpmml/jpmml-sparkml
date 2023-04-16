@@ -49,7 +49,7 @@ public class PredictionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 	@Override
 	public Label getLabel(SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		String labelCol = model.getLabelCol();
 
@@ -112,7 +112,7 @@ public class PredictionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 	@Override
 	public List<Feature> getFeatures(SparkMLEncoder encoder){
-		T model = getTransformer();
+		T model = getModel();
 
 		String featuresCol = model.getFeaturesCol();
 

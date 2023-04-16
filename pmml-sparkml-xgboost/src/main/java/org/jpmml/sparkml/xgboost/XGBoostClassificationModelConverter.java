@@ -35,7 +35,7 @@ public class XGBoostClassificationModelConverter extends ProbabilisticClassifica
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		XGBoostClassificationModel model = getTransformer();
+		XGBoostClassificationModel model = getModel();
 
 		Booster booster = model.nativeBooster();
 

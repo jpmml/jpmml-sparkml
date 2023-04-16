@@ -58,7 +58,7 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 	@Override
 	public List<Feature> getFeatures(SparkMLEncoder encoder){
-		FPGrowthModel model = getTransformer();
+		FPGrowthModel model = getModel();
 
 		String itemsCol = model.getItemsCol();
 
@@ -78,7 +78,7 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 	@Override
 	public AssociationModel encodeModel(Schema schema){
-		FPGrowthModel model = getTransformer();
+		FPGrowthModel model = getModel();
 
 		List<? extends Feature> features = schema.getFeatures();
 

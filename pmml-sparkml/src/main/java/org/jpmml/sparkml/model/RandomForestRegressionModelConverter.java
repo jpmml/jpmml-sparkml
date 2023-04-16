@@ -39,7 +39,7 @@ public class RandomForestRegressionModelConverter extends RegressionModelConvert
 
 	@Override
 	public Vector getFeatureImportances(){
-		RandomForestRegressionModel model = getTransformer();
+		RandomForestRegressionModel model = getModel();
 
 		return model.featureImportances();
 	}

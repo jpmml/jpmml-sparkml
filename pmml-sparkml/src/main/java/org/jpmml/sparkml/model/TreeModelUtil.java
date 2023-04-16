@@ -74,7 +74,7 @@ public class TreeModelUtil {
 
 	static
 	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & DecisionTreeModel> TreeModel encodeDecisionTree(C converter, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
-		return encodeDecisionTree(converter, converter.getTransformer(), predicateManager, scoreDistributionManager, schema);
+		return encodeDecisionTree(converter, converter.getModel(), predicateManager, scoreDistributionManager, schema);
 	}
 
 	static
@@ -87,7 +87,7 @@ public class TreeModelUtil {
 
 	static
 	public <C extends ModelConverter<? extends M> & HasTreeOptions, M extends Model<M> & TreeEnsembleModel<T>, T extends Model<T> & DecisionTreeModel> List<TreeModel> encodeDecisionTreeEnsemble(C converter, PredicateManager predicateManager, ScoreDistributionManager scoreDistributionManager, Schema schema){
-		M model = converter.getTransformer();
+		M model = converter.getModel();
 
 		Schema segmentSchema = schema.toAnonymousSchema();
 

@@ -32,7 +32,7 @@ public class DecisionTreeClassificationModelConverter extends ProbabilisticClass
 
 	@Override
 	public Vector getFeatureImportances(){
-		DecisionTreeClassificationModel model = getTransformer();
+		DecisionTreeClassificationModel model = getModel();
 
 		return model.featureImportances();
 	}

@@ -32,7 +32,7 @@ public class LogisticRegressionModelConverter extends ProbabilisticClassificatio
 
 	@Override
 	public Model encodeModel(Schema schema){
-		LogisticRegressionModel model = getTransformer();
+		LogisticRegressionModel model = getModel();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
 

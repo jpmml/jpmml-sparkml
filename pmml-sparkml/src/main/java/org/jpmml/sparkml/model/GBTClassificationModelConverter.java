@@ -43,14 +43,14 @@ public class GBTClassificationModelConverter extends ProbabilisticClassification
 
 	@Override
 	public Vector getFeatureImportances(){
-		GBTClassificationModel model = getTransformer();
+		GBTClassificationModel model = getModel();
 
 		return model.featureImportances();
 	}
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		GBTClassificationModel model = getTransformer();
+		GBTClassificationModel model = getModel();
 
 		String lossType = model.getLossType();
 		switch(lossType){

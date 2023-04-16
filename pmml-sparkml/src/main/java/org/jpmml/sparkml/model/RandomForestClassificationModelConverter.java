@@ -39,7 +39,7 @@ public class RandomForestClassificationModelConverter extends ProbabilisticClass
 
 	@Override
 	public Vector getFeatureImportances(){
-		RandomForestClassificationModel model = getTransformer();
+		RandomForestClassificationModel model = getModel();
 
 		return model.featureImportances();
 	}

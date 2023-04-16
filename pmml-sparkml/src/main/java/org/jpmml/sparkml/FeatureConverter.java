@@ -72,6 +72,11 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 		}
 	}
 
+	@Override
+	public T getTransformer(){
+		return super.getTransformer();
+	}
+
 	protected InOutMode getInputMode(){
 		throw new IllegalArgumentException();
 	}

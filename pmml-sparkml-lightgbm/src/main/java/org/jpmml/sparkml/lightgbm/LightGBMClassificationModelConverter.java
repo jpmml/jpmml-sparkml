@@ -44,7 +44,7 @@ public class LightGBMClassificationModelConverter extends ProbabilisticClassific
 
 	@Override
 	public MiningModel encodeModel(Schema schema){
-		LightGBMClassificationModel model = getTransformer();
+		LightGBMClassificationModel model = getModel();
 
 		MiningModel miningModel = BoosterUtil.encodeModel(this, schema);
 

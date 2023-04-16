@@ -31,7 +31,7 @@ public class NaiveBayesModelConverter extends ProbabilisticClassificationModelCo
 
 	@Override
 	public Model encodeModel(Schema schema){
-		NaiveBayesModel model = getTransformer();
+		NaiveBayesModel model = getModel();
 
 		String modelType = model.getModelType();
 		switch(modelType){

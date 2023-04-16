@@ -122,4 +122,8 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 		return model;
 	}
+
+	public T getModel(){
+		return getTransformer();
+	}
 }
