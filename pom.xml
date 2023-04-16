@@ -166,6 +166,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
+					<!--
+					<compilerArgument>-Xlint:unchecked</compilerArgument>
+					-->
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
 					<source>1.8</source>

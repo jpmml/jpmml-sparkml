@@ -468,9 +468,10 @@ public class PMMLBuilder {
 
 	static
 	private List<?> getVectorColumn(Dataset<Row> dataset, String name, int index){
-		List<Vector> column = (List<Vector>)getColumn(dataset, name);
+		List<?> column = getColumn(dataset, name);
 
 		return column.stream()
+			.map(Vector.class::cast)
 			.map(vector -> vector.apply(index))
 			.collect(Collectors.toList());
 	}
