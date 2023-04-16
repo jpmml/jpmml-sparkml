@@ -19,7 +19,6 @@
 package org.jpmml.sparkml.lightgbm;
 
 import com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel;
-import org.apache.spark.ml.param.shared.HasProbabilityCol;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
@@ -50,10 +49,7 @@ public class LightGBMClassificationModelConverter extends ProbabilisticClassific
 		MiningModel miningModel = BoosterUtil.encodeModel(this, schema);
 
 		RegressionModel regressionModel = (RegressionModel)MiningModelUtil.getFinalModel(miningModel);
-
-		if(model instanceof HasProbabilityCol){
-			regressionModel.setOutput(null);
-		}
+		regressionModel.setOutput(null);
 
 		return miningModel;
 	}

@@ -20,7 +20,6 @@ package org.jpmml.sparkml.xgboost;
 
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel;
-import org.apache.spark.ml.classification.ProbabilisticClassificationModel;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
@@ -43,10 +42,7 @@ public class XGBoostClassificationModelConverter extends ProbabilisticClassifica
 		MiningModel miningModel = BoosterUtil.encodeBooster(this, booster, schema);
 
 		RegressionModel regressionModel = (RegressionModel)MiningModelUtil.getFinalModel(miningModel);
-
-		if(model instanceof ProbabilisticClassificationModel){
-			regressionModel.setOutput(null);
-		}
+		regressionModel.setOutput(null);
 
 		return miningModel;
 	}

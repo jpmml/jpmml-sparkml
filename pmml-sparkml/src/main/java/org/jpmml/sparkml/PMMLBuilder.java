@@ -191,7 +191,7 @@ public class PMMLBuilder {
 			model = MiningModelUtil.createModelChain(models, Segmentation.MissingPredictionTreatment.CONTINUE);
 		} // End if
 
-		if((model != null) && (postProcessorNames.size() > 0)){
+		if((model != null) && !postProcessorNames.isEmpty()){
 			org.dmg.pmml.Model finalModel = MiningModelUtil.getFinalModel(model);
 
 			Output output = ModelUtil.ensureOutput(finalModel);
@@ -211,7 +211,7 @@ public class PMMLBuilder {
 
 		PMML pmml = encoder.encodePMML(model);
 
-		if((model != null) && (predictionColumns.size() > 0 || probabilityColumns.size() > 0) && (verification != null)){
+		if((model != null) && (!predictionColumns.isEmpty() || !probabilityColumns.isEmpty()) && (verification != null)){
 			Dataset<Row> dataset = verification.getDataset();
 			Dataset<Row> transformedDataset = verification.getTransformedDataset();
 			Double precision = verification.getPrecision();
