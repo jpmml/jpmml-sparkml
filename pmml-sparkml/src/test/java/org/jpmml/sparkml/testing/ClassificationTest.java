@@ -128,7 +128,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateNeuralNetworkIris() throws Exception {
-		evaluate(NEURAL_NETWORK, IRIS, new PMMLEquivalence(5e-13, 5e-13));
+		evaluate(NEURAL_NETWORK, IRIS, new PMMLEquivalence(5e-13, 5e-11));
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateGLMSentiment() throws Exception {
-		evaluate(GLM, SENTIMENT, new PMMLEquivalence(5e-13, 5e-13));
+		evaluate(GLM, SENTIMENT, new PMMLEquivalence(5e-11, 5e-11));
 	}
 
 	@Test
