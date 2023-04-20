@@ -3,7 +3,7 @@ import java.io.File
 import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
-import org.apache.spark.sql.types.StringType
+import org.apache.spark.sql.types.{FloatType, StringType}
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
 
@@ -21,7 +21,7 @@ val assembler = new VectorAssembler().setInputCols(ohe.getOutputCols ++ cont_col
 
 val sparse2dense = new SparseToDenseTransformer().setInputCol(assembler.getOutputCol).setOutputCol("denseFeatureVec")
 
-val regressor = new XGBoostRegressor(Map("objective" -> "reg:squarederror", "num_round" -> 101, "num_workers" -> 1, "skip_clean_checkpoint" -> true)).setLabelCol("mpg").setFeaturesCol(sparse2dense.getOutputCol)
+val regressor = new XGBoostRegressor(Map("objective" -> "reg:squarederror", "num_round" -> 101, "num_workers" -> 1)).setLabelCol("mpg").setFeaturesCol(sparse2dense.getOutputCol)
 
 val pipeline = new Pipeline().setStages(Array(indexer, ohe, assembler, sparse2dense, regressor))
 val pipelineModel = pipeline.fit(df)
@@ -30,5 +30,6 @@ PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAuto.zip"))
 
 var xgbDf = pipelineModel.transform(df)
 xgbDf = xgbDf.selectExpr("prediction as mpg")
+xgbDf = DatasetUtil.castColumn(xgbDf, "mpg", FloatType)
 
 DatasetUtil.storeCsv(xgbDf, new File("csv/XGBoostAuto.csv"))
