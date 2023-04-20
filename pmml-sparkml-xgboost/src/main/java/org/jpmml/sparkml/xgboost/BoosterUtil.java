@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 import ml.dmlc.xgboost4j.scala.Booster;
+import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
+import org.apache.spark.ml.Model;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.BinaryFeature;
@@ -43,7 +46,9 @@ public class BoosterUtil {
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
+	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M> & HasXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
+		M model = converter.getModel();
+
 		byte[] bytes;
 
 		try {
@@ -79,7 +84,13 @@ public class BoosterUtil {
 			}
 		};
 
+		Float missing = model.getMissing();
+		if(missing.isNaN()){
+			missing = null;
+		}
+
 		Map<String, Object> options = new LinkedHashMap<>();
+		options.put(HasXGBoostOptions.OPTION_MISSING, missing);
 		options.put(HasXGBoostOptions.OPTION_COMPACT, converter.getOption(HasXGBoostOptions.OPTION_COMPACT, false));
 		options.put(HasXGBoostOptions.OPTION_NTREE_LIMIT, converter.getOption(HasXGBoostOptions.OPTION_NTREE_LIMIT, null));
 

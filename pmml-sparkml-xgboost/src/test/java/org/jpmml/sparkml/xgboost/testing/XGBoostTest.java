@@ -87,6 +87,11 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 	}
 
 	@Test
+	public void evaluateHousing() throws Exception {
+		evaluate("XGBoost", "Housing");
+	}
+
+	@Test
 	public void evaluateIris() throws Exception {
 		evaluate("XGBoost", "Iris", new FloatEquivalence(16));
 	}
