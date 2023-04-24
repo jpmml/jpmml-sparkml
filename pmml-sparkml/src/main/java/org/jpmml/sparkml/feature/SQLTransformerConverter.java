@@ -71,25 +71,8 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 		List<Field<?>> fields = encodeLogicalPlan(encoder, logicalPlan);
 		for(Field<?> field : fields){
 			String name = field.requireName();
-			DataType dataType = field.requireDataType();
-			OpType opType = field.requireOpType();
 
-			Feature feature;
-
-			switch(dataType){
-				case STRING:
-					feature = new StringFeature(encoder, field);
-					break;
-				case INTEGER:
-				case DOUBLE:
-					feature = new ContinuousFeature(encoder, field);
-					break;
-				case BOOLEAN:
-					feature = new BooleanFeature(encoder, field);
-					break;
-				default:
-					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
-			}
+			Feature feature = encoder.createFeature(field);
 
 			encoder.putOnlyFeature(name, feature);
 
