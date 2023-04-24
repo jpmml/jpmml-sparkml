@@ -124,7 +124,6 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 			inputDataset = DatasetUtil.loadCsv(sparkSession, tmpCsvFile);
 		}
 
-
 		inputDataset = DatasetUtil.castColumns(inputDataset, schema);
 
 		Map<String, Object> options = getOptions();
