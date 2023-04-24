@@ -33,11 +33,8 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
-import org.jpmml.converter.BooleanFeature;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
-import org.jpmml.converter.StringFeature;
 import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.AliasExpression;
 import org.jpmml.sparkml.DatasetUtil;
@@ -68,15 +65,32 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 		List<Feature> result = new ArrayList<>();
 
-		List<Field<?>> fields = encodeLogicalPlan(encoder, logicalPlan);
-		for(Field<?> field : fields){
-			String name = field.requireName();
+		List<?> objects = encodeLogicalPlan(encoder, logicalPlan);
+		for(Object object : objects){
 
-			Feature feature = encoder.createFeature(field);
+			if(object instanceof List){
+				List<?> features = (List<?>)object;
 
-			encoder.putOnlyFeature(name, feature);
+				features.stream()
+					.map(Feature.class::cast)
+					.forEach(result::add);
+			} else
 
-			result.add(feature);
+			if(object instanceof Field){
+				Field<?> field = (Field<?>)object;
+
+				String name = field.requireName();
+
+				Feature feature = encoder.createFeature(field);
+
+				encoder.putOnlyFeature(name, feature);
+
+				result.add(feature);
+			} else
+
+			{
+				throw new IllegalArgumentException();
+			}
 		}
 
 		return result;
@@ -88,8 +102,8 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 	}
 
 	static
-	public List<Field<?>> encodeLogicalPlan(SparkMLEncoder encoder, LogicalPlan logicalPlan){
-		List<Field<?>> result = new ArrayList<>();
+	public List<?> encodeLogicalPlan(SparkMLEncoder encoder, LogicalPlan logicalPlan){
+		List<Object> result = new ArrayList<>();
 
 		List<LogicalPlan> children = JavaConversions.seqAsJavaList(logicalPlan.children());
 		for(LogicalPlan child : children){
@@ -102,6 +116,14 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 			if(pmmlExpression instanceof FieldRef){
 				FieldRef fieldRef = (FieldRef)pmmlExpression;
+
+				if(encoder.hasFeatures(fieldRef.requireField())){
+					List<Feature> features = encoder.getFeatures(fieldRef.requireField());
+
+					result.add(features);
+
+					continue;
+				}
 
 				Field<?> field = ensureField(encoder, fieldRef.requireField());
 				if(field != null){
