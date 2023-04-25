@@ -73,7 +73,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
       * Trigonometric functions `sin`, `asin`, `sinh`, `cos`, `acos`, `cosh`, `tan`, `atan`, `tanh`.
       * Aggregation functions `greatest` and `least`.
       * RegExp functions `regexp_replace` and `rlike`.
-      * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `substring`, `trim`, `ucase` and `upper`.
+      * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `replace`, `substring`, `trim`, `ucase` and `upper`.
       * Type cast functions `boolean`, `cast`, `double`, `int` and `string`.
       * Value functions `in`, `isnan`, `isnull`, `isnotnull`, `negative` and `positive`.
     * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
