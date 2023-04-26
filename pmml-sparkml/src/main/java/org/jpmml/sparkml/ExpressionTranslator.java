@@ -96,6 +96,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.TypeUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
 import scala.Option;
@@ -334,7 +335,7 @@ public class ExpressionTranslator {
 					name = FieldNameUtil.create(dataType, ExpressionUtil.format(child));
 				}
 
-				OpType opType = ExpressionUtil.getOpType(dataType);
+				OpType opType = TypeUtil.getOpType(dataType);
 
 				pmmlExpression = AliasExpression.unwrap(pmmlExpression);
 

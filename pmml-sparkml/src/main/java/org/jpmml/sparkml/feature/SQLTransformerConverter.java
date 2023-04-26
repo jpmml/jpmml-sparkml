@@ -35,6 +35,7 @@ import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
+import org.jpmml.converter.TypeUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.AliasExpression;
 import org.jpmml.sparkml.DatasetUtil;
@@ -147,7 +148,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 			DataType dataType = DatasetUtil.translateDataType(expression.dataType());
 
-			OpType opType = ExpressionUtil.getOpType(dataType);
+			OpType opType = TypeUtil.getOpType(dataType);
 
 			pmmlExpression = AliasExpression.unwrap(pmmlExpression);
 

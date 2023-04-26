@@ -19,29 +19,10 @@
 package org.jpmml.sparkml;
 
 import org.apache.spark.sql.catalyst.expressions.Expression;
-import org.dmg.pmml.DataType;
-import org.dmg.pmml.OpType;
 
 public class ExpressionUtil {
 
 	private ExpressionUtil(){
-	}
-
-	static
-	public OpType getOpType(DataType dataType){
-
-		switch(dataType){
-			case STRING:
-				return OpType.CATEGORICAL;
-			case INTEGER:
-			case FLOAT:
-			case DOUBLE:
-				return OpType.CONTINUOUS;
-			case BOOLEAN:
-				return OpType.CATEGORICAL;
-			default:
-				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
-		}
 	}
 
 	static

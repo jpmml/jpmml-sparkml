@@ -43,6 +43,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.StringFeature;
+import org.jpmml.converter.TypeUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 
 public class SparkMLEncoder extends ModelEncoder {
@@ -152,7 +153,7 @@ public class SparkMLEncoder extends ModelEncoder {
 
 		DataType dataType = DatasetUtil.translateDataType(field.dataType());
 
-		OpType opType = ExpressionUtil.getOpType(dataType);
+		OpType opType = TypeUtil.getOpType(dataType);
 
 		return createDataField(name, opType, dataType);
 	}
