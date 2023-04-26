@@ -23,17 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.mining.MiningModel;
-import org.jpmml.converter.BinaryFeature;
-import org.jpmml.converter.ContinuousFeature;
-import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.xgboost.HasXGBoostOptions;
@@ -65,36 +60,21 @@ public class BoosterUtil {
 			throw new RuntimeException(ioe);
 		}
 
-		Function<Feature, Feature> function = new Function<Feature, Feature>(){
-
-			@Override
-			public Feature apply(Feature feature){
-
-				if(feature instanceof BinaryFeature){
-					BinaryFeature binaryFeature = (BinaryFeature)feature;
-
-					return binaryFeature;
-				} else
-
-				{
-					ContinuousFeature continuousFeature = feature.toContinuousFeature(DataType.FLOAT);
-
-					return continuousFeature;
-				}
-			}
-		};
-
 		Float missing = model.getMissing();
 		if(missing.isNaN()){
 			missing = null;
 		}
 
 		Map<String, Object> options = new LinkedHashMap<>();
-		options.put(HasXGBoostOptions.OPTION_MISSING, missing);
+		options.put(HasXGBoostOptions.OPTION_MISSING, converter.getOption(HasXGBoostOptions.OPTION_MISSING, missing));
 		options.put(HasXGBoostOptions.OPTION_COMPACT, converter.getOption(HasXGBoostOptions.OPTION_COMPACT, false));
+		options.put(HasXGBoostOptions.OPTION_NUMERIC, converter.getOption(HasXGBoostOptions.OPTION_NUMERIC, true));
+		options.put(HasXGBoostOptions.OPTION_PRUNE, converter.getOption(HasXGBoostOptions.OPTION_PRUNE, false));
 		options.put(HasXGBoostOptions.OPTION_NTREE_LIMIT, converter.getOption(HasXGBoostOptions.OPTION_NTREE_LIMIT, null));
 
-		Schema xgbSchema = schema.toTransformedSchema(function);
+		Boolean numeric = (Boolean)options.get(HasXGBoostOptions.OPTION_NUMERIC);
+
+		Schema xgbSchema = learner.toXGBoostSchema(numeric, schema);
 
 		return learner.encodeMiningModel(options, xgbSchema);
 	}
