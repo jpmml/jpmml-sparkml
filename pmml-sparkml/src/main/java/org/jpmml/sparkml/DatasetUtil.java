@@ -41,8 +41,11 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalog.Catalog;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.execution.QueryExecution;
+import org.apache.spark.sql.types.AtomicType;
 import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DoubleType;
+import org.apache.spark.sql.types.FloatType;
+import org.apache.spark.sql.types.FractionalType;
 import org.apache.spark.sql.types.IntegralType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
@@ -178,24 +181,57 @@ public class DatasetUtil {
 	static
 	public DataType translateDataType(org.apache.spark.sql.types.DataType sparkDataType){
 
-		if(sparkDataType instanceof StringType){
+		if(sparkDataType instanceof AtomicType){
+			return translateAtomicType((AtomicType)sparkDataType);
+		} else
+
+		{
+			throw new IllegalArgumentException("Expected atomic data type, got " + sparkDataType.typeName() + " data type");
+		}
+	}
+
+	static
+	public DataType translateAtomicType(org.apache.spark.sql.types.AtomicType atomicType){
+
+		if(atomicType instanceof StringType){
 			return DataType.STRING;
 		} else
 
-		if(sparkDataType instanceof IntegralType){
-			return DataType.INTEGER;
+		if(atomicType instanceof IntegralType){
+			return translateIntegralType((IntegralType)atomicType);
 		} else
 
-		if(sparkDataType instanceof DoubleType){
-			return DataType.DOUBLE;
+		if(atomicType instanceof FractionalType){
+			return translateFractionalType((FractionalType)atomicType);
 		} else
 
-		if(sparkDataType instanceof BooleanType){
+		if(atomicType instanceof BooleanType){
 			return DataType.BOOLEAN;
 		} else
 
 		{
-			throw new IllegalArgumentException("Expected string, integral, double or boolean data type, got " + sparkDataType.typeName() + " data type");
+			throw new IllegalArgumentException("Expected string, integral, fractional or boolean data type, got " + atomicType.typeName() + " data type");
+		}
+	}
+
+	static
+	public DataType translateIntegralType(IntegralType integralType){
+		return DataType.INTEGER;
+	}
+
+	static
+	public DataType translateFractionalType(FractionalType fractionalType){
+
+		if(fractionalType instanceof FloatType){
+			return DataType.FLOAT;
+		} else
+
+		if(fractionalType instanceof DoubleType){
+			return DataType.DOUBLE;
+		} else
+
+		{
+			throw new IllegalArgumentException("Expected float or double data type, got " + fractionalType.typeName() + " data type");
 		}
 	}
 

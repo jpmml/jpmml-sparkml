@@ -34,6 +34,7 @@ public class ExpressionUtil {
 			case STRING:
 				return OpType.CATEGORICAL;
 			case INTEGER:
+			case FLOAT:
 			case DOUBLE:
 				return OpType.CONTINUOUS;
 			case BOOLEAN:
