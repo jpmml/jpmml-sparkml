@@ -66,8 +66,10 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 			@Override
 			protected StructType updateSchema(StructType schema, PipelineModel pipelineModel){
+				String algorithm = getAlgorithm();
+				String dataset = getDataset();
 
-				if(MODEL_CHAIN.equals(getAlgorithm()) && AUDIT.equals(getDataset())){
+				if((MODEL_CHAIN).equals(algorithm) && (AUDIT).equals(dataset)){
 					StructType transformedSchema = pipelineModel.transformSchema(schema);
 
 					return schema
