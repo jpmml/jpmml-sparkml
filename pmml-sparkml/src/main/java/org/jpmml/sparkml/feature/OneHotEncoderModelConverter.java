@@ -27,6 +27,7 @@ import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.BinarizedCategoricalFeature;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -80,9 +81,7 @@ public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEnc
 		if(outputMode == InOutMode.MULTIPLE){
 			String[] outputCols = transformer.getOutputCols();
 
-			if(outputCols.length != features.size()){
-				throw new IllegalArgumentException("Expected " + outputCols.length + " features, got " + features.size() + " features");
-			}
+			SchemaUtil.checkSize(outputCols.length, features);
 
 			for(int i = 0; i < outputCols.length; i++){
 				String outputCol = outputCols[i];

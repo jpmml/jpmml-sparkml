@@ -37,9 +37,8 @@ import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.PredictionModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
-import org.jpmml.xgboost.HasXGBoostOptions;
 
-public class XGBoostRegressionModelConverter extends PredictionModelConverter<XGBoostRegressionModel> implements HasXGBoostOptions {
+public class XGBoostRegressionModelConverter extends PredictionModelConverter<XGBoostRegressionModel> implements HasSparkMLXGBoostOptions {
 
 	public XGBoostRegressionModelConverter(XGBoostRegressionModel model){
 		super(model);

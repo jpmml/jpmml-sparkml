@@ -114,6 +114,8 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 			pipelineModel = PipelineModelUtil.load(sparkSession, tmpPipelineDir);
 		}
 
+		schema = updateSchema(schema, pipelineModel);
+
 		Dataset<Row> inputDataset;
 
 		try(InputStream is = open(getInputCsvPath())){
@@ -123,7 +125,6 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 			inputDataset = DatasetUtil.loadCsv(sparkSession, tmpCsvFile);
 		}
-
 
 		inputDataset = DatasetUtil.castColumns(inputDataset, schema);
 
@@ -158,6 +159,10 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		}
 
 		return pmml;
+	}
+
+	protected StructType updateSchema(StructType schema, PipelineModel pipelineModel){
+		return schema;
 	}
 
 	static

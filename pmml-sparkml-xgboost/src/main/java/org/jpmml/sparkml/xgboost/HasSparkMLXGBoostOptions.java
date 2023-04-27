@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Villu Ruusmann
+ * Copyright (c) 2023 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,17 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml;
+package org.jpmml.sparkml.xgboost;
 
-import org.apache.spark.sql.catalyst.expressions.Expression;
+import org.jpmml.sparkml.HasSparkMLOptions;
+import org.jpmml.xgboost.HasXGBoostOptions;
 
-public class ExpressionUtil {
+public interface HasSparkMLXGBoostOptions extends HasSparkMLOptions, HasXGBoostOptions {
 
-	private ExpressionUtil(){
-	}
-
-	static
-	public String format(Expression expression){
-		return String.valueOf(expression);
-	}
+	String OPTION_INPUT_FLOAT = "input_float";
 }

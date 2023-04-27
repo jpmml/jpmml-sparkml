@@ -25,9 +25,8 @@ import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
-import org.jpmml.xgboost.HasXGBoostOptions;
 
-public class XGBoostClassificationModelConverter extends ProbabilisticClassificationModelConverter<XGBoostClassificationModel> implements HasXGBoostOptions {
+public class XGBoostClassificationModelConverter extends ProbabilisticClassificationModelConverter<XGBoostClassificationModel> implements HasSparkMLXGBoostOptions {
 
 	public XGBoostClassificationModelConverter(XGBoostClassificationModel model){
 		super(model);

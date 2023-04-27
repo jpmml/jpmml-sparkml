@@ -44,17 +44,17 @@ def build_modelchain_audit(audit_df, name):
 
 	genderVectorAssembler = VectorAssembler(inputCols = ["Income", "Hours"] + [occupationIndexer.getOutputCol()])
 
-	genderDt = DecisionTreeClassifier(maxDepth = 3, labelCol = genderIndexer.getOutputCol(), featuresCol = genderVectorAssembler.getOutputCol(), rawPredictionCol = "genderRanPrediction", predictionCol = "genderPrediction", probabilityCol = "genderProbability")
+	genderDt = DecisionTreeClassifier(maxDepth = 3, labelCol = genderIndexer.getOutputCol(), featuresCol = genderVectorAssembler.getOutputCol(), predictionCol = "genderPrediction", probabilityCol = "genderProbability")
 
-	genderVectorSlicer = VectorSlicer(indices = [1], inputCol = genderDt.getProbabilityCol(), outputCol = "slicedGenderProbability")
+	genderSqlTransformer = SQLTransformer(statement = "SELECT Adjusted, genderPrediction, genderProbability, Age, Employment, Education, Marital, Deductions FROM __THIS__")
 
-	adjustedFormula = RFormula(formula = "Adjusted ~ genderPrediction + Age + Employment + Education + Marital + Deductions", labelCol = "Adjusted", featuresCol = "adjustedFeatureVector")
+	genderVectorSlicer = VectorSlicer(indices = [1], inputCol = "genderProbability", outputCol = "slicedGenderProbability")
 
-	adjustedVectorAssembler = VectorAssembler(inputCols = [genderVectorSlicer.getOutputCol()] + [adjustedFormula.getFeaturesCol()])
+	adjustedFormula = RFormula(formula = "Adjusted ~ genderPrediction + slicedGenderProbability + Age + Employment + Education + Marital + Deductions", labelCol = "Adjusted", featuresCol = "adjustedFeatureVector")
 
-	adjustedLr = LogisticRegression(labelCol = adjustedFormula.getLabelCol(), featuresCol = adjustedVectorAssembler.getOutputCol())
+	adjustedLr = LogisticRegression(labelCol = adjustedFormula.getLabelCol(), featuresCol = adjustedFormula.getFeaturesCol())
 
-	build_classification(audit_df, Pipeline(stages = [genderIndexer, occupationIndexer, genderVectorAssembler, genderDt, genderVectorSlicer, adjustedFormula, adjustedVectorAssembler, adjustedLr]), adjustedIndexerModel, adjustedLr.getPredictionCol(), adjustedLr.getProbabilityCol(), name)
+	build_classification(audit_df, Pipeline(stages = [genderIndexer, occupationIndexer, genderVectorAssembler, genderDt, genderSqlTransformer, genderVectorSlicer, adjustedFormula, adjustedLr]), adjustedIndexerModel, adjustedLr.getPredictionCol(), adjustedLr.getProbabilityCol(), name)
 
 def build_classification_audit(audit_df, classifier, name):
 	stages = []
