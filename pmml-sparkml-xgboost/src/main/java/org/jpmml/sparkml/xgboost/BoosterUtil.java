@@ -23,12 +23,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.mining.MiningModel;
+import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.xgboost.HasXGBoostOptions;
@@ -58,6 +63,41 @@ public class BoosterUtil {
 			learner = XGBoostUtil.loadLearner(is);
 		} catch(IOException ioe){
 			throw new RuntimeException(ioe);
+		}
+
+		Boolean inputFloat = (Boolean)converter.getOption(HasSparkMLXGBoostOptions.OPTION_INPUT_FLOAT, null);
+		if((Boolean.TRUE).equals(inputFloat)){
+			Function<Feature, Feature> function = new Function<Feature, Feature>(){
+
+				@Override
+				public Feature apply(Feature feature){
+
+					if(feature instanceof ContinuousFeature){
+						ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+						DataType dataType = continuousFeature.getDataType();
+						switch(dataType){
+							case INTEGER:
+							case FLOAT:
+								break;
+							case DOUBLE:
+								{
+									Field<?> field = continuousFeature.getField();
+
+									field.setDataType(DataType.FLOAT);
+
+									return new ContinuousFeature(continuousFeature.getEncoder(), field);
+								}
+							default:
+								break;
+						}
+					}
+
+					return feature;
+				}
+			};
+
+			schema = schema.toTransformedSchema(function);
 		}
 
 		Float missing = model.getMissing();

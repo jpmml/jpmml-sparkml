@@ -22,4 +22,6 @@ import org.jpmml.sparkml.HasSparkMLOptions;
 import org.jpmml.xgboost.HasXGBoostOptions;
 
 public interface HasSparkMLXGBoostOptions extends HasSparkMLOptions, HasXGBoostOptions {
+
+	String OPTION_INPUT_FLOAT = "input_float";
 }
