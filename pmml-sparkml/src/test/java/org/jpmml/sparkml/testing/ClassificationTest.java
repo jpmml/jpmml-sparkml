@@ -131,12 +131,12 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateLogisticRegressionIris() throws Exception {
-		evaluate(LOGISTIC_REGRESSION, IRIS);
+		evaluate(LOGISTIC_REGRESSION, IRIS, new PMMLEquivalence(1e-13, 1e-13));
 	}
 
 	@Test
 	public void evaluateModelChainIris() throws Exception {
-		evaluate(MODEL_CHAIN, IRIS);
+		evaluate(MODEL_CHAIN, IRIS, new PMMLEquivalence(1e-13, 1e-13));
 	}
 
 	@Test
