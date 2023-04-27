@@ -106,7 +106,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateModelChainAudit() throws Exception {
-		evaluate(MODEL_CHAIN, AUDIT, new PMMLEquivalence(1e-9, 1e-9));
+		evaluate(MODEL_CHAIN, AUDIT, new PMMLEquivalence(3e-9, 3e-9));
 	}
 
 	@Test

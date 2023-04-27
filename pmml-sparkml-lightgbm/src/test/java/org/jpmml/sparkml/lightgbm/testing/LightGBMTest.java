@@ -18,11 +18,16 @@
  */
 package org.jpmml.sparkml.lightgbm.testing;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import org.jpmml.converter.testing.OptionsUtil;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.lightgbm.HasLightGBMOptions;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.junit.AfterClass;
@@ -39,7 +44,24 @@ public class LightGBMTest extends SparkMLEncoderBatchTest {
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
 		columnFilter = columnFilter.and(SparkMLEncoderBatchTest.excludePredictionFields());
 
-		return super.createBatch(algorithm, dataset, columnFilter, equivalence);
+		SparkMLEncoderBatch result = new SparkMLEncoderBatch(algorithm, dataset, columnFilter, equivalence){
+
+			@Override
+			public LightGBMTest getArchiveBatchTest(){
+				return LightGBMTest.this;
+			}
+
+			@Override
+			public List<Map<String, Object>> getOptionsMatrix(){
+				Map<String, Object> options = new LinkedHashMap<>();
+
+				options.put(HasLightGBMOptions.OPTION_COMPACT, new Boolean[]{false, true});
+
+				return OptionsUtil.generateOptionsMatrix(options);
+			}
+		};
+
+		return result;
 	}
 
 	@Test
