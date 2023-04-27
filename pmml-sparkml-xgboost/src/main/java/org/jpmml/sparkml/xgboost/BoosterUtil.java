@@ -41,7 +41,7 @@ public class BoosterUtil {
 	}
 
 	static
-	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M> & HasXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
+	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M> & HasSparkMLXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
 		M model = converter.getModel();
 
 		byte[] bytes;
