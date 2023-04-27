@@ -30,7 +30,6 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.Field;
 import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -76,7 +75,7 @@ public class SQLTransformerConverterTest {
 
 		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(SQLTransformerConverterTest.sparkSession, SQLTransformerConverterTest.schema, sqlStatement);
 
-		List<Field<?>> fields = SQLTransformerConverter.encodeLogicalPlan(encoder, logicalPlan);
+		SQLTransformerConverter.encodeLogicalPlan(encoder, logicalPlan);
 
 		Collection<DataField> dataFields = (encoder.getDataFields()).values();
 		for(DataField dataField : dataFields){

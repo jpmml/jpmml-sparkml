@@ -73,7 +73,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
       * Trigonometric functions `sin`, `asin`, `sinh`, `cos`, `acos`, `cosh`, `tan`, `atan`, `tanh`.
       * Aggregation functions `greatest` and `least`.
       * RegExp functions `regexp_replace` and `rlike`.
-      * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `substring`, `trim`, `ucase` and `upper`.
+      * String functions `char_length`, `character_length`, `concat`, `lcase`, `length`, `lower`, `replace`, `substring`, `trim`, `ucase` and `upper`.
       * Type cast functions `boolean`, `cast`, `double`, `int` and `string`.
       * Value functions `in`, `isnan`, `isnull`, `isnotnull`, `negative` and `positive`.
     * [`feature.StandardScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/StandardScalerModel.html) (the result of fitting a `feature.StandardScaler`)
@@ -129,7 +129,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark 1.5.X, 1.6.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 3.0.X, 3.1.X, 3.2.X or 3.3.X.
+* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X or 3.4.X.
 
 # Installation #
 
@@ -156,7 +156,8 @@ Active development branches:
 | 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) |
 | 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) |
 | 3.2.X | [`2.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.2.X) |
-| 3.3.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
+| 3.3.X | [`2.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.3.X) |
+| 3.4.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
 
 Archived development branches:
 

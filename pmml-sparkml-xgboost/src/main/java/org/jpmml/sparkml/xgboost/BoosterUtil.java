@@ -26,9 +26,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 import ml.dmlc.xgboost4j.scala.Booster;
+import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
+import org.apache.spark.ml.Model;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.mining.MiningModel;
-import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Schema;
@@ -43,7 +46,9 @@ public class BoosterUtil {
 	}
 
 	static
-	public <C extends ModelConverter<?> & HasXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
+	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M> & HasSparkMLXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
+		M model = converter.getModel();
+
 		byte[] bytes;
 
 		try {
@@ -60,30 +65,56 @@ public class BoosterUtil {
 			throw new RuntimeException(ioe);
 		}
 
-		Function<Feature, Feature> function = new Function<Feature, Feature>(){
+		Boolean inputFloat = (Boolean)converter.getOption(HasSparkMLXGBoostOptions.OPTION_INPUT_FLOAT, null);
+		if((Boolean.TRUE).equals(inputFloat)){
+			Function<Feature, Feature> function = new Function<Feature, Feature>(){
 
-			@Override
-			public Feature apply(Feature feature){
+				@Override
+				public Feature apply(Feature feature){
 
-				if(feature instanceof BinaryFeature){
-					BinaryFeature binaryFeature = (BinaryFeature)feature;
+					if(feature instanceof ContinuousFeature){
+						ContinuousFeature continuousFeature = (ContinuousFeature)feature;
 
-					return binaryFeature;
-				} else
+						DataType dataType = continuousFeature.getDataType();
+						switch(dataType){
+							case INTEGER:
+							case FLOAT:
+								break;
+							case DOUBLE:
+								{
+									Field<?> field = continuousFeature.getField();
 
-				{
-					ContinuousFeature continuousFeature = feature.toContinuousFeature(DataType.FLOAT);
+									field.setDataType(DataType.FLOAT);
 
-					return continuousFeature;
+									return new ContinuousFeature(continuousFeature.getEncoder(), field);
+								}
+							default:
+								break;
+						}
+					}
+
+					return feature;
 				}
-			}
-		};
+			};
+
+			schema = schema.toTransformedSchema(function);
+		}
+
+		Float missing = model.getMissing();
+		if(missing.isNaN()){
+			missing = null;
+		}
 
 		Map<String, Object> options = new LinkedHashMap<>();
+		options.put(HasXGBoostOptions.OPTION_MISSING, converter.getOption(HasXGBoostOptions.OPTION_MISSING, missing));
 		options.put(HasXGBoostOptions.OPTION_COMPACT, converter.getOption(HasXGBoostOptions.OPTION_COMPACT, false));
+		options.put(HasXGBoostOptions.OPTION_NUMERIC, converter.getOption(HasXGBoostOptions.OPTION_NUMERIC, true));
+		options.put(HasXGBoostOptions.OPTION_PRUNE, converter.getOption(HasXGBoostOptions.OPTION_PRUNE, false));
 		options.put(HasXGBoostOptions.OPTION_NTREE_LIMIT, converter.getOption(HasXGBoostOptions.OPTION_NTREE_LIMIT, null));
 
-		Schema xgbSchema = schema.toTransformedSchema(function);
+		Boolean numeric = (Boolean)options.get(HasXGBoostOptions.OPTION_NUMERIC);
+
+		Schema xgbSchema = learner.toXGBoostSchema(numeric, schema);
 
 		return learner.encodeMiningModel(options, xgbSchema);
 	}

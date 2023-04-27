@@ -21,6 +21,7 @@ package org.jpmml.sparkml;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.apache.spark.sql.catalyst.expressions.Abs;
 import org.apache.spark.sql.catalyst.expressions.Acos;
@@ -74,6 +75,7 @@ import org.apache.spark.sql.catalyst.expressions.Rint;
 import org.apache.spark.sql.catalyst.expressions.Sin;
 import org.apache.spark.sql.catalyst.expressions.Sinh;
 import org.apache.spark.sql.catalyst.expressions.Sqrt;
+import org.apache.spark.sql.catalyst.expressions.StringReplace;
 import org.apache.spark.sql.catalyst.expressions.StringTrim;
 import org.apache.spark.sql.catalyst.expressions.Substring;
 import org.apache.spark.sql.catalyst.expressions.Subtract;
@@ -85,6 +87,7 @@ import org.apache.spark.sql.catalyst.expressions.UnaryPositive;
 import org.apache.spark.sql.catalyst.expressions.Upper;
 import org.apache.spark.sql.types.Decimal;
 import org.dmg.pmml.Apply;
+import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.FieldRef;
@@ -93,6 +96,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.TypeUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
 import scala.Option;
@@ -331,7 +335,7 @@ public class ExpressionTranslator {
 					name = FieldNameUtil.create(dataType, ExpressionUtil.format(child));
 				}
 
-				OpType opType = ExpressionUtil.getOpType(dataType);
+				OpType opType = TypeUtil.getOpType(dataType);
 
 				pmmlExpression = AliasExpression.unwrap(pmmlExpression);
 
@@ -467,6 +471,16 @@ public class ExpressionTranslator {
 			Expression right = rlike.right();
 
 			return PMMLUtil.createApply(PMMLFunctions.MATCHES, translateInternal(left), translateInternal(right));
+		} else
+
+		if(expression instanceof StringReplace){
+			StringReplace stringReplace = (StringReplace)expression;
+
+			Expression srcExpr = stringReplace.srcExpr();
+			Expression searchExpr = stringReplace.searchExpr();
+			Expression replaceExpr = stringReplace.replaceExpr();
+
+			return PMMLUtil.createApply(PMMLFunctions.REPLACE, translateInternal(srcExpr), transformString(translateInternal(searchExpr), ExpressionTranslator::escapeSearchString), transformString(translateInternal(replaceExpr), ExpressionTranslator::escapeReplacementString));
 		} else
 
 		if(expression instanceof StringTrim){
@@ -623,6 +637,46 @@ public class ExpressionTranslator {
 		{
 			throw new IllegalArgumentException(formatMessage(expression));
 		}
+	}
+
+	static
+	private String escapeSearchString(String string){
+		return escape(string, "<([{\\^-=$!|]})?*+.>");
+	}
+
+	static
+	private String escapeReplacementString(String string){
+		return escape(string, "\\$");
+	}
+
+	static
+	private String escape(String string, String specialCharacters){
+		StringBuilder sb = new StringBuilder();
+
+		for(int i = 0; i < string.length(); i++){
+			char c = string.charAt(i);
+
+			if(specialCharacters.indexOf(c) > -1){
+				sb.append('\\');
+			}
+
+			sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	static
+	private Constant transformString(org.dmg.pmml.Expression pmmlExpression, Function<String, String> function){
+		Constant constant = (Constant)pmmlExpression;
+
+		if(constant.getDataType() != DataType.STRING){
+			throw new IllegalArgumentException();
+		}
+
+		constant.setValue(function.apply((String)constant.getValue()));
+
+		return constant;
 	}
 
 	static

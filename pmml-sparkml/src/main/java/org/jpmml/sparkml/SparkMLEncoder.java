@@ -26,14 +26,11 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.collect.Iterables;
-import org.apache.spark.sql.types.BooleanType;
-import org.apache.spark.sql.types.DoubleType;
-import org.apache.spark.sql.types.IntegralType;
-import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
@@ -45,7 +42,8 @@ import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.SchemaUtil;
-import org.jpmml.converter.WildcardFeature;
+import org.jpmml.converter.StringFeature;
+import org.jpmml.converter.TypeUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 
 public class SparkMLEncoder extends ModelEncoder {
@@ -101,23 +99,7 @@ public class SparkMLEncoder extends ModelEncoder {
 				dataField = createDataField(name);
 			}
 
-			Feature feature;
-
-			DataType dataType = dataField.requireDataType();
-			switch(dataType){
-				case STRING:
-					feature = new WildcardFeature(this, dataField);
-					break;
-				case INTEGER:
-				case DOUBLE:
-					feature = new ContinuousFeature(this, dataField);
-					break;
-				case BOOLEAN:
-					feature = new BooleanFeature(this, dataField);
-					break;
-				default:
-					throw new IllegalArgumentException("Data type " + dataType + " is not supported");
-			}
+			Feature feature = createFeature(dataField);
 
 			return Collections.singletonList(feature);
 		}
@@ -169,26 +151,28 @@ public class SparkMLEncoder extends ModelEncoder {
 
 		StructField field = schema.apply(name);
 
-		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
+		DataType dataType = DatasetUtil.translateDataType(field.dataType());
 
-		if(sparkDataType instanceof StringType){
-			return createDataField(name, OpType.CATEGORICAL, DataType.STRING);
-		} else
+		OpType opType = TypeUtil.getOpType(dataType);
 
-		if(sparkDataType instanceof IntegralType){
-			return createDataField(name, OpType.CONTINUOUS, DataType.INTEGER);
-		} else
+		return createDataField(name, opType, dataType);
+	}
 
-		if(sparkDataType instanceof DoubleType){
-			return createDataField(name, OpType.CONTINUOUS, DataType.DOUBLE);
-		} else
+	public Feature createFeature(Field<?> field){
+		DataType dataType = field.requireDataType();
+		OpType opType = field.requireOpType();
 
-		if(sparkDataType instanceof BooleanType){
-			return createDataField(name, OpType.CATEGORICAL, DataType.BOOLEAN);
-		} else
-
-		{
-			throw new IllegalArgumentException("Expected string, integral, double or boolean data type, got " + sparkDataType.typeName() + " data type");
+		switch(dataType){
+			case STRING:
+				return new StringFeature(this, field);
+			case INTEGER:
+			case FLOAT:
+			case DOUBLE:
+				return new ContinuousFeature(this, field);
+			case BOOLEAN:
+				return new BooleanFeature(this, field);
+			default:
+				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 		}
 	}
 

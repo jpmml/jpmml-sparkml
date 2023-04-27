@@ -39,9 +39,10 @@ import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.SchemaUtil;
+import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
-public class PredictionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> {
+public class PredictionModelConverter<T extends PredictionModel<Vector, T> & HasLabelCol & HasFeaturesCol & HasPredictionCol> extends ModelConverter<T> implements HasPredictionModelOptions {
 
 	public PredictionModelConverter(T model){
 		super(model);

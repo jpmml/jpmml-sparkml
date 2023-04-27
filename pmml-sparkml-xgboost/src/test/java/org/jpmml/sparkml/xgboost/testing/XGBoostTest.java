@@ -18,6 +18,9 @@
  */
 package org.jpmml.sparkml.xgboost.testing;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
@@ -26,11 +29,14 @@ import org.dmg.pmml.VerificationField;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.testing.Fields;
+import org.jpmml.converter.testing.OptionsUtil;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.FloatEquivalence;
 import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
+import org.jpmml.sparkml.xgboost.HasSparkMLXGBoostOptions;
+import org.jpmml.xgboost.HasXGBoostOptions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +56,18 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 			@Override
 			public XGBoostTest getArchiveBatchTest(){
 				return XGBoostTest.this;
+			}
+
+			@Override
+			public List<Map<String, Object>> getOptionsMatrix(){
+				Map<String, Object> options = new LinkedHashMap<>();
+
+				options.put(HasSparkMLXGBoostOptions.OPTION_INPUT_FLOAT, new Boolean[]{false, true});
+
+				options.put(HasXGBoostOptions.OPTION_COMPACT, new Boolean[]{false, true});
+				options.put(HasXGBoostOptions.OPTION_PRUNE, false);
+
+				return OptionsUtil.generateOptionsMatrix(options);
 			}
 
 			@Override
@@ -84,6 +102,11 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 	@Test
 	public void evaluateAuto() throws Exception {
 		evaluate("XGBoost", "Auto");
+	}
+
+	@Test
+	public void evaluateHousing() throws Exception {
+		evaluate("XGBoost", "Housing");
 	}
 
 	@Test
