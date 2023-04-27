@@ -5,10 +5,15 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
-import org.apache.spark.sql.types.StringType
+import org.apache.spark.sql.types.{DataType, StringType, StructType}
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
 
 var df = DatasetUtil.loadCsv(spark, new File("csv/Iris.csv"))
+
+val schema = df.schema
+val floatSchema = DataType.fromJson(schema.json.replaceAll("double", "float"))
+
+df = DatasetUtil.castColumns(df, floatSchema.asInstanceOf[StructType])
 
 DatasetUtil.storeSchema(df, new File("schema/Iris.json"))
 

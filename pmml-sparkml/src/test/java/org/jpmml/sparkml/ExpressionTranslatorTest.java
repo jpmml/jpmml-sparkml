@@ -252,6 +252,12 @@ public class ExpressionTranslatorTest {
 
 		checkValue("SPARKSQL", "ucase(\"SparkSql\")");
 		checkValue("SPARKSQL", "upper(\"SparkSql\")");
+
+		checkValue("ABCDEF", "replace(\"ABCabc\", \"abc\", \"DEF\")");
+		checkValue("ABCabc", "replace(\"ABCabc\", \"def\", \"DEF\")");
+		checkValue("ABC", "replace(\"ABCabc\", \"abc\", \"\")");
+
+		checkValue("ABC$abc", "replace(\"ABC.abc\", \".\", \"$\")");
 	}
 
 	@Test

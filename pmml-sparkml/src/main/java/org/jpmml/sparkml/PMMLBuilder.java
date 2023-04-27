@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,6 +49,7 @@ import org.apache.spark.ml.tuning.CrossValidatorModel;
 import org.apache.spark.ml.tuning.TrainValidationSplitModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.MiningField;
@@ -306,6 +308,23 @@ public class PMMLBuilder {
 		}
 
 		return file;
+	}
+
+	public PMMLBuilder extendSchema(Set<String> names){
+		StructType schema = getSchema();
+		PipelineModel pipelineModel = getPipelineModel();
+
+		StructType transformedSchema = pipelineModel.transformSchema(schema);
+
+		for(String name : names){
+			StructField field = transformedSchema.apply(name);
+
+			schema = schema.add(field);
+		}
+
+		setSchema(schema);
+
+		return this;
 	}
 
 	public PMMLBuilder putOption(String key, Object value){

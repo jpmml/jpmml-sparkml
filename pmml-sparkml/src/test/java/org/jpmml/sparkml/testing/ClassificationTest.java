@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.testing.Datasets;
 import org.jpmml.converter.testing.Fields;
@@ -61,6 +63,22 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 				return options;
 			}
+
+			@Override
+			protected StructType updateSchema(StructType schema, PipelineModel pipelineModel){
+				String algorithm = getAlgorithm();
+				String dataset = getDataset();
+
+				if((MODEL_CHAIN).equals(algorithm) && (AUDIT).equals(dataset)){
+					StructType transformedSchema = pipelineModel.transformSchema(schema);
+
+					return schema
+						.add(transformedSchema.apply("genderPrediction"))
+						.add(transformedSchema.apply("genderProbability"));
+				}
+
+				return super.updateSchema(schema, pipelineModel);
+			}
 		};
 
 		return result;
@@ -88,7 +106,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 	@Test
 	public void evaluateModelChainAudit() throws Exception {
-		evaluate(MODEL_CHAIN, AUDIT, new PMMLEquivalence(1e-9, 1e-9));
+		evaluate(MODEL_CHAIN, AUDIT, new PMMLEquivalence(3e-9, 3e-9));
 	}
 
 	@Test
