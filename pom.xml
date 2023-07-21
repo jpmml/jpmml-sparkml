@@ -76,7 +76,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter</artifactId>
-				<version>1.5.4</version>
+				<version>1.5.5</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -87,7 +87,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter-testing</artifactId>
-				<version>1.5.4</version>
+				<version>1.5.5</version>
 			</dependency>
 			
 			<dependency>
@@ -99,13 +99,13 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-lightgbm</artifactId>
-				<version>1.4.5</version>
+				<version>1.4.6</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-xgboost</artifactId>
-				<version>1.7.3</version>
+				<version>1.7.4</version>
 			</dependency>
 
 			<dependency>
