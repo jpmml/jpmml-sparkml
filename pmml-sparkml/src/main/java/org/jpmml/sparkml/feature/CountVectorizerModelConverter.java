@@ -25,8 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
+import com.sun.org.apache.xml.internal.utils.XMLChar;
 import org.apache.spark.ml.feature.CountVectorizerModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
@@ -41,7 +43,6 @@ import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.TermFeature;
-import org.jpmml.sparkml.TermUtil;
 
 public class CountVectorizerModelConverter extends FeatureConverter<CountVectorizerModel> {
 
@@ -105,15 +106,17 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 		List<Feature> result = new ArrayList<>();
 
 		String[] vocabulary = transformer.vocabulary();
-		for(int i = 0; i < vocabulary.length; i++){
-			String term = vocabulary[i];
+        for (String term : vocabulary) {
+            if (term.chars().anyMatch(XMLChar::isInvalid)) {
+                term = term.chars()
+                        .filter(XMLChar::isValid)
+                        .mapToObj(Character::toChars)
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(""));
+            }
 
-			if(TermUtil.hasPunctuation(term)){
-				throw new IllegalArgumentException("Punctuated vocabulary terms (" + term + ") are not supported");
-			}
-
-			result.add(new TermFeature(encoder, defineFunction, documentFeature, term));
-		}
+            result.add(new TermFeature(encoder, defineFunction, documentFeature, term));
+        }
 
 		return result;
 	}
