@@ -7,7 +7,7 @@ import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.functions.{lit, udf}
 import org.apache.spark.sql.types.StringType
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
-import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
+import org.jpmml.sparkml.feature.SparseToDenseTransformer
 
 var df = DatasetUtil.loadCsv(spark, new File("csv/Audit.csv"))
 df = DatasetUtil.castColumn(df, "Adjusted", StringType)

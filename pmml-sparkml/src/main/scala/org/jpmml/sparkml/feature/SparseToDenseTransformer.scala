@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.xgboost
+package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}

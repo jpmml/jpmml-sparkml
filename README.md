@@ -110,6 +110,13 @@ Java library and command-line application for converting Apache Spark ML pipelin
 </details>
 
 <details>
+  <summary>JPMML-SparkML</summary>
+
+  * Feature transformers:
+    * `org.jpmml.sparkml.feature.SparseToDenseTransformer`
+</details>
+
+<details>
   <summary>LightGBM</summary>
 
   * Prediction models:
@@ -120,8 +127,6 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>XGBoost</summary>
 
-  * Feature transformers:
-    * `org.jpmml.sparkml.xgboost.SparseToDenseTransformer`
   * Prediction models:
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostRegressionModel.html)
