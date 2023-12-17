@@ -50,6 +50,11 @@
 		<url>https://github.com/jpmml/jpmml-sparkml/issues</url>
 	</issueManagement>
 
+	<properties>
+		<synapseml-lightgbm.version>[0.9.5,)</synapseml-lightgbm.version>
+		<xgboost4j-spark.version>[1.0.0,)</xgboost4j-spark.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -111,7 +116,7 @@
 			<dependency>
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>synapseml-lightgbm_2.12</artifactId>
-				<version>[0.9.5,)</version>
+				<version>${synapseml-lightgbm.version}</version>
 			</dependency>
 
 			<dependency>
@@ -123,7 +128,7 @@
 			<dependency>
 				<groupId>ml.dmlc</groupId>
 				<artifactId>xgboost4j-spark_2.12</artifactId>
-				<version>[1.0.0,)</version>
+				<version>${xgboost4j-spark.version}</version>
 			</dependency>
 
 			<dependency>
@@ -178,7 +183,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.3</version>
 				<configuration>
 					<javadocVersion>1.8</javadocVersion>
 				</configuration>
@@ -186,7 +191,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.0.1</version>
 				<configuration>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 					<localCheckout>true</localCheckout>
@@ -196,7 +201,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.2.3</version>
 				<configuration>
 					<argLine>${jacoco.agent}</argLine>
 					<trimStackTrace>false</trimStackTrace>
@@ -205,7 +210,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.9</version>
+				<version>0.8.10</version>
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>
