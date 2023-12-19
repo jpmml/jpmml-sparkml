@@ -1,0 +1,107 @@
+/*
+ * Copyright (c) 2023 Villu Ruusmann
+ *
+ * This file is part of JPMML-SparkML
+ *
+ * JPMML-SparkML is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * JPMML-SparkML is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.jpmml.sparkml.feature;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.linalg.DenseVector;
+import org.apache.spark.ml.linalg.SparseVector;
+import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.linalg.VectorUDT;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.Metadata;
+import org.apache.spark.sql.types.MetadataBuilder;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
+import org.jpmml.sparkml.SparkSessionUtil;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class SparseToDenseTransformerTest {
+
+	@Test
+	public void transform(){
+		Metadata metadata = new MetadataBuilder()
+			.build();
+
+		StructType schema = new StructType()
+			.add(new StructField("featureVec", new VectorUDT(), false, metadata));
+
+		List<Row> rows = Arrays.asList(
+			RowFactory.create(new SparseVector(3, new int[]{1}, new double[]{1.0})),
+			RowFactory.create(new DenseVector(new double[]{0.0d, 0.0d, 1.0d})),
+			RowFactory.create(new SparseVector(3, new int[]{0}, new double[]{1.0}))
+		);
+
+		Dataset<Row> ds = sparkSession.createDataFrame(rows, schema);
+
+		Transformer transformer = new SparseToDenseTransformer()
+			.setInputCol("featureVec")
+			.setOutputCol("denseFeatureVec");
+
+		Dataset<Row> transformedDs = transformer.transform(ds);
+
+		assertNotNull(transformedDs.col("featureVec"));
+		assertNotNull(transformedDs.col("denseFeatureVec"));
+
+		List<Row> transformedRows = transformedDs.select("featureVec", "denseFeatureVec")
+			.collectAsList();
+
+		for(int i = 0; i < 3; i++){
+			Row transformedRow = transformedRows.get(i);
+
+			Vector vector = (Vector)transformedRow.get(0);
+			Vector denseVector = (Vector)transformedRow.get(1);
+
+			assertEquals(i == 1 ? 3 : 1, vector.numActives());
+			assertEquals(1, vector.numNonzeros());
+			assertEquals(3, vector.size());
+
+			assertTrue(denseVector instanceof DenseVector);
+
+			assertEquals(3, denseVector.numActives());
+			assertEquals(1, denseVector.numNonzeros());
+			assertEquals(3, denseVector.size());
+		}
+	}
+
+	@BeforeClass
+	static
+	public void createSparkSession(){
+		SparseToDenseTransformerTest.sparkSession = SparkSessionUtil.createSparkSession();
+	}
+
+	@AfterClass
+	static
+	public void destroySparkSession(){
+		SparseToDenseTransformerTest.sparkSession = SparkSessionUtil.destroySparkSession(SparseToDenseTransformerTest.sparkSession);
+	}
+
+	public static SparkSession sparkSession = null;
+}
