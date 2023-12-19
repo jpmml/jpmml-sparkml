@@ -29,21 +29,18 @@ import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.MetadataBuilder;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.jpmml.sparkml.SparkSessionUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.jpmml.sparkml.SparkMLTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class SparseToDenseTransformerTest {
+public class SparseToDenseTransformerTest extends SparkMLTest {
 
 	@Test
 	public void transform(){
@@ -59,7 +56,7 @@ public class SparseToDenseTransformerTest {
 			RowFactory.create(new SparseVector(3, new int[]{0}, new double[]{1.0}))
 		);
 
-		Dataset<Row> ds = sparkSession.createDataFrame(rows, schema);
+		Dataset<Row> ds = SparkMLTest.sparkSession.createDataFrame(rows, schema);
 
 		Transformer transformer = new SparseToDenseTransformer()
 			.setInputCol("featureVec")
@@ -90,18 +87,4 @@ public class SparseToDenseTransformerTest {
 			assertEquals(3, denseVector.size());
 		}
 	}
-
-	@BeforeClass
-	static
-	public void createSparkSession(){
-		SparseToDenseTransformerTest.sparkSession = SparkSessionUtil.createSparkSession();
-	}
-
-	@AfterClass
-	static
-	public void destroySparkSession(){
-		SparseToDenseTransformerTest.sparkSession = SparkSessionUtil.destroySparkSession(SparseToDenseTransformerTest.sparkSession);
-	}
-
-	public static SparkSession sparkSession = null;
 }

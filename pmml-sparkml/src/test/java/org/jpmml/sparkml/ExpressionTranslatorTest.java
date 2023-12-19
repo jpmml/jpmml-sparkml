@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
@@ -43,8 +42,6 @@ import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.FieldValueUtil;
 import org.jpmml.evaluator.VirtualEvaluationContext;
 import org.jpmml.model.ReflectionUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import scala.collection.JavaConversions;
 
@@ -52,7 +49,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class ExpressionTranslatorTest {
+public class ExpressionTranslatorTest extends SparkMLTest {
 
 	@Test
 	public void translateLogicalExpression(){
@@ -295,7 +292,7 @@ public class ExpressionTranslatorTest {
 
 	static
 	private Expression translateInternal(String sqlStatement){
-		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(ExpressionTranslatorTest.sparkSession, ExpressionTranslatorTest.schema, sqlStatement);
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(SparkMLTest.sparkSession, ExpressionTranslatorTest.schema, sqlStatement);
 
 		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
 		if(expressions.size() != 1){
@@ -375,20 +372,6 @@ public class ExpressionTranslatorTest {
 
 		assertTrue(ReflectionUtil.equals(expected, actual));
 	}
-
-	@BeforeClass
-	static
-	public void createSparkSession(){
-		ExpressionTranslatorTest.sparkSession = SparkSessionUtil.createSparkSession();
-	}
-
-	@AfterClass
-	static
-	public void destroySparkSession(){
-		ExpressionTranslatorTest.sparkSession = SparkSessionUtil.destroySparkSession(ExpressionTranslatorTest.sparkSession);
-	}
-
-	public static SparkSession sparkSession = null;
 
 	private static final StructType schema = new StructType()
 		.add("flag", DataTypes.BooleanType)
