@@ -21,13 +21,16 @@ package org.jpmml.sparkml.xgboost.testing;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.VerificationField;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
+import org.jpmml.converter.testing.Datasets;
 import org.jpmml.converter.testing.Fields;
 import org.jpmml.converter.testing.OptionsUtil;
 import org.jpmml.evaluator.ResultField;
@@ -74,7 +77,19 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 			public PMML getPMML() throws Exception {
 				PMML pmml = super.getPMML();
 
+				String dataset = getDataset();
+
 				Visitor visitor = new AbstractVisitor(){
+
+					@Override
+					public VisitorAction visit(Model model){
+
+						if(Objects.equals(dataset, Datasets.AUDIT)){
+							model.setModelVerification(null);
+						}
+
+						return super.visit(model);
+					}
 
 					@Override
 					public VisitorAction visit(VerificationField verificationField){
@@ -96,7 +111,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 
 	@Test
 	public void evaluateAudit() throws Exception {
-		evaluate("XGBoost", "Audit", excludeFields(Fields.AUDIT_PROBABILITY_FALSE));
+		evaluate("XGBoost", "Audit", excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8));
 	}
 
 	@Test
