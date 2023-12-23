@@ -18,7 +18,6 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +37,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.dmg.pmml.PMML;
+import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.SparkMLTest;
 import org.junit.Test;
 
@@ -63,29 +64,28 @@ public class InvalidCategoryTransformerTest extends SparkMLTest {
 
 		Dataset<Row> ds = SparkMLTest.sparkSession.createDataFrame(rows, schema);
 
-		List<PipelineStage> stages = new ArrayList<>();
-
 		StringIndexer stringIndexer = new StringIndexer()
 			.setStringOrderType("alphabetAsc")
 			.setInputCols(new String[]{"fruit", "color", "rating"})
 			.setOutputCols(new String[]{"fruitIdx", "colorIdx", "ratingIdx"})
 			.setHandleInvalid("keep");
 
-		stages.add(stringIndexer);
+		InvalidCategoryTransformer multiInvalidColumnTransformer = new InvalidCategoryTransformer()
+			.setInputCols(new String[]{"fruitIdx", "colorIdx"})
+			.setOutputCols(new String[]{"fruitIdxTransformed", "colorIdxTransformed"});
 
-		String[] indexedCols = stringIndexer.getOutputCols();
-		for(String indexedCol : indexedCols){
-			InvalidCategoryTransformer invalidCategoryTransformer = new InvalidCategoryTransformer()
-				.setInputCol(indexedCol)
-				.setOutputCol(indexedCol + "Transformed");
-
-			stages.add(invalidCategoryTransformer);
-		}
+		InvalidCategoryTransformer singleInvalidCategoryTransformer = new InvalidCategoryTransformer()
+			.setInputCol("ratingIdx")
+			.setOutputCol("ratingIdxTransformed");
 
 		Pipeline pipeline = new Pipeline()
-			.setStages(stages.toArray(new PipelineStage[stages.size()]));
+			.setStages(new PipelineStage[]{stringIndexer, multiInvalidColumnTransformer, singleInvalidCategoryTransformer});
 
 		PipelineModel pipelineModel = pipeline.fit(ds);
+
+		@SuppressWarnings("unused")
+		PMML pmml = new PMMLBuilder(schema, pipelineModel)
+			.build();
 
 		Dataset<Row> transformedDs = pipelineModel.transform(ds);
 

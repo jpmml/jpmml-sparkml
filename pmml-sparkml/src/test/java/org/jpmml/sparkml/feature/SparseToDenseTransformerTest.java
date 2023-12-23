@@ -21,6 +21,9 @@ package org.jpmml.sparkml.feature;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.spark.ml.Pipeline;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.linalg.DenseVector;
 import org.apache.spark.ml.linalg.SparseVector;
@@ -56,12 +59,18 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 			.setInputCol("featureVec")
 			.setOutputCol("denseFeatureVec");
 
-		Dataset<Row> transformedDs = transformer.transform(ds);
+		Pipeline pipeline = new Pipeline()
+			.setStages(new PipelineStage[]{transformer});
+
+		PipelineModel pipelineModel = pipeline.fit(ds);
+
+		Dataset<Row> transformedDs = pipelineModel.transform(ds);
 
 		assertNotNull(transformedDs.col("featureVec"));
 		assertNotNull(transformedDs.col("denseFeatureVec"));
 
-		List<Row> transformedRows = transformedDs.select("featureVec", "denseFeatureVec")
+		List<Row> transformedRows = transformedDs
+			.select("featureVec", "denseFeatureVec")
 			.collectAsList();
 
 		for(int i = 0; i < 3; i++){

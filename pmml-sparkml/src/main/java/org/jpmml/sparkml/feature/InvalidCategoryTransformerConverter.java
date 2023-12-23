@@ -18,7 +18,7 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +37,11 @@ import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Decorator;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
-import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.FeatureConverter.InOutMode;
+import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class InvalidCategoryTransformerConverter extends FeatureConverter<InvalidCategoryTransformer> {
+public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<InvalidCategoryTransformer> {
 
 	public InvalidCategoryTransformerConverter(InvalidCategoryTransformer transformer){
 		super(transformer);
@@ -50,9 +51,18 @@ public class InvalidCategoryTransformerConverter extends FeatureConverter<Invali
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		InvalidCategoryTransformer transformer = getTransformer();
 
-		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
+		InOutMode inputMode = getInputMode();
 
-		if(feature instanceof CategoricalFeature){
+		List<Feature> result = new ArrayList<>();
+
+		String[] inputCols = inputMode.getInputCols(transformer);
+		for(String inputCol : inputCols){
+			Feature feature = encoder.getOnlyFeature(inputCol);
+
+			if(!(feature instanceof CategoricalFeature)){
+				throw new IllegalArgumentException();
+			}
+
 			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
 			Field<?> field = categoricalFeature.getField();
@@ -106,12 +116,10 @@ public class InvalidCategoryTransformerConverter extends FeatureConverter<Invali
 				throw new IllegalArgumentException();
 			}
 
-			return Collections.singletonList(new CategoricalFeature(encoder, field, values));
-		} else
-
-		{
-			throw new IllegalArgumentException();
+			result.add(new CategoricalFeature(encoder, field, values));
 		}
+
+		return result;
 	}
 
 	static
