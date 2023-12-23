@@ -29,9 +29,6 @@ import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
-import org.apache.spark.sql.types.Metadata;
-import org.apache.spark.sql.types.MetadataBuilder;
-import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.jpmml.sparkml.SparkMLTest;
 import org.junit.Test;
@@ -44,11 +41,8 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 
 	@Test
 	public void transform(){
-		Metadata metadata = new MetadataBuilder()
-			.build();
-
 		StructType schema = new StructType()
-			.add(new StructField("featureVec", new VectorUDT(), false, metadata));
+			.add("featureVec", new VectorUDT(), false);
 
 		List<Row> rows = Arrays.asList(
 			RowFactory.create(new SparseVector(3, new int[]{1}, new double[]{1.0})),

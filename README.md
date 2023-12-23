@@ -113,6 +113,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
   <summary>JPMML-SparkML</summary>
 
   * Feature transformers:
+    * `org.jpmml.sparkml.feature.InvalidCategoryTransformer`
     * `org.jpmml.sparkml.feature.SparseToDenseTransformer`
 </details>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Villu Ruusmann
+ * Copyright (c) 2023 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -19,8 +19,7 @@
 package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.Transformer
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
-import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
+import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.param.shared.{HasInputCol, HasOutputCol}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
@@ -28,16 +27,16 @@ import org.apache.spark.sql.{Dataset, Row}
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.{StructField, StructType}
 
-class SparseToDenseTransformer(override val uid: String) extends Transformer with HasInputCol with HasOutputCol with DefaultParamsWritable {
+class InvalidCategoryTransformer(override val uid: String) extends Transformer with HasInputCol with HasOutputCol with DefaultParamsWritable {
 
-	def this() = this(Identifiable.randomUID("sparse2dense"))
+	def this() = this(Identifiable.randomUID("invalidCat"))
 
 	def setInputCol(value: String): this.type = set(inputCol, value)
 
 	def setOutputCol(value: String): this.type = set(outputCol, value)
 
 	override
-	def copy(extra: ParamMap): SparseToDenseTransformer = defaultCopy(extra)
+	def copy(extra: ParamMap): InvalidCategoryTransformer = defaultCopy(extra)
 
 	override
 	def transformSchema(schema: StructType): StructType = {
@@ -48,8 +47,7 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 
 		require(!inputFields.exists(_.name == outputColName), s"Output column $outputColName already exists")
 
-		val inputField = schema(inputColName)
-		val outputField = new StructField(outputColName, inputField.dataType, inputField.nullable)
+		val outputField = transformField(schema, inputColName, outputColName)
 
 		StructType(inputFields :+ outputField)
 	}
@@ -59,16 +57,37 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 		val inputColName = $(inputCol)
 		val outputColName = $(outputCol)
 
-		transformSchema(dataset.schema, logging = true)
+		val transformedSchema = transformSchema(dataset.schema, logging = true)
 
-		val converter = udf { vec: Vector => vec.toDense }
+		val inputField = transformedSchema(inputColName)
+		val outputField = transformedSchema(outputColName)
 
-		dataset.withColumn(outputColName, converter(dataset(inputColName)))
+		val inputMlAttr = NominalAttribute.fromStructField(inputField).asInstanceOf[NominalAttribute]
+		require(inputMlAttr.values.isDefined)
+
+		val inputLabels = inputMlAttr.values.get
+		require(inputLabels.last == "__unknown")
+
+		val outputLabels = inputLabels.slice(0, inputLabels.size - 1)
+		val outputMlAttr = NominalAttribute.defaultAttr
+			.withName(outputColName)
+			.withValues(outputLabels.asInstanceOf[Array[String]])
+			.toMetadata()
+
+		val converter = udf { x: Double => if (x >= 0 && x < outputLabels.size) x else Double.NaN }
+
+		dataset.withColumn(outputColName, converter(dataset(inputColName)).as(outputColName, outputMlAttr))
 	}
-}
 
-object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTransformer] {
+	private def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
+		val inputField = schema(inputColName)
 
-	override
-	def load(path: String): SparseToDenseTransformer = super.load(path)
+		val inputMlAttr = NominalAttribute.fromStructField(inputField).asInstanceOf[NominalAttribute]
+
+		var outputMlAttr = NominalAttribute.defaultAttr
+			.withName(outputColName)
+			.toMetadata()
+
+		StructField(outputColName, inputField.dataType, inputField.nullable, outputMlAttr)
+	}
 }
