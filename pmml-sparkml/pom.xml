@@ -76,36 +76,6 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
-				<version>4.8.1</version>
-				<configuration>
-					<charset>${project.build.sourceEncoding}</charset>
-					<compileOrder>ScalaThenJava</compileOrder>
-					<jvmArgs>
-						<jvmArg>-Xmx1024m</jvmArg>
-					</jvmArgs>
-					<scalaVersion>2.12.15</scalaVersion>
-				</configuration>
-				<executions>
-					<execution>
-						<id>scala-compile-first</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>add-source</goal>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>scala-test-compile</id>
-						<phase>process-test-resources</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 </project>
