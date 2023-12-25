@@ -21,6 +21,7 @@ package org.jpmml.sparkml.lightgbm.testing;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.IntegrationTest;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
@@ -28,7 +29,7 @@ import org.jpmml.evaluator.testing.SimpleArchiveBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.junit.Test;
 
-public class LightGBMTest extends IntegrationTest {
+public class LightGBMTest extends IntegrationTest implements Datasets {
 
 	public LightGBMTest(){
 		super(new PMMLEquivalence(1e-14, 1e-14));
@@ -43,16 +44,16 @@ public class LightGBMTest extends IntegrationTest {
 
 	@Test
 	public void evaluateLightGBMAudit() throws Exception {
-		evaluate("LightGBM", "Audit");
+		evaluate("LightGBM", AUDIT);
 	}
 
 	@Test
 	public void evaluateLightGBMAuto() throws Exception {
-		evaluate("LightGBM", "Auto");
+		evaluate("LightGBM", AUTO);
 	}
 
 	@Test
 	public void evaluateLightGBMIris() throws Exception {
-		evaluate("LightGBM", "Iris");
+		evaluate("LightGBM", IRIS);
 	}
 }

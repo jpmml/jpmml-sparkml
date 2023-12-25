@@ -18,6 +18,9 @@
  */
 package org.jpmml.sparkml.xgboost.testing;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,14 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
+import ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel;
+import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.PredictionModel;
+import org.apache.spark.ml.util.MLReader;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.VerificationField;
@@ -36,6 +47,8 @@ import org.jpmml.converter.testing.OptionsUtil;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.FloatEquivalence;
 import org.jpmml.model.visitors.AbstractVisitor;
+import org.jpmml.sparkml.ArchiveUtil;
+import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.jpmml.sparkml.xgboost.HasSparkMLXGBoostOptions;
@@ -44,7 +57,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class XGBoostTest extends SparkMLEncoderBatchTest {
+public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	public XGBoostTest(){
 		super(new FloatEquivalence(12));
@@ -84,7 +97,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 					@Override
 					public VisitorAction visit(Model model){
 
-						if(Objects.equals(dataset, Datasets.AUDIT)){
+						if(Objects.equals(dataset, AUDIT)){
 							model.setModelVerification(null);
 						}
 
@@ -104,6 +117,86 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 
 				return pmml;
 			}
+
+			@Override
+			protected PipelineModel loadPipelineModel(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+				String dataset = getDataset();
+
+				if(Objects.equals(dataset, AUDIT_NA)){
+					return loadPipelineModel(sparkSession, "Transformers", "XGBoostClassificationModel", tmpResources);
+				} else
+
+				if(Objects.equals(dataset, AUTO_NA)){
+					return loadPipelineModel(sparkSession, "Transformers", "XGBoostRegressionModel", tmpResources);
+				} else
+
+				{
+					return super.loadPipelineModel(sparkSession, tmpResources);
+				}
+			}
+
+			private PipelineModel loadPipelineModel(SparkSession sparkSession, String pipelineModelName, String modelName, List<File> tmpResources) throws IOException {
+				String dataset = getDataset();
+
+				PipelineModel pipelineModel;
+
+				try(InputStream is = open("/pipeline/" + pipelineModelName + dataset + ".zip")){
+					File tmpZipFile = toTmpFile(is, pipelineModelName + dataset, ".zip");
+
+					tmpResources.add(tmpZipFile);
+
+					File tmpPipelineModelDir = ArchiveUtil.uncompress(tmpZipFile);
+
+					tmpResources.add(tmpPipelineModelDir);
+
+					pipelineModel = PipelineModelUtil.load(sparkSession, tmpPipelineModelDir);
+				}
+
+				PredictionModel<?, ?> model;
+
+				try(InputStream is = open("/pipeline/" + modelName + dataset + ".zip")){
+					File tmpZipFile = toTmpFile(is, modelName + dataset, ".zip");
+
+					tmpResources.add(tmpZipFile);
+
+					File tmpModelDir = ArchiveUtil.uncompress(tmpZipFile);
+
+					tmpResources.add(tmpModelDir);
+
+					MLReader<?> mlReader;
+
+					if(modelName.endsWith("ClassificationModel")){
+						mlReader = new XGBoostClassificationModel.XGBoostClassificationModelReader();
+					} else
+
+					if(modelName.endsWith("RegressionModel")){
+						mlReader = new XGBoostRegressionModel.XGBoostRegressionModelReader();
+					} else
+
+					{
+						throw new IllegalArgumentException();
+					}
+
+					mlReader.session(sparkSession);
+
+					model = (PredictionModel<?, ?>)mlReader.load(tmpModelDir.getAbsolutePath());
+				}
+
+				PipelineModelUtil.addStage(pipelineModel, (pipelineModel.stages()).length, model);
+
+				return pipelineModel;
+			}
+
+			@Override
+			public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
+				String dataset = getDataset();
+
+				if(Objects.equals(dataset, AUDIT_NA) || Objects.equals(dataset, AUTO_NA)){
+					return null;
+				}
+
+				return super.getVerificationDataset(inputDataset);
+			}
 		};
 
 		return result;
@@ -111,22 +204,32 @@ public class XGBoostTest extends SparkMLEncoderBatchTest {
 
 	@Test
 	public void evaluateAudit() throws Exception {
-		evaluate("XGBoost", "Audit", excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8));
+		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8));
+	}
+
+	@Test
+	public void evaluateAuditNA() throws Exception {
+		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8));
 	}
 
 	@Test
 	public void evaluateAuto() throws Exception {
-		evaluate("XGBoost", "Auto");
+		evaluate("XGBoost", AUTO);
+	}
+
+	@Test
+	public void evaluateAutoNA() throws Exception {
+		evaluate("XGBoost", AUTO_NA);
 	}
 
 	@Test
 	public void evaluateHousing() throws Exception {
-		evaluate("XGBoost", "Housing");
+		evaluate("XGBoost", HOUSING);
 	}
 
 	@Test
 	public void evaluateIris() throws Exception {
-		evaluate("XGBoost", "Iris", new FloatEquivalence(16));
+		evaluate("XGBoost", IRIS, new FloatEquivalence(16));
 	}
 
 	@BeforeClass
