@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -55,7 +56,7 @@ public class PipelineModelUtil {
 
 	static
 	public void addStage(PipelineModel pipelineModel, int index, Transformer transformer){
-		List<Transformer> stages = Arrays.asList(pipelineModel.stages());
+		List<Transformer> stages = new ArrayList<>(Arrays.asList(pipelineModel.stages()));
 
 		stages.add(index, transformer);
 
@@ -64,7 +65,7 @@ public class PipelineModelUtil {
 
 	static
 	public Transformer removeStage(PipelineModel pipelineModel, int index){
-		List<Transformer> stages = Arrays.asList(pipelineModel.stages());
+		List<Transformer> stages = new ArrayList<>(Arrays.asList(pipelineModel.stages()));
 
 		Transformer result = stages.remove(index);
 
