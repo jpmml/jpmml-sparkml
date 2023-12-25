@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -31,7 +32,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -39,13 +42,35 @@ import java.util.zip.ZipOutputStream;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.MoreFiles;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.util.MLReader;
 import org.apache.spark.ml.util.MLWriter;
 import org.apache.spark.sql.SparkSession;
+import org.jpmml.model.ReflectionUtil;
 
 public class PipelineModelUtil {
 
 	private PipelineModelUtil(){
+	}
+
+	static
+	public void addStage(PipelineModel pipelineModel, int index, Transformer transformer){
+		List<Transformer> stages = Arrays.asList(pipelineModel.stages());
+
+		stages.add(index, transformer);
+
+		ReflectionUtil.setFieldValue(PipelineModelUtil.FIELD_STAGES, pipelineModel, stages.toArray(new Transformer[stages.size()]));
+	}
+
+	static
+	public Transformer removeStage(PipelineModel pipelineModel, int index){
+		List<Transformer> stages = Arrays.asList(pipelineModel.stages());
+
+		Transformer result = stages.remove(index);
+
+		ReflectionUtil.setFieldValue(PipelineModelUtil.FIELD_STAGES, pipelineModel, stages.toArray(new Transformer[stages.size()]));
+
+		return result;
 	}
 
 	static
@@ -177,4 +202,6 @@ public class PipelineModelUtil {
 			}
 		}
 	}
+
+	private static final Field FIELD_STAGES = ReflectionUtil.getField(PipelineModel.class, "stages");
 }
