@@ -19,28 +19,12 @@
 package org.jpmml.sparkml;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
-import com.google.common.io.ByteStreams;
 import com.google.common.io.MoreFiles;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
@@ -84,7 +68,7 @@ public class PipelineModelUtil {
 
 	static
 	public PipelineModel loadZip(SparkSession sparkSession, File file) throws IOException {
-		File tmpDir = uncompress(file);
+		File tmpDir = ArchiveUtil.uncompress(file);
 
 		PipelineModel pipelineModel = load(sparkSession, tmpDir);
 
@@ -109,99 +93,9 @@ public class PipelineModelUtil {
 
 		store(pipelineModel, tmpDir);
 
-		compress(tmpDir, file);
+		ArchiveUtil.compress(tmpDir, file);
 
 		MoreFiles.deleteRecursively(tmpDir.toPath());
-	}
-
-	static
-	public void compress(File dir, File file) throws IOException {
-		Path dirPath = Paths.get(dir.getAbsolutePath());
-
-		try(OutputStream os = new FileOutputStream(file)){
-			ZipOutputStream zos = new ZipOutputStream(os);
-
-			FileVisitor<Path> dirFileVisitor = new SimpleFileVisitor<Path>(){
-
-				@Override
-				public FileVisitResult visitFile(Path path, BasicFileAttributes mainAtts) throws IOException {
-					File dirFile = path.toFile();
-
-					Path relativePath = dirPath.relativize(path);
-
-					ZipEntry entry = new ZipEntry(relativePath.toString());
-					entry.setSize(dirFile.length());
-					entry.setTime(dirFile.lastModified());
-
-					zos.putNextEntry(entry);
-
-					try(InputStream is = new FileInputStream(dirFile)){
-						ByteStreams.copy(is, zos);
-					}
-
-					zos.closeEntry();
-
-					return FileVisitResult.CONTINUE;
-				}
-			};
-
-			Files.walkFileTree(dirPath, dirFileVisitor);
-
-			zos.finish();
-		}
-	}
-
-	static
-	public File uncompress(File file) throws IOException {
-
-		try(ZipFile zipFile = new ZipFile(file)){
-			File tmpDir = File.createTempFile("PipelineModel", "");
-			if(!tmpDir.delete()){
-				throw new IOException();
-			}
-
-			tmpDir.mkdirs();
-
-			uncompress(zipFile, tmpDir);
-
-			return tmpDir;
-		}
-	}
-
-	static
-	public void uncompress(File file, File dir) throws IOException {
-
-		try(ZipFile zipFile = new ZipFile(file)){
-			uncompress(zipFile, dir);
-		}
-	}
-
-	static
-	private void uncompress(ZipFile zipFile, File dir) throws IOException {
-
-		for(Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements(); ){
-			ZipEntry entry = entries.nextElement();
-
-			if(entry.isDirectory()){
-				continue;
-			}
-
-			try(InputStream is = zipFile.getInputStream(entry)){
-				File file = new File(dir, entry.getName());
-
-				File parentDir = file.getParentFile();
-				if(!parentDir.exists()){
-
-					if(!parentDir.mkdirs()){
-						throw new IOException(parentDir.getAbsolutePath());
-					}
-				}
-
-				try(OutputStream os = new FileOutputStream(file)){
-					ByteStreams.copy(is, os);
-				}
-			}
-		}
 	}
 
 	private static final Field FIELD_STAGES = ReflectionUtil.getField(PipelineModel.class, "stages");

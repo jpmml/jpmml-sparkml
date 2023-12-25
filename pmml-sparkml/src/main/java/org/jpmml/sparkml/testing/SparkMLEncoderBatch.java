@@ -42,6 +42,7 @@ import org.dmg.pmml.PMML;
 import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.sparkml.ArchiveUtil;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.PipelineModelUtil;
@@ -107,7 +108,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 			tmpResources.add(tmpZipFile);
 
-			File tmpPipelineDir = PipelineModelUtil.uncompress(tmpZipFile);
+			File tmpPipelineDir = ArchiveUtil.uncompress(tmpZipFile);
 
 			tmpResources.add(tmpPipelineDir);
 
