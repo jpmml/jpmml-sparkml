@@ -72,7 +72,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		return "/schema/" + getDataset() + ".json";
 	}
 
-	public String getPipelineZipPath(){
+	public String getPipelineModelZipPath(){
 		return "/pipeline/" + getAlgorithm() + getDataset() + ".zip";
 	}
 
@@ -91,41 +91,13 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 		List<File> tmpResources = new ArrayList<>();
 
-		StructType schema;
+		StructType schema = loadSchema(sparkSession, tmpResources);
 
-		try(InputStream is = open(getSchemaJsonPath())){
-			File tmpSchemaFile = toTmpFile(is, getDataset(), ".json");
-
-			tmpResources.add(tmpSchemaFile);
-
-			schema = DatasetUtil.loadSchema(tmpSchemaFile);
-		}
-
-		PipelineModel pipelineModel;
-
-		try(InputStream is = open(getPipelineZipPath())){
-			File tmpZipFile = toTmpFile(is, getAlgorithm() + getDataset(), ".zip");
-
-			tmpResources.add(tmpZipFile);
-
-			File tmpPipelineDir = ArchiveUtil.uncompress(tmpZipFile);
-
-			tmpResources.add(tmpPipelineDir);
-
-			pipelineModel = PipelineModelUtil.load(sparkSession, tmpPipelineDir);
-		}
+		PipelineModel pipelineModel = loadPipelineModel(sparkSession, tmpResources);
 
 		schema = updateSchema(schema, pipelineModel);
 
-		Dataset<Row> inputDataset;
-
-		try(InputStream is = open(getInputCsvPath())){
-			File tmpCsvFile = toTmpFile(is, getDataset(), ".csv");
-
-			tmpResources.add(tmpCsvFile);
-
-			inputDataset = DatasetUtil.loadCsv(sparkSession, tmpCsvFile);
-		}
+		Dataset<Row> inputDataset = loadInput(sparkSession, tmpResources);
 
 		inputDataset = DatasetUtil.castColumns(inputDataset, schema);
 
@@ -162,12 +134,49 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		return pmml;
 	}
 
+	protected StructType loadSchema(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+
+		try(InputStream is = open(getSchemaJsonPath())){
+			File tmpSchemaFile = toTmpFile(is, getDataset(), ".json");
+
+			tmpResources.add(tmpSchemaFile);
+
+			return DatasetUtil.loadSchema(tmpSchemaFile);
+		}
+	}
+
+	protected PipelineModel loadPipelineModel(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+
+		try(InputStream is = open(getPipelineModelZipPath())){
+			File tmpZipFile = toTmpFile(is, getAlgorithm() + getDataset(), ".zip");
+
+			tmpResources.add(tmpZipFile);
+
+			File tmpPipelineModelDir = ArchiveUtil.uncompress(tmpZipFile);
+
+			tmpResources.add(tmpPipelineModelDir);
+
+			return PipelineModelUtil.load(sparkSession, tmpPipelineModelDir);
+		}
+	}
+
 	protected StructType updateSchema(StructType schema, PipelineModel pipelineModel){
 		return schema;
 	}
 
+	protected Dataset<Row> loadInput(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+
+		try(InputStream is = open(getInputCsvPath())){
+			File tmpCsvFile = toTmpFile(is, getDataset(), ".csv");
+
+			tmpResources.add(tmpCsvFile);
+
+			return DatasetUtil.loadCsv(sparkSession, tmpCsvFile);
+		}
+	}
+
 	static
-	private File toTmpFile(InputStream is, String prefix, String suffix) throws IOException {
+	protected File toTmpFile(InputStream is, String prefix, String suffix) throws IOException {
 		File tmpFile = File.createTempFile(prefix, suffix);
 
 		try(OutputStream os = new FileOutputStream(tmpFile)){
