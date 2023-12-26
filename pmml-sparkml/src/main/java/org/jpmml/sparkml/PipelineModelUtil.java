@@ -60,7 +60,7 @@ public class PipelineModelUtil {
 
 	static
 	public PipelineModel load(SparkSession sparkSession, File dir) throws IOException {
-		MLReader<PipelineModel> mlReader = new PipelineModel.PipelineModelReader();
+		MLReader<PipelineModel> mlReader = PipelineModel.read();
 		mlReader.session(sparkSession);
 
 		return mlReader.load(dir.getAbsolutePath());

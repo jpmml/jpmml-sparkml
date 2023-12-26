@@ -166,11 +166,11 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 					MLReader<?> mlReader;
 
 					if(modelName.endsWith("ClassificationModel")){
-						mlReader = new XGBoostClassificationModel.XGBoostClassificationModelReader();
+						mlReader = XGBoostClassificationModel.read();
 					} else
 
 					if(modelName.endsWith("RegressionModel")){
-						mlReader = new XGBoostRegressionModel.XGBoostRegressionModelReader();
+						mlReader = XGBoostRegressionModel.read();
 					} else
 
 					{
