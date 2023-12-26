@@ -48,8 +48,18 @@ public class LightGBMTest extends IntegrationTest implements Datasets {
 	}
 
 	@Test
+	public void evaluateLightGBMAuditNA() throws Exception {
+		evaluate("LightGBM", AUDIT_NA);
+	}
+
+	@Test
 	public void evaluateLightGBMAuto() throws Exception {
 		evaluate("LightGBM", AUTO);
+	}
+
+	@Test
+	public void evaluateLightGBMAutoNA() throws Exception {
+		evaluate("LightGBM", AUTO_NA);
 	}
 
 	@Test
