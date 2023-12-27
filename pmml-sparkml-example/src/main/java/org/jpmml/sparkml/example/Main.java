@@ -37,6 +37,7 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.metro.MetroJAXBUtil;
+import org.jpmml.sparkml.ArchiveUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
@@ -187,7 +188,7 @@ public class Main {
 			logger.info("Loading pipeline model..");
 
 			if(this.pipelineInput.isFile()){
-				this.pipelineInput = PipelineModelUtil.uncompress(this.pipelineInput);
+				this.pipelineInput = ArchiveUtil.uncompress(this.pipelineInput);
 			}
 
 			long begin = System.currentTimeMillis();

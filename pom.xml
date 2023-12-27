@@ -50,6 +50,14 @@
 		<url>https://github.com/jpmml/jpmml-sparkml/issues</url>
 	</issueManagement>
 
+	<properties>
+		<synapseml-lightgbm.version>[0.9.5,)</synapseml-lightgbm.version>
+		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
+		<xgboost4j-spark.version>[1.0.0, 2.0.1]</xgboost4j-spark.version>
+
+		<skipTests>false</skipTests>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -76,7 +84,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter</artifactId>
-				<version>1.5.4</version>
+				<version>1.5.5</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -87,7 +95,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter-testing</artifactId>
-				<version>1.5.4</version>
+				<version>1.5.5</version>
 			</dependency>
 			
 			<dependency>
@@ -99,19 +107,19 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-lightgbm</artifactId>
-				<version>1.4.5</version>
+				<version>1.5.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-xgboost</artifactId>
-				<version>1.7.3</version>
+				<version>1.8.1</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>synapseml-lightgbm_2.12</artifactId>
-				<version>[0.9.5,)</version>
+				<version>${synapseml-lightgbm.version}</version>
 			</dependency>
 
 			<dependency>
@@ -123,7 +131,7 @@
 			<dependency>
 				<groupId>ml.dmlc</groupId>
 				<artifactId>xgboost4j-spark_2.12</artifactId>
-				<version>[1.0.0,)</version>
+				<version>${xgboost4j-spark.version}</version>
 			</dependency>
 
 			<dependency>
@@ -178,7 +186,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.3</version>
 				<configuration>
 					<javadocVersion>1.8</javadocVersion>
 				</configuration>
@@ -186,8 +194,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.0.1</version>
 				<configuration>
+					<!-- See org.sonatype.oss:oss-parent:7 -->
+					<arguments>-Psonatype-oss-release -DskipTests=${skipTests}</arguments>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 					<localCheckout>true</localCheckout>
 					<pushChanges>false</pushChanges>
@@ -196,16 +206,47 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.2.3</version>
 				<configuration>
 					<argLine>${jacoco.agent}</argLine>
+					<skipTests>${skipTests}</skipTests>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>4.8.1</version>
+				<configuration>
+					<charset>${project.build.sourceEncoding}</charset>
+					<compileOrder>ScalaThenJava</compileOrder>
+					<jvmArgs>
+						<jvmArg>-Xmx1024m</jvmArg>
+					</jvmArgs>
+					<scalaVersion>2.12.15</scalaVersion>
+				</configuration>
+				<executions>
+					<execution>
+						<id>scala-compile-first</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>add-source</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>scala-test-compile</id>
+						<phase>process-test-resources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.9</version>
+				<version>0.8.10</version>
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>

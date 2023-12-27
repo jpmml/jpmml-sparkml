@@ -110,6 +110,14 @@ Java library and command-line application for converting Apache Spark ML pipelin
 </details>
 
 <details>
+  <summary>JPMML-SparkML</summary>
+
+  * Feature transformers:
+    * `org.jpmml.sparkml.feature.InvalidCategoryTransformer`
+    * `org.jpmml.sparkml.feature.SparseToDenseTransformer`
+</details>
+
+<details>
   <summary>LightGBM</summary>
 
   * Prediction models:
@@ -120,8 +128,6 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>XGBoost</summary>
 
-  * Feature transformers:
-    * `org.jpmml.sparkml.xgboost.SparseToDenseTransformer`
   * Prediction models:
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostRegressionModel.html)
@@ -247,6 +253,7 @@ spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-
 
 # Documentation #
 
+* [Training PySpark LightGBM pipelines](https://openscoring.io/blog/2023/05/26/pyspark_lightgbm_pipeline/)
 * [Converting logistic regression models to PMML documents](https://openscoring.io/blog/2020/01/19/converting_logistic_regression_pmml/#apache-spark)
 * [Deploying Apache Spark ML pipeline models on Openscoring REST web service](https://openscoring.io/blog/2020/02/16/deploying_sparkml_pipeline_openscoring_rest/)
 * [Converting Apache Spark ML pipeline models to PMML documents](https://openscoring.io/blog/2018/07/09/converting_sparkml_pipeline_pmml/)

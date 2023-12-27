@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.xgboost
+package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
@@ -43,6 +43,7 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 	def transformSchema(schema: StructType): StructType = {
 		val inputColName = $(inputCol)
 		val outputColName = $(outputCol)
+
 		val inputFields = schema.fields
 
 		require(!inputFields.exists(_.name == outputColName), s"Output column $outputColName already exists")
@@ -55,11 +56,14 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 
 	override 
 	def transform(dataset: Dataset[_]): Dataset[Row] = {
+		val inputColName = $(inputCol)
+		val outputColName = $(outputCol)
+
 		transformSchema(dataset.schema, logging = true)
 
 		val converter = udf { vec: Vector => vec.toDense }
 
-		dataset.withColumn($(outputCol), converter(dataset($(inputCol))))
+		dataset.withColumn(outputColName, converter(dataset(inputColName)))
 	}
 }
 
