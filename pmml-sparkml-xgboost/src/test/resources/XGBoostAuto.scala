@@ -5,7 +5,7 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.{FloatType, StringType}
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
-import org.jpmml.sparkml.xgboost.SparseToDenseTransformer
+import org.jpmml.sparkml.feature.SparseToDenseTransformer
 
 var df = DatasetUtil.loadCsv(spark, new File("csv/Auto.csv"))
 df = DatasetUtil.castColumn(df, "origin", StringType)

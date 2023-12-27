@@ -19,7 +19,6 @@
 package org.jpmml.sparkml;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
@@ -27,6 +26,7 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ScalarLabel;
@@ -89,11 +89,9 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 		if(label instanceof ScalarLabel){
 			ScalarLabel scalarLabel = (ScalarLabel)label;
 
-			for(Feature feature : features){
-
-				if(Objects.equals(scalarLabel.getName(), feature.getName())){
-					throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
-				}
+			Feature labelFeature = FeatureUtil.findLabelFeature(features, scalarLabel);
+			if(labelFeature != null){
+				throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
 			}
 		}
 	}

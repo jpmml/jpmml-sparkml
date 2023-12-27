@@ -88,6 +88,8 @@ public class DatasetUtil {
 			.format("csv")
 			.option("header", true)
 			.option("inferSchema", true)
+			.option("nullValue", "N/A")
+			.option("nanValue", "N/A")
 			.load(file.getAbsolutePath());
 	}
 
