@@ -52,7 +52,8 @@
 
 	<properties>
 		<synapseml-lightgbm.version>[0.9.5,)</synapseml-lightgbm.version>
-		<xgboost4j-spark.version>[1.0.0,)</xgboost4j-spark.version>
+		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
+		<xgboost4j-spark.version>[1.0.0, 2.0.1]</xgboost4j-spark.version>
 	</properties>
 
 	<dependencyManagement>
