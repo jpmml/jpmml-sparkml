@@ -37,12 +37,10 @@ import org.dmg.pmml.PMML;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
 import org.dmg.pmml.association.Item;
-import org.jpmml.converter.BooleanFeature;
-import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.SchemaUtil;
-import org.jpmml.converter.StringFeature;
 import org.jpmml.converter.TypeUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 
@@ -164,13 +162,11 @@ public class SparkMLEncoder extends ModelEncoder {
 
 		switch(dataType){
 			case STRING:
-				return new StringFeature(this, field);
 			case INTEGER:
 			case FLOAT:
 			case DOUBLE:
-				return new ContinuousFeature(this, field);
 			case BOOLEAN:
-				return new BooleanFeature(this, field);
+				return FeatureUtil.createFeature(field, this);
 			default:
 				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
 		}

@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.xgboost;
+package org.jpmml.sparkml.feature;
 
 import java.util.List;
 
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.xgboost.SparseToDenseTransformer;
+import org.jpmml.sparkml.feature.SparseToDenseTransformer;
 
 public class SparseToDenseTransformerConverter extends FeatureConverter<SparseToDenseTransformer> {
 

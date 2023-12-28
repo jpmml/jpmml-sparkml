@@ -18,13 +18,14 @@
  */
 package org.jpmml.sparkml.xgboost;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.google.common.io.MoreFiles;
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
 import org.apache.spark.ml.Model;
@@ -49,20 +50,20 @@ public class BoosterUtil {
 	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M> & HasSparkMLXGBoostOptions> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
 		M model = converter.getModel();
 
-		byte[] bytes;
-
-		try {
-			bytes = booster.toByteArray();
-		} catch(Exception e){
-			throw new RuntimeException(e);
-		}
-
 		Learner learner;
 
-		try(InputStream is = new ByteArrayInputStream(bytes)){
-			learner = XGBoostUtil.loadLearner(is);
-		} catch(IOException ioe){
-			throw new RuntimeException(ioe);
+		try {
+			File tmpBoosterFile = File.createTempFile("Booster", ".json");
+
+			booster.saveModel(tmpBoosterFile.getAbsolutePath());
+
+			try(InputStream is = new FileInputStream(tmpBoosterFile)){
+				learner = XGBoostUtil.loadLearner(is);
+			}
+
+			MoreFiles.deleteRecursively(tmpBoosterFile.toPath());
+		} catch(Exception e){
+			throw new RuntimeException(e);
 		}
 
 		Boolean inputFloat = (Boolean)converter.getOption(HasSparkMLXGBoostOptions.OPTION_INPUT_FLOAT, null);

@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
@@ -33,14 +32,12 @@ import org.dmg.pmml.DerivedField;
 import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.SparkSessionUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.jpmml.sparkml.SparkMLTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class SQLTransformerConverterTest {
+public class SQLTransformerConverterTest extends SparkMLTest {
 
 	@Test
 	public void encodeLogicalPlan(){
@@ -73,7 +70,7 @@ public class SQLTransformerConverterTest {
 
 		SparkMLEncoder encoder = new SparkMLEncoder(SQLTransformerConverterTest.schema, converterFactory);
 
-		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(SQLTransformerConverterTest.sparkSession, SQLTransformerConverterTest.schema, sqlStatement);
+		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(SparkMLTest.sparkSession, SQLTransformerConverterTest.schema, sqlStatement);
 
 		SQLTransformerConverter.encodeLogicalPlan(encoder, logicalPlan);
 
@@ -95,20 +92,6 @@ public class SQLTransformerConverterTest {
 
 		assertTrue(derivedFieldNames.toString(), derivedFieldNames.isEmpty());
 	}
-
-	@BeforeClass
-	static
-	public void createSparkSession(){
-		SQLTransformerConverterTest.sparkSession = SparkSessionUtil.createSparkSession();
-	}
-
-	@AfterClass
-	static
-	public void destroySparkSession(){
-		SQLTransformerConverterTest.sparkSession = SparkSessionUtil.destroySparkSession(SQLTransformerConverterTest.sparkSession);
-	}
-
-	public static SparkSession sparkSession = null;
 
 	private static final StructType schema = new StructType()
 		.add("Sepal_Length", DataTypes.DoubleType)
