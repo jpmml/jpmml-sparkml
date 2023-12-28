@@ -10,7 +10,7 @@
 
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>2.4-SNAPSHOT</version>
+	<version>2.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>JPMML-SparkML</name>
@@ -63,22 +63,22 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml</artifactId>
-				<version>2.4-SNAPSHOT</version>
+				<version>2.5-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-example</artifactId>
-				<version>2.4-SNAPSHOT</version>
+				<version>2.5-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-lightgbm</artifactId>
-				<version>2.4-SNAPSHOT</version>
+				<version>2.5-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-xgboost</artifactId>
-				<version>2.4-SNAPSHOT</version>
+				<version>2.5-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
