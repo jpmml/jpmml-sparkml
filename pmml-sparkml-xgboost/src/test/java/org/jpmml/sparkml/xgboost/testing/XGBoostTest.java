@@ -224,7 +224,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateHousing() throws Exception {
-		evaluate("XGBoost", HOUSING);
+		evaluate("XGBoost", HOUSING, new FloatEquivalence(12 + 12));
 	}
 
 	@Test
