@@ -1,6 +1,6 @@
 import java.io.File
 
-import ml.dmlc.xgboost4j.scala.spark.{TrackerConf, XGBoostClassifier}
+import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
@@ -22,8 +22,7 @@ val labelIndexerModel = labelIndexer.fit(df)
 
 val assembler = new VectorAssembler().setInputCols(Array("Sepal_Length", "Sepal_Width", "Petal_Length", "Petal_Width")).setOutputCol("featureVector")
 
-val trackerConf = TrackerConf(0, "scala")
-val classifier = new XGBoostClassifier(Map("objective" -> "multi:softprob", "num_class" -> 3, "num_round" -> 17, "tracker_conf" -> trackerConf)).setLabelCol(labelIndexer.getOutputCol).setFeaturesCol(assembler.getOutputCol)
+val classifier = new XGBoostClassifier(Map("objective" -> "multi:softprob", "num_class" -> 3)).setLabelCol(labelIndexer.getOutputCol).setFeaturesCol(assembler.getOutputCol)
 
 val pipeline = new Pipeline().setStages(Array(labelIndexer, assembler, classifier))
 val pipelineModel = pipeline.fit(df)
