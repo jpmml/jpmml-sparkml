@@ -1,6 +1,6 @@
 import java.io.File
 
-import ml.dmlc.xgboost4j.scala.spark.{TrackerConf, XGBoostClassifier}
+import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vector
@@ -25,8 +25,7 @@ val assembler = new VectorAssembler().setInputCols(ohe.getOutputCols ++ cont_col
 
 val sparse2dense = new SparseToDenseTransformer().setInputCol(assembler.getOutputCol).setOutputCol("denseFeatureVec")
 
-val trackerConf = TrackerConf(0, "scala")
-val classifier = new XGBoostClassifier(Map("objective" -> "binary:logistic", "num_round" -> 101, "tracker_conf" -> trackerConf)).setLabelCol(labelIndexer.getOutputCol).setFeaturesCol(sparse2dense.getOutputCol)
+val classifier = new XGBoostClassifier(Map("objective" -> "binary:logistic", "num_round" -> 101)).setLabelCol(labelIndexer.getOutputCol).setFeaturesCol(sparse2dense.getOutputCol)
 
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, ohe, assembler, sparse2dense, classifier))
 val pipelineModel = pipeline.fit(df)
