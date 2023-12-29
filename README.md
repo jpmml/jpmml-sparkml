@@ -45,6 +45,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>Apache Spark ML</summary>
 
+  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/2.2.X/pmml-sparkml/src/test/resources/main.py)
+
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
     * [`feature.Bucketizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Bucketizer.html)
@@ -120,6 +122,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>LightGBM</summary>
 
+  Examples: [LightGBMAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/2.2.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAuditNA.scala), [LightGBMAutoNA.scaka](https://github.com/jpmml/jpmml-sparkml/blob/2.2.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAutoNA.scala), etc.
+
   * Prediction models:
     * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMClassificationModel.html)
     * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressionModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMRegressionModel.html)
@@ -128,6 +132,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>XGBoost</summary>
 
+  Examples: [XGBoostAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/2.2.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAuditNA.scala), [XGBoostAutoNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/2.2.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAutoNA.scala), etc.
+
   * Prediction models:
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostRegressionModel.html)
@@ -135,7 +141,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X or 3.4.X.
+* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X or 3.5.X.
 
 # Installation #
 
@@ -163,7 +169,8 @@ Active development branches:
 | 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) |
 | 3.2.X | [`2.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.2.X) |
 | 3.3.X | [`2.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.3.X) |
-| 3.4.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
+| 3.4.X | [`2.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.4.X) |
+| 3.5.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
 
 Archived development branches:
 
