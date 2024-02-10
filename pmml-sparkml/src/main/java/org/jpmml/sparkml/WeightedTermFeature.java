@@ -22,9 +22,9 @@ import java.util.Objects;
 
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.DefineFunction;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.model.ToStringHelper;
 
 public class WeightedTermFeature extends TermFeature {
@@ -43,7 +43,7 @@ public class WeightedTermFeature extends TermFeature {
 		Number weight = getWeight();
 
 		Apply apply = super.createApply()
-			.addExpressions(PMMLUtil.createConstant(weight));
+			.addExpressions(ExpressionUtil.createConstant(weight));
 
 		return apply;
 	}

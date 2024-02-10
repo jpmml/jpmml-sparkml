@@ -28,14 +28,15 @@ import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Field;
+import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.InvalidValueDecorator;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -113,17 +114,15 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 				switch(handleInvalid){
 					case "keep":
 						{
-							Apply setApply = PMMLUtil.createApply(PMMLFunctions.ISIN, feature.ref());
+							FieldRef fieldRef = feature.ref();
 
-							for(String category : categories){
-								setApply.addExpressions(PMMLUtil.createConstant(category, dataType));
-							}
+							Apply apply = ExpressionUtil.createApply(PMMLFunctions.IF,
+								ExpressionUtil.createValueApply(fieldRef, dataType, categories),
+								fieldRef,
+								ExpressionUtil.createConstant(dataType, invalidCategory)
+							);
 
 							categories.add(invalidCategory);
-
-							Apply apply = PMMLUtil.createApply(PMMLFunctions.IF)
-								.addExpressions(setApply)
-								.addExpressions(feature.ref(), PMMLUtil.createConstant(invalidCategory, dataType));
 
 							field = encoder.createDerivedField(FieldNameUtil.create("handleInvalid", feature), OpType.CATEGORICAL, dataType, apply);
 						}

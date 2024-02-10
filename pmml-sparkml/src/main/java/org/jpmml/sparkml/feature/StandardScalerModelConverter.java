@@ -31,8 +31,8 @@ import org.dmg.pmml.Expression;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ProductFeature;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ValueUtil;
@@ -80,7 +80,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 				if(!ValueUtil.isZero(meanValue)){
 					ContinuousFeature continuousFeature = feature.toContinuousFeature();
 
-					expression = PMMLUtil.createApply(PMMLFunctions.SUBTRACT, continuousFeature.ref(), PMMLUtil.createConstant(meanValue));
+					expression = ExpressionUtil.createApply(PMMLFunctions.SUBTRACT, continuousFeature.ref(), ExpressionUtil.createConstant(meanValue));
 				}
 			} // End if
 
@@ -91,7 +91,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 					Double factor = (1d / stdValue);
 
 					if(expression != null){
-						expression = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, expression, PMMLUtil.createConstant(factor));
+						expression = ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, expression, ExpressionUtil.createConstant(factor));
 					} else
 
 					{
@@ -103,7 +103,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 									Feature feature = getFeature();
 									Number factor = getFactor();
 
-									return PMMLUtil.createApply(PMMLFunctions.MULTIPLY, (feature.toContinuousFeature()).ref(), PMMLUtil.createConstant(factor));
+									return ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, (feature.toContinuousFeature()).ref(), ExpressionUtil.createConstant(factor));
 								};
 
 								return toContinuousFeature(name, DataType.DOUBLE, applySupplier);

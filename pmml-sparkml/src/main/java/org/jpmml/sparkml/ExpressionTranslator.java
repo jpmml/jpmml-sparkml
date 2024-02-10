@@ -95,7 +95,7 @@ import org.dmg.pmml.HasDataType;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.FieldNameUtil;
-import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.IfElseBuilder;
 import org.jpmml.converter.TypeUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
@@ -182,7 +182,7 @@ public class ExpressionTranslator {
 				throw new IllegalArgumentException(formatMessage(binaryMathExpression));
 			}
 
-			return PMMLUtil.createApply(function, translateInternal(left), translateInternal(right));
+			return org.jpmml.converter.ExpressionUtil.createApply(function, translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof BinaryOperator){
@@ -258,7 +258,7 @@ public class ExpressionTranslator {
 				throw new IllegalArgumentException(formatMessage(binaryOperator));
 			}
 
-			return PMMLUtil.createApply(function, translateInternal(left), translateInternal(right));
+			return org.jpmml.converter.ExpressionUtil.createApply(function, translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof CaseWhen){
@@ -268,11 +268,9 @@ public class ExpressionTranslator {
 
 			Option<Expression> elseValue = caseWhen.elseValue();
 
-			Apply apply = null;
+			IfElseBuilder applyBuilder = new IfElseBuilder();
 
 			Iterator<Tuple2<Expression, Expression>> branchIt = branches.iterator();
-
-			Apply prevBranchApply = null;
 
 			do {
 				Tuple2<Expression, Expression> branch = branchIt.next();
@@ -280,29 +278,16 @@ public class ExpressionTranslator {
 				Expression predicate = branch._1();
 				Expression value = branch._2();
 
-				Apply branchApply = PMMLUtil.createApply(PMMLFunctions.IF,
-					translateInternal(predicate),
-					translateInternal(value)
-				);
-
-				if(apply == null){
-					apply = branchApply;
-				} // End if
-
-				if(prevBranchApply != null){
-					prevBranchApply.addExpressions(branchApply);
-				}
-
-				prevBranchApply = branchApply;
+				applyBuilder.add(translateInternal(predicate), translateInternal(value));
 			} while(branchIt.hasNext());
 
 			if(elseValue.isDefined()){
 				Expression value = elseValue.get();
 
-				prevBranchApply.addExpressions(translateInternal(value));
+				applyBuilder.terminate(translateInternal(value));
 			}
 
-			return apply;
+			return applyBuilder.build();
 		} else
 
 		if(expression instanceof Cast){
@@ -350,7 +335,7 @@ public class ExpressionTranslator {
 
 			List<Expression> children = JavaConversions.seqAsJavaList(concat.children());
 
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.CONCAT);
+			Apply apply = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.CONCAT);
 
 			for(Expression child : children){
 				apply.addExpressions(translateInternal(child));
@@ -364,7 +349,7 @@ public class ExpressionTranslator {
 
 			List<Expression> children = JavaConversions.seqAsJavaList(greatest.children());
 
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.MAX);
+			Apply apply = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.MAX);
 
 			for(Expression child : children){
 				apply.addExpressions(translateInternal(child));
@@ -381,7 +366,7 @@ public class ExpressionTranslator {
 			Expression trueValue = _if.trueValue();
 			Expression falseValue = _if.falseValue();
 
-			return PMMLUtil.createApply(PMMLFunctions.IF,
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.IF,
 				translateInternal(predicate),
 				translateInternal(trueValue),
 				translateInternal(falseValue)
@@ -395,7 +380,7 @@ public class ExpressionTranslator {
 
 			List<Expression> elements = JavaConversions.seqAsJavaList(in.list());
 
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.ISIN, translateInternal(value));
+			Apply apply = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISIN, translateInternal(value));
 
 			for(Expression element : elements){
 				apply.addExpressions(translateInternal(element));
@@ -409,7 +394,7 @@ public class ExpressionTranslator {
 
 			List<Expression> children = JavaConversions.seqAsJavaList(least.children());
 
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.MIN);
+			Apply apply = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.MIN);
 
 			for(Expression child : children){
 				apply.addExpressions(translateInternal(child));
@@ -423,7 +408,7 @@ public class ExpressionTranslator {
 
 			Expression child = length.child();
 
-			return PMMLUtil.createApply(PMMLFunctions.STRINGLENGTH, translateInternal(child));
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.STRINGLENGTH, translateInternal(child));
 		} else
 
 		if(expression instanceof Literal){
@@ -431,7 +416,7 @@ public class ExpressionTranslator {
 
 			Object value = literal.value();
 			if(value == null){
-				return PMMLUtil.createMissingConstant();
+				return org.jpmml.converter.ExpressionUtil.createMissingConstant();
 			}
 
 			DataType dataType;
@@ -451,7 +436,7 @@ public class ExpressionTranslator {
 				value = toSimpleObject(value);
 			}
 
-			return PMMLUtil.createConstant(value, dataType);
+			return org.jpmml.converter.ExpressionUtil.createConstant(dataType, value);
 		} else
 
 		if(expression instanceof RegExpReplace){
@@ -461,7 +446,7 @@ public class ExpressionTranslator {
 			Expression regexp = regexpReplace.regexp();
 			Expression rep = regexpReplace.rep();
 
-			return PMMLUtil.createApply(PMMLFunctions.REPLACE, translateInternal(subject), translateInternal(regexp), translateInternal(rep));
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.REPLACE, translateInternal(subject), translateInternal(regexp), translateInternal(rep));
 		} else
 
 		if(expression instanceof RLike){
@@ -470,7 +455,7 @@ public class ExpressionTranslator {
 			Expression left = rlike.left();
 			Expression right = rlike.right();
 
-			return PMMLUtil.createApply(PMMLFunctions.MATCHES, translateInternal(left), translateInternal(right));
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.MATCHES, translateInternal(left), translateInternal(right));
 		} else
 
 		if(expression instanceof StringReplace){
@@ -480,7 +465,7 @@ public class ExpressionTranslator {
 			Expression searchExpr = stringReplace.searchExpr();
 			Expression replaceExpr = stringReplace.replaceExpr();
 
-			return PMMLUtil.createApply(PMMLFunctions.REPLACE, translateInternal(srcExpr), transformString(translateInternal(searchExpr), ExpressionTranslator::escapeSearchString), transformString(translateInternal(replaceExpr), ExpressionTranslator::escapeReplacementString));
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.REPLACE, translateInternal(srcExpr), transformString(translateInternal(searchExpr), ExpressionTranslator::escapeSearchString), transformString(translateInternal(replaceExpr), ExpressionTranslator::escapeReplacementString));
 		} else
 
 		if(expression instanceof StringTrim){
@@ -492,7 +477,7 @@ public class ExpressionTranslator {
 				throw new IllegalArgumentException();
 			}
 
-			return PMMLUtil.createApply(PMMLFunctions.TRIMBLANKS, translateInternal(srcStr));
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.TRIMBLANKS, translateInternal(srcStr));
 		} else
 
 		if(expression instanceof Substring){
@@ -512,7 +497,7 @@ public class ExpressionTranslator {
 			// XXX
 			lenValue = Math.min(lenValue, MAX_STRING_LENGTH);
 
-			return PMMLUtil.createApply(PMMLFunctions.SUBSTRING, translateInternal(str), PMMLUtil.createConstant(posValue), PMMLUtil.createConstant(lenValue));
+			return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.SUBSTRING, translateInternal(str), org.jpmml.converter.ExpressionUtil.createConstant(posValue), org.jpmml.converter.ExpressionUtil.createConstant(lenValue));
 		} else
 
 		if(expression instanceof UnaryExpression){
@@ -521,104 +506,104 @@ public class ExpressionTranslator {
 			Expression child = unaryExpression.child();
 
 			if(expression instanceof Abs){
-				return PMMLUtil.createApply(PMMLFunctions.ABS, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ABS, translateInternal(child));
 			} else
 
 			if(expression instanceof Acos){
-				return PMMLUtil.createApply(PMMLFunctions.ACOS, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ACOS, translateInternal(child));
 			} else
 
 			if(expression instanceof Asin){
-				return PMMLUtil.createApply(PMMLFunctions.ASIN, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ASIN, translateInternal(child));
 			} else
 
 			if(expression instanceof Atan){
-				return PMMLUtil.createApply(PMMLFunctions.ATAN, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ATAN, translateInternal(child));
 			} else
 
 			if(expression instanceof Ceil){
-				return PMMLUtil.createApply(PMMLFunctions.CEIL, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.CEIL, translateInternal(child));
 			} else
 
 			if(expression instanceof Cos){
-				return PMMLUtil.createApply(PMMLFunctions.COS, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.COS, translateInternal(child));
 			} else
 
 			if(expression instanceof Cosh){
-				return PMMLUtil.createApply(PMMLFunctions.COSH, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.COSH, translateInternal(child));
 			} else
 
 			if(expression instanceof Exp){
-				return PMMLUtil.createApply(PMMLFunctions.EXP, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.EXP, translateInternal(child));
 			} else
 
 			if(expression instanceof Expm1){
-				return PMMLUtil.createApply(PMMLFunctions.EXPM1, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.EXPM1, translateInternal(child));
 			} else
 
 			if(expression instanceof Floor){
-				return PMMLUtil.createApply(PMMLFunctions.FLOOR, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.FLOOR, translateInternal(child));
 			} else
 
 			if(expression instanceof Log){
-				return PMMLUtil.createApply(PMMLFunctions.LN, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.LN, translateInternal(child));
 			} else
 
 			if(expression instanceof Log10){
-				return PMMLUtil.createApply(PMMLFunctions.LOG10, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.LOG10, translateInternal(child));
 			} else
 
 			if(expression instanceof Log1p){
-				return PMMLUtil.createApply(PMMLFunctions.LN1P, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.LN1P, translateInternal(child));
 			} else
 
 			if(expression instanceof Lower){
-				return PMMLUtil.createApply(PMMLFunctions.LOWERCASE, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.LOWERCASE, translateInternal(child));
 			} else
 
 			if(expression instanceof IsNaN){
 				// XXX
-				return PMMLUtil.createApply(PMMLFunctions.ISNOTVALID, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISNOTVALID, translateInternal(child));
 			} else
 
 			if(expression instanceof IsNotNull){
-				return PMMLUtil.createApply(PMMLFunctions.ISNOTMISSING, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISNOTMISSING, translateInternal(child));
 			} else
 
 			if(expression instanceof IsNull){
-				return PMMLUtil.createApply(PMMLFunctions.ISMISSING, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISMISSING, translateInternal(child));
 			} else
 
 			if(expression instanceof Not){
-				 return PMMLUtil.createApply(PMMLFunctions.NOT, translateInternal(child));
+				 return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.NOT, translateInternal(child));
 			} else
 
 			if(expression instanceof Rint){
-				return PMMLUtil.createApply(PMMLFunctions.RINT, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.RINT, translateInternal(child));
 			} else
 
 			if(expression instanceof Sin){
-				return PMMLUtil.createApply(PMMLFunctions.SIN, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.SIN, translateInternal(child));
 			} else
 
 			if(expression instanceof Sinh){
-				return PMMLUtil.createApply(PMMLFunctions.SINH, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.SINH, translateInternal(child));
 			} else
 
 			if(expression instanceof Sqrt){
-				return PMMLUtil.createApply(PMMLFunctions.SQRT, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.SQRT, translateInternal(child));
 			} else
 
 			if(expression instanceof Tan){
-				return PMMLUtil.createApply(PMMLFunctions.TAN, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.TAN, translateInternal(child));
 			} else
 
 			if(expression instanceof Tanh){
-				return PMMLUtil.createApply(PMMLFunctions.TANH, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.TANH, translateInternal(child));
 			} else
 
 			if(expression instanceof UnaryMinus){
-				return PMMLUtil.toNegative(translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.toNegative(translateInternal(child));
 			} else
 
 			if(expression instanceof UnaryPositive){
@@ -626,7 +611,7 @@ public class ExpressionTranslator {
 			} else
 
 			if(expression instanceof Upper){
-				return PMMLUtil.createApply(PMMLFunctions.UPPERCASE, translateInternal(child));
+				return org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.UPPERCASE, translateInternal(child));
 			} else
 
 			{

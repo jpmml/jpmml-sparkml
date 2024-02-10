@@ -31,10 +31,10 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.ParameterField;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLEncoder;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.model.ToStringHelper;
 
 public class TermFeature extends Feature {
@@ -74,7 +74,7 @@ public class TermFeature extends Feature {
 			List<ParameterField> weightedParameterFields = new ArrayList<>(defineFunction.getParameterFields());
 			weightedParameterFields.add(weightField);
 
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.requireExpression(), new FieldRef(weightField));
+			Apply apply = ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, defineFunction.requireExpression(), new FieldRef(weightField));
 
 			weightedDefineFunction = new DefineFunction(name, OpType.CONTINUOUS, DataType.DOUBLE, weightedParameterFields, apply);
 
@@ -89,9 +89,9 @@ public class TermFeature extends Feature {
 		Feature feature = getFeature();
 		String value = getValue();
 
-		Constant constant = PMMLUtil.createConstant(value, DataType.STRING);
+		Constant constant = ExpressionUtil.createConstant(DataType.STRING, value);
 
-		return PMMLUtil.createApply(defineFunction, feature.ref(), constant);
+		return ExpressionUtil.createApply(defineFunction, feature.ref(), constant);
 	}
 
 	@Override
