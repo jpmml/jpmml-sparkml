@@ -26,7 +26,7 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 
-public class XGBoostClassificationModelConverter extends ProbabilisticClassificationModelConverter<XGBoostClassificationModel> implements HasSparkMLXGBoostOptions {
+public class XGBoostClassificationModelConverter extends ProbabilisticClassificationModelConverter<XGBoostClassificationModel> {
 
 	public XGBoostClassificationModelConverter(XGBoostClassificationModel model){
 		super(model);
