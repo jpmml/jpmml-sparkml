@@ -31,8 +31,8 @@ import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -78,7 +78,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 
 				encoder.toCategorical(feature.getName(), categories);
 
-				MapValues mapValues = PMMLUtil.createMapValues(feature.getName(), categories, values)
+				MapValues mapValues = ExpressionUtil.createMapValues(feature.getName(), categories, values)
 					.setDataType(DataType.INTEGER);
 
 				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
