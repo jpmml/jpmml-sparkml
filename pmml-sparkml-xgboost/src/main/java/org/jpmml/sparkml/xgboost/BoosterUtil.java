@@ -69,16 +69,13 @@ public class BoosterUtil {
 		Map<String, Object> options = new LinkedHashMap<>();
 		options.put(HasXGBoostOptions.OPTION_MISSING, converter.getOption(HasXGBoostOptions.OPTION_MISSING, missing));
 		options.put(HasXGBoostOptions.OPTION_COMPACT, converter.getOption(HasXGBoostOptions.OPTION_COMPACT, false));
+		options.put(HasXGBoostOptions.OPTION_INPUT_FLOAT, converter.getOption(HasXGBoostOptions.OPTION_INPUT_FLOAT, null));
 		options.put(HasXGBoostOptions.OPTION_NUMERIC, converter.getOption(HasXGBoostOptions.OPTION_NUMERIC, true));
 		options.put(HasXGBoostOptions.OPTION_PRUNE, converter.getOption(HasXGBoostOptions.OPTION_PRUNE, false));
 		options.put(HasXGBoostOptions.OPTION_NTREE_LIMIT, converter.getOption(HasXGBoostOptions.OPTION_NTREE_LIMIT, null));
 
-		Schema xgbSchema = learner.configureSchema(options, schema);
+		Schema xgbSchema = learner.toXGBoostSchema(schema);
 
-		MiningModel miningModel = learner.encodeModel(options, xgbSchema);
-
-		miningModel = learner.configureModel(options, miningModel);
-
-		return miningModel;
+		return learner.encodeModel(options, xgbSchema);
 	}
 }
