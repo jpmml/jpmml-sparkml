@@ -30,8 +30,8 @@ import org.dmg.pmml.Expression;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.MatrixUtil;
@@ -56,7 +56,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0, length = transformer.getK(); i < length; i++){
-			Apply apply = PMMLUtil.createApply(PMMLFunctions.SUM);
+			Apply apply = ExpressionUtil.createApply(PMMLFunctions.SUM);
 
 			for(int j = 0; j < features.size(); j++){
 				Feature feature = features.get(j);
@@ -67,7 +67,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
 				Double coefficient = pc.apply(j, i);
 				if(!ValueUtil.isOne(coefficient)){
-					expression = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, expression, PMMLUtil.createConstant(coefficient));
+					expression = ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, expression, ExpressionUtil.createConstant(coefficient));
 				}
 
 				apply.addExpressions(expression);

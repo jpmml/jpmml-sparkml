@@ -40,7 +40,6 @@ import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.AliasExpression;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.ExpressionTranslator;
-import org.jpmml.sparkml.ExpressionUtil;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import scala.collection.JavaConversions;
@@ -143,7 +142,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 			} else
 
 			{
-				name = FieldNameUtil.create("sql", ExpressionUtil.format(expression));
+				name = FieldNameUtil.create("sql", String.valueOf(expression));
 			}
 
 			DataType dataType = DatasetUtil.translateDataType(expression.dataType());

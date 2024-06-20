@@ -30,8 +30,8 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.dmg.pmml.Value;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.MissingValueDecorator;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -76,7 +76,7 @@ public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 				encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatmentMethod, surrogate));
 
 				if(missingValue != null && !missingValue.isNaN()){
-					PMMLUtil.addValues(dataField, Value.Property.MISSING, Collections.singletonList(missingValue));
+					FieldUtil.addValues(dataField, Value.Property.MISSING, Collections.singletonList(missingValue));
 				}
 			} else
 
