@@ -51,7 +51,6 @@ import org.jpmml.sparkml.ArchiveUtil;
 import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
-import org.jpmml.sparkml.xgboost.HasSparkMLXGBoostOptions;
 import org.jpmml.xgboost.HasXGBoostOptions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -78,9 +77,8 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 			public List<Map<String, Object>> getOptionsMatrix(){
 				Map<String, Object> options = new LinkedHashMap<>();
 
-				options.put(HasSparkMLXGBoostOptions.OPTION_INPUT_FLOAT, new Boolean[]{false, true});
-
 				options.put(HasXGBoostOptions.OPTION_COMPACT, new Boolean[]{false, true});
+				options.put(HasXGBoostOptions.OPTION_INPUT_FLOAT, new Boolean[]{false, true});
 				options.put(HasXGBoostOptions.OPTION_PRUNE, false);
 
 				return OptionsUtil.generateOptionsMatrix(options);

@@ -27,9 +27,9 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -46,7 +46,7 @@ public class TokenizerConverter extends FeatureConverter<Tokenizer> {
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());
 
-		Apply apply = PMMLUtil.createApply(PMMLFunctions.LOWERCASE, feature.ref());
+		Apply apply = ExpressionUtil.createApply(PMMLFunctions.LOWERCASE, feature.ref());
 
 		DerivedField derivedField = encoder.createDerivedField(FieldNameUtil.create(PMMLFunctions.LOWERCASE, feature), OpType.CATEGORICAL, DataType.STRING, apply);
 
