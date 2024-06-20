@@ -21,7 +21,7 @@ package org.jpmml.sparkml;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.PMMLFunctions;
-import org.jpmml.converter.PMMLUtil;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.model.ReflectionUtil;
 import org.junit.Test;
 
@@ -37,9 +37,9 @@ public class AliasExpressionTest {
 
 		checkExpression(fieldRef, expression);
 
-		expression = new AliasExpression("parent", PMMLUtil.createApply(PMMLFunctions.ADD, new AliasExpression("left child", fieldRef), new AliasExpression("right child", fieldRef)));
+		expression = new AliasExpression("parent", ExpressionUtil.createApply(PMMLFunctions.ADD, new AliasExpression("left child", fieldRef), new AliasExpression("right child", fieldRef)));
 
-		checkExpression(PMMLUtil.createApply(PMMLFunctions.ADD, fieldRef, fieldRef), expression);
+		checkExpression(ExpressionUtil.createApply(PMMLFunctions.ADD, fieldRef, fieldRef), expression);
 	}
 
 	static

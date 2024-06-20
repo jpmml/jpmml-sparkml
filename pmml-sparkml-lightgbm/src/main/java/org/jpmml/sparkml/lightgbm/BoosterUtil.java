@@ -59,7 +59,7 @@ public class BoosterUtil {
 
 		Schema lgbmSchema = gbdt.toLightGBMSchema(schema);
 
-		MiningModel miningModel = gbdt.encodeMiningModel(options, lgbmSchema);
+		MiningModel miningModel = gbdt.encodeModel(options, lgbmSchema);
 
 		return miningModel;
 	}
