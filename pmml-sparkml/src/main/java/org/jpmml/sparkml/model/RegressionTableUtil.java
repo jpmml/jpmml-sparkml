@@ -31,10 +31,10 @@ import org.dmg.pmml.MapValues;
 import org.dmg.pmml.OpType;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLEncoder;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.ModelConverter;
 
@@ -101,7 +101,7 @@ public class RegressionTableUtil {
 			outputValues.add(coefficient);
 		}
 
-		MapValues mapValues = PMMLUtil.createMapValues(name, inputValues, outputValues)
+		MapValues mapValues = ExpressionUtil.createMapValues(name, inputValues, outputValues)
 			.setDefaultValue(0d)
 			.setDataType(DataType.DOUBLE);
 

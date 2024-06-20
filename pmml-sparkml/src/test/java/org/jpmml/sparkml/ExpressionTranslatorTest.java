@@ -35,7 +35,6 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.TransformationDictionary;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.evaluator.EvaluationContext;
 import org.jpmml.evaluator.ExpressionUtil;
 import org.jpmml.evaluator.FieldValue;
@@ -58,19 +57,19 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 		FieldRef first = new FieldRef("x1");
 		FieldRef second = new FieldRef("x2");
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.AND,
-			PMMLUtil.createApply(PMMLFunctions.ISMISSING, first),
+		Apply expected = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.AND,
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISMISSING, first),
 			// "not(isnotnull(..)) -> "isnull(..)"
-			PMMLUtil.createApply(PMMLFunctions.ISMISSING, second)
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISMISSING, second)
 		);
 
 		checkExpression(expected, string);
 
 		string = "(x1 <= 0) or (x2 >= 0)";
 
-		expected = PMMLUtil.createApply(PMMLFunctions.OR,
-			PMMLUtil.createApply(PMMLFunctions.LESSOREQUAL, first, PMMLUtil.createConstant(0, DataType.DOUBLE)),
-			PMMLUtil.createApply(PMMLFunctions.GREATEROREQUAL, second, PMMLUtil.createConstant(0, DataType.DOUBLE))
+		expected = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.OR,
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.LESSOREQUAL, first, org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 0)),
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.GREATEROREQUAL, second, org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 0))
 		);
 
 		checkExpression(expected, string);
@@ -99,11 +98,11 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 	public void translateArithmeticExpression(){
 		String string = "-((x1 - 1) / (x2 + 1))";
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.MULTIPLY,
-			PMMLUtil.createConstant(-1),
-			PMMLUtil.createApply(PMMLFunctions.DIVIDE,
-				PMMLUtil.createApply(PMMLFunctions.SUBTRACT, new FieldRef("x1"), PMMLUtil.createConstant(1, DataType.DOUBLE)),
-				PMMLUtil.createApply(PMMLFunctions.ADD, new FieldRef("x2"), PMMLUtil.createConstant(1, DataType.DOUBLE))
+		Apply expected = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.MULTIPLY,
+			org.jpmml.converter.ExpressionUtil.createConstant(-1),
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.DIVIDE,
+				org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.SUBTRACT, new FieldRef("x1"), org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 1)),
+				org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ADD, new FieldRef("x2"), org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 1))
 			)
 		);
 
@@ -117,13 +116,13 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 		FieldRef first = new FieldRef("x1");
 		FieldRef second = new FieldRef("x2");
 
-		Constant zero = PMMLUtil.createConstant(0, DataType.DOUBLE);
+		Constant zero = org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 0);
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF,
-			PMMLUtil.createApply(PMMLFunctions.LESSTHAN, first, zero),
+		Apply expected = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.IF,
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.LESSTHAN, first, zero),
 			first,
-			PMMLUtil.createApply(PMMLFunctions.IF,
-				PMMLUtil.createApply(PMMLFunctions.GREATERTHAN, second, zero),
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.IF,
+				org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.GREATERTHAN, second, zero),
 				second,
 				zero
 			)
@@ -136,10 +135,10 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 	public void translateIfExpression(){
 		String string = "if(status in (-1, 1), x1 != 0, x2 != 0)";
 
-		Apply expected = PMMLUtil.createApply(PMMLFunctions.IF,
-			PMMLUtil.createApply(PMMLFunctions.ISIN, new FieldRef("status"), PMMLUtil.createConstant(-1), PMMLUtil.createConstant(1)),
-			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef("x1"), PMMLUtil.createConstant(0, DataType.DOUBLE)),
-			PMMLUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef("x2"), PMMLUtil.createConstant(0, DataType.DOUBLE))
+		Apply expected = org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.IF,
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.ISIN, new FieldRef("status"), org.jpmml.converter.ExpressionUtil.createConstant(-1), org.jpmml.converter.ExpressionUtil.createConstant(1)),
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef("x1"), org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 0)),
+			org.jpmml.converter.ExpressionUtil.createApply(PMMLFunctions.NOTEQUAL, new FieldRef("x2"), org.jpmml.converter.ExpressionUtil.createConstant(DataType.DOUBLE, 0))
 		);
 
 		checkExpression(expected, string);

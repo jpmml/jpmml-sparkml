@@ -29,8 +29,8 @@ import org.dmg.pmml.Expression;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.PMMLUtil;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.FeatureConverter;
@@ -66,14 +66,14 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 			double min = originalMin.apply(i);
 			double max = originalMax.apply(i);
 
-			Expression expression = PMMLUtil.createApply(PMMLFunctions.DIVIDE, PMMLUtil.createApply(PMMLFunctions.SUBTRACT, continuousFeature.ref(), PMMLUtil.createConstant(min)), PMMLUtil.createConstant(max - min));
+			Expression expression = ExpressionUtil.createApply(PMMLFunctions.DIVIDE, ExpressionUtil.createApply(PMMLFunctions.SUBTRACT, continuousFeature.ref(), ExpressionUtil.createConstant(min)), ExpressionUtil.createConstant(max - min));
 
 			if(!ValueUtil.isOne(rescaleFactor)){
-				expression = PMMLUtil.createApply(PMMLFunctions.MULTIPLY, expression, PMMLUtil.createConstant(rescaleFactor));
+				expression = ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, expression, ExpressionUtil.createConstant(rescaleFactor));
 			} // End if
 
 			if(!ValueUtil.isZero(rescaleConstant)){
-				expression = PMMLUtil.createApply(PMMLFunctions.ADD, expression, PMMLUtil.createConstant(rescaleConstant));
+				expression = ExpressionUtil.createApply(PMMLFunctions.ADD, expression, ExpressionUtil.createConstant(rescaleConstant));
 			}
 
 			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CONTINUOUS, DataType.DOUBLE, expression);
