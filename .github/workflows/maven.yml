@@ -13,13 +13,10 @@ jobs:
         java: [ 8, 11 ]
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
       with:
+        distribution: 'zulu'
         java-version: ${{ matrix.java }}
-    - uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - run: mvn -Dxgboost4j-spark.version=2.0.1 -B package --file pom.xml
+        cache: 'maven'
+    - run: mvn -B package --file pom.xml
