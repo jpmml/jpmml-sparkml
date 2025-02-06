@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
@@ -125,7 +126,7 @@ public class DatasetUtil {
 
 		Files.copy(csvFiles[0], file);
 
-		MoreFiles.deleteRecursively(tmpDir.toPath());
+		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 	}
 
 	static

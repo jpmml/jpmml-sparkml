@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
 import org.apache.spark.ml.Model;
@@ -56,7 +57,7 @@ public class BoosterUtil {
 				learner = XGBoostUtil.loadLearner(is);
 			}
 
-			MoreFiles.deleteRecursively(tmpBoosterFile.toPath());
+			MoreFiles.deleteRecursively(tmpBoosterFile.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 		} catch(Exception e){
 			throw new RuntimeException(e);
 		}
