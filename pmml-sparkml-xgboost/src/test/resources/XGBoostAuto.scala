@@ -16,7 +16,7 @@ val cat_cols = Array("cylinders", "model_year", "origin")
 val cont_cols = Array("acceleration", "displacement", "horsepower", "weight")
 
 val indexer = new StringIndexer().setInputCols(cat_cols).setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
-val ohe = new OneHotEncoder().setDropLast(false).setInputCols(indexer.getOutputCols).setOutputCols(cat_cols.map(cat_col => "ohe_" + cat_col))
+val ohe = new OneHotEncoder().setHandleInvalid("keep").setDropLast(false).setInputCols(indexer.getOutputCols).setOutputCols(cat_cols.map(cat_col => "ohe_" + cat_col))
 val assembler = new VectorAssembler().setInputCols(ohe.getOutputCols ++ cont_cols).setOutputCol("featureVector")
 
 val sparse2dense = new SparseToDenseTransformer().setInputCol(assembler.getOutputCol).setOutputCol("denseFeatureVec")
