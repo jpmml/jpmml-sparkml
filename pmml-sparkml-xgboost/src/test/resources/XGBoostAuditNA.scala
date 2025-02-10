@@ -33,15 +33,7 @@ val classifier = new XGBoostClassifier(Map("objective" -> "binary:logistic", "nu
 val pipeline = new Pipeline().setStages(Array(labelIndexer, indexer, indexTransformer, assembler, sparse2dense, classifier))
 val pipelineModel = pipeline.fit(df)
 
-//PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAuditNA.zip"))
-
-val transformers = pipelineModel.copy(new ParamMap())
-val classificationModel = PipelineModelUtil.removeStage(transformers, 5)
-
-PipelineModelUtil.storeZip(transformers, new File("pipeline/TransformersAuditNA.zip"))
-
-val mlWriter = classificationModel.asInstanceOf[MLWritable].write.option("format", "json")
-ArchiveUtil.storeZip(mlWriter, new File("pipeline/XGBoostClassificationModelAuditNA.zip"))
+PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAuditNA.zip"))
 
 val predLabel = udf{ (value: Float) => value.toInt.toString }
 val vectorToColumn = udf{ (vec: Vector, index: Int) => vec(index).toFloat }

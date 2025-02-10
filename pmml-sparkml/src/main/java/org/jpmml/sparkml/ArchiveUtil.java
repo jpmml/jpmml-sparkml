@@ -38,6 +38,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.util.MLReadable;
 import org.apache.spark.ml.util.MLReader;
@@ -55,7 +56,7 @@ public class ArchiveUtil {
 
 		E stage = mlReader.load(tmpDir.getAbsolutePath());
 
-		MoreFiles.deleteRecursively(tmpDir.toPath());
+		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 
 		return stage;
 	}
@@ -76,7 +77,7 @@ public class ArchiveUtil {
 
 		ArchiveUtil.compress(tmpDir, file);
 
-		MoreFiles.deleteRecursively(tmpDir.toPath());
+		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 	}
 
 	static
