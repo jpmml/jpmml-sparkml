@@ -20,7 +20,7 @@ val cont_cols = Array("Age", "Hours", "Income")
 val labelIndexer = new StringIndexer().setInputCol("Adjusted").setOutputCol("idx_Adjusted")
 
 val indexer = new StringIndexer().setInputCols(cat_cols).setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
-val ohe = new OneHotEncoder().setDropLast(false).setInputCols(indexer.getOutputCols).setOutputCols(cat_cols.map(cat_col => "ohe_" + cat_col))
+val ohe = new OneHotEncoder().setHandleInvalid("keep").setDropLast(true).setInputCols(indexer.getOutputCols).setOutputCols(cat_cols.map(cat_col => "ohe_" + cat_col))
 val assembler = new VectorAssembler().setInputCols(ohe.getOutputCols ++ cont_cols).setOutputCol("featureVector")
 
 val sparse2dense = new SparseToDenseTransformer().setInputCol(assembler.getOutputCol).setOutputCol("denseFeatureVec")
