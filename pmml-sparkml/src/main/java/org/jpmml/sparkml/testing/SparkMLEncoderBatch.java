@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 import com.google.common.base.Equivalence;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -128,7 +129,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		validatePMML(pmml);
 
 		for(File tmpResource : tmpResources){
-			MoreFiles.deleteRecursively(tmpResource.toPath());
+			MoreFiles.deleteRecursively(tmpResource.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 		}
 
 		return pmml;

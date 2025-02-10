@@ -50,6 +50,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		StringIndexerModel transformer = getTransformer();
 
+		String handleInvalid = transformer.getHandleInvalid();
 		String[][] labelsArray = transformer.labelsArray();
 
 		InOutMode inputMode = getInputMode();
@@ -63,24 +64,12 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
+			DataType dataType = feature.getDataType();
+
 			List<String> categories = new ArrayList<>();
 			categories.addAll(Arrays.asList(labels));
 
-			String invalidCategory;
-
-			DataType dataType = feature.getDataType();
-			switch(dataType){
-				case INTEGER:
-				case FLOAT:
-				case DOUBLE:
-					invalidCategory = "-999";
-					break;
-				default:
-					invalidCategory = "__unknown";
-					break;
-			}
-
-			String handleInvalid = transformer.getHandleInvalid();
+			String invalidCategory = getInvalidCategory(dataType);
 
 			Field<?> field = encoder.toCategorical(feature.getName(), categories);
 
@@ -145,5 +134,18 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 		}
 
 		return result;
+	}
+
+	static
+	public String getInvalidCategory(DataType dataType){
+
+		switch(dataType){
+			case INTEGER:
+			case FLOAT:
+			case DOUBLE:
+				return "-999";
+			default:
+				return "__unknown";
+		}
 	}
 }
