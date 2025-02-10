@@ -26,15 +26,7 @@ val regressor = new XGBoostRegressor(Map("objective" -> "reg:squarederror", "num
 val pipeline = new Pipeline().setStages(Array(indexer, indexTransformer, assembler, regressor))
 val pipelineModel = pipeline.fit(df)
 
-//PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAutoNA.zip"))
-
-val transformers = pipelineModel.copy(new ParamMap())
-val regressionModel = PipelineModelUtil.removeStage(transformers, 3)
-
-PipelineModelUtil.storeZip(transformers, new File("pipeline/TransformersAutoNA.zip"))
-
-val mlWriter = regressionModel.asInstanceOf[MLWritable].write.option("format", "json")
-ArchiveUtil.storeZip(mlWriter, new File("pipeline/XGBoostRegressionModelAutoNA.zip"))
+PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/XGBoostAutoNA.zip"))
 
 var xgbDf = pipelineModel.transform(df)
 xgbDf = xgbDf.selectExpr("prediction as mpg")

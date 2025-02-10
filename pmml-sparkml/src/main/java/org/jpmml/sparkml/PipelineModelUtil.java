@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.util.MLReader;
@@ -72,7 +73,7 @@ public class PipelineModelUtil {
 
 		PipelineModel pipelineModel = load(sparkSession, tmpDir);
 
-		MoreFiles.deleteRecursively(tmpDir.toPath());
+		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 
 		return pipelineModel;
 	}
@@ -95,7 +96,7 @@ public class PipelineModelUtil {
 
 		ArchiveUtil.compress(tmpDir, file);
 
-		MoreFiles.deleteRecursively(tmpDir.toPath());
+		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 	}
 
 	private static final Field FIELD_STAGES = ReflectionUtil.getField(PipelineModel.class, "stages");
