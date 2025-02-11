@@ -51,11 +51,11 @@
 	</issueManagement>
 
 	<properties>
-		<project.build.outputTimestamp>2025-02-11T12:38:36Z</project.build.outputTimestamp>
-
+		<jdk.version>11</jdk.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.0.9]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
 		<xgboost4j-spark.version>[1.0.0, 2.0.1],[2.1.0, 2.1.3]</xgboost4j-spark.version>
+		<project.build.outputTimestamp>2025-02-11T12:38:36Z</project.build.outputTimestamp>	
 
 		<skipTests>false</skipTests>
 	</properties>
@@ -181,8 +181,8 @@
 					-->
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -190,7 +190,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.7.0</version>
 				<configuration>
-					<javadocVersion>1.8</javadocVersion>
+					<release>${jdk.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
