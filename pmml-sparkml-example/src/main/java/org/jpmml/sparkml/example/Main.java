@@ -91,7 +91,7 @@ public class Main {
 	@Parameter (
 		names = "--X-compact",
 		arity = 1,
-		hidden = true
+		order = 4
 	)
 	private Boolean compact = Boolean.TRUE;
 
@@ -101,7 +101,7 @@ public class Main {
 	@Parameter (
 		names = "--X-estimate_featureImportances",
 		arity = 1,
-		hidden = true
+		order = 5
 	)
 	private Boolean estimateFeatureImportances = Boolean.FALSE;
 
@@ -110,7 +110,7 @@ public class Main {
 	 */
 	@Parameter (
 		names = "--X-lookup_threshold",
-		hidden = true
+		order = 6
 	)
 	private Integer lookupThreshold = null;
 
@@ -119,7 +119,7 @@ public class Main {
 	 */
 	@Parameter (
 		names = "--X-representation",
-		hidden = true
+		order = 7
 	)
 	private String representation = null;
 
