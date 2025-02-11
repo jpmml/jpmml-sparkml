@@ -170,6 +170,7 @@ Active development branches:
 | 3.2.X | [`2.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.2.X) |
 | 3.3.X | [`2.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.3.X) |
 | 3.4.X | [`2.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.4.X) |
+| 3.5.X | [`2.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.5.X) |
 | 3.5.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
 
 Archived development branches:
