@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.beust.jcommander.DefaultUsageFormatter;
+import com.beust.jcommander.IUsageFormatter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
@@ -50,30 +52,26 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
 	@Parameter (
-		names = "--help",
-		description = "Show the list of configuration options and exit",
-		help = true
-	)
-	private boolean help = false;
-
-	@Parameter (
-		names = "--schema-input",
-		description = "Schema JSON input file",
-		required = true
-	)
-	private File schemaInput = null;
-
-	@Parameter (
 		names = "--pipeline-input",
 		description = "Pipeline ML input ZIP file or directory",
-		required = true
+		required = true,
+		order = 1
 	)
 	private File pipelineInput = null;
 
 	@Parameter (
+		names = "--schema-input",
+		description = "Schema JSON input file",
+		required = true,
+		order = 2
+	)
+	private File schemaInput = null;
+
+	@Parameter (
 		names = "--pmml-output",
 		description = "PMML output file",
-		required = true
+		required = true,
+		order = 3
 	)
 	private File output = null;
 
@@ -125,6 +123,14 @@ public class Main {
 	)
 	private String representation = null;
 
+	@Parameter (
+		names = "--help",
+		description = "Show the list of configuration options and exit",
+		help = true,
+		order = Integer.MAX_VALUE
+	)
+	private boolean help = false;
+
 
 	static
 	public void main(String... args) throws Exception {
@@ -132,6 +138,8 @@ public class Main {
 
 		JCommander commander = new JCommander(main);
 		commander.setProgramName(Main.class.getName());
+
+		IUsageFormatter usageFormatter = new DefaultUsageFormatter(commander);
 
 		try {
 			commander.parse(args);
@@ -141,7 +149,7 @@ public class Main {
 			sb.append(pe.toString());
 			sb.append("\n");
 
-			commander.usage(sb);
+			usageFormatter.usage(sb);
 
 			System.err.println(sb.toString());
 
@@ -151,7 +159,7 @@ public class Main {
 		if(main.help){
 			StringBuilder sb = new StringBuilder();
 
-			commander.usage(sb);
+			usageFormatter.usage(sb);
 
 			System.out.println(sb.toString());
 
@@ -164,24 +172,6 @@ public class Main {
 	private void run() throws Exception {
 		SparkSession sparkSession = SparkSession.builder()
 			.getOrCreate();
-
-		StructType schema;
-
-		try(InputStream is = new FileInputStream(this.schemaInput)){
-			logger.info("Loading schema..");
-
-			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
-
-			long begin = System.currentTimeMillis();
-			schema = (StructType)DataType.fromJson(json);
-			long end = System.currentTimeMillis();
-
-			logger.info("Loaded schema in {} ms.", (end - begin));
-		} catch(Exception e){
-			logger.error("Failed to load schema", e);
-
-			throw e;
-		}
 
 		PipelineModel pipelineModel;
 
@@ -199,6 +189,24 @@ public class Main {
 			logger.info("Loaded pipeline model in {} ms.", (end - begin));
 		} catch(Exception e){
 			logger.error("Failed to load pipeline model", e);
+
+			throw e;
+		}
+
+		StructType schema;
+
+		try(InputStream is = new FileInputStream(this.schemaInput)){
+			logger.info("Loading schema..");
+
+			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
+
+			long begin = System.currentTimeMillis();
+			schema = (StructType)DataType.fromJson(json);
+			long end = System.currentTimeMillis();
+
+			logger.info("Loaded schema in {} ms.", (end - begin));
+		} catch(Exception e){
+			logger.error("Failed to load schema", e);
 
 			throw e;
 		}
