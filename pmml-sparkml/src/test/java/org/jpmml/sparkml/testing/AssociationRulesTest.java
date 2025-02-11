@@ -29,9 +29,9 @@ import org.dmg.pmml.PMML;
 import org.dmg.pmml.association.AssociationModel;
 import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AssociationRulesTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
 

@@ -31,7 +31,7 @@ import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets, Fields {
 

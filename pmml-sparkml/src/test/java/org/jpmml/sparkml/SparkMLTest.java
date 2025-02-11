@@ -19,19 +19,19 @@
 package org.jpmml.sparkml;
 
 import org.apache.spark.sql.SparkSession;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 abstract
 public class SparkMLTest {
 
-	@BeforeClass
+	@BeforeAll
 	static
 	public void createSparkSession(){
 		SparkMLTest.sparkSession = SparkSessionUtil.createSparkSession();
 	}
 
-	@AfterClass
+	@AfterAll
 	static
 	public void destroySparkSession(){
 		SparkMLTest.sparkSession = SparkSessionUtil.destroySparkSession(SparkMLTest.sparkSession);

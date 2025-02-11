@@ -25,9 +25,9 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.ml.linalg.DenseVector;
 import org.apache.spark.sql.types.StructType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PMMLBuilderTest {
 

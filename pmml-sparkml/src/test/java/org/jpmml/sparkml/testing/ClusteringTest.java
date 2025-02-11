@@ -20,7 +20,7 @@ package org.jpmml.sparkml.testing;
 
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.testing.Datasets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ClusteringTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
 

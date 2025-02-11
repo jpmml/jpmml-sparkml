@@ -40,10 +40,10 @@ import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.SparkMLTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InvalidCategoryTransformerTest extends SparkMLTest {
 

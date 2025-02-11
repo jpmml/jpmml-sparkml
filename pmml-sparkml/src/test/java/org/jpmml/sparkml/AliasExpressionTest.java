@@ -23,9 +23,9 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.model.ReflectionUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AliasExpressionTest {
 
