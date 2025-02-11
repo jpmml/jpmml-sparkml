@@ -53,6 +53,7 @@
 	<properties>
 		<jdk.version>11</jdk.version>
 		<jpmml-converter.version>1.6.0</jpmml-converter.version>
+		<jpmml-lightgbm.version>1.6.0</jpmml-lightgbm.version>
 		<jpmml-xgboost.version>1.9.0</jpmml-xgboost.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.0.9]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
@@ -109,7 +110,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-lightgbm</artifactId>
-				<version>1.5.6</version>
+				<version>${jpmml-lightgbm.version}</version>
 			</dependency>
 
 			<dependency>
