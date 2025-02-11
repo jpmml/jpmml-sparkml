@@ -52,6 +52,7 @@
 
 	<properties>
 		<jdk.version>11</jdk.version>
+		<jpmml-converter.version>1.6.0</jpmml-converter.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.0.9]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
 		<xgboost4j-spark.version>[1.0.0, 2.0.1],[2.1.0, 2.1.3]</xgboost4j-spark.version>
@@ -84,7 +85,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter</artifactId>
-				<version>1.5.12</version>
+				<version>${jpmml-converter.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -95,7 +96,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter-testing</artifactId>
-				<version>1.5.12</version>
+				<version>${jpmml-converter.version}</version>
 			</dependency>
 			
 			<dependency>

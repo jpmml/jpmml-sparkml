@@ -36,7 +36,8 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
-import org.jpmml.model.metro.MetroJAXBUtil;
+import org.jpmml.model.JAXBSerializer;
+import org.jpmml.model.metro.MetroJAXBSerializer;
 import org.jpmml.sparkml.ArchiveUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.PipelineModelUtil;
@@ -230,8 +231,10 @@ public class Main {
 		try(OutputStream os = new FileOutputStream(this.output)){
 			logger.info("Marshalling PMML..");
 
+			JAXBSerializer jaxbSerializer = new MetroJAXBSerializer();
+
 			long begin = System.currentTimeMillis();
-			MetroJAXBUtil.marshalPMML(pmml, os);
+			jaxbSerializer.serializePretty(pmml, os);
 			long end = System.currentTimeMillis();
 
 			logger.info("Marshalled PMML in {} ms.", (end - begin));
