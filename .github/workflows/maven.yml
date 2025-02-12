@@ -2,7 +2,7 @@ name: maven
 
 on:
   push:
-    branches: [ '2.0.X', '2.1.X', '2.2.X', '2.3.X', '2.4.X', master ]
+    branches: [ '3.0.X', master ]
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 11 ]
+        java: [ 11, 17 ]
 
     steps:
     - uses: actions/checkout@v4
