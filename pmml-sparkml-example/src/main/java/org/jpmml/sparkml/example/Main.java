@@ -106,20 +106,11 @@ public class Main {
 	private Boolean estimateFeatureImportances = Boolean.FALSE;
 
 	/**
-	 * @see HasRegressionTableOptions#OPTION_LOOKUP_THRESHOLD
-	 */
-	@Parameter (
-		names = "--X-lookup_threshold",
-		order = 6
-	)
-	private Integer lookupThreshold = null;
-
-	/**
 	 * @see HasRegressionTableOptions#OPTION_REPRESENTATION
 	 */
 	@Parameter (
 		names = "--X-representation",
-		order = 7
+		order = 6
 	)
 	private String representation = null;
 
@@ -215,7 +206,6 @@ public class Main {
 		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
 		options.put(HasTreeOptions.OPTION_COMPACT, this.compact);
 		options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, this.estimateFeatureImportances);
-		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, this.lookupThreshold);
 		options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, this.representation);
 
 		PMML pmml;

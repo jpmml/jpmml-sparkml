@@ -48,13 +48,11 @@ public class LinearModelUtil {
 	static
 	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createRegression(C converter, Vector coefficients, double intercept, Schema schema){
 		ContinuousLabel continuousLabel = (ContinuousLabel)schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
 
 		String representation = (String)converter.getOption(HasRegressionTableOptions.OPTION_REPRESENTATION, null);
 
-		List<Feature> features = new ArrayList<>(schema.getFeatures());
-		List<Double> featureCoefficients = new ArrayList<>(VectorUtil.toList(coefficients));
-
-		RegressionTableUtil.simplify(converter, null, features, featureCoefficients);
+		List<Double> featureCoefficients = VectorUtil.toList(coefficients);
 
 		if(representation != null && (GeneralRegressionModel.class.getSimpleName()).equalsIgnoreCase(representation)){
 			GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.REGRESSION, MiningFunction.REGRESSION, ModelUtil.createMiningSchema(continuousLabel), null, null, null);
@@ -70,13 +68,11 @@ public class LinearModelUtil {
 	static
 	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createBinaryLogisticClassification(C converter, Vector coefficients, double intercept, Schema schema){
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
 
 		String representation = (String)converter.getOption(HasRegressionTableOptions.OPTION_REPRESENTATION, null);
 
-		List<Feature> features = new ArrayList<>(schema.getFeatures());
-		List<Double> featureCoefficients = new ArrayList<>(VectorUtil.toList(coefficients));
-
-		RegressionTableUtil.simplify(converter, null, features, featureCoefficients);
+		List<Double> featureCoefficients = VectorUtil.toList(coefficients);
 
 		if(representation != null && (GeneralRegressionModel.class.getSimpleName()).equalsIgnoreCase(representation)){
 			Object targetCategory = categoricalLabel.getValue(1);
@@ -95,6 +91,7 @@ public class LinearModelUtil {
 	static
 	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createSoftmaxClassification(C converter, Matrix coefficients, Vector intercepts, Schema schema){
 		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		List<? extends Feature> features = schema.getFeatures();
 
 		MatrixUtil.checkRows(categoricalLabel.size(), coefficients);
 
@@ -103,10 +100,7 @@ public class LinearModelUtil {
 		for(int i = 0; i < categoricalLabel.size(); i++){
 			Object targetCategory = categoricalLabel.getValue(i);
 
-			List<Feature> features = new ArrayList<>(schema.getFeatures());
-			List<Double> featureCoefficients = new ArrayList<>(MatrixUtil.getRow(coefficients, i));
-
-			RegressionTableUtil.simplify(converter, targetCategory, features, featureCoefficients);
+			List<Double> featureCoefficients = MatrixUtil.getRow(coefficients, i);
 
 			double intercept = intercepts.apply(i);
 
