@@ -315,6 +315,26 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<activation>
+				<jdk>[16, )</jdk>
+			</activation>
+			
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<argLine>--add-exports=java.base/sun.nio.ch=ALL-UNNAMED</argLine>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<!-- See org.sonatype.oss:oss-parent:7 -->
 	<repositories>
 		<repository>
