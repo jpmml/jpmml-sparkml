@@ -34,6 +34,7 @@
 
 	<modules>
 		<module>pmml-sparkml</module>
+		<module>pmml-sparkml-evaluator</module>
 		<module>pmml-sparkml-example</module>
 		<module>pmml-sparkml-lightgbm</module>
 		<module>pmml-sparkml-xgboost</module>
@@ -71,6 +72,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-evaluator</artifactId>
+				<version>3.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-example</artifactId>
 				<version>3.0-SNAPSHOT</version>
 			</dependency>
@@ -101,7 +107,12 @@
 				<artifactId>pmml-converter-testing</artifactId>
 				<version>${jpmml-converter.version}</version>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-evaluator</artifactId>
+				<version>${jpmml-evaluator.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-evaluator-testing</artifactId>
