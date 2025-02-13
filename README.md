@@ -45,7 +45,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>Apache Spark ML</summary>
 
-  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/2.4.X/pmml-sparkml/src/test/resources/main.py)
+  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml/src/test/resources/main.py)
 
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
@@ -122,7 +122,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>LightGBM</summary>
 
-  Examples: [LightGBMAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/2.4.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAuditNA.scala), [LightGBMAutoNA.scaka](https://github.com/jpmml/jpmml-sparkml/blob/2.4.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAutoNA.scala), etc.
+  Examples: [LightGBMAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAuditNA.scala), [LightGBMAutoNA.scaka](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAutoNA.scala), etc.
 
   * Prediction models:
     * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMClassificationModel.html)
@@ -132,7 +132,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>XGBoost</summary>
 
-  Examples: [XGBoostAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/2.4.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAuditNA.scala), [XGBoostAutoNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/2.4.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAutoNA.scala), etc.
+  Examples: [XGBoostAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAuditNA.scala), [XGBoostAutoNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAutoNA.scala), etc.
 
   * Prediction models:
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
@@ -163,28 +163,35 @@ The current version is **2.4.4** (10 February, 2025).
 
 Active development branches:
 
-| Apache Spark version | JPMML-SparkML branch |
+| JPMML-SparkML branch | Apache Spark version |
 |----------------------|----------------------|
-| 3.0.X | [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) |
-| 3.1.X | [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) |
-| 3.2.X | [`2.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.2.X) |
-| 3.3.X | [`2.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.3.X) |
-| 3.4.X | [`2.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.4.X) |
-| 3.5.X | [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) |
+| [`3.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.0.X) | 3.4.X |
+| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 3.5.X |
+
+Stale development branches:
+
+| JPMML-SparkML branch | Apache Spark version |
+|----------------------|----------------------|
+| [`2.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.0.X) | 3.0.X |
+| [`2.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.1.X) | 3.1.X |
+| [`2.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.2.X) | 3.2.X |
+| [`2.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.3.X) | 3.3.X |
+| [`2.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.4.X) | 3.4.X |
+| [`2.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/2.5.X) | 3.5.X |
 
 Archived development branches:
 
-| Apache Spark version | JPMML-SparkML branch |
+| JPMML-SparkML branch | Apache Spark version |
 |----------------------|----------------------|
-| 1.5.X and 1.6.X | [`1.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.0.X) |
-| 2.0.X | [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) |
-| 2.1.X | [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) |
-| 2.2.X | [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) |
-| 2.3.X | [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) |
-| 2.4.X | [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) |
-| ~~3.0.X~~ | ~~[`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X)~~ |
-| ~~3.1.X~~ | ~~[`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X)~~ |
-| ~~3.2.X~~ | ~~[`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X)~~ |
+| [`1.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.0.X) | 1.5.X and 1.6.X |
+| [`1.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.1.X) | 2.0.X |
+| [`1.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.2.X) | 2.1.X |
+| [`1.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.3.X) | 2.2.X |
+| [`1.4.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.4.X) | 2.3.X |
+| [`1.5.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.5.X) | 2.4.X |
+| ~~[`1.6.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.6.X)~~ | ~~3.0.X~~ |
+| ~~[`1.7.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.7.X)~~ | ~~3.1.X~~ |
+| ~~[`1.8.X`](https://github.com/jpmml/jpmml-sparkml/tree/1.8.X)~~ | ~~3.2.X~~ |
 
 ### Example application
 
