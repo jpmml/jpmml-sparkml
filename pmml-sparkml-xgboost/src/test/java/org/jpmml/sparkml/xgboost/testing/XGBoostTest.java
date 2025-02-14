@@ -39,9 +39,9 @@ import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.jpmml.xgboost.HasXGBoostOptions;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
@@ -137,13 +137,13 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 		evaluate("XGBoost", IRIS, new FloatEquivalence(16));
 	}
 
-	@BeforeClass
+	@BeforeAll
 	static
 	public void createSparkSession(){
 		SparkMLEncoderBatchTest.createSparkSession();
 	}
 
-	@AfterClass
+	@AfterAll
 	static
 	public void destroySparkSession(){
 		SparkMLEncoderBatchTest.destroySparkSession();

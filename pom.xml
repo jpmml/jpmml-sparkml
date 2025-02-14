@@ -34,6 +34,7 @@
 
 	<modules>
 		<module>pmml-sparkml</module>
+		<module>pmml-sparkml-evaluator</module>
 		<module>pmml-sparkml-example</module>
 		<module>pmml-sparkml-lightgbm</module>
 		<module>pmml-sparkml-xgboost</module>
@@ -51,13 +52,15 @@
 	</issueManagement>
 
 	<properties>
-		<project.build.outputTimestamp>2025-02-10T10:24:05Z</project.build.outputTimestamp>
-
+		<jdk.version>11</jdk.version>
+		<jpmml-converter.version>1.6.0</jpmml-converter.version>
+		<jpmml-lightgbm.version>1.6.0</jpmml-lightgbm.version>
+		<jpmml-xgboost.version>1.9.0</jpmml-xgboost.version>
+		<jpmml-evaluator.version>1.7.1</jpmml-evaluator.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.0.9]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
 		<xgboost4j-spark.version>[1.0.0, 2.0.1],[2.1.0, 2.1.3]</xgboost4j-spark.version>
-
-		<skipTests>false</skipTests>
+		<project.build.outputTimestamp>2025-02-10T10:24:05Z</project.build.outputTimestamp>
 	</properties>
 
 	<dependencyManagement>
@@ -65,6 +68,11 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml</artifactId>
+				<version>3.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-sparkml-evaluator</artifactId>
 				<version>3.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -86,7 +94,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter</artifactId>
-				<version>1.5.12</version>
+				<version>${jpmml-converter.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -97,25 +105,30 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-converter-testing</artifactId>
-				<version>1.5.12</version>
+				<version>${jpmml-converter.version}</version>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-evaluator</artifactId>
+				<version>${jpmml-evaluator.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-evaluator-testing</artifactId>
-				<version>1.6.11</version>
+				<version>${jpmml-evaluator.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-lightgbm</artifactId>
-				<version>1.5.6</version>
+				<version>${jpmml-lightgbm.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-xgboost</artifactId>
-				<version>1.8.8</version>
+				<version>${jpmml-xgboost.version}</version>
 			</dependency>
 
 			<dependency>
@@ -127,7 +140,7 @@
 			<dependency>
 				<groupId>com.beust</groupId>
 				<artifactId>jcommander</artifactId>
-				<version>1.72</version>
+				<version>1.82</version>
 			</dependency>
 
 			<dependency>
@@ -154,9 +167,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.2</version>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>5.11.4</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -181,25 +194,46 @@
 					-->
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[11,)</version>
+								</requireJavaVersion>
+								<requireMavenVersion>
+									<version>3.6.3</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.11.2</version>
 				<configuration>
-					<javadocVersion>1.8</javadocVersion>
+					<release>${jdk.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.1</version>
 				<configuration>
-					<!-- See org.sonatype.oss:oss-parent:7 -->
-					<arguments>-Psonatype-oss-release -DskipTests=${skipTests}</arguments>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 					<localCheckout>true</localCheckout>
 					<pushChanges>false</pushChanges>
@@ -213,23 +247,23 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.5.2</version>
 				<configuration>
 					<argLine>${jacoco.agent}</argLine>
-					<skipTests>${skipTests}</skipTests>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>4.8.1</version>
+				<version>4.9.2</version>
 				<configuration>
 					<charset>${project.build.sourceEncoding}</charset>
 					<compileOrder>ScalaThenJava</compileOrder>
 					<jvmArgs>
 						<jvmArg>-Xmx1024m</jvmArg>
 					</jvmArgs>
+					<release>${jdk.version}</release>
 					<scalaVersion>2.12.15</scalaVersion>
 				</configuration>
 				<executions>
@@ -253,7 +287,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.10</version>
+				<version>0.8.12</version>
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>
@@ -292,4 +326,39 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<activation>
+				<jdk>[16, )</jdk>
+			</activation>
+			
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<argLine>--add-exports=java.base/sun.nio.ch=ALL-UNNAMED</argLine>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<!-- See org.sonatype.oss:oss-parent:7 -->
+	<repositories>
+		<repository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>

@@ -9,11 +9,11 @@
 	</parent>
 
 	<groupId>org.jpmml</groupId>
-	<artifactId>pmml-sparkml-lightgbm</artifactId>
+	<artifactId>pmml-sparkml-evaluator</artifactId>
 	<packaging>jar</packaging>
 
-	<name>JPMML Spark ML LightGBM converter</name>
-	<description>JPMML Apache Spark ML LightGBM to PMML converter</description>
+	<name>JPMML Spark ML JPMML-Evaluator integration</name>
+	<description>JPMML Apache Spark ML JPMML-Evaluator integration</description>
 
 	<licenses>
 		<license>
@@ -26,34 +26,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-sparkml</artifactId>
+			<artifactId>pmml-evaluator</artifactId>
+			<scope>provided</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-evaluator-testing</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jpmml</groupId>
-			<artifactId>pmml-lightgbm</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>synapseml-lightgbm_2.12</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.12</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

@@ -33,9 +33,9 @@ import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.SparkMLTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SQLTransformerConverterTest extends SparkMLTest {
 
@@ -78,19 +78,19 @@ public class SQLTransformerConverterTest extends SparkMLTest {
 		for(DataField dataField : dataFields){
 			String name = dataField.requireName();
 
-			assertTrue(name, dataFieldNames.remove(name));
+			assertTrue(dataFieldNames.remove(name), name);
 		}
 
-		assertTrue(dataFieldNames.toString(), dataFieldNames.isEmpty());
+		assertTrue(dataFieldNames.isEmpty(), dataFieldNames.toString());
 
 		Collection<DerivedField> derivedFields = (encoder.getDerivedFields()).values();
 		for(DerivedField derivedField : derivedFields){
 			String name = derivedField.requireName();
 
-			assertTrue(name, derivedFieldNames.remove(name));
+			assertTrue(derivedFieldNames.remove(name), name);
 		}
 
-		assertTrue(derivedFieldNames.toString(), derivedFieldNames.isEmpty());
+		assertTrue(derivedFieldNames.isEmpty(), derivedFieldNames.toString());
 	}
 
 	private static final StructType schema = new StructType()

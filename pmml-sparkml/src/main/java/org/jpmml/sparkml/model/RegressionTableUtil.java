@@ -19,11 +19,8 @@
 package org.jpmml.sparkml.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
@@ -35,36 +32,10 @@ import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.PMMLEncoder;
-import org.jpmml.converter.SchemaUtil;
-import org.jpmml.sparkml.ModelConverter;
 
 public class RegressionTableUtil {
 
 	private RegressionTableUtil(){
-	}
-
-	static
-	public <C extends ModelConverter<?> & HasRegressionTableOptions> void simplify(C converter, Object identifier, List<Feature> features, List<Double> coefficients){
-		SchemaUtil.checkSize(coefficients.size(), features);
-
-		Integer lookupThreshold = (Integer)converter.getOption(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, null);
-		if(lookupThreshold == null){
-			return;
-		}
-
-		Map<String, Long> countMap = features.stream()
-			.filter(feature -> (feature instanceof BinaryFeature))
-			.collect(Collectors.groupingBy(feature -> ((BinaryFeature)feature).getName(), Collectors.counting()));
-
-		Collection<? extends Map.Entry<String, Long>> entries = countMap.entrySet();
-		for(Map.Entry<String, Long> entry : entries){
-
-			if(entry.getValue() < lookupThreshold){
-				continue;
-			}
-
-			createMapValues(entry.getKey(), identifier, features, coefficients);
-		}
 	}
 
 	static

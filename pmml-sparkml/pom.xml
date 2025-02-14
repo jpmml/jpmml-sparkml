@@ -51,8 +51,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -74,6 +74,19 @@
 							<Implementation-Version>${project.version}</Implementation-Version>
 						</manifestEntries>
 					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<sourceFileExcludes>
+						<!--
+						<sourceFileExclude>org/jpmml/sparkml/feature/InvalidCategoryTransformerConverter.java</sourceFileExclude>
+						<sourceFileExclude>org/jpmml/sparkml/feature/SparseToDenseTransformerConverter.java</sourceFileExclude>
+						-->
+						<sourceFileExclude>**/*Converter.java</sourceFileExclude>
+					</sourceFileExcludes>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -22,8 +22,8 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import org.jpmml.evaluator.ResultField;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 abstract
 public class SimpleSparkMLEncoderBatchTest extends SparkMLEncoderBatchTest {
@@ -35,13 +35,13 @@ public class SimpleSparkMLEncoderBatchTest extends SparkMLEncoderBatchTest {
 		return super.createBatch(algorithm, dataset, columnFilter, equivalence);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	static
 	public void createSparkSession(){
 		SparkMLEncoderBatchTest.createSparkSession();
 	}
 
-	@AfterClass
+	@AfterAll
 	static
 	public void destroySparkSession(){
 		SparkMLEncoderBatchTest.destroySparkSession();

@@ -47,7 +47,6 @@ import org.jpmml.sparkml.ArchiveUtil;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.PipelineModelUtil;
-import org.jpmml.sparkml.model.HasRegressionTableOptions;
 
 abstract
 public class SparkMLEncoderBatch extends ModelEncoderBatch {
@@ -62,19 +61,17 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 	@Override
 	public List<Map<String, Object>> getOptionsMatrix(){
-		// XXX
 		Map<String, Object> options = new LinkedHashMap<>();
-		options.put(HasRegressionTableOptions.OPTION_LOOKUP_THRESHOLD, 5);
 
 		return Collections.singletonList(options);
 	}
 
-	public String getSchemaJsonPath(){
-		return "/schema/" + getDataset() + ".json";
-	}
-
 	public String getPipelineModelZipPath(){
 		return "/pipeline/" + getAlgorithm() + getDataset() + ".zip";
+	}
+
+	public String getSchemaJsonPath(){
+		return "/schema/" + getDataset() + ".json";
 	}
 
 	public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){

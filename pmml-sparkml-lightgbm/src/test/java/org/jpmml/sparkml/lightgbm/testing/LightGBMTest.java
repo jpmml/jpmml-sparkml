@@ -31,9 +31,9 @@ import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.lightgbm.HasLightGBMOptions;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatch;
 import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class LightGBMTest extends SparkMLEncoderBatchTest implements Datasets {
 
@@ -90,13 +90,13 @@ public class LightGBMTest extends SparkMLEncoderBatchTest implements Datasets {
 		evaluate("LightGBM", IRIS);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	static
 	public void createSparkSession(){
 		SparkMLEncoderBatchTest.createSparkSession();
 	}
 
-	@AfterClass
+	@AfterAll
 	static
 	public void destroySparkSession(){
 		SparkMLEncoderBatchTest.destroySparkSession();

@@ -20,7 +20,6 @@ package org.jpmml.sparkml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.Arrays;
@@ -33,15 +32,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.transform.stream.StreamSource;
-
-import jakarta.xml.bind.JAXBException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.sql.SparkSession;
-import org.jpmml.model.JAXBUtil;
 
 public class ConverterFactory {
 
@@ -112,17 +107,6 @@ public class ConverterFactory {
 
 		if(!Arrays.equals(ConverterFactory.VERSION, version)){
 			throw new IllegalArgumentException("Expected Apache Spark ML version " + formatVersion(ConverterFactory.VERSION) + ", got version " + formatVersion(version) + " (" + sparkContext.version() + ")");
-		}
-	}
-
-	static
-	public void checkApplicationClasspath(){
-		String string = "<PMML xmlns=\"http://www.dmg.org/PMML-4_4\"/>";
-
-		try {
-			JAXBUtil.unmarshalPMML(new StreamSource(new StringReader(string)));
-		} catch(JAXBException je){
-			throw new IllegalArgumentException("Expected JPMML-Model version 1.5.X, got a legacy version. See https://issues.apache.org/jira/browse/SPARK-15526", je);
 		}
 	}
 

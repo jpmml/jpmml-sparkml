@@ -65,7 +65,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.mining.MiningModelUtil;
-import org.jpmml.model.metro.MetroJAXBUtil;
+import org.jpmml.model.JAXBSerializer;
 import org.jpmml.sparkml.model.HasFeatureImportances;
 import org.jpmml.sparkml.model.HasTreeOptions;
 
@@ -286,7 +286,7 @@ public class PMMLBuilder {
 		ByteArrayOutputStream os = new ByteArrayOutputStream(size);
 
 		try {
-			MetroJAXBUtil.marshalPMML(pmml, os);
+			serializePretty(pmml, os);
 		} catch(JAXBException je){
 			throw new RuntimeException(je);
 		}
@@ -300,7 +300,7 @@ public class PMMLBuilder {
 		OutputStream os = new FileOutputStream(file);
 
 		try {
-			MetroJAXBUtil.marshalPMML(pmml, os);
+			serializePretty(pmml, os);
 		} catch(JAXBException je){
 			throw new RuntimeException(je);
 		} finally {
@@ -417,6 +417,13 @@ public class PMMLBuilder {
 	}
 
 	static
+	private void serializePretty(PMML pmml, OutputStream os) throws JAXBException {
+		JAXBSerializer jaxbSerializer = new JAXBSerializer();
+
+		jaxbSerializer.serializePretty(pmml, os);
+	}
+
+	static
 	private Iterable<Transformer> getTransformers(PipelineModel pipelineModel){
 		List<Transformer> result = new ArrayList<>();
 		result.add(pipelineModel);
@@ -498,7 +505,6 @@ public class PMMLBuilder {
 	static
 	private void init(){
 		ConverterFactory.checkVersion();
-		ConverterFactory.checkApplicationClasspath();
 		ConverterFactory.checkNoShading();
 	}
 
