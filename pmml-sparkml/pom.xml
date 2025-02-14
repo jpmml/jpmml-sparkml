@@ -76,6 +76,19 @@
 					</archive>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<sourceFileExcludes>
+						<!--
+						<sourceFileExclude>org/jpmml/sparkml/feature/InvalidCategoryTransformerConverter.java</sourceFileExclude>
+						<sourceFileExclude>org/jpmml/sparkml/feature/SparseToDenseTransformerConverter.java</sourceFileExclude>
+						-->
+						<sourceFileExclude>**/*Converter.java</sourceFileExclude>
+					</sourceFileExcludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>

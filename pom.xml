@@ -263,6 +263,7 @@
 					<jvmArgs>
 						<jvmArg>-Xmx1024m</jvmArg>
 					</jvmArgs>
+					<release>${jdk.version}</release>
 					<scalaVersion>2.12.15</scalaVersion>
 				</configuration>
 				<executions>
