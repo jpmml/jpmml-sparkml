@@ -144,23 +144,41 @@ public class ArchiveUtil {
 
 	static void uncompress(ZipFile zipFile, File dir) throws IOException {
 
-		for(Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements(); ){
-			ZipEntry entry = entries.nextElement();
+		// Normalize the destination directory path
+	String canonicalDestDir = dir.getCanonicalPath();
 
-			if(entry.isDirectory()){
-				continue;
+	for(Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements(); ){
+		ZipEntry entry = entries.nextElement();
+
+		if(entry.isDirectory()){
+			continue;
+		}
+
+		try(InputStream is = zipFile.getInputStream(entry)){
+			// Validate and sanitize the entry name to prevent Zip Slip
+			String entryName = entry.getName();
+			
+			// Check for path traversal attempts
+			if (entryName.contains("..") || entryName.startsWith("/") || entryName.startsWith("\\")) {
+				throw new IOException("Unsafe zip entry detected: " + entryName);
 			}
-
-			try(InputStream is = zipFile.getInputStream(entry)){
-				File file = new File(dir, entry.getName());
+			
+			File file = new File(dir, entryName);
+			
+			// Verify the resolved file path is within the destination directory
+			String canonicalFilePath = file.getCanonicalPath();
+			if (!canonicalFilePath.startsWith(canonicalDestDir + File.separator) && 
+				!canonicalFilePath.equals(canonicalDestDir)) {
+				throw new IOException("Zip Slip attack detected: " + entryName);
+			}
 
 				File parentDir = file.getParentFile();
 				if(!parentDir.exists()){
 
 					if(!parentDir.mkdirs()){
-						throw new IOException(parentDir.getAbsolutePath());
-					}
-				}
+					throw new IOException("Failed to create directory: " + parentDir.getAbsolutePath());
+          }
+        }
 
 				try(OutputStream os = new FileOutputStream(file)){
 					ByteStreams.copy(is, os);
