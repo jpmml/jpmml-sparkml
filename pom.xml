@@ -53,7 +53,7 @@
 
 	<properties>
 		<jdk.version>11</jdk.version>
-		<jpmml-converter.version>1.6.0</jpmml-converter.version>
+		<jpmml-converter.version>1.6.3</jpmml-converter.version>
 		<jpmml-lightgbm.version>1.6.0</jpmml-lightgbm.version>
 		<jpmml-xgboost.version>1.9.0</jpmml-xgboost.version>
 		<jpmml-evaluator.version>1.7.1</jpmml-evaluator.version>
