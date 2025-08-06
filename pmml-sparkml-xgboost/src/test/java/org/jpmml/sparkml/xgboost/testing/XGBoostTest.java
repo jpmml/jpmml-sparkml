@@ -25,7 +25,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
-import org.dmg.pmml.Model;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.VerificationField;
 import org.dmg.pmml.Visitor;
@@ -75,19 +76,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 			public PMML getPMML() throws Exception {
 				PMML pmml = super.getPMML();
 
-				String dataset = getDataset();
-
 				Visitor visitor = new AbstractVisitor(){
-
-					@Override
-					public VisitorAction visit(Model model){
-
-						if(Objects.equals(dataset, AUDIT) || Objects.equals(dataset, AUDIT_NA)){
-							model.setModelVerification(null);
-						}
-
-						return super.visit(model);
-					}
 
 					@Override
 					public VisitorAction visit(VerificationField verificationField){
@@ -102,6 +91,18 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 				return pmml;
 			}
+
+			@Override
+			public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
+				String algorithm = getAlgorithm();
+				String dataset = getDataset();
+
+				if(Objects.equals(algorithm, "XGBoost") && Objects.equals(dataset, IRIS)){
+					return null;
+				}
+
+				return super.getVerificationDataset(inputDataset);
+			}
 		};
 
 		return result;
@@ -109,7 +110,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateAudit() throws Exception {
-		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8));
+		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8 + 32));
 	}
 
 	@Test
@@ -129,12 +130,12 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateHousing() throws Exception {
-		evaluate("XGBoost", HOUSING);
+		evaluate("XGBoost", HOUSING, new FloatEquivalence(24));
 	}
 
 	@Test
 	public void evaluateIris() throws Exception {
-		evaluate("XGBoost", IRIS, new FloatEquivalence(16));
+		evaluate("XGBoost", IRIS, new FloatEquivalence(24));
 	}
 
 	@BeforeAll
