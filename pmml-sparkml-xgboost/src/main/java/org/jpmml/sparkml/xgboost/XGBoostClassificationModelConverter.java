@@ -33,6 +33,18 @@ public class XGBoostClassificationModelConverter extends ProbabilisticClassifica
 	}
 
 	@Override
+	public int getNumberOfClasses(){
+		XGBoostClassificationModel model = getModel();
+
+		int numClass = model.getNumClass();
+		if(numClass != 0){
+			return numClass;
+		}
+
+		return super.getNumberOfClasses();
+	}
+
+	@Override
 	public MiningModel encodeModel(Schema schema){
 		XGBoostClassificationModel model = getModel();
 
