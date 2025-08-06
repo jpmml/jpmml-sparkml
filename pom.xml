@@ -3,9 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
+		<groupId>org.jpmml</groupId>
+		<artifactId>jpmml-parent</artifactId>
+		<version>1.0.8</version>
 	</parent>
 
 	<groupId>org.jpmml</groupId>
@@ -52,7 +52,7 @@
 	</issueManagement>
 
 	<properties>
-		<jdk.version>11</jdk.version>
+		<scala.version>2.12.15</scala.version>
 		<jpmml-converter.version>1.6.3</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.4</jpmml-evaluator.version>
 		<jpmml-lightgbm.version>1.6.1</jpmml-lightgbm.version>
@@ -168,13 +168,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>5.11.4</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>org.apache.hadoop</groupId>
 				<artifactId>hadoop-client</artifactId>
 				<version>2.7.4</version>
@@ -186,75 +179,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
-				<configuration>
-					<!--
-					<compilerArgument>-Xlint:unchecked</compilerArgument>
-					-->
-					<showDeprecation>true</showDeprecation>
-					<showWarnings>true</showWarnings>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.5.0</version>
-				<executions>
-					<execution>
-						<id>enforce-maven</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>[11,)</version>
-								</requireJavaVersion>
-								<requireMavenVersion>
-									<version>3.6.3</version>
-								</requireMavenVersion>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.2</version>
-				<configuration>
-					<release>${jdk.version}</release>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<localCheckout>true</localCheckout>
-					<pushChanges>false</pushChanges>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.2</version>
-				<configuration>
-					<argLine>${jacoco.agent}</argLine>
-					<trimStackTrace>false</trimStackTrace>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>4.9.2</version>
@@ -264,8 +188,8 @@
 					<jvmArgs>
 						<jvmArg>-Xmx1024m</jvmArg>
 					</jvmArgs>
-					<release>${jdk.version}</release>
-					<scalaVersion>2.12.15</scalaVersion>
+					<release>${java.version}</release>
+					<scalaVersion>${scala.version}</scalaVersion>
 				</configuration>
 				<executions>
 					<execution>
@@ -285,29 +209,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
-				<executions>
-					<execution>
-						<id>pre-unit-test</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<configuration>
-							<propertyName>jacoco.agent</propertyName>
-						</configuration>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
 			<plugin>
 				<groupId>de.jutzig</groupId>
 				<artifactId>github-release-plugin</artifactId>
@@ -347,19 +249,4 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<!-- See org.sonatype.oss:oss-parent:7 -->
-	<repositories>
-		<repository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 </project>
