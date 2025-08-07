@@ -133,6 +133,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>telemetry-client</artifactId>
+				<version>1.0.0</version>
+			</dependency>
+
+			<dependency>
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>synapseml-lightgbm_2.12</artifactId>
 				<version>${synapseml-lightgbm.version}</version>
