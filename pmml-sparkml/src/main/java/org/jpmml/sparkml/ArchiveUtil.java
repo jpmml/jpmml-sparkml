@@ -142,7 +142,8 @@ public class ArchiveUtil {
 		}
 	}
 
-	static void uncompress(ZipFile zipFile, File dir) throws IOException {
+	static
+	public void uncompress(ZipFile zipFile, File dir) throws IOException {
 
 		for(Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements(); ){
 			ZipEntry entry = entries.nextElement();
@@ -153,6 +154,10 @@ public class ArchiveUtil {
 
 			try(InputStream is = zipFile.getInputStream(entry)){
 				File file = new File(dir, entry.getName());
+
+				if(!checkInside(dir, file)){
+					throw new IOException(file.getAbsolutePath() + " is not inside " + dir.getAbsolutePath());
+				}
 
 				File parentDir = file.getParentFile();
 				if(!parentDir.exists()){
@@ -167,5 +172,18 @@ public class ArchiveUtil {
 				}
 			}
 		}
+	}
+
+	static
+	private boolean checkInside(File dir, File file){
+		Path dirPath = toCanonicalPath(dir);
+		Path filePath = toCanonicalPath(file);
+
+		return filePath.startsWith(dirPath);
+	}
+
+	static
+	private Path toCanonicalPath(File file){
+		return (file.toPath()).normalize().toAbsolutePath();
 	}
 }

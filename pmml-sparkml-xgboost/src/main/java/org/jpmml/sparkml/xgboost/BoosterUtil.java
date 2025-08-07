@@ -21,6 +21,7 @@ package org.jpmml.sparkml.xgboost;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class BoosterUtil {
 			throw new RuntimeException(e);
 		}
 
-		Float missing = model.getMissing();
+		Float missing = getMissing(model);
 		if(missing.isNaN()){
 			missing = null;
 		}
@@ -78,5 +79,20 @@ public class BoosterUtil {
 		Schema xgbSchema = learner.toXGBoostSchema(schema);
 
 		return learner.encodeModel(options, xgbSchema);
+	}
+
+	static
+	private Float getMissing(Model model){
+		Class<?> clazz = model.getClass();
+
+		try {
+			// XGBoost4J-Spark 1.0.0 -- 2.1.4: GeneralParams#getMissing()
+			// XGBoost4J-Spark 3.0.0 and newer: SparkParams#getMissing()
+			Method method = clazz.getMethod("getMissing");
+
+			return (Float)method.invoke(model);
+		} catch(ReflectiveOperationException roe){
+			throw new RuntimeException(roe);
+		}
 	}
 }

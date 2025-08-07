@@ -20,7 +20,9 @@ package org.jpmml.sparkml.example;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -46,6 +48,8 @@ import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
+import org.jpmml.telemetry.Incident;
+import org.jpmml.telemetry.TelemetryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,7 +161,29 @@ public class Main {
 			System.exit(0);
 		}
 
-		main.run();
+		try {
+			main.run();
+		} catch(FileNotFoundException fnfe){
+			throw fnfe;
+		} catch(Exception e){
+			Package _package = Main.class.getPackage();
+
+			Map<String, String> environment = new LinkedHashMap<>();
+			environment.put("jpmml-sparkml", _package.getImplementationVersion());
+
+			Incident incident = new Incident()
+				.setProject("jpmml-sparkml")
+				.setEnvironment(environment)
+				.setException(e);
+
+			try {
+				TelemetryClient.report("https://telemetry.jpmml.org/v1/incidents", incident);
+			} catch(IOException ioe){
+				// Ignored
+			}
+
+			throw e;
+		}
 	}
 
 	private void run() throws Exception {
