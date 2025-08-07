@@ -141,7 +141,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 
 # Prerequisites #
 
-* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X or 3.5.X.
+* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X, 3.5.X or 4.0.X.
 
 # Installation #
 
@@ -166,7 +166,8 @@ Active development branches:
 | JPMML-SparkML branch | Apache Spark version |
 |----------------------|----------------------|
 | [`3.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.0.X) | 3.4.X |
-| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 3.5.X |
+| [`3.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.1.X) | 3.5.X |
+| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 4.0.X |
 
 Stale development branches:
 
