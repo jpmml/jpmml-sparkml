@@ -41,8 +41,8 @@ import org.jpmml.sparkml.AliasExpression;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.ExpressionTranslator;
 import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.ScalaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
-import scala.collection.JavaConversions;
 
 public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
@@ -105,12 +105,12 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 	public List<?> encodeLogicalPlan(SparkMLEncoder encoder, LogicalPlan logicalPlan){
 		List<Object> result = new ArrayList<>();
 
-		List<LogicalPlan> children = JavaConversions.seqAsJavaList(logicalPlan.children());
+		List<LogicalPlan> children = ScalaUtil.seqAsJavaList(logicalPlan.children());
 		for(LogicalPlan child : children){
 			encodeLogicalPlan(encoder, child);
 		}
 
-		List<Expression> expressions = JavaConversions.seqAsJavaList(logicalPlan.expressions());
+		List<Expression> expressions = ScalaUtil.seqAsJavaList(logicalPlan.expressions());
 		for(Expression expression : expressions){
 			org.dmg.pmml.Expression pmmlExpression = ExpressionTranslator.translate(encoder, expression);
 

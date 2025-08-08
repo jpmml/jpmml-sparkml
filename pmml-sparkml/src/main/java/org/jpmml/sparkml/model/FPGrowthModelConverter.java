@@ -46,8 +46,8 @@ import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.AssociationRulesModelConverter;
 import org.jpmml.sparkml.ItemSetFeature;
+import org.jpmml.sparkml.ScalaUtil;
 import org.jpmml.sparkml.SparkMLEncoder;
-import scala.collection.JavaConversions;
 import scala.collection.Seq;
 
 public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGrowthModel> {
@@ -93,8 +93,8 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 		List<Row> associationRuleRows = (model.associationRules()).collectAsList();
 		for(Row associationRuleRow : associationRuleRows){
-			List<String> antecedent = formatValues(JavaConversions.seqAsJavaList((Seq<?>)associationRuleRow.apply(0)));
-			List<String> consequent = formatValues(JavaConversions.seqAsJavaList((Seq<?>)associationRuleRow.apply(1)));
+			List<String> antecedent = formatValues(ScalaUtil.seqAsJavaList((Seq<?>)associationRuleRow.apply(0)));
+			List<String> consequent = formatValues(ScalaUtil.seqAsJavaList((Seq<?>)associationRuleRow.apply(1)));
 
 			Double confidence = (Double)associationRuleRow.apply(2);
 

@@ -102,7 +102,6 @@ import org.jpmml.converter.ValueUtil;
 import org.jpmml.converter.visitors.ExpressionCompactor;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 public class ExpressionTranslator {
 
@@ -265,7 +264,7 @@ public class ExpressionTranslator {
 		if(expression instanceof CaseWhen){
 			CaseWhen caseWhen = (CaseWhen)expression;
 
-			List<Tuple2<Expression, Expression>> branches = JavaConversions.seqAsJavaList(caseWhen.branches());
+			List<Tuple2<Expression, Expression>> branches = ScalaUtil.seqAsJavaList(caseWhen.branches());
 
 			Option<Expression> elseValue = caseWhen.elseValue();
 
@@ -334,7 +333,7 @@ public class ExpressionTranslator {
 		if(expression instanceof Concat){
 			Concat concat = (Concat)expression;
 
-			List<Expression> children = JavaConversions.seqAsJavaList(concat.children());
+			List<Expression> children = ScalaUtil.seqAsJavaList(concat.children());
 
 			Apply apply = ExpressionUtil.createApply(PMMLFunctions.CONCAT);
 
@@ -348,7 +347,7 @@ public class ExpressionTranslator {
 		if(expression instanceof Greatest){
 			Greatest greatest = (Greatest)expression;
 
-			List<Expression> children = JavaConversions.seqAsJavaList(greatest.children());
+			List<Expression> children = ScalaUtil.seqAsJavaList(greatest.children());
 
 			Apply apply = ExpressionUtil.createApply(PMMLFunctions.MAX);
 
@@ -379,7 +378,7 @@ public class ExpressionTranslator {
 
 			Expression value = in.value();
 
-			List<Expression> elements = JavaConversions.seqAsJavaList(in.list());
+			List<Expression> elements = ScalaUtil.seqAsJavaList(in.list());
 
 			Apply apply = ExpressionUtil.createApply(PMMLFunctions.ISIN, translateInternal(value));
 
@@ -393,7 +392,7 @@ public class ExpressionTranslator {
 		if(expression instanceof Least){
 			Least least = (Least)expression;
 
-			List<Expression> children = JavaConversions.seqAsJavaList(least.children());
+			List<Expression> children = ScalaUtil.seqAsJavaList(least.children());
 
 			Apply apply = ExpressionUtil.createApply(PMMLFunctions.MIN);
 
