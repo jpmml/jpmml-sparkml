@@ -3,9 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
+		<groupId>org.jpmml</groupId>
+		<artifactId>jpmml-parent</artifactId>
+		<version>1.0.8</version>
 	</parent>
 
 	<groupId>org.jpmml</groupId>
@@ -52,14 +52,15 @@
 	</issueManagement>
 
 	<properties>
-		<jdk.version>17</jdk.version>
+		<java.version>17</java.version>
 		<scala.version>2.13.16</scala.version>
-		<jpmml-converter.version>1.6.0</jpmml-converter.version>
-		<jpmml-lightgbm.version>1.6.0</jpmml-lightgbm.version>
-		<jpmml-xgboost.version>1.9.0</jpmml-xgboost.version>
-		<jpmml-evaluator.version>1.7.1</jpmml-evaluator.version>
-		<synapseml-lightgbm.version>[0.9.5, 1.0.9]</synapseml-lightgbm.version>
-		<xgboost4j-spark.version>[2.1.0, 2.1.3]</xgboost4j-spark.version>
+		<jpmml-converter.version>1.6.3</jpmml-converter.version>
+		<jpmml-evaluator.version>1.7.4</jpmml-evaluator.version>
+		<jpmml-lightgbm.version>1.6.1</jpmml-lightgbm.version>
+		<jpmml-xgboost.version>1.9.2</jpmml-xgboost.version>
+		<spark.version>4.0.0</spark.version>
+		<synapseml-lightgbm.version>[0.9.5, 1.0.13]</synapseml-lightgbm.version>
+		<xgboost4j-spark.version>[2.1.0, 3.0.2]</xgboost4j-spark.version>
 		<project.build.outputTimestamp>2025-08-07T20:09:03Z</project.build.outputTimestamp>
 	</properties>
 
@@ -132,6 +133,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>telemetry-client</artifactId>
+				<version>1.0.0</version>
+			</dependency>
+
+			<dependency>
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>synapseml-lightgbm_2.12</artifactId>
 				<version>${synapseml-lightgbm.version}</version>
@@ -152,25 +159,18 @@
 			<dependency>
 				<groupId>org.apache.spark</groupId>
 				<artifactId>spark-core_2.13</artifactId>
-				<version>4.0.0</version>
+				<version>${spark.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.spark</groupId>
 				<artifactId>spark-mllib_2.13</artifactId>
-				<version>4.0.0</version>
+				<version>${spark.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.glassfish.jaxb</groupId>
 						<artifactId>jaxb-runtime</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>5.11.4</version>
-				<scope>test</scope>
 			</dependency>
 
 			<dependency>
@@ -185,75 +185,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
-				<configuration>
-					<!--
-					<compilerArgument>-Xlint:unchecked</compilerArgument>
-					-->
-					<showDeprecation>true</showDeprecation>
-					<showWarnings>true</showWarnings>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.5.0</version>
-				<executions>
-					<execution>
-						<id>enforce-maven</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>[17,)</version>
-								</requireJavaVersion>
-								<requireMavenVersion>
-									<version>3.6.3</version>
-								</requireMavenVersion>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.2</version>
-				<configuration>
-					<release>${jdk.version}</release>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<localCheckout>true</localCheckout>
-					<pushChanges>false</pushChanges>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.2</version>
-				<configuration>
-					<argLine>${jacoco.agent}</argLine>
-					<trimStackTrace>false</trimStackTrace>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>4.9.5</version>
@@ -263,7 +194,7 @@
 					<jvmArgs>
 						<jvmArg>-Xmx1024m</jvmArg>
 					</jvmArgs>
-					<release>${jdk.version}</release>
+					<release>${java.version}</release>
 					<scalaVersion>${scala.version}</scalaVersion>
 				</configuration>
 				<executions>
@@ -284,29 +215,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
-				<executions>
-					<execution>
-						<id>pre-unit-test</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<configuration>
-							<propertyName>jacoco.agent</propertyName>
-						</configuration>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
 			<plugin>
 				<groupId>de.jutzig</groupId>
 				<artifactId>github-release-plugin</artifactId>
@@ -346,19 +255,4 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<!-- See org.sonatype.oss:oss-parent:7 -->
-	<repositories>
-		<repository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 </project>

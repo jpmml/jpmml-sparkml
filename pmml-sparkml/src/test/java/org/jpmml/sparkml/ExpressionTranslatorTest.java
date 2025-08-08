@@ -35,7 +35,6 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.PMMLFunctions;
 import org.dmg.pmml.TransformationDictionary;
-import org.jpmml.evaluator.EvaluationContext;
 import org.jpmml.evaluator.ExpressionUtil;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.FieldValueUtil;
@@ -337,7 +336,7 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 
 		PMML pmml = encoder.encodePMML();
 
-		EvaluationContext context = new VirtualEvaluationContext(){
+		VirtualEvaluationContext context = new VirtualEvaluationContext(){
 
 			@Override
 			public FieldValue resolve(String name){
