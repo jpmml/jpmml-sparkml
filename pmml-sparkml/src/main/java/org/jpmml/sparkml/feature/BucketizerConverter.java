@@ -83,9 +83,12 @@ public class BucketizerConverter extends MultiFeatureConverter<Bucketizer> {
 
 				categories.add(category);
 
-				Interval interval = new Interval((j < (splits.length - 2)) ? Interval.Closure.CLOSED_OPEN : Interval.Closure.CLOSED_CLOSED)
-					.setLeftMargin(formatMargin(splits[j]))
-					.setRightMargin(formatMargin(splits[j + 1]));
+				Interval.Closure closure = ((j < (splits.length - 2)) ? Interval.Closure.CLOSED_OPEN : Interval.Closure.CLOSED_CLOSED);
+
+				Double leftMargin = formatMargin(splits[j]);
+				Double rightMargin = formatMargin(splits[j + 1]);
+
+				Interval interval = new Interval(closure, leftMargin, rightMargin);
 
 				DiscretizeBin discretizeBin = new DiscretizeBin(category, interval);
 

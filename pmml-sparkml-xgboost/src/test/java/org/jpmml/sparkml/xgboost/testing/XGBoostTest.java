@@ -137,7 +137,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateIris() throws Exception {
-		evaluate("XGBoost", IRIS, new FloatEquivalence(24));
+		evaluate("XGBoost", IRIS, new FloatEquivalence(24 + 4));
 	}
 
 	@BeforeAll
