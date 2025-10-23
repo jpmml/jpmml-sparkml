@@ -58,7 +58,7 @@
 		<jpmml-lightgbm.version>1.6.2</jpmml-lightgbm.version>
 		<jpmml-xgboost.version>1.9.3</jpmml-xgboost.version>
 		<spark.version>3.4.0</spark.version>
-		<synapseml-lightgbm.version>[0.9.5, 1.0.13]</synapseml-lightgbm.version>
+		<synapseml-lightgbm.version>[0.9.5, 1.0.15]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
 		<xgboost4j-spark.version>[1.0.0, 2.0.1],[2.1.0, 3.0.2]</xgboost4j-spark.version>
 		<project.build.outputTimestamp>2025-08-07T19:54:03Z</project.build.outputTimestamp>	
