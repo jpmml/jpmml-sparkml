@@ -55,7 +55,7 @@
 		<scala.version>2.12.15</scala.version>
 		<jpmml-converter.version>1.6.4</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.4</jpmml-evaluator.version>
-		<jpmml-lightgbm.version>1.6.1</jpmml-lightgbm.version>
+		<jpmml-lightgbm.version>1.6.2</jpmml-lightgbm.version>
 		<jpmml-xgboost.version>1.9.2</jpmml-xgboost.version>
 		<spark.version>3.4.0</spark.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.0.13]</synapseml-lightgbm.version>
