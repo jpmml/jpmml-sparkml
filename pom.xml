@@ -53,7 +53,7 @@
 
 	<properties>
 		<scala.version>2.12.15</scala.version>
-		<jpmml-converter.version>1.6.3</jpmml-converter.version>
+		<jpmml-converter.version>1.6.4</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.4</jpmml-evaluator.version>
 		<jpmml-lightgbm.version>1.6.1</jpmml-lightgbm.version>
 		<jpmml-xgboost.version>1.9.2</jpmml-xgboost.version>
