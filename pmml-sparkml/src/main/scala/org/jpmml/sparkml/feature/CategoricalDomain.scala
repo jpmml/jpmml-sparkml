@@ -1,0 +1,145 @@
+/*
+ * Copyright (c) 2025 Villu Ruusmann
+ *
+ * This file is part of JPMML-SparkML
+ *
+ * JPMML-SparkML is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * JPMML-SparkML is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.jpmml.sparkml.feature
+
+import org.apache.spark.ml.param.{Param, ParamMap, Params}
+import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
+import org.apache.spark.sql.{Column, Dataset}
+import org.apache.spark.sql.catalyst.expressions.NamedExpression
+import org.apache.spark.sql.functions.{col, collect_set, not, when}
+
+trait CategoricalDomainParams extends DomainParams {
+
+	val dataValues: Param[Map[String, Array[Object]]] = new Param[Map[String, Array[Object]]](this, "dataValues", "")
+
+
+	def getDataValues: Map[String, Array[Object]] = $(dataValues)
+
+	def setDataValues(value: Map[String, Array[Object]]): this.type = set(dataValues, value)
+
+
+	override
+	def validateParams(): Unit = {
+		super.validateParams()
+
+		if(getDataValues.nonEmpty){
+			require(getDataValues.keys.forall(getInputCols.toSet.contains), s"dataValues keys and inputCols must match")
+
+			if(!getWithData){
+				throw new IllegalArgumentException("dataValues requires withData")
+			}
+		}
+	}
+}
+
+class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomainModel](uid) with CategoricalDomainParams with DefaultParamsWritable {
+
+	def this() = this(Identifiable.randomUID("catDomain"))
+
+	setDefault(
+		dataValues -> Map.empty[String, Array[Object]]
+	)
+
+	override
+	def fit(dataset: Dataset[_]): CategoricalDomainModel = {
+		val fitDataValues: Map[String, Array[Object]] = if(getWithData){
+			if(getDataValues.nonEmpty){
+				$(dataValues)
+			} else
+
+			{
+				collectDataValues(dataset)
+			}
+		} else
+
+		{
+			Map.empty[String, Array[Object]]
+		}
+
+		val model = new CategoricalDomainModel(uid)
+			.setDataValues(fitDataValues)
+
+		copyValues(model).asInstanceOf[CategoricalDomainModel]
+	}
+
+	protected
+	def collectDataValues(dataset: Dataset[_]): Map[String, Array[Object]] = {
+		val inputColNames = getInputCols
+
+		val selectCols = inputColNames.map {
+			inputColName => {
+				val inputCol = col(inputColName)
+
+				val isMissingCol = isMissing(inputCol)
+
+				val isNotMissingCol = not(isMissingCol)
+
+				when(isNotMissingCol, inputCol).as(inputColName)
+			}
+		}
+
+		val aggCols = inputColNames.map {
+			inputColName => collect_set(inputColName).as(inputColName)
+		}
+
+		val dataValues = dataset
+			.select(selectCols: _*)
+			.groupBy()
+			.agg(aggCols.head, aggCols.tail: _*)
+			.collect()
+			.headOption
+			.map {
+				row => inputColNames.zipWithIndex.map {
+					case (colName, idx) => colName -> row.getAs[Array[Object]](idx)
+				}.toMap
+			}
+			.getOrElse(Map.empty[String, Array[Object]])
+
+		dataValues
+	}
+}
+
+object CategoricalDomain extends DefaultParamsReadable[CategoricalDomain]
+
+class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with CategoricalDomainParams with DefaultParamsWritable {
+
+	override
+	protected 
+	def isValid(col: Column, isNotMissingCol: Column): Column = {
+
+		if(getDataValues.nonEmpty){
+			val colName = col.expr.asInstanceOf[NamedExpression].name
+
+			val values = getDataValues.getOrElse(colName, Array.empty[Object])
+
+			isNotMissingCol && col.isin(values: _*)
+		} else
+
+		{
+			super.isValid(col, isNotMissingCol)
+		}
+	}
+
+	override 
+	def copy(extra: ParamMap): CategoricalDomainModel = {
+		defaultCopy[CategoricalDomainModel](extra)
+	}
+}
+
+object CategoricalDomainModel extends DefaultParamsReadable[CategoricalDomainModel]
