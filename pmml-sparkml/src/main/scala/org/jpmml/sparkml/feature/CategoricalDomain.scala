@@ -60,7 +60,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 	def fit(dataset: Dataset[_]): CategoricalDomainModel = {
 		val fitDataValues: Map[String, Array[Object]] = if(getWithData){
 			if(getDataValues.nonEmpty){
-				$(dataValues)
+				getDataValues
 			} else
 
 			{
@@ -82,17 +82,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 	def collectDataValues(dataset: Dataset[_]): Map[String, Array[Object]] = {
 		val inputColNames = getInputCols
 
-		val selectCols = inputColNames.map {
-			inputColName => {
-				val inputCol = col(inputColName)
-
-				val isMissingCol = isMissing(inputCol)
-
-				val isNotMissingCol = not(isMissingCol)
-
-				when(isNotMissingCol, inputCol).as(inputColName)
-			}
-		}
+		val selectCols = selectNonMissing(inputColNames)
 
 		val aggCols = inputColNames.map {
 			inputColName => collect_set(inputColName).as(inputColName)
@@ -106,7 +96,8 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 			.headOption
 			.map {
 				row => inputColNames.zipWithIndex.map {
-					case (colName, idx) => colName -> row.getAs[Array[Object]](idx)
+					case (colName, idx) =>
+						colName -> row.getAs[Array[Object]](idx)
 				}.toMap
 			}
 			.getOrElse(Map.empty[String, Array[Object]])

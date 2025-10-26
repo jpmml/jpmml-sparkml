@@ -1,0 +1,229 @@
+/*
+ * Copyright (c) 2025 Villu Ruusmann
+ *
+ * This file is part of JPMML-SparkML
+ *
+ * JPMML-SparkML is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * JPMML-SparkML is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.jpmml.sparkml.feature
+
+import org.apache.spark.ml.param.{Param, ParamMap, Params, ParamValidators}
+import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
+import org.apache.spark.sql.{Column, Dataset}
+import org.apache.spark.sql.catalyst.expressions.NamedExpression
+import org.apache.spark.sql.functions.{col, lit, max, min, not, when}
+
+sealed
+trait OutlierTreatment {
+	def name: String
+}
+
+object OutlierTreatment {
+	case object AsIs extends OutlierTreatment { 
+		val name = "asIs"
+	}
+
+	case object AsMissingValues extends OutlierTreatment {
+		val name = "asMissingValues"
+	}
+
+	case object AsExtremeValues extends OutlierTreatment {
+		val name = "asExtremeValues" 
+	}
+
+	val values: Array[OutlierTreatment] = Array(AsIs, AsMissingValues, AsExtremeValues)
+
+	def forName(name: String): OutlierTreatment = values
+		.find(_.name == name)
+		.getOrElse(throw new IllegalArgumentException(s"${name}")
+	)
+}
+
+trait ContinuousDomainParams extends DomainParams {
+
+	val outlierTreatment: Param[String] = new Param[String](this, "outlierTreatment", "", ParamValidators.inArray(OutlierTreatment.values.map(_.name)))
+
+	val lowValue: Param[Number] = new Param[Number](this, "lowValue", "")
+
+	val highValue: Param[Number] = new Param[Number](this, "highValue", "")
+
+	val dataRanges: Param[Map[String, Array[Number]]] = new Param[Map[String, Array[Number]]](this, "dataRanges", "")
+
+
+	def getOutlierTreatment(): String = $(outlierTreatment)
+
+	def setOutlierTreatment(value: String): this.type = set(outlierTreatment, value)
+
+	def getLowValue(): Number = $(lowValue)
+
+	def setLowValue(value: Number): this.type = set(lowValue, value)
+
+	def getHighValue(): Number = $(highValue)
+
+	def setHighValue(value: Number): this.type = set(highValue, value)
+
+	def getDataRanges(): Map[String, Array[Number]] = $(dataRanges)
+
+	def setDataRanges(value: Map[String, Array[Number]]): this.type = set(dataRanges, value)
+
+
+	override
+	def validateParams(): Unit = {
+		super.validateParams()
+
+		if(getOutlierTreatment == OutlierTreatment.AsIs.name){
+			
+			if(isDefined(lowValue) || isDefined(highValue)){
+				throw new IllegalArgumentException(s"Outlier treatment ${getOutlierTreatment} does not support lowValue or highValue")
+			}
+		} else
+
+		if(getOutlierTreatment == OutlierTreatment.AsMissingValues.name || getOutlierTreatment == OutlierTreatment.AsExtremeValues.name){
+		
+			if(!isDefined(lowValue) || !isDefined(highValue)){
+				throw new IllegalArgumentException(s"Outlier treatment ${getOutlierTreatment} requires lowValue and highValue")
+			}
+		} // End if
+
+		if(getDataRanges.nonEmpty){
+			require(getDataRanges.keys.forall(getInputCols.toSet.contains), s"dataRanges keys and inputCols must match")
+
+			if(!getWithData){
+				throw new IllegalArgumentException("dataRanges requires withData")
+			}
+		}
+	}
+}
+
+class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomainModel](uid) with ContinuousDomainParams with DefaultParamsWritable {
+
+	def this() = this(Identifiable.randomUID("contDomain"))
+
+	setDefault(
+		outlierTreatment -> OutlierTreatment.AsIs.name,
+		dataRanges -> Map.empty[String, Array[Number]]
+	)
+
+	override
+	def fit(dataset: Dataset[_]): ContinuousDomainModel = {
+		val fitDataRanges: Map[String, Array[Number]] = if(getWithData){
+			if(getDataRanges.nonEmpty){
+				getDataRanges
+			} else
+
+			{
+				collectDataRanges(dataset)
+			}
+		} else
+
+		{
+			Map.empty[String, Array[Number]]
+		}
+
+		val model = new ContinuousDomainModel(uid)
+			.setDataRanges(fitDataRanges)
+
+		copyValues(model).asInstanceOf[ContinuousDomainModel]
+	}
+
+	protected
+	def collectDataRanges(dataset: Dataset[_]): Map[String, Array[Number]] = {
+		val inputColNames = getInputCols
+
+		val selectCols = selectNonMissing(inputColNames)
+
+		val aggCols = inputColNames.flatMap {
+			inputColName => Seq(min(inputColName), max(inputColName))
+		}
+
+		val dataRanges = dataset
+			.select(selectCols: _*)
+			.groupBy()
+			.agg(aggCols.head, aggCols.tail: _*)
+			.collect()
+			.headOption
+			.map {
+				row => inputColNames.zipWithIndex.map {
+					case (colName, idx) => {
+						val minIdx = 2 * idx
+						val maxIdx = 2 * idx + 1
+						colName -> Array(row.getAs[Number](minIdx), row.getAs[Number](maxIdx))
+					}
+				}.toMap
+			}
+			.getOrElse(Map.empty[String, Array[Number]])
+
+		dataRanges
+	}
+}
+
+object ContinuousDomain extends DefaultParamsReadable[ContinuousDomain]
+
+class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with ContinuousDomainParams with DefaultParamsWritable {
+
+	override
+	protected
+	def isValid(col: Column, isNotMissingCol: Column): Column = {
+		
+		if(getDataRanges.nonEmpty){
+			val colName = col.expr.asInstanceOf[NamedExpression].name
+
+			val (dataMin, dataMax) = getDataRanges.get(colName) match {
+				case Some(Array(min, max)) =>
+					(Some(min), Some(max))
+				case _ =>
+					// XXX
+					return lit(false)
+			}
+
+			(col >= dataMin) && (col <= dataMax)
+		} else
+
+		{
+			super.isValid(col, isNotMissingCol)
+		}
+	}
+
+	override
+	protected
+	def transformValid(col: Column, isValidCol: Column): Column = {
+		val outlierTreatment = getOutlierTreatment
+		val lowValue = getLowValue
+		val highValue = getHighValue
+
+		OutlierTreatment.forName(outlierTreatment) match {
+			case OutlierTreatment.AsIs =>
+				col
+			case OutlierTreatment.AsMissingValues => {
+				val isOutlier = (col < lowValue) || (col > highValue)
+				val nullifiedCol = when(isOutlier, lit(null)).otherwise(col)
+				transformMissing(nullifiedCol, isOutlier)
+			}
+			case OutlierTreatment.AsExtremeValues => {
+				val isNegativeOutlier = (col < lowValue)
+				val isPositiveOutlier = (col > highValue)
+				when(isNegativeOutlier, lit(lowValue)).otherwise(when(isPositiveOutlier, lit(highValue)).otherwise(col))
+			}
+			case _ =>
+				throw new IllegalArgumentException(outlierTreatment)
+		}
+	}
+
+	override
+	def copy(extra: ParamMap): ContinuousDomainModel = {
+		defaultCopy[ContinuousDomainModel](extra)
+	}
+}
+
+object ContinuousDomainModel extends DefaultParamsReadable[ContinuousDomainModel]

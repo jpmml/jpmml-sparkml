@@ -227,6 +227,21 @@ class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M]
 
 	override
 	def copy(extra: ParamMap): Domain[M] = defaultCopy(extra)
+
+	protected
+	def selectNonMissing(inputColNames: Array[String]): Seq[Column] = {
+		inputColNames.map {
+			inputColName => {
+				val inputCol = col(inputColName)
+
+				val isMissingCol = isMissing(inputCol)
+
+				val isNotMissingCol = not(isMissingCol)
+
+				when(isNotMissingCol, inputCol).as(inputColName)
+			}
+		}
+	}
 }
 
 abstract
