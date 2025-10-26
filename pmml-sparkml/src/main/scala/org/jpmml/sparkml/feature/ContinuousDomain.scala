@@ -50,7 +50,7 @@ object OutlierTreatment {
 	)
 }
 
-trait ContinuousDomainParams extends DomainParams {
+trait HasContinuousDomainParams extends HasDomainParams {
 
 	val outlierTreatment: Param[String] = new Param[String](this, "outlierTreatment", "", ParamValidators.inArray(OutlierTreatment.values.map(_.name)))
 
@@ -106,7 +106,7 @@ trait ContinuousDomainParams extends DomainParams {
 	}
 }
 
-class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomainModel](uid) with ContinuousDomainParams with DefaultParamsWritable {
+class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomainModel](uid) with HasContinuousDomainParams with DefaultParamsWritable {
 
 	def this() = this(Identifiable.randomUID("contDomain"))
 
@@ -170,7 +170,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 
 object ContinuousDomain extends DefaultParamsReadable[ContinuousDomain]
 
-class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with ContinuousDomainParams with DefaultParamsWritable {
+class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with HasContinuousDomainParams with DefaultParamsWritable {
 
 	override
 	protected

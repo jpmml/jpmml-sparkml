@@ -24,7 +24,7 @@ import org.apache.spark.sql.{Column, Dataset}
 import org.apache.spark.sql.catalyst.expressions.NamedExpression
 import org.apache.spark.sql.functions.{col, collect_set, not, when}
 
-trait CategoricalDomainParams extends DomainParams {
+trait HasCategoricalDomainParams extends HasDomainParams {
 
 	val dataValues: Param[Map[String, Array[Object]]] = new Param[Map[String, Array[Object]]](this, "dataValues", "")
 
@@ -48,7 +48,7 @@ trait CategoricalDomainParams extends DomainParams {
 	}
 }
 
-class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomainModel](uid) with CategoricalDomainParams with DefaultParamsWritable {
+class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomainModel](uid) with HasCategoricalDomainParams with DefaultParamsWritable {
 
 	def this() = this(Identifiable.randomUID("catDomain"))
 
@@ -108,7 +108,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 
 object CategoricalDomain extends DefaultParamsReadable[CategoricalDomain]
 
-class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with CategoricalDomainParams with DefaultParamsWritable {
+class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with HasCategoricalDomainParams with DefaultParamsWritable {
 
 	override
 	protected 

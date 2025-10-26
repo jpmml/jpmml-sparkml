@@ -94,7 +94,7 @@ object InvalidValueTreatment {
 	)
 }
 
-trait DomainParams extends Params with HasInputCols with HasOutputCols {
+trait HasDomainParams extends Params with HasInputCols with HasOutputCols {
 
 	val missingValues: Param[Array[Object]] = new Param[Array[Object]](this, "missingValues", "")
 
@@ -219,7 +219,7 @@ trait DomainParams extends Params with HasInputCols with HasOutputCols {
 }
 
 abstract
-class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M] with DomainParams with DefaultParamsWritable {
+class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M] with HasDomainParams with DefaultParamsWritable {
 
 	setDefault(
 		missingValues -> Array.empty[Object],
@@ -248,7 +248,7 @@ class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M]
 }
 
 abstract
-class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M] with DomainParams with DefaultParamsWritable {
+class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M] with HasDomainParams with DefaultParamsWritable {
 
 	protected
 	def transformMissing(col: Column, isMissingCol: Column): Column = {
