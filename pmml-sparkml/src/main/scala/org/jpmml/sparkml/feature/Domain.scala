@@ -197,21 +197,24 @@ trait DomainParams extends Params with HasInputCols with HasOutputCols {
 		val outputColNames = getOutputCols
 
 		val inputFields = schema.fields
-		val outputFields = new Array[StructField](outputColNames.length)
 
-		for(i <- 0 until outputColNames.length){
-			val inputColName = inputColNames(i)
-			val outputColName = outputColNames(i)
+		val outputFields = inputColNames.zip(outputColNames).map {
+			case (inputColName, outputColName) => {
+				require(inputFields.exists(_.name == inputColName), s"Input column ${inputColName} not found")
+				require(!inputFields.exists(_.name == outputColName), s"Output column ${outputColName} already exists")
 
-			require(inputFields.exists(_.name == inputColName), s"Input column $inputColName not found")
-			require(!inputFields.exists(_.name == outputColName), s"Output column $outputColName already exists")
-
-			val inputField = schema(inputColName)
-
-			outputFields(i) = StructField(outputColName, inputField.dataType, nullable = true)
+				transformField(schema, inputColName, outputColName)
+			}
 		}
 
 		StructType(inputFields ++ outputFields)
+	}
+
+	private
+	def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
+		val inputField = schema(inputColName)
+
+		StructField(outputColName, inputField.dataType, nullable = true)
 	}
 }
 
@@ -291,8 +294,6 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 
 	override
 	def transform(dataset: Dataset[_]): DataFrame = {
-		var df: DataFrame = dataset.toDF()
-
 		val inputColNames = getInputCols
 		val outputColNames = getOutputCols
 
@@ -315,6 +316,6 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 			}
 		}
 
-		df.select(dataset("*") +: outputCols: _*)
+		dataset.select(dataset("*") +: outputCols: _*)
 	}
 }

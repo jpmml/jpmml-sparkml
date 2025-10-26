@@ -30,7 +30,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 class SparseToDenseTransformer(override val uid: String) extends Transformer with HasInputCol with HasOutputCol with DefaultParamsWritable {
 	private
 	val sparseToDenseUDF = udf {
-		vec: Vector => {
+		(vec: Vector) => {
 			if(vec != null){
 				vec.toDense
 			} else
@@ -53,9 +53,7 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 
 	protected 
 	def validateParams(): Unit = {
-		require(isDefined(inputCol), "inputCol must be defined")
-		require(isDefined(outputCol), "outputCol must be defined")
-		require(getInputCol != getOutputCol, "inputCol and outputCol must be different")
+		require(isDefined(inputCol) && isDefined(outputCol), "inputCol and outputCol must be defined")
 	}
 
 	override

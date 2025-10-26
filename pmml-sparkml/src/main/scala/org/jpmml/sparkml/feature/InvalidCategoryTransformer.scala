@@ -23,13 +23,24 @@ import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.param.{ParamMap, ParamValidators}
 import org.apache.spark.ml.param.shared.{HasInputCol, HasInputCols, HasOutputCol, HasOutputCols}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
-import org.apache.spark.sql.{Column, Dataset, Row}
-import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.types.{StructField, StructType}
+import org.apache.spark.sql.{Dataset, Row}
+import org.apache.spark.sql.functions.{lit, udf}
+import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
 
 class InvalidCategoryTransformer(override val uid: String) extends Transformer with HasInputCol with HasInputCols with HasOutputCol with HasOutputCols with DefaultParamsWritable {
 
-	def this() = this(Identifiable.randomUID("invalidCat"))
+	private
+	val convertUDF = udf {
+		(x: Double, size: Int) => {
+			if(x >= 0 && x < size){
+				x
+			} else
+
+			{
+				Double.NaN
+			}
+		}
+	}
 
 	def setInputCol(value: String): this.type = set(inputCol, value)
 
@@ -39,83 +50,67 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 
 	def setOutputCols(value: Array[String]): this.type = set(outputCols, value)
 
+	protected 
+	def getInOutCols(): (Array[String], Array[String]) = {
+
+		if(isSet(inputCol)){
+			(Array(getInputCol), Array(getOutputCol))
+		} else 
+
+		{
+			(getInputCols, getOutputCols)
+		}
+	}
+
+
+	def this() = this(Identifiable.randomUID("invalidCat"))
+
 	override
 	def copy(extra: ParamMap): InvalidCategoryTransformer = defaultCopy(extra)
 
+	protected 
+	def validateParams(): Unit = {
+		ParamValidators.checkSingleVsMultiColumnParams(this, Seq(inputCol, outputCol), Seq(inputCols, outputCols))
+
+		if(isSet(inputCol)){
+			require(isDefined(inputCol) && isDefined(outputCol), "inputCol and outputCol must be defined")
+		} else
+
+		{
+			require(isDefined(inputCols) && isDefined(outputCols), "inputCols and outputCols must be defined")
+			require(getInputCols.length == getOutputCols.length, "inputCols and outputCols must have the same length")
+		}
+	}
+
 	override
 	def transformSchema(schema: StructType): StructType = {
+		validateParams()
+
 		val (inputColNames, outputColNames) = getInOutCols()
 
 		val inputFields = schema.fields
-		val outputFields = new Array[StructField](outputColNames.length)
 
-		for(i <- 0 until outputColNames.length){
-			val inputColName = inputColNames(i)
-			val outputColName = outputColNames(i)
-
-			require(!inputFields.exists(_.name == outputColName), s"Output column $outputColName already exists")
-
-			outputFields(i) = transformField(schema, inputColName, outputColName)
+		val outputFields = inputColNames.zip(outputColNames).map {
+			case (inputColName, outputColName) => {
+				require(inputFields.exists(_.name == inputColName), s"Input column ${inputColName} not found")
+				require(!inputFields.exists(_.name == outputColName), s"Output column ${outputColName} already exists")
+			
+				transformField(schema, inputColName, outputColName)
+			}
 		}
 
 		StructType(inputFields ++ outputFields)
 	}
 
-	override 
-	def transform(dataset: Dataset[_]): Dataset[Row] = {
-		val (inputColNames, outputColNames) = getInOutCols()
-
-		val transformedSchema = transformSchema(dataset.schema, logging = true)
-
-		var result = dataset.asInstanceOf[Dataset[Row]]
-
-		for(i <- 0 until outputColNames.length){
-			val inputColName = inputColNames(i)
-			val outputColName = outputColNames(i)
-
-			val inputField = transformedSchema(inputColName)
-			val outputField = transformedSchema(outputColName)
-
-			val inputMlAttr = NominalAttribute.fromStructField(inputField).asInstanceOf[NominalAttribute]
-			require(inputMlAttr.values.isDefined)
-
-			val inputLabels = inputMlAttr.values.get
-			require(inputLabels.last == "__unknown")
-
-			val outputLabels = inputLabels.slice(0, inputLabels.size - 1)
-			val outputMlAttr = NominalAttribute.defaultAttr
-				.withName(outputColName)
-				.withValues(outputLabels.asInstanceOf[Array[String]])
-				.toMetadata()
-
-			val converter = udf { x: Double => if (x >= 0 && x < outputLabels.size) x else Double.NaN }
-
-			val outputColumn = converter(dataset(inputColName)).as(outputColName, outputMlAttr)
-
-			result = result.withColumn(outputColName, outputColumn)
-		}
-
-		result
-	}
-
-	private def getInOutCols(): (Array[String], Array[String]) = {
-		ParamValidators.checkSingleVsMultiColumnParams(this, Seq(outputCol), Seq(outputCols))
-
-		if(isSet(inputCol)){
-			(Array($(inputCol)), Array($(outputCol)))
-		} else 
-
-		{
-			require($(inputCols).length == $(outputCols).length)
-
-			($(inputCols), $(outputCols))
-		}
-	}
-
-	private def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
+	private
+	def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
 		val inputField = schema(inputColName)
 
+		require(inputField.dataType == DoubleType, s"Input column ${inputColName} must be of type DoubleType, found ${inputField.dataType}")
+
 		val inputMlAttr = NominalAttribute.fromStructField(inputField).asInstanceOf[NominalAttribute]
+		// XXX
+		//require(inputMlAttr.values.isDefined && inputMlAttr.values.get.last == "__unknown", s"Input column ${inputColName} must have StringIndexer-like NominalAttribute metadata")
 
 		var outputMlAttr = NominalAttribute.defaultAttr
 			.withName(outputColName)
@@ -123,10 +118,32 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 
 		StructField(outputColName, inputField.dataType, inputField.nullable, outputMlAttr)
 	}
+
+	override 
+	def transform(dataset: Dataset[_]): Dataset[Row] = {
+		val transformedSchema = transformSchema(dataset.schema, logging = true)
+
+		val (inputColNames, outputColNames) = getInOutCols()
+
+		val outputCols = inputColNames.zip(outputColNames).map {
+			case (inputColName, outputColName) => {
+				val inputField = transformedSchema(inputColName)
+				val inputMlAttr = NominalAttribute.fromStructField(inputField).asInstanceOf[NominalAttribute]
+				val inputLabels = inputMlAttr.values.get
+				require(inputLabels.last == "__unknown")
+
+				val outputLabels = inputLabels.slice(0, inputLabels.size - 1)
+				val outputMlAttr = NominalAttribute.defaultAttr
+					.withName(outputColName)
+					.withValues(outputLabels.asInstanceOf[Array[String]])
+					.toMetadata()
+
+				convertUDF(dataset(inputColName), lit(outputLabels.length)).as(outputColName, outputMlAttr)
+			}
+		}
+
+		dataset.select(dataset("*") +: outputCols: _*)
+	}
 }
 
-object InvalidCategoryTransformer extends DefaultParamsReadable[InvalidCategoryTransformer] {
-
-	override
-	def load(path: String): InvalidCategoryTransformer = super.load(path)
-}
+object InvalidCategoryTransformer extends DefaultParamsReadable[InvalidCategoryTransformer]
