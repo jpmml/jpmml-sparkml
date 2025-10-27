@@ -23,7 +23,7 @@ import org.apache.spark.ml.param.{BooleanParam, Param, ParamMap, Params, ParamVa
 import org.apache.spark.ml.param.shared.{HasInputCols, HasOutputCols}
 import org.apache.spark.ml.util.{DefaultParamsWritable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset, DataFrame}
-import org.apache.spark.sql.functions.{col, lit, not, when}
+import org.apache.spark.sql.functions.{col, lit, not, raise_error, when}
 import org.apache.spark.sql.types.{StructField, StructType}
 
 sealed
@@ -169,7 +169,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 
 
 	protected
-	def isMissing(col: Column): Column = {
+	def isMissing(colName: String, col: Column): Column = {
 
 		if(missingValuesSet.nonEmpty){
 			col.isin(missingValuesSet.toSeq: _*)
@@ -181,12 +181,12 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	}
 
 	protected
-	def isValid(col: Column, isNotMissingCol: Column): Column = {
+	def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
 		isNotMissingCol
 	}
 
 	protected
-	def isInvalid(col: Column, isMissingCol: Column, isValidCol: Column): Column = {
+	def isInvalid(colName: String, col: Column, isMissingCol: Column, isValidCol: Column): Column = {
 		not(isMissingCol) && not(isValidCol)
 	}
 
@@ -250,7 +250,9 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 	setDefault(
 		missingValues -> Array.empty[Object],
 		missingValueTreatment -> MissingValueTreatment.AsIs.name,
+		missingValueReplacement -> null,
 		invalidValueTreatment -> InvalidValueTreatment.ReturnInvalid.name,
+		invalidValueReplacement -> null,
 		withData -> true
 	)
 
@@ -263,7 +265,7 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 			inputColName => {
 				val inputCol = col(inputColName)
 
-				val isMissingCol = isMissing(inputCol)
+				val isMissingCol = isMissing(inputColName, inputCol)
 
 				val isNotMissingCol = not(isMissingCol)
 
@@ -289,8 +291,8 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 				MissingValueTreatment.AsMedian |
 				MissingValueTreatment.AsValue =>
 				when(isMissingCol, lit(missingValueReplacement)).otherwise(col)
-			case _ => 
-				throw new IllegalArgumentException(missingValueTreatment)
+			case MissingValueTreatment.ReturnInvalid => 
+				when(isMissingCol, raise_error(lit("Missing value"))).otherwise(col)
 		}
 	}
 
@@ -305,6 +307,8 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 		val invalidValueReplacement = getInvalidValueReplacement
 
 		InvalidValueTreatment.forName(invalidValueTreatment) match {
+			case InvalidValueTreatment.ReturnInvalid =>
+				when(isInvalidCol, raise_error(lit("Invalid value"))).otherwise(col)
 			case InvalidValueTreatment.AsIs =>
 				col
 			case InvalidValueTreatment.AsMissing => {
@@ -313,8 +317,6 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 			}
 			case InvalidValueTreatment.AsValue =>
 				when(isInvalidCol, lit(invalidValueReplacement)).otherwise(col)
-			case _ =>
-				throw new IllegalArgumentException(invalidValueTreatment)
 		}
 	}
 
@@ -325,18 +327,23 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 
 		val outputCols = inputColNames.zip(outputColNames).map {
 			case (inputColName, outputColName) => {
-				var outputCol = col(inputColName).as(outputColName)
+				val inputCol = col(inputColName)
 
-				val isMissingCol = isMissing(outputCol)
-				outputCol = transformMissing(outputCol, isMissingCol)
+				val isMissingCol = isMissing(inputColName, inputCol)
+				val afterMissingTransformCol = transformMissing(inputCol, isMissingCol)
 
 				val isNotMissingCol = not(isMissingCol)
 
-				val isValidCol = isValid(outputCol, isNotMissingCol)
-				outputCol = transformValid(outputCol, isValidCol)
+				val isValidCol = isValid(inputColName, afterMissingTransformCol, isNotMissingCol)
+				val afterValidTransformCol = transformValid(afterMissingTransformCol, isValidCol)
 
-				val isInvalidCol = isInvalid(outputCol, isMissingCol, isValidCol)
-				outputCol = transformInvalid(outputCol, isInvalidCol)
+				val isInvalidCol = isInvalid(inputColName, afterValidTransformCol, isMissingCol, isValidCol)
+				val afterInvalidTransformCol = transformInvalid(afterValidTransformCol, isInvalidCol)
+
+				val outputCol = afterInvalidTransformCol.as(outputColName)
+
+				// XXX
+				//println(s"outputCol for ${outputColName}: ${outputCol.expr.sql}")
 
 				outputCol
 			}

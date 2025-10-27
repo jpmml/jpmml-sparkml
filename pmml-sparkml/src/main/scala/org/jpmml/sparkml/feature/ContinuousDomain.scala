@@ -21,8 +21,7 @@ package org.jpmml.sparkml.feature
 import org.apache.spark.ml.param.{Param, ParamMap, Params, ParamValidators}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset}
-import org.apache.spark.sql.catalyst.expressions.NamedExpression
-import org.apache.spark.sql.functions.{col, lit, max, min, not, when}
+import org.apache.spark.sql.functions.{col, isnan, lit, max, min, not, when}
 
 sealed
 trait OutlierTreatment {
@@ -156,7 +155,14 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 		val selectCols = selectNonMissing(inputColNames)
 
 		val aggCols = inputColNames.flatMap {
-			inputColName => Seq(min(inputColName), max(inputColName))
+			inputColName => {
+				val inputCol = col(inputColName)
+
+				Seq(
+					min(when(!isnan(inputCol), inputCol)),
+					max(when(!isnan(inputCol), inputCol))
+				)
+			}
 		}
 
 		val dataRanges = dataset
@@ -186,24 +192,22 @@ class ContinuousDomainModel(override val uid: String) extends DomainModel[Contin
 
 	override
 	protected
-	def isValid(col: Column, isNotMissingCol: Column): Column = {
+	def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
 		
 		if(getDataRanges.nonEmpty){
-			val colName = col.expr.asInstanceOf[NamedExpression].name
-
 			val (dataMin, dataMax) = getDataRanges.get(colName) match {
 				case Some(Array(min, max)) =>
-					(Some(min), Some(max))
+					(lit(min), lit(max))
 				case _ =>
 					// XXX
 					return lit(false)
 			}
 
-			(col >= dataMin) && (col <= dataMax)
+			(col >= dataMin) && (col <= dataMax) && !isnan(col)
 		} else
 
 		{
-			super.isValid(col, isNotMissingCol)
+			super.isValid(colName, col, isNotMissingCol) && !isnan(col)
 		}
 	}
 
@@ -211,21 +215,19 @@ class ContinuousDomainModel(override val uid: String) extends DomainModel[Contin
 	protected
 	def transformValid(col: Column, isValidCol: Column): Column = {
 		val outlierTreatment = getOutlierTreatment
-		val lowValue = getLowValue
-		val highValue = getHighValue
 
 		OutlierTreatment.forName(outlierTreatment) match {
 			case OutlierTreatment.AsIs =>
 				col
 			case OutlierTreatment.AsMissingValues => {
-				val isOutlier = (col < lowValue) || (col > highValue)
+				val isOutlier = (col < getLowValue) || (col > getHighValue)
 				val nullifiedCol = when(isOutlier, lit(null)).otherwise(col)
 				transformMissing(nullifiedCol, isOutlier)
 			}
 			case OutlierTreatment.AsExtremeValues => {
-				val isNegativeOutlier = (col < lowValue)
-				val isPositiveOutlier = (col > highValue)
-				when(isNegativeOutlier, lit(lowValue)).otherwise(when(isPositiveOutlier, lit(highValue)).otherwise(col))
+				val isNegativeOutlier = (col < getLowValue)
+				val isPositiveOutlier = (col > getHighValue)
+				when(isNegativeOutlier, lit(getLowValue)).otherwise(when(isPositiveOutlier, lit(getHighValue)).otherwise(col))
 			}
 			case _ =>
 				throw new IllegalArgumentException(outlierTreatment)

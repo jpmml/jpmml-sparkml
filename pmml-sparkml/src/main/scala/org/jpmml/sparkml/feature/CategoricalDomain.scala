@@ -21,7 +21,6 @@ package org.jpmml.sparkml.feature
 import org.apache.spark.ml.param.{Param, ParamMap, Params}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset}
-import org.apache.spark.sql.catalyst.expressions.NamedExpression
 import org.apache.spark.sql.functions.{col, collect_set, not, when}
 
 trait HasCategoricalDomainParams[T <: HasCategoricalDomainParams[T]] extends HasDomainParams[T] {
@@ -100,7 +99,8 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 			.map {
 				row => inputColNames.zipWithIndex.map {
 					case (colName, idx) =>
-						colName -> row.getAs[Array[Object]](idx)
+						val seq = row.getAs[scala.collection.Seq[Object]](idx)
+						colName -> seq.toArray[Object]
 				}.toMap
 			}
 			.getOrElse(Map.empty[String, Array[Object]])
@@ -115,18 +115,24 @@ class CategoricalDomainModel(override val uid: String) extends DomainModel[Categ
 
 	override
 	protected 
-	def isValid(col: Column, isNotMissingCol: Column): Column = {
+	def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
 
 		if(getDataValues.nonEmpty){
-			val colName = col.expr.asInstanceOf[NamedExpression].name
-
 			val values = getDataValues.getOrElse(colName, Array.empty[Object])
 
-			isNotMissingCol && col.isin(values: _*)
+			if(values.nonEmpty){
+				val valuesSet = values.toSet
+
+				isNotMissingCol && col.isin(valuesSet.toSeq: _*)
+			} else
+
+			{
+				super.isValid(colName, col, isNotMissingCol)
+			}
 		} else
 
 		{
-			super.isValid(col, isNotMissingCol)
+			super.isValid(colName, col, isNotMissingCol)
 		}
 	}
 
