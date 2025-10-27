@@ -50,7 +50,7 @@ object OutlierTreatment {
 	)
 }
 
-trait HasContinuousDomainParams extends HasDomainParams {
+trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDomainParams[T] {
 
 	val outlierTreatment: Param[String] = new Param[String](this, "outlierTreatment", "", ParamValidators.inArray(OutlierTreatment.values.map(_.name)))
 
@@ -63,19 +63,31 @@ trait HasContinuousDomainParams extends HasDomainParams {
 
 	def getOutlierTreatment(): String = $(outlierTreatment)
 
-	def setOutlierTreatment(value: String): this.type = set(outlierTreatment, value)
+	def setOutlierTreatment(value: String): T = {
+		set(outlierTreatment, value)
+		self
+	}
 
 	def getLowValue(): Number = $(lowValue)
 
-	def setLowValue(value: Number): this.type = set(lowValue, value)
+	def setLowValue(value: Number): T = {
+		set(lowValue, value)
+		self
+	}
 
 	def getHighValue(): Number = $(highValue)
 
-	def setHighValue(value: Number): this.type = set(highValue, value)
+	def setHighValue(value: Number): T = {
+		set(highValue, value)
+		self
+	}
 
 	def getDataRanges(): Map[String, Array[Number]] = $(dataRanges)
 
-	def setDataRanges(value: Map[String, Array[Number]]): this.type = set(dataRanges, value)
+	def setDataRanges(value: Map[String, Array[Number]]): T = {
+		set(dataRanges, value)
+		self
+	}
 
 
 	override
@@ -106,7 +118,7 @@ trait HasContinuousDomainParams extends HasDomainParams {
 	}
 }
 
-class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomainModel](uid) with HasContinuousDomainParams with DefaultParamsWritable {
+class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain, ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomain] with DefaultParamsWritable {
 
 	def this() = this(Identifiable.randomUID("contDomain"))
 
@@ -134,7 +146,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 		val model = new ContinuousDomainModel(uid)
 			.setDataRanges(fitDataRanges)
 
-		copyValues(model).asInstanceOf[ContinuousDomainModel]
+		copyValues(model)
 	}
 
 	protected
@@ -170,7 +182,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 
 object ContinuousDomain extends DefaultParamsReadable[ContinuousDomain]
 
-class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with HasContinuousDomainParams with DefaultParamsWritable {
+class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomainModel] with DefaultParamsWritable {
 
 	override
 	protected
@@ -222,7 +234,7 @@ class ContinuousDomainModel(override val uid: String) extends DomainModel[Contin
 
 	override
 	def copy(extra: ParamMap): ContinuousDomainModel = {
-		defaultCopy[ContinuousDomainModel](extra)
+		defaultCopy(extra)
 	}
 }
 

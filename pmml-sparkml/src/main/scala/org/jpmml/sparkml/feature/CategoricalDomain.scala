@@ -24,14 +24,17 @@ import org.apache.spark.sql.{Column, Dataset}
 import org.apache.spark.sql.catalyst.expressions.NamedExpression
 import org.apache.spark.sql.functions.{col, collect_set, not, when}
 
-trait HasCategoricalDomainParams extends HasDomainParams {
+trait HasCategoricalDomainParams[T <: HasCategoricalDomainParams[T]] extends HasDomainParams[T] {
 
 	val dataValues: Param[Map[String, Array[Object]]] = new Param[Map[String, Array[Object]]](this, "dataValues", "")
 
 
 	def getDataValues: Map[String, Array[Object]] = $(dataValues)
 
-	def setDataValues(value: Map[String, Array[Object]]): this.type = set(dataValues, value)
+	def setDataValues(value: Map[String, Array[Object]]): T = {
+		set(dataValues, value)
+		self
+	}
 
 
 	override
@@ -48,7 +51,7 @@ trait HasCategoricalDomainParams extends HasDomainParams {
 	}
 }
 
-class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomainModel](uid) with HasCategoricalDomainParams with DefaultParamsWritable {
+class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomain, CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomain] with DefaultParamsWritable {
 
 	def this() = this(Identifiable.randomUID("catDomain"))
 
@@ -75,7 +78,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 		val model = new CategoricalDomainModel(uid)
 			.setDataValues(fitDataValues)
 
-		copyValues(model).asInstanceOf[CategoricalDomainModel]
+		copyValues(model)
 	}
 
 	protected
@@ -108,7 +111,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 
 object CategoricalDomain extends DefaultParamsReadable[CategoricalDomain]
 
-class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with HasCategoricalDomainParams with DefaultParamsWritable {
+class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomainModel] with DefaultParamsWritable {
 
 	override
 	protected 
@@ -129,7 +132,7 @@ class CategoricalDomainModel(override val uid: String) extends DomainModel[Categ
 
 	override 
 	def copy(extra: ParamMap): CategoricalDomainModel = {
-		defaultCopy[CategoricalDomainModel](extra)
+		defaultCopy(extra)
 	}
 }
 

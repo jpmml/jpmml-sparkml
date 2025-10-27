@@ -94,7 +94,7 @@ object InvalidValueTreatment {
 	)
 }
 
-trait HasDomainParams extends Params with HasInputCols with HasOutputCols {
+trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols with HasOutputCols {
 
 	val missingValues: Param[Array[Object]] = new Param[Array[Object]](this, "missingValues", "")
 
@@ -112,34 +112,60 @@ trait HasDomainParams extends Params with HasInputCols with HasOutputCols {
 	lazy 
 	val missingValuesSet: Set[Object] = if (isDefined(missingValues)) getMissingValues.toSet else Set.empty
 
+	protected
+	def self: T = this.asInstanceOf[T]
 
-	def setInputCols(value: Array[String]): this.type = set(inputCols, value)
+	def setInputCols(value: Array[String]): T = {
+		set(inputCols, value)
+		self
+	}
 
-	def setOutputCols(value: Array[String]): this.type = set(outputCols, value)
+	def setOutputCols(value: Array[String]): T = {
+		set(outputCols, value)
+		self
+	}
 
 	def getMissingValues: Array[Object] = $(missingValues)
 
-	def setMissingValues(value: Array[Object]): this.type = set(missingValues, value)
+	def setMissingValues(value: Array[Object]): T = {
+		set(missingValues, value)
+		self
+	}
 
 	def getMissingValueTreatment: String = $(missingValueTreatment)
 
-	def setMissingValueTreatment(value: String): this.type = set(missingValueTreatment, value)
+	def setMissingValueTreatment(value: String): T = {
+		set(missingValueTreatment, value)
+		self
+	}
 
 	def getMissingValueReplacement: Object = $(missingValueReplacement)
 
-	def setMissingValueReplacement(value: Object): this.type = set(missingValueReplacement, value)
+	def setMissingValueReplacement(value: Object): T = {
+		set(missingValueReplacement, value)
+		self
+	}
 
 	def getInvalidValueTreatment: String = $(invalidValueTreatment)
 
-	def setInvalidValueTreatment(value: String): this.type = set(invalidValueTreatment, value)
+	def setInvalidValueTreatment(value: String): T = {
+		set(invalidValueTreatment, value)
+		self
+	}
 
 	def getInvalidValueReplacement: Object = $(invalidValueReplacement)
 
-	def setInvalidValueReplacement(value: Object): this.type = set(invalidValueReplacement, value)
+	def setInvalidValueReplacement(value: Object): T = {
+		set(invalidValueReplacement, value)
+		self
+	}
 
 	def getWithData: Boolean = $(withData)
 
-	def setWithData(value: Boolean): this.type = set(withData, value)
+	def setWithData(value: Boolean): T = {
+		set(withData, value)
+		self
+	}
 
 
 	protected
@@ -219,7 +245,7 @@ trait HasDomainParams extends Params with HasInputCols with HasOutputCols {
 }
 
 abstract
-class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M] with HasDomainParams with DefaultParamsWritable {
+class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) extends Estimator[M] with HasDomainParams[E] with DefaultParamsWritable {
 
 	setDefault(
 		missingValues -> Array.empty[Object],
@@ -229,7 +255,7 @@ class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M]
 	)
 
 	override
-	def copy(extra: ParamMap): Domain[M] = defaultCopy(extra)
+	def copy(extra: ParamMap): Domain[E, M] = defaultCopy(extra)
 
 	protected
 	def selectNonMissing(inputColNames: Array[String]): Seq[Column] = {
@@ -248,7 +274,7 @@ class Domain[M <: DomainModel[M]](override val uid: String) extends Estimator[M]
 }
 
 abstract
-class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M] with HasDomainParams with DefaultParamsWritable {
+class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M] with HasDomainParams[M] with DefaultParamsWritable {
 
 	protected
 	def transformMissing(col: Column, isMissingCol: Column): Column = {
