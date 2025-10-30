@@ -42,18 +42,18 @@
 
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
-			<artifactId>synapseml-lightgbm_2.12</artifactId>
+			<artifactId>synapseml-lightgbm_${scala.binary.version}</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
+			<artifactId>spark-core_${scala.binary.version}</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.12</artifactId>
+			<artifactId>spark-mllib_${scala.binary.version}</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
