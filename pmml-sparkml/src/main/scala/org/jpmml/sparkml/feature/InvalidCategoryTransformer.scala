@@ -42,12 +42,24 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 		}
 	}
 
+	/**
+	 * @group setParam
+	 */
 	def setInputCol(value: String): this.type = set(inputCol, value)
 
+	/**
+	 * @group setParam
+	 */
 	def setOutputCol(value: String): this.type = set(outputCol, value)
 
+	/**
+	 * @group setParam
+	 */
 	def setInputCols(value: Array[String]): this.type = set(inputCols, value)
 
+	/**
+	 * @group setParam
+	 */
 	def setOutputCols(value: Array[String]): this.type = set(outputCols, value)
 
 	protected 

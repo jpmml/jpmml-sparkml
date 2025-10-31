@@ -25,11 +25,20 @@ import org.apache.spark.sql.functions.{col, collect_set, not, when}
 
 trait HasCategoricalDomainParams[T <: HasCategoricalDomainParams[T]] extends HasDomainParams[T] {
 
+	/**
+	 * @group param
+	 */
 	val dataValues: Param[Map[String, Array[Object]]] = new Param[Map[String, Array[Object]]](this, "dataValues", "")
 
 
+	/**
+	 * @group getParam
+	 */
 	def getDataValues: Map[String, Array[Object]] = $(dataValues)
 
+	/**
+	 * @group setParam
+	 */
 	def setDataValues(value: Map[String, Array[Object]]): T = {
 		set(dataValues, value)
 		self

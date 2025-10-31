@@ -26,6 +26,24 @@ import org.apache.spark.sql.{Column, Dataset, DataFrame}
 import org.apache.spark.sql.functions.{col, lit, not, raise_error, when}
 import org.apache.spark.sql.types.{StructField, StructType}
 
+/**
+ * Strategy for handling missing values during transformation.
+ *
+ * <p>
+ * The default representation of missing values is <code>null</code>.
+ * Override by specifying a non-empty [[HasDomainParams.missingValues]].
+ * </p>
+ *
+ * <h2>Supported strategies</h2>
+ * 
+ * <ul>
+ *   <li><code>asIs</code>. Leave missing values unchanged.
+ *   <li><code>asValue</code> (aliases: <code>asMean</code>, <code>asMode</code>, <code>asMean</code>). Replace missing values with [[HasDomainParams.missingValueReplacement]].
+ *   <li><code>returnInvalid</code>. Raise error.
+ * </ul>
+ *
+ * @see <a href="https://dmg.org/pmml/v4-4-1/MiningSchema.html#xsdType_MISSING-VALUE-TREATMENT-METHOD">PMML specification</a>
+ */
 sealed
 trait MissingValueTreatment {
 	def name: String
@@ -64,6 +82,25 @@ object MissingValueTreatment {
 	)
 }
 
+/**
+ * Strategy for handling invalid values during transformation.
+ *
+ * <p>
+ * The default representation of invalid floating-point values is </code>NaN</code>. There is no default representation for integer values, or non-numeric values.
+ * Override by specifying a non-empty [[HasCategoricalDomainParams.dataValues]] or [[HasContinuousDomainParams.dataRanges]].
+ * </p>
+ *
+ * <h2>Supported strategies</h2>
+ * 
+ * <ul>
+ *   <li><code>asIs</code>. Leave invalid values unchanged.
+ *   <li><code>asValue</code>. Replace invalid values with [[HasDomainParams.invalidValueReplacement]].
+ *   <li><code>asMissing</code> Replace invalid values with missing values, and apply the effective missing value treatment to them.
+ *   <li><code>returnInvalid</code>. Raise error.
+ * </ul>
+ *
+ * @see <a href="https://dmg.org/pmml/v4-4-1/MiningSchema.html#xsdType_INVALID-VALUE-TREATMENT-METHOD">PMML specification</a>
+ */
 sealed
 trait InvalidValueTreatment {
 	def name: String
@@ -96,17 +133,45 @@ object InvalidValueTreatment {
 
 trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols with HasOutputCols {
 
-	val missingValues: Param[Array[Object]] = new Param[Array[Object]](this, "missingValues", "")
+	/**
+	 * @group param
+	 */
+	val missingValues: Param[Array[Object]] = new Param[Array[Object]](this, "missingValues", "Values that equate to missing values")
 
-	val missingValueTreatment: Param[String] = new Param[String](this, "missingValueTreatment", "", ParamValidators.inArray(MissingValueTreatment.values.map(_.name)))
+	/**
+	 * Supported values: <code>asIs</code>, <code>asValue</code>, <code>returnInvalid</code>.
+	 * Default: <code>asIs</code>.
+	 *
+	 * @see [[MissingValueTreatment]]
+	 * @group param
+	 */
+	val missingValueTreatment: Param[String] = new Param[String](this, "missingValueTreatment", "Missing value handling strategy", ParamValidators.inArray(MissingValueTreatment.values.map(_.name)))
 
-	val missingValueReplacement: Param[Object] = new Param[Object](this, "missingValueReplacement", "")
+	/**
+	 * @group param
+	 */
+	val missingValueReplacement: Param[Object] = new Param[Object](this, "missingValueReplacement", "Missing value replacement value")
 
-	val invalidValueTreatment: Param[String] = new Param[String](this, "invalidValueTreatment", "", ParamValidators.inArray(InvalidValueTreatment.values.map(_.name)))
+	/**
+	 * Supported values: <code>asIs</code>, <code>asValue</code>, <code>asMissing</code>, <code>returnInvalid</code>.
+	 * Default: <code>returnInvalid</code>.
+	 *
+	 * @see [[InvalidValueTreatment]]
+	 * @group param
+	 */
+	val invalidValueTreatment: Param[String] = new Param[String](this, "invalidValueTreatment", "Invalid value handling strategy", ParamValidators.inArray(InvalidValueTreatment.values.map(_.name)))
 
-	val invalidValueReplacement: Param[Object] = new Param[Object](this, "invalidValueReplacement", "")
+	/**
+	 * @group param
+	 */
+	val invalidValueReplacement: Param[Object] = new Param[Object](this, "invalidValueReplacement", "Invalid value replacement value")
 
-	val withData: BooleanParam = new BooleanParam(this, "withData", "")
+	/**
+	 * Default: <code>true</code>.
+	 * 
+	 * @group param
+	 */
+	val withData: BooleanParam = new BooleanParam(this, "withData", "Collect valid value information during fitting?")
 
 	private 
 	lazy 
@@ -115,53 +180,95 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	protected
 	def self: T = this.asInstanceOf[T]
 
+	/**
+	 * @group setParam
+	 */
 	def setInputCols(value: Array[String]): T = {
 		set(inputCols, value)
 		self
 	}
 
+	/**
+	 * @group setParam
+	 */
 	def setOutputCols(value: Array[String]): T = {
 		set(outputCols, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getMissingValues: Array[Object] = $(missingValues)
 
+	/**
+	 * @group setParam
+	 */
 	def setMissingValues(value: Array[Object]): T = {
 		set(missingValues, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getMissingValueTreatment: String = $(missingValueTreatment)
 
+	/**
+	 * @group setParam
+	 */
 	def setMissingValueTreatment(value: String): T = {
 		set(missingValueTreatment, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getMissingValueReplacement: Object = $(missingValueReplacement)
 
+	/**
+	 * @group setParam
+	 */
 	def setMissingValueReplacement(value: Object): T = {
 		set(missingValueReplacement, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getInvalidValueTreatment: String = $(invalidValueTreatment)
 
+	/**
+	 * @group setParam
+	 */
 	def setInvalidValueTreatment(value: String): T = {
 		set(invalidValueTreatment, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getInvalidValueReplacement: Object = $(invalidValueReplacement)
 
+	/**
+	 * @group setParam
+	 */
 	def setInvalidValueReplacement(value: Object): T = {
 		set(invalidValueReplacement, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getWithData: Boolean = $(withData)
 
+	/**
+	 * @group setParam
+	 */
 	def setWithData(value: Boolean): T = {
 		set(withData, value)
 		self
@@ -244,6 +351,12 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	}
 }
 
+/**
+ * @tparam E Self-type
+ * @tparam M Model type
+ *
+ * @param uid Identifier
+ */
 abstract
 class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) extends Estimator[M] with HasDomainParams[E] with DefaultParamsWritable {
 
@@ -275,13 +388,17 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 	}
 }
 
+/**
+ * @tparam M Model type
+ *
+ * @param uid Identifier
+ */
 abstract
 class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M] with HasDomainParams[M] with DefaultParamsWritable {
 
 	protected
 	def transformMissing(col: Column, isMissingCol: Column): Column = {
 		val missingValueTreatment = getMissingValueTreatment
-		val missingValueReplacement = getMissingValueReplacement
 
 		MissingValueTreatment.forName(missingValueTreatment) match {
 			case MissingValueTreatment.AsIs => 
@@ -290,7 +407,7 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 				MissingValueTreatment.AsMode |
 				MissingValueTreatment.AsMedian |
 				MissingValueTreatment.AsValue =>
-				when(isMissingCol, lit(missingValueReplacement)).otherwise(col)
+				when(isMissingCol, lit(getMissingValueReplacement)).otherwise(col)
 			case MissingValueTreatment.ReturnInvalid => 
 				when(isMissingCol, raise_error(lit("Missing value"))).otherwise(col)
 		}
@@ -304,7 +421,6 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 	protected
 	def transformInvalid(col: Column, isInvalidCol: Column): Column = {
 		val invalidValueTreatment = getInvalidValueTreatment
-		val invalidValueReplacement = getInvalidValueReplacement
 
 		InvalidValueTreatment.forName(invalidValueTreatment) match {
 			case InvalidValueTreatment.ReturnInvalid =>
@@ -316,7 +432,7 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 				transformMissing(nullifiedCol, isInvalidCol)
 			}
 			case InvalidValueTreatment.AsValue =>
-				when(isInvalidCol, lit(invalidValueReplacement)).otherwise(col)
+				when(isInvalidCol, lit(getInvalidValueReplacement)).otherwise(col)
 		}
 	}
 

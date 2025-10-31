@@ -41,8 +41,14 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 		}
 	}
 
+	/**
+	 * @group setParam
+	 */
 	def setInputCol(value: String): this.type = set(inputCol, value)
 
+	/**
+	 * @group setParam
+	 */
 	def setOutputCol(value: String): this.type = set(outputCol, value)
 
 

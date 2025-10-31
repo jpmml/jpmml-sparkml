@@ -51,38 +51,74 @@ object OutlierTreatment {
 
 trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDomainParams[T] {
 
+	/**
+	 * @group param
+	 */
 	val outlierTreatment: Param[String] = new Param[String](this, "outlierTreatment", "", ParamValidators.inArray(OutlierTreatment.values.map(_.name)))
 
+	/**
+	 * @group param
+	 */
 	val lowValue: Param[Number] = new Param[Number](this, "lowValue", "")
 
+	/**
+	 * @group param
+	 */
 	val highValue: Param[Number] = new Param[Number](this, "highValue", "")
 
+	/**
+	 * @group param
+	 */
 	val dataRanges: Param[Map[String, Array[Number]]] = new Param[Map[String, Array[Number]]](this, "dataRanges", "")
 
 
+	/**
+	 * @group getParam
+	 */
 	def getOutlierTreatment(): String = $(outlierTreatment)
 
+	/**
+	 * @group setParam
+	 */
 	def setOutlierTreatment(value: String): T = {
 		set(outlierTreatment, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getLowValue(): Number = $(lowValue)
 
+	/**
+	 * @group setParam
+	 */
 	def setLowValue(value: Number): T = {
 		set(lowValue, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getHighValue(): Number = $(highValue)
 
+	/**
+	 * @group setParam
+	 */
 	def setHighValue(value: Number): T = {
 		set(highValue, value)
 		self
 	}
 
+	/**
+	 * @group getParam
+	 */
 	def getDataRanges(): Map[String, Array[Number]] = $(dataRanges)
 
+	/**
+	 * @group setParam
+	 */
 	def setDataRanges(value: Map[String, Array[Number]]): T = {
 		set(dataRanges, value)
 		self
