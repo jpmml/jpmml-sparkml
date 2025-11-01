@@ -71,7 +71,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 
 			String invalidCategory = getInvalidCategory(dataType);
 
-			Field<?> field = encoder.toCategorical(feature.getName(), categories);
+			Field<?> field = encoder.toCategorical(feature, categories);
 
 			if(field instanceof DataField){
 				DataField dataField = (DataField)field;

@@ -76,7 +76,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 					values.add(value);
 				}
 
-				encoder.toCategorical(feature.getName(), categories);
+				encoder.toCategorical(feature, categories);
 
 				MapValues mapValues = ExpressionUtil.createMapValues(feature.getName(), categories, values)
 					.setDataType(DataType.INTEGER);
