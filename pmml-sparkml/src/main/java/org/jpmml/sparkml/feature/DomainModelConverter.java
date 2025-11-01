@@ -21,10 +21,8 @@ package org.jpmml.sparkml.feature;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import org.dmg.pmml.DataField;
-import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.dmg.pmml.Value;
@@ -42,7 +40,7 @@ public class DomainModelConverter<T extends DomainModel<T>> extends FeatureConve
 		super(transformer);
 	}
 
-	public List<Feature> encodeFeatures(Function<DataField, Feature> function, SparkMLEncoder encoder){
+	protected List<Feature> encodeFeatures(DomainManager domainManager, SparkMLEncoder encoder){
 		T transformer = getTransformer();
 
 		Object[] missingValues = transformer.getMissingValues();
@@ -58,22 +56,14 @@ public class DomainModelConverter<T extends DomainModel<T>> extends FeatureConve
 		for(String inputCol : inputCols){
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
-			Field<?> field = feature.getField();
+			DataField dataField = domainManager.toDataField(feature);
 
-			if(field instanceof DataField){
-				DataField dataField = (DataField)field;
+			FieldUtil.addValues(dataField, Value.Property.MISSING, Arrays.asList(missingValues));
 
-				FieldUtil.addValues(dataField, Value.Property.MISSING, Arrays.asList(missingValues));
+			encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatment, missingValueReplacement));
+			encoder.addDecorator(dataField, new InvalidValueDecorator(invalidValueTreatment, invalidValueReplacement));
 
-				encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatment, missingValueReplacement));
-				encoder.addDecorator(dataField, new InvalidValueDecorator(invalidValueTreatment, invalidValueReplacement));
-
-				feature = function.apply(dataField);
-			} else
-
-			{
-				throw new IllegalArgumentException();
-			}
+			feature = domainManager.toFeature(dataField);
 
 			result.add(feature);
 		}
@@ -89,5 +79,13 @@ public class DomainModelConverter<T extends DomainModel<T>> extends FeatureConve
 	static
 	private InvalidValueTreatmentMethod parseInvalidValueTreatment(String invalidValueTreatment){
 		return InvalidValueTreatmentMethod.fromValue(invalidValueTreatment);
+	}
+
+	static
+	protected interface DomainManager {
+
+		DataField toDataField(Feature feature);
+
+		Feature toFeature(DataField dataField);
 	}
 }

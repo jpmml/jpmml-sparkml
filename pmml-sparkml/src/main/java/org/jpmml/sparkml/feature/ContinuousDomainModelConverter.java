@@ -21,7 +21,6 @@ package org.jpmml.sparkml.feature;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.Interval;
@@ -41,6 +40,18 @@ public class ContinuousDomainModelConverter extends DomainModelConverter<Continu
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		ContinuousDomainModel transformer = getTransformer();
 
+		boolean withData = transformer.getWithData();
+
+		Map<String, Number[]> dataRanges;
+
+		if(withData){
+			dataRanges = DomainUtil.toJavaMap(transformer.getDataRanges());
+		} else
+
+		{
+			dataRanges = Collections.emptyMap();
+		}
+
 		OutlierTreatmentMethod outlierTreatment = parseOutlierTreatment(transformer.getOutlierTreatment());
 		Number lowValue;
 		Number highValue;
@@ -57,25 +68,13 @@ public class ContinuousDomainModelConverter extends DomainModelConverter<Continu
 				break;
 		}
 
-		boolean withData = transformer.getWithData();
-
-		Map<String, Number[]> dataRanges;
-
-		if(withData){
-			dataRanges = DomainUtil.toJavaMap(transformer.getDataRanges());
-		} else
-
-		{
-			dataRanges = Collections.emptyMap();
-		}
-
-		Function<DataField, Feature> function = new Function<DataField, Feature>(){
+		DomainManager domainManager = new DomainManager(){
 
 			@Override
-			public ContinuousFeature apply(DataField dataField){
-				Number[] range = dataRanges.get(dataField.requireName());
+			public DataField toDataField(Feature feature){
+				Number[] range = dataRanges.get(feature.getName());
 
-				encoder.addDecorator(dataField, new OutlierDecorator(outlierTreatment, lowValue, highValue));
+				DataField dataField = (DataField)encoder.toContinuous(feature);
 
 				if(range != null){
 					Interval interval = new Interval(Interval.Closure.CLOSED_CLOSED, range[0], range[1]);
@@ -83,11 +82,18 @@ public class ContinuousDomainModelConverter extends DomainModelConverter<Continu
 					dataField.addIntervals(interval);
 				}
 
+				encoder.addDecorator(dataField, new OutlierDecorator(outlierTreatment, lowValue, highValue));
+
+				return dataField;
+			}
+
+			@Override
+			public ContinuousFeature toFeature(DataField dataField){
 				return new ContinuousFeature(encoder, dataField);
 			}
 		};
 
-		return super.encodeFeatures(function, encoder);
+		return super.encodeFeatures(domainManager, encoder);
 	}
 
 	static

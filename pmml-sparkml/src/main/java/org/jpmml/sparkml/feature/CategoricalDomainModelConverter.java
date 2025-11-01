@@ -22,12 +22,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.dmg.pmml.DataField;
-import org.dmg.pmml.Value;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.ObjectFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -53,20 +50,23 @@ public class CategoricalDomainModelConverter extends DomainModelConverter<Catego
 			dataValues = Collections.emptyMap();
 		}
 
-		Function<DataField, Feature> function = new Function<DataField, Feature>(){
+		DomainManager domainManager = new DomainManager(){
 
 			@Override
-			public Feature apply(DataField dataField){
-				Object[] values = dataValues.get(dataField.requireName());
+			public DataField toDataField(Feature feature){
+				Object[] values = dataValues.get(feature.getName());
 
-				if(values != null){
-					FieldUtil.addValues(dataField, Value.Property.VALID, Arrays.asList(values));
-				}
+				DataField dataField = (DataField)encoder.toCategorical(feature, values != null ? Arrays.asList(values) : null);
 
+				return dataField;
+			}
+
+			@Override
+			public ObjectFeature toFeature(DataField dataField){
 				return new ObjectFeature(encoder, dataField);
 			}
 		};
 
-		return super.encodeFeatures(function, encoder);
+		return super.encodeFeatures(domainManager, encoder);
 	}
 }
