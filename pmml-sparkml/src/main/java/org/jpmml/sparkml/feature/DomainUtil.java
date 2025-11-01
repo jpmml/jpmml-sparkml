@@ -18,36 +18,27 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.jpmml.sparkml.SparkMLTest;
+import scala.collection.JavaConverters;
+import scala.jdk.CollectionConverters;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public class DomainUtil {
 
-abstract
-public class DomainTest extends SparkMLTest {
+	private DomainUtil(){
+	}
 
 	static
-	protected void checkDataset(Map<String, List<Object>> expectedColumns, Dataset<Row> actualDs){
-		Set<String> keys = expectedColumns.keySet();
+	public <V> Map<String, V[]> toJavaMap(scala.collection.immutable.Map scalaMap){
+		Map<String, V[]> javaMap = (Map)CollectionConverters.mapAsJavaMap(scalaMap);
 
-		for(String key : keys){
-			List<Object> expectedColumn = expectedColumns.get(key);
+		return javaMap;
+	}
 
-			List<Row> actualColumnRows = actualDs
-				.select(key)
-				.collectAsList();
+	static
+	public <V> scala.collection.immutable.Map toScalaMap(Map<String, V[]> javaMap){
+		scala.collection.mutable.Map scalaMap = (scala.collection.mutable.Map)JavaConverters.mapAsScalaMap(javaMap);
 
-			List<Object> actualColumn = actualColumnRows.stream()
-				.map(row -> row.get(0))
-				.collect(Collectors.toList());
-
-			assertEquals(expectedColumn, actualColumn);
-		}
+		return scalaMap.toMap(scala.Predef$.MODULE$.conforms());
 	}
 }

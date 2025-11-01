@@ -114,7 +114,8 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>JPMML-SparkML</summary>
 
-  * Feature transformers:
+  * Feature decorators and transformers:
+    * `org.jpmml.sparkml.feature.ContinuousDomainModel` (the result of fitting a `feature.ContinuousDomain`)
     * `org.jpmml.sparkml.feature.InvalidCategoryTransformer`
     * `org.jpmml.sparkml.feature.SparseToDenseTransformer`
 </details>

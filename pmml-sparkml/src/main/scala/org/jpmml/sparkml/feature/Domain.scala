@@ -302,14 +302,14 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 		require(isDefined(inputCols) && isDefined(outputCols), "inputCols and outputCols must be defined")
 		require(getInputCols.length == getOutputCols.length, "inputCols and outputCols must have the same length")
 
-		if(isDefined(missingValueReplacement)){
+		if(getOrDefault(missingValueReplacement) != null){
 
 			if(getMissingValueTreatment == MissingValueTreatment.ReturnInvalid.name){
 				throw new IllegalArgumentException(s"Missing value treatment ${getMissingValueTreatment} does not support missingValueReplacement")
 			}
-		}
+		} // End if
 
-		if(isDefined(invalidValueReplacement)){
+		if(getOrDefault(invalidValueReplacement) != null){
 
 			if(getInvalidValueTreatment != InvalidValueTreatment.AsValue.name){
 				throw new IllegalArgumentException(s"Invalid value treatment ${getInvalidValueTreatment} does not support invalidValueReplacement")

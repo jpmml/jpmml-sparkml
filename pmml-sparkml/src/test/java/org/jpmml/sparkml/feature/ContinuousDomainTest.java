@@ -69,7 +69,7 @@ public class ContinuousDomainTest extends DomainTest {
 
 		Dataset<Row> transformedDs = domainModel.transform(ds);
 
-		checkDataRanges(dataRanges, toJavaMap(domainModel.getDataRanges()));
+		checkDataRanges(dataRanges, DomainUtil.toJavaMap(domainModel.getDataRanges()));
 
 		dataRanges = Map.of(
 			"width", new Number[]{-999d, 150d},
@@ -83,7 +83,7 @@ public class ContinuousDomainTest extends DomainTest {
 
 		transformedDs = domainModel.transform(ds);
 
-		checkDataRanges(dataRanges, toJavaMap(domainModel.getDataRanges()));
+		checkDataRanges(dataRanges, DomainUtil.toJavaMap(domainModel.getDataRanges()));
 
 		dataRanges = Map.of(
 			"width", new Number[]{0d, 100d},
@@ -96,7 +96,7 @@ public class ContinuousDomainTest extends DomainTest {
 		);
 
 		domain = (ContinuousDomain)domain
-			.setDataRanges(toScalaMap(dataRanges))
+			.setDataRanges(DomainUtil.toScalaMap(dataRanges))
 			.setInvalidValueTreatment("asValue")
 			.setInvalidValueReplacement(-1d);
 
@@ -104,7 +104,7 @@ public class ContinuousDomainTest extends DomainTest {
 
 		transformedDs = domainModel.transform(ds);
 
-		checkDataRanges(dataRanges, toJavaMap(domainModel.getDataRanges()));
+		checkDataRanges(dataRanges, DomainUtil.toJavaMap(domainModel.getDataRanges()));
 
 		checkDataset(expectedColumns, transformedDs);
 

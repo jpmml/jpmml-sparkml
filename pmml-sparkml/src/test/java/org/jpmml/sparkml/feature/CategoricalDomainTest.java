@@ -71,7 +71,7 @@ public class CategoricalDomainTest extends DomainTest {
 
 		Dataset<Row> transformedDs = domainModel.transform(ds);
 
-		checkDataValues(dataValues, toJavaMap(domainModel.getDataValues()));
+		checkDataValues(dataValues, DomainUtil.toJavaMap(domainModel.getDataValues()));
 
 		dataValues = Map.of(
 			"fruit", new Object[]{"apple", "banana", "orange"},
@@ -85,7 +85,7 @@ public class CategoricalDomainTest extends DomainTest {
 
 		transformedDs = domainModel.transform(ds);
 
-		checkDataValues(dataValues, toJavaMap(domainModel.getDataValues()));
+		checkDataValues(dataValues, DomainUtil.toJavaMap(domainModel.getDataValues()));
 
 		dataValues = Map.of(
 			"fruit", new Object[]{"apple", "orange"},
@@ -98,14 +98,14 @@ public class CategoricalDomainTest extends DomainTest {
 		);
 
 		domain = (CategoricalDomain)domain
-			.setDataValues(toScalaMap(dataValues))
+			.setDataValues(DomainUtil.toScalaMap(dataValues))
 			.setInvalidValueTreatment("asMissing");
 
 		domainModel = domain.fit(ds);
 
 		transformedDs = domainModel.transform(ds);
 
-		checkDataValues(dataValues, toJavaMap(domainModel.getDataValues()));
+		checkDataValues(dataValues, DomainUtil.toJavaMap(domainModel.getDataValues()));
 
 		checkDataset(expectedColumns, transformedDs);
 
