@@ -56,10 +56,12 @@ public class ContinuousDomainTest extends DomainTest {
 
 		Map<String, List<Object>> expectedColumns;
 
-		ContinuousDomain domain = (ContinuousDomain)new ContinuousDomain()
-			.setWithData(false)
+		ContinuousDomain domain = new ContinuousDomain()
 			.setInputCols(new String[]{"width", "height"})
 			.setOutputCols(new String[]{"width_pmml", "height_pmml"});
+
+		domain
+			.setWithData(false);
 
 		assertEquals("asIs", domain.getOutlierTreatment());
 		assertEquals("asIs", domain.getMissingValueTreatment());
@@ -76,7 +78,7 @@ public class ContinuousDomainTest extends DomainTest {
 			"height", new Number[]{10d, 50d}
 		);
 
-		domain = (ContinuousDomain)domain
+		domain
 			.setWithData(true);
 
 		domainModel = domain.fit(ds);
@@ -95,7 +97,7 @@ public class ContinuousDomainTest extends DomainTest {
 			"height_pmml", Arrays.asList(10d, 20d, null, -1d, 50d)
 		);
 
-		domain = (ContinuousDomain)domain
+		domain
 			.setDataRanges(DomainUtil.toScalaMap(dataRanges))
 			.setInvalidValueTreatment("asValue")
 			.setInvalidValueReplacement(-1d);
@@ -113,7 +115,7 @@ public class ContinuousDomainTest extends DomainTest {
 			"height_pmml", Arrays.asList(null, 20d, null, -1d, 50d)
 		);
 
-		domain = (ContinuousDomain)domain
+		domain
 			.setOutlierTreatment("asMissingValues")
 			.setLowValue(20d)
 			.setHighValue(100d);
@@ -129,7 +131,7 @@ public class ContinuousDomainTest extends DomainTest {
 			"height_pmml", Arrays.asList(20d, 20d, null, -1d, 50d)
 		);
 
-		domain = (ContinuousDomain)domain
+		domain
 			.setOutlierTreatment("asExtremeValues");
 
 		domainModel = domain.fit(ds);

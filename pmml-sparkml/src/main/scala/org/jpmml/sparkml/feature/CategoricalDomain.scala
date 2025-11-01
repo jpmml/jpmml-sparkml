@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.param.{Param, ParamMap, Params}
-import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
+import org.apache.spark.ml.util.{DefaultParamsReadable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset}
 import org.apache.spark.sql.functions.{col, collect_set, not, when}
 
@@ -59,7 +59,14 @@ trait HasCategoricalDomainParams[T <: HasCategoricalDomainParams[T]] extends Has
 	}
 }
 
-class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomain, CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomain] with DefaultParamsWritable {
+class CategoricalDomain(override val uid: String) extends Domain[CategoricalDomain, CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomain] {
+
+	override
+	def setInputCols(value: Array[String]): CategoricalDomain = super.setInputCols(value)
+
+	override
+	def setOutputCols(value: Array[String]): CategoricalDomain = super.setOutputCols(value)
+
 
 	def this() = this(Identifiable.randomUID("catDomain"))
 
@@ -120,7 +127,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 
 object CategoricalDomain extends DefaultParamsReadable[CategoricalDomain]
 
-class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomainModel] with DefaultParamsWritable {
+class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomainModel] {
 
 	override
 	protected 

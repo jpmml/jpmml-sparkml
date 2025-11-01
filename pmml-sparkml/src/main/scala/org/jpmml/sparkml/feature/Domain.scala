@@ -78,8 +78,7 @@ object MissingValueTreatment {
 
 	def forName(name: String): MissingValueTreatment = values
 		.find(_.name == name)
-		.getOrElse(throw new IllegalArgumentException(s"${name}")
-	)
+		.getOrElse(throw new IllegalArgumentException(name))
 }
 
 /**
@@ -127,8 +126,7 @@ object InvalidValueTreatment {
 
 	def forName(name: String): InvalidValueTreatment = values
 		.find(_.name == name)
-		.getOrElse(throw new IllegalArgumentException(s"${name}")
-	)
+		.getOrElse(throw new IllegalArgumentException(name))
 }
 
 trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols with HasOutputCols {
@@ -173,9 +171,6 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	 */
 	val withData: BooleanParam = new BooleanParam(this, "withData", "Collect valid value information during fitting?")
 
-	private 
-	lazy 
-	val missingValuesSet: Set[Object] = if (isDefined(missingValues)) getMissingValues.toSet else Set.empty
 
 	protected
 	def self: T = this.asInstanceOf[T]
@@ -277,6 +272,13 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 
 	protected
 	def isMissing(colName: String, col: Column): Column = {
+		val missingValuesSet = if(isDefined(missingValues)){
+			getMissingValues.toSet
+		} else
+
+		{
+			Set.empty[Object]
+		} // End if
 
 		if(missingValuesSet.nonEmpty){
 			col.isin(missingValuesSet.toSeq: _*)

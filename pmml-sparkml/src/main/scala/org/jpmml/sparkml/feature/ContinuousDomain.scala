@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.param.{Param, ParamMap, Params, ParamValidators}
-import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
+import org.apache.spark.ml.util.{DefaultParamsReadable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset}
 import org.apache.spark.sql.functions.{col, isnan, lit, max, min, not, when}
 
@@ -45,8 +45,7 @@ object OutlierTreatment {
 
 	def forName(name: String): OutlierTreatment = values
 		.find(_.name == name)
-		.getOrElse(throw new IllegalArgumentException(s"${name}")
-	)
+		.getOrElse(throw new IllegalArgumentException(name))
 }
 
 trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDomainParams[T] {
@@ -153,7 +152,14 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	}
 }
 
-class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain, ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomain] with DefaultParamsWritable {
+class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain, ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomain] {
+
+	override
+	def setInputCols(value: Array[String]): ContinuousDomain = super.setInputCols(value)
+
+	override
+	def setOutputCols(value: Array[String]): ContinuousDomain = super.setOutputCols(value)
+
 
 	def this() = this(Identifiable.randomUID("contDomain"))
 
@@ -224,7 +230,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 
 object ContinuousDomain extends DefaultParamsReadable[ContinuousDomain]
 
-class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomainModel] with DefaultParamsWritable {
+class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomainModel] {
 
 	override
 	protected

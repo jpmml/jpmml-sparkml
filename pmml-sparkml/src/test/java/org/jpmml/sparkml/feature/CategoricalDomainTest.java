@@ -59,10 +59,12 @@ public class CategoricalDomainTest extends DomainTest {
 
 		Map<String, List<Object>> expectedColumns;
 
-		CategoricalDomain domain = (CategoricalDomain)new CategoricalDomain()
-			.setWithData(false)
+		CategoricalDomain domain = new CategoricalDomain()
 			.setInputCols(new String[]{"fruit", "color"})
 			.setOutputCols(new String[]{"fruit_pmml", "color_pmml"});
+
+		domain
+			.setWithData(false);
 
 		assertEquals("asIs", domain.getMissingValueTreatment());
 		assertEquals("returnInvalid", domain.getInvalidValueTreatment());
@@ -78,7 +80,7 @@ public class CategoricalDomainTest extends DomainTest {
 			"color", new Object[]{"green", "orange", "pink", "red", "yellow"}
 		);
 
-		domain = (CategoricalDomain)domain
+		domain
 			.setWithData(true);
 
 		domainModel = domain.fit(ds);
@@ -97,7 +99,7 @@ public class CategoricalDomainTest extends DomainTest {
 			"color_pmml", Arrays.asList("red", null, null, "yellow", "green", "green", null)
 		);
 
-		domain = (CategoricalDomain)domain
+		domain
 			.setDataValues(DomainUtil.toScalaMap(dataValues))
 			.setInvalidValueTreatment("asMissing");
 
@@ -109,7 +111,7 @@ public class CategoricalDomainTest extends DomainTest {
 
 		checkDataset(expectedColumns, transformedDs);
 
-		domain = (CategoricalDomain)domain
+		domain
 			.setInvalidValueTreatment("asValue")
 			.setInvalidValueReplacement("(invalid)");
 
@@ -124,7 +126,7 @@ public class CategoricalDomainTest extends DomainTest {
 
 		checkDataset(expectedColumns, transformedDs);
 
-		domain = (CategoricalDomain)domain
+		domain
 			.setMissingValueTreatment("asValue")
 			.setMissingValueReplacement("(missing)")
 			.setInvalidValueTreatment("asMissing")
