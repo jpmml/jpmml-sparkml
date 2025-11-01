@@ -18,26 +18,20 @@
  */
 package org.jpmml.sparkml.feature;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.dmg.pmml.DataField;
-import org.dmg.pmml.Field;
 import org.dmg.pmml.Interval;
-import org.dmg.pmml.InvalidValueTreatmentMethod;
-import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.dmg.pmml.OutlierTreatmentMethod;
-import org.dmg.pmml.Value;
+import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.InvalidValueDecorator;
-import org.jpmml.converter.MissingValueDecorator;
 import org.jpmml.converter.OutlierDecorator;
-import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class ContinuousDomainModelConverter extends FeatureConverter<ContinuousDomainModel> {
+public class ContinuousDomainModelConverter extends DomainModelConverter<ContinuousDomainModel> {
 
 	public ContinuousDomainModelConverter(ContinuousDomainModel transformer){
 		super(transformer);
@@ -46,13 +40,6 @@ public class ContinuousDomainModelConverter extends FeatureConverter<ContinuousD
 	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		ContinuousDomainModel transformer = getTransformer();
-
-		Object[] missingValues = transformer.getMissingValues();
-
-		MissingValueTreatmentMethod missingValueTreatment = parseMissingValueTreatment(transformer.getMissingValueTreatment());
-		Object missingValueReplacement = transformer.getMissingValueReplacement();
-		InvalidValueTreatmentMethod invalidValueTreatment = parseInvalidValueTreatment(transformer.getInvalidValueTreatment());
-		Object invalidValueReplacement = transformer.getInvalidValueReplacement();
 
 		OutlierTreatmentMethod outlierTreatment = parseOutlierTreatment(transformer.getOutlierTreatment());
 		Number lowValue;
@@ -72,57 +59,35 @@ public class ContinuousDomainModelConverter extends FeatureConverter<ContinuousD
 
 		boolean withData = transformer.getWithData();
 
-		Map<String, Number[]> dataRanges = Collections.emptyMap();
+		Map<String, Number[]> dataRanges;
 
 		if(withData){
 			dataRanges = DomainUtil.toJavaMap(transformer.getDataRanges());
+		} else
+
+		{
+			dataRanges = Collections.emptyMap();
 		}
 
-		List<Feature> result = new ArrayList<>();
+		Function<DataField, Feature> function = new Function<DataField, Feature>(){
 
-		String[] inputCols = transformer.getInputCols();
-		for(String inputCol : inputCols){
-			Feature feature = encoder.getOnlyFeature(inputCol);
-
-			Number[] dataRange = dataRanges.get(inputCol);
-
-			Field<?> field = feature.getField();
-
-			if(field instanceof DataField){
-				DataField dataField = (DataField)field;
-
-				dataField.addValues(Value.Property.MISSING, missingValues);
-
-				encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatment, missingValueReplacement));
-				encoder.addDecorator(dataField, new InvalidValueDecorator(invalidValueTreatment, invalidValueReplacement));
+			@Override
+			public ContinuousFeature apply(DataField dataField){
+				Number[] range = dataRanges.get(dataField.requireName());
 
 				encoder.addDecorator(dataField, new OutlierDecorator(outlierTreatment, lowValue, highValue));
 
-				if(dataRange != null){
-					Interval interval = new Interval(Interval.Closure.CLOSED_CLOSED, dataRange[0], dataRange[1]);
+				if(range != null){
+					Interval interval = new Interval(Interval.Closure.CLOSED_CLOSED, range[0], range[1]);
 
 					dataField.addIntervals(interval);
 				}
-			} else
 
-			{
-				throw new IllegalArgumentException();
+				return new ContinuousFeature(encoder, dataField);
 			}
+		};
 
-			result.add(feature);
-		}
-
-		return result;
-	}
-
-	static
-	private MissingValueTreatmentMethod parseMissingValueTreatment(String missingValueTreatment){
-		return MissingValueTreatmentMethod.fromValue(missingValueTreatment);
-	}
-
-	static
-	private InvalidValueTreatmentMethod parseInvalidValueTreatment(String invalidValueTreatment){
-		return InvalidValueTreatmentMethod.fromValue(invalidValueTreatment);
+		return super.encodeFeatures(function, encoder);
 	}
 
 	static
