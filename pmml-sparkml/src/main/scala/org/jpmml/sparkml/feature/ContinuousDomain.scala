@@ -58,17 +58,17 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	/**
 	 * @group param
 	 */
-	val lowValue: Param[Number] = new Param[Number](this, "lowValue", "")
+	val lowValue: Param[Number] = ScalarParam.numberParam(this, "lowValue", "")
 
 	/**
 	 * @group param
 	 */
-	val highValue: Param[Number] = new Param[Number](this, "highValue", "")
+	val highValue: Param[Number] = ScalarParam.numberParam(this, "highValue", "")
 
 	/**
 	 * @group param
 	 */
-	val dataRanges: Param[Map[String, Array[Number]]] = new Param[Map[String, Array[Number]]](this, "dataRanges", "")
+	val dataRanges: Param[Map[String, Array[Number]]] = MapParam.numberArrayMapParam(this, "dataRanges", "")
 
 
 	/**

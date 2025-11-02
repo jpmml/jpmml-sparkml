@@ -134,7 +134,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	/**
 	 * @group param
 	 */
-	val missingValues: Param[Array[Object]] = new Param[Array[Object]](this, "missingValues", "Values that equate to missing values")
+	val missingValues: Param[Array[Object]] = ScalarArrayParam.objectArrayParam(this, "missingValues", "Values that equate to missing values")
 
 	/**
 	 * Supported values: <code>asIs</code>, <code>asValue</code>, <code>returnInvalid</code>.
@@ -148,7 +148,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	/**
 	 * @group param
 	 */
-	val missingValueReplacement: Param[Object] = new Param[Object](this, "missingValueReplacement", "Missing value replacement value")
+	val missingValueReplacement: Param[Object] = ScalarParam.objectParam(this, "missingValueReplacement", "Missing value replacement value")
 
 	/**
 	 * Supported values: <code>asIs</code>, <code>asValue</code>, <code>asMissing</code>, <code>returnInvalid</code>.
@@ -162,7 +162,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	/**
 	 * @group param
 	 */
-	val invalidValueReplacement: Param[Object] = new Param[Object](this, "invalidValueReplacement", "Invalid value replacement value")
+	val invalidValueReplacement: Param[Object] = ScalarParam.objectParam(this, "invalidValueReplacement", "Invalid value replacement value")
 
 	/**
 	 * Default: <code>true</code>.

@@ -28,7 +28,7 @@ trait HasCategoricalDomainParams[T <: HasCategoricalDomainParams[T]] extends Has
 	/**
 	 * @group param
 	 */
-	val dataValues: Param[Map[String, Array[Object]]] = new Param[Map[String, Array[Object]]](this, "dataValues", "")
+	val dataValues: Param[Map[String, Array[Object]]] = MapParam.objectArrayMapParam(this, "dataValues", "")
 
 
 	/**
