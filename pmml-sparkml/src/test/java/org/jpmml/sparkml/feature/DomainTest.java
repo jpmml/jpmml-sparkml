@@ -18,11 +18,20 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
+import org.apache.spark.ml.PipelineStage;
+import org.apache.spark.ml.util.MLReader;
+import org.apache.spark.ml.util.MLWritable;
+import org.apache.spark.ml.util.MLWriter;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.jpmml.sparkml.SparkMLTest;
@@ -49,5 +58,45 @@ public class DomainTest extends SparkMLTest {
 
 			assertEquals(expectedColumn, actualColumn);
 		}
+	}
+
+	static
+	protected <S extends PipelineStage & MLWritable> S sparkClone(S stage) throws IOException {
+		File tmpDir = createTempDir(stage);
+
+		try {
+			String path = tmpDir.getAbsolutePath();
+
+			MLWriter writer = stage.write();
+
+			writer
+				.overwrite()
+				.save(path);
+
+			Class<?> stageClazz = stage.getClass();
+
+			// The read method of the companion object
+			Method readMethod = stageClazz.getDeclaredMethod("read");
+
+			@SuppressWarnings("unchecked")
+			MLReader<S> reader = (MLReader<S>)readMethod.invoke(null);
+
+			return reader.load(path);
+		} catch(ReflectiveOperationException roe){
+			throw new RuntimeException(roe);
+		} finally {
+			MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+		}
+	}
+
+	static
+	private File createTempDir(PipelineStage stage) throws IOException {
+		File tmpFile = File.createTempFile("jpmml-sparkml-" + stage.uid(), "");
+
+		if(!tmpFile.delete() || !tmpFile.mkdirs()){
+			throw new IOException();
+		}
+
+		return tmpFile;
 	}
 }

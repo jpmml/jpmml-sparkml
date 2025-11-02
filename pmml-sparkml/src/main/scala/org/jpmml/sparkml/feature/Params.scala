@@ -62,15 +62,15 @@ private[feature] object ValueMapper {
 		case null => 
 			JNull
 		case integer: JavaInteger => 
-			JLong(integer.intValue())
+			JInt(integer.intValue)
 		case _long: JavaLong => 
-			JLong(_long.longValue())
+			JLong(_long.longValue)
 		case _float: JavaFloat => 
-			JDouble(_float.floatValue())
+			JDouble(_float.floatValue)
 		case _double: JavaDouble => 
-			JDouble(_double.doubleValue())
+			JDouble(_double.doubleValue)
 		case _boolean: JavaBoolean =>
-			JBool(_boolean.booleanValue())
+			JBool(_boolean.booleanValue)
 		case string: String => 
 			JString(string)
 		case _ =>
@@ -80,12 +80,20 @@ private[feature] object ValueMapper {
 	def jsToJava(jsValue: JValue): AnyRef = jsValue match {
 		case JNull =>
 			null
+		case JInt(value) =>
+			if(value.isValidInt){
+				JavaInteger.valueOf(value.intValue)
+			} else
+
+			{
+				JavaLong.valueOf(value.longValue)
+			}
 		case JLong(value) =>
-			JavaLong.valueOf(value)
+			JavaLong.valueOf(value.longValue)
 		case JDouble(value) =>
-			JavaDouble.valueOf(value)
+			JavaDouble.valueOf(value.doubleValue)
 		case JBool(value) =>
-			JavaBoolean.valueOf(value)
+			JavaBoolean.valueOf(value.booleanValue)
 		case JString(value) => 
 			value
 		case _ =>
@@ -156,23 +164,34 @@ class MapParam[T <: AnyRef](parent: Params, name: String, doc: String, isValid: 
 
 	override
 	def jsonEncode(value: Map[String, Array[T]]): String = {
-		val fields = value.map {
-			case (k, v) => {
-				k -> JArray(v.map(ValueMapper.javaToJS).toList)
-			}
-		}
-		val jsValue = JObject(fields.toList)
+		val jsValue = formatMap(value)
 		compact(render(jsValue))
 	}
 
 	override
 	def jsonDecode(json: String): Map[String, Array[T]] = {
 		val jsValue = parse(json)
+		val rawMap = parseMap(jsValue)
+		rawMap.asInstanceOf[Map[String, Array[T]]]
+	}
+
+	protected
+	def formatMap(value: Map[String, Array[T]]): JValue = {
+		val fields = value.map {
+			case (k, v) => {
+				k -> JArray(v.map(ValueMapper.javaToJS).toList)
+			}
+		}
+		JObject(fields.toList)
+	}
+
+	protected
+	def parseMap(jsValue: JValue): Map[String, Array[AnyRef]] = {
 		jsValue match {
 			case JObject(fields) => {
 				fields.map {
 					case (k, JArray(jsValues)) => {
-						k -> jsValues.map(ValueMapper.jsToJava).toArray.asInstanceOf[Array[T]]
+						k -> jsValues.map(ValueMapper.jsToJava).toArray
 					}
 					case (k, _) =>
 						throw new IllegalArgumentException()
@@ -189,7 +208,17 @@ object MapParam {
 	def numberArrayMapParam(parent: Params, name: String, doc: String): MapParam[Number] = {
 		new MapParam[Number](parent, name, doc, value => value.forall {
 			case (_, array) => array.forall(ValueMapper.isNumber)
-		})
+		}){
+			override
+			def jsonDecode(json: String): Map[String, Array[Number]] = {
+				val jsValue = parse(json)
+				val rawMap = parseMap(jsValue)
+				rawMap.map {
+					case (k, array) =>
+						k -> array.map(_.asInstanceOf[Number]).toArray[Number]
+				}
+			}
+		}
 	}
 
 	def objectArrayMapParam(parent: Params, name: String, doc: String): MapParam[Object] = {

@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CategoricalDomainTest extends DomainTest {
 
 	@Test
-	public void fitTransform(){
+	public void fitTransform() throws IOException {
 		StructType schema = new StructType()
 			.add("fruit", DataTypes.StringType, true)
 			.add("color", DataTypes.StringType, true);
@@ -142,6 +143,9 @@ public class CategoricalDomainTest extends DomainTest {
 		transformedDs = domainModel.transform(ds);
 
 		checkDataset(expectedColumns, transformedDs);
+
+		sparkClone(domain);
+		sparkClone(domainModel);
 	}
 
 	static

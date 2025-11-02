@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ContinuousDomainTest extends DomainTest {
 
 	@Test
-	public void fitTransform(){
+	public void fitTransform() throws IOException {
 		StructType schema = new StructType()
 			.add("width", DataTypes.DoubleType, true)
 			.add("height", DataTypes.DoubleType, true);
@@ -139,6 +140,9 @@ public class ContinuousDomainTest extends DomainTest {
 		transformedDs = domainModel.transform(ds);
 
 		checkDataset(expectedColumns, transformedDs);
+
+		sparkClone(domain);
+		sparkClone(domainModel);
 	}
 
 	static
