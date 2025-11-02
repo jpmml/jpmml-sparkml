@@ -35,12 +35,12 @@
 
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
+			<artifactId>spark-core_${scala.binary.version}</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.12</artifactId>
+			<artifactId>spark-mllib_${scala.binary.version}</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -74,13 +74,13 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<sourceFileExcludes>
-						<!--
-						<sourceFileExclude>org/jpmml/sparkml/feature/InvalidCategoryTransformerConverter.java</sourceFileExclude>
-						<sourceFileExclude>org/jpmml/sparkml/feature/SparseToDenseTransformerConverter.java</sourceFileExclude>
-						-->
-						<sourceFileExclude>**/*Converter.java</sourceFileExclude>
-					</sourceFileExcludes>
+					<additionalDependencies>
+						<additionalDependency>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+						</additionalDependency>
+					</additionalDependencies>
 				</configuration>
 			</plugin>
 		</plugins>
