@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.jpmml</groupId>
 		<artifactId>jpmml-sparkml</artifactId>
-		<version>3.0.3</version>
+		<version>3.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.jpmml</groupId>
