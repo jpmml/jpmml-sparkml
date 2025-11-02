@@ -18,13 +18,19 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dmg.pmml.DataField;
+import org.dmg.pmml.InvalidValueTreatmentMethod;
+import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.jpmml.converter.Feature;
+import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.ObjectFeature;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -50,6 +56,38 @@ public class CategoricalDomainModelConverter extends DomainModelConverter<Catego
 			dataValues = Collections.emptyMap();
 		}
 
+		MissingValueTreatmentMethod missingValueTreatment = parseMissingValueTreatment(transformer.getMissingValueTreatment());
+		InvalidValueTreatmentMethod invalidValueTreatment = parseInvalidValueTreatment(transformer.getInvalidValueTreatment());
+
+		Set<Object> replacementValues = new HashSet<>();
+
+		switch(missingValueTreatment){
+			case AS_MEAN:
+			case AS_MODE:
+			case AS_MEDIAN:
+			case AS_VALUE:
+				{
+					Object missingValueReplacement = transformer.getMissingValueReplacement();
+
+					replacementValues.add(missingValueReplacement);
+				}
+				break;
+			default:
+				break;
+		} // End switch
+
+		switch(invalidValueTreatment){
+			case AS_VALUE:
+				{
+					Object invalidValueReplacement = transformer.getInvalidValueReplacement();
+
+					replacementValues.add(invalidValueReplacement);
+				}
+				break;
+			default:
+				break;
+		}
+
 		DomainManager domainManager = new DomainManager(){
 
 			@Override
@@ -57,6 +95,13 @@ public class CategoricalDomainModelConverter extends DomainModelConverter<Catego
 				Object[] values = dataValues.get(feature.getName());
 
 				DataField dataField = (DataField)encoder.toCategorical(feature, values != null ? Arrays.asList(values) : null);
+
+				List<Object> extraValues = new ArrayList<>(replacementValues);
+				extraValues.removeAll(Arrays.asList(values));
+
+				if(!extraValues.isEmpty()){
+					FieldUtil.addValues(dataField, extraValues);
+				}
 
 				return dataField;
 			}

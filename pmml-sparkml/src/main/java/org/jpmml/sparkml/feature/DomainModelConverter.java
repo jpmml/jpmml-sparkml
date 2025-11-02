@@ -72,12 +72,12 @@ public class DomainModelConverter<T extends DomainModel<T>> extends FeatureConve
 	}
 
 	static
-	private MissingValueTreatmentMethod parseMissingValueTreatment(String missingValueTreatment){
+	protected MissingValueTreatmentMethod parseMissingValueTreatment(String missingValueTreatment){
 		return MissingValueTreatmentMethod.fromValue(missingValueTreatment);
 	}
 
 	static
-	private InvalidValueTreatmentMethod parseInvalidValueTreatment(String invalidValueTreatment){
+	protected InvalidValueTreatmentMethod parseInvalidValueTreatment(String invalidValueTreatment){
 		return InvalidValueTreatmentMethod.fromValue(invalidValueTreatment);
 	}
 
