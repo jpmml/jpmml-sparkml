@@ -139,9 +139,10 @@
 				<version>1.0.0</version>
 			</dependency>
 
+			<!-- XXX: There is no Scala 2.13 artifact available -->
 			<dependency>
 				<groupId>com.microsoft.azure</groupId>
-				<artifactId>synapseml-lightgbm_${scala.binary.version}</artifactId>
+				<artifactId>synapseml-lightgbm_2.12</artifactId>
 				<version>${synapseml-lightgbm.version}</version>
 			</dependency>
 
