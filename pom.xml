@@ -52,7 +52,7 @@
 	</issueManagement>
 
 	<properties>
-		<scala.version>2.12.17</scala.version>
+		<scala.version>2.12.18</scala.version>
 		<scala.binary.version>2.12</scala.binary.version>
 		<jpmml-converter.version>1.6.4</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.5</jpmml-evaluator.version>
