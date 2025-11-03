@@ -87,7 +87,7 @@ public class PredictionModelConverter<T extends PredictionModel<Vector, T> & Has
 
 						List<Integer> categories = LabelUtil.createTargetCategories(numClasses);
 
-						Field<?> field = encoder.toCategorical(continuousFeature.getName(), categories);
+						Field<?> field = encoder.toCategorical(continuousFeature, categories);
 
 						encoder.putOnlyFeature(labelCol, new IndexFeature(encoder, field, categories));
 
@@ -100,7 +100,7 @@ public class PredictionModelConverter<T extends PredictionModel<Vector, T> & Has
 				}
 			case REGRESSION:
 				{
-					Field<?> field = encoder.toContinuous(feature.getName());
+					Field<?> field = encoder.toContinuous(feature);
 
 					field.setDataType(DataType.DOUBLE);
 

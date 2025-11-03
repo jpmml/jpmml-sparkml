@@ -19,11 +19,14 @@
 package org.jpmml.sparkml;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
 import org.apache.spark.sql.types.StructField;
@@ -34,14 +37,18 @@ import org.dmg.pmml.Field;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
+import org.dmg.pmml.Value;
 import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
 import org.dmg.pmml.association.Item;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
+import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.ModelEncoder;
+import org.jpmml.converter.ObjectFeature;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.TypeUtil;
+import org.jpmml.converter.ValueUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 
 public class SparkMLEncoder extends ModelEncoder {
@@ -74,6 +81,42 @@ public class SparkMLEncoder extends ModelEncoder {
 		visitor.applyTo(pmml);
 
 		return pmml;
+	}
+
+	public Field<?> toContinuous(Feature feature){
+		return toContinuous(feature.getName());
+	}
+
+	public Field<?> toCategorical(Feature feature, List<?> values){
+
+		values:
+		if(feature instanceof ObjectFeature){
+
+			if(values == null || values.isEmpty()){
+				break values;
+			}
+
+			Field<?> field = feature.getField();
+
+			if(field instanceof DataField){
+				DataField dataField = (DataField)field;
+
+				List<?> existingValues = FieldUtil.getValues(dataField);
+				if(existingValues != null && !existingValues.isEmpty()){
+					DataType dataType = dataField.requireDataType();
+
+					if((existingValues.size() == values.size())  && (parseValues(dataType, existingValues)).equals(parseValues(dataType, values))){
+						FieldUtil.clearValues(dataField, Value.Property.VALID);
+					}
+				}
+			}
+		}
+
+		return toCategorical(feature.getName(), values);
+	}
+
+	public Field<?> toOrdinal(Feature feature, List<?> values){
+		return toOrdinal(feature.getName(), values);
 	}
 
 	public boolean hasFeatures(String column){
@@ -186,5 +229,31 @@ public class SparkMLEncoder extends ModelEncoder {
 
 	private void setConverterFactory(ConverterFactory converterFactory){
 		this.converterFactory = Objects.requireNonNull(converterFactory);
+	}
+
+	static
+	private Set<?> parseValues(DataType dataType, Collection<?> values){
+		return values.stream()
+			.map(value -> parseValue(dataType, value))
+			.collect(Collectors.toSet());
+	}
+
+	static
+	private Object parseValue(DataType dataType, Object value){
+		String string = ValueUtil.asString(value);
+
+		switch(dataType){
+			case STRING:
+				return string;
+			case INTEGER:
+				return Long.valueOf(string);
+			case FLOAT:
+			case DOUBLE:
+				return Double.valueOf(string);
+			case BOOLEAN:
+				return Boolean.valueOf(string);
+			default:
+				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
+		}
 	}
 }

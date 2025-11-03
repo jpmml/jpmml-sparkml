@@ -54,6 +54,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<scala.version>2.13.16</scala.version>
+		<scala.binary.version>2.13</scala.binary.version>
 		<jpmml-converter.version>1.6.4</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.5</jpmml-evaluator.version>
 		<jpmml-lightgbm.version>1.6.2</jpmml-lightgbm.version>
@@ -140,7 +141,7 @@
 
 			<dependency>
 				<groupId>com.microsoft.azure</groupId>
-				<artifactId>synapseml-lightgbm_2.12</artifactId>
+				<artifactId>synapseml-lightgbm_${scala.binary.version}</artifactId>
 				<version>${synapseml-lightgbm.version}</version>
 			</dependency>
 
@@ -152,18 +153,18 @@
 
 			<dependency>
 				<groupId>ml.dmlc</groupId>
-				<artifactId>xgboost4j-spark_2.13</artifactId>
+				<artifactId>xgboost4j-spark_${scala.binary.version}</artifactId>
 				<version>${xgboost4j-spark.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.spark</groupId>
-				<artifactId>spark-core_2.13</artifactId>
+				<artifactId>spark-core_${scala.binary.version}</artifactId>
 				<version>${spark.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.spark</groupId>
-				<artifactId>spark-mllib_2.13</artifactId>
+				<artifactId>spark-mllib_${scala.binary.version}</artifactId>
 				<version>${spark.version}</version>
 				<exclusions>
 					<exclusion>
@@ -187,15 +188,15 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>4.9.5</version>
+				<version>4.9.6</version>
 				<configuration>
-					<charset>${project.build.sourceEncoding}</charset>
 					<compileOrder>ScalaThenJava</compileOrder>
 					<jvmArgs>
 						<jvmArg>-Xmx1024m</jvmArg>
 					</jvmArgs>
 					<release>${java.version}</release>
 					<scalaVersion>${scala.version}</scalaVersion>
+					<sourceDir>src/main/scala</sourceDir>
 				</configuration>
 				<executions>
 					<execution>
@@ -212,6 +213,25 @@
 						<goals>
 							<goal>testCompile</goal>
 						</goals>
+					</execution>
+					<!--
+					Usage: mvn site -pl :pmml-sparkml
+					-->
+					<execution>
+						<id>doc</id>
+						<phase>site</phase>
+						<goals>
+							<goal>doc</goal>
+						</goals>
+						<configuration>
+							<args>
+								<arg>-groups</arg>
+								<arg>-implicits</arg>
+							</args>
+							<excludes>
+								<exclude>**/*.java</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

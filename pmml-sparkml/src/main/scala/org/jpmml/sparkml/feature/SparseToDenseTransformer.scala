@@ -19,8 +19,7 @@
 package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.Transformer
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
-import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.param.shared.{HasInputCol, HasOutputCol}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
@@ -29,23 +28,50 @@ import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.{StructField, StructType}
 
 class SparseToDenseTransformer(override val uid: String) extends Transformer with HasInputCol with HasOutputCol with DefaultParamsWritable {
+	private
+	val sparseToDenseUDF = udf {
+		(vec: Vector) => {
+			if(vec != null){
+				vec.toDense
+			} else
 
-	def this() = this(Identifiable.randomUID("sparse2dense"))
+			{
+				null
+			}
+		}
+	}
 
+	/**
+	 * @group setParam
+	 */
 	def setInputCol(value: String): this.type = set(inputCol, value)
 
+	/**
+	 * @group setParam
+	 */
 	def setOutputCol(value: String): this.type = set(outputCol, value)
+
+
+	def this() = this(Identifiable.randomUID("sparse2dense"))
 
 	override
 	def copy(extra: ParamMap): SparseToDenseTransformer = defaultCopy(extra)
 
+	protected 
+	def validateParams(): Unit = {
+		require(isDefined(inputCol) && isDefined(outputCol), "inputCol and outputCol must be defined")
+	}
+
 	override
 	def transformSchema(schema: StructType): StructType = {
-		val inputColName = $(inputCol)
-		val outputColName = $(outputCol)
+		validateParams()
+
+		val inputColName = getInputCol
+		val outputColName = getOutputCol
 
 		val inputFields = schema.fields
 
+		require(inputFields.exists(_.name == inputColName), s"Input column $inputColName not found")
 		require(!inputFields.exists(_.name == outputColName), s"Output column $outputColName already exists")
 
 		val inputField = schema(inputColName)
@@ -56,19 +82,13 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 
 	override 
 	def transform(dataset: Dataset[_]): Dataset[Row] = {
-		val inputColName = $(inputCol)
-		val outputColName = $(outputCol)
+		val inputColName = getInputCol
+		val outputColName = getOutputCol
 
 		transformSchema(dataset.schema, logging = true)
 
-		val converter = udf { vec: Vector => vec.toDense }
-
-		dataset.withColumn(outputColName, converter(dataset(inputColName)))
+		dataset.withColumn(outputColName, sparseToDenseUDF(dataset(inputColName)))
 	}
 }
 
-object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTransformer] {
-
-	override
-	def load(path: String): SparseToDenseTransformer = super.load(path)
-}
+object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTransformer]
