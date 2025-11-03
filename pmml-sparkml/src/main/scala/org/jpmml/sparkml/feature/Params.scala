@@ -29,6 +29,7 @@ import java.lang.{
 import org.apache.spark.ml.param.{Param, Params}
 import org.json4s._
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
+import scala.reflect.ClassTag
 
 private[feature] object ValueMapper {
 
@@ -101,7 +102,7 @@ private[feature] object ValueMapper {
 	}
 }
 
-class ScalarParam[T <: AnyRef](parent: Params, name: String, doc: String, isValid: T => Boolean) extends Param[T](parent, name, doc, isValid){
+class ScalarParam[T <: AnyRef : ClassTag](parent: Params, name: String, doc: String, isValid: T => Boolean) extends Param[T](parent, name, doc, isValid){
 
 	def this(parent: Params, name: String, doc: String) = this(parent, name, doc, _ => true)
 
@@ -129,7 +130,7 @@ object ScalarParam {
 	}
 }
 
-class ScalarArrayParam[T <: AnyRef](parent: Params, name: String, doc: String, isValid: Array[T] => Boolean) extends Param[Array[T]](parent, name, doc, isValid){
+class ScalarArrayParam[T <: AnyRef : ClassTag](parent: Params, name: String, doc: String, isValid: Array[T] => Boolean) extends Param[Array[T]](parent, name, doc, isValid){
 
 	def this(parent: Params, name: String, doc: String) = this(parent, name, doc, _ => true)
 
@@ -158,7 +159,7 @@ object ScalarArrayParam {
 	}
 }
 
-class MapParam[T <: AnyRef](parent: Params, name: String, doc: String, isValid: Map[String, Array[T]] => Boolean) extends Param[Map[String, Array[T]]](parent, name, doc, isValid){
+class MapParam[T <: AnyRef : ClassTag](parent: Params, name: String, doc: String, isValid: Map[String, Array[T]] => Boolean) extends Param[Map[String, Array[T]]](parent, name, doc, isValid){
 
 	def this(parent: Params, name: String, doc: String) = this(parent, name, doc, _ => true)
 

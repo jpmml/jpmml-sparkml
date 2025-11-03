@@ -20,8 +20,7 @@ package org.jpmml.sparkml.feature;
 
 import java.util.Map;
 
-import scala.collection.JavaConverters;
-import scala.jdk.CollectionConverters;
+import scala.jdk.javaapi.CollectionConverters;
 
 public class DomainUtil {
 
@@ -30,15 +29,15 @@ public class DomainUtil {
 
 	static
 	public <V> Map<String, V[]> toJavaMap(scala.collection.immutable.Map scalaMap){
-		Map<String, V[]> javaMap = (Map)CollectionConverters.mapAsJavaMap(scalaMap);
+		Map<String, V[]> javaMap = (Map)CollectionConverters.asJava(scalaMap);
 
 		return javaMap;
 	}
 
 	static
 	public <V> scala.collection.immutable.Map toScalaMap(Map<String, V[]> javaMap){
-		scala.collection.mutable.Map scalaMap = (scala.collection.mutable.Map)JavaConverters.mapAsScalaMap(javaMap);
+		scala.collection.mutable.Map scalaMap = CollectionConverters.asScala(javaMap);
 
-		return scalaMap.toMap(scala.Predef$.MODULE$.conforms());
+		return scala.collection.immutable.Map$.MODULE$.from(scalaMap);
 	}
 }
