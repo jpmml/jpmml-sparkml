@@ -134,7 +134,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>XGBoost</summary>
 
-  Examples: [XGBoostAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAuditNA.scala), [XGBoostAutoNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-xgboost/src/test/resources/XGBoostAutoNA.scala), etc.
+  Examples: [main.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-xgboost/src/test/resources/main.scala)
 
   * Prediction models:
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
