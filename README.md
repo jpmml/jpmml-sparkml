@@ -124,7 +124,7 @@ Java library and command-line application for converting Apache Spark ML pipelin
 <details>
   <summary>LightGBM</summary>
 
-  Examples: [LightGBMAuditNA.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAuditNA.scala), [LightGBMAutoNA.scaka](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-lightgbm/src/test/resources/LightGBMAutoNA.scala), etc.
+  Examples: [main.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml-lightgbm/src/test/resources/main.scala)
 
   * Prediction models:
     * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMClassificationModel.html)

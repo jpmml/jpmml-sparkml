@@ -14,7 +14,7 @@ object CategoryEncoding extends Enumeration {
 
 	type CategoryEncoding = Value
 
-	val LEGACY_DIRECT, LEGACY_OHE, MODERN_DIRECT = Value
+	val LEGACY_DIRECT_NUMERIC, LEGACY_DIRECT_MIXED, LEGACY_OHE, MODERN_DIRECT = Value
 }
 
 import CategoryEncoding._
@@ -48,7 +48,7 @@ class SparkMLTest {
 				Array(vecAssembler)
 			}
 
-			case LEGACY_DIRECT => {
+			case LEGACY_DIRECT_NUMERIC => {
 				val vecAssembler = new VectorAssembler()
 					.setInputCols(cat_cols ++ cont_cols)
 					.setOutputCol("featureVec")
@@ -58,6 +58,18 @@ class SparkMLTest {
 					.setOutputCol("indexedFeatureVec")
 
 				Array(vecAssembler, vecIndexer)
+			}
+
+			case LEGACY_DIRECT_MIXED => {
+				val stringIndexer = new StringIndexer()
+					.setInputCols(cat_cols)
+					.setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
+
+				val vecAssembler = new VectorAssembler()
+					.setInputCols(stringIndexer.getOutputCols ++ cont_cols)
+					.setOutputCol("featureVec")
+
+				Array(stringIndexer, vecAssembler)
 			}
 
 			case LEGACY_OHE => {

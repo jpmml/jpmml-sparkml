@@ -53,7 +53,7 @@ class XGBoostTest extends SparkMLTest {
 		val features = build_features(cat_cols, cont_cols, cat_encoding)
 
 		val params = label_col match {
-			case "Adjusted" => 
+			case "Adjusted" =>
 				Map("objective" -> "binary:logistic", "num_round" -> 101)
 			case "Species" =>
 				Map("objective" -> "multi:softprob", "num_class" -> 3, "num_round" -> 17)
@@ -128,7 +128,7 @@ class XGBoostTest extends SparkMLTest {
 
 		val df = load_housing("Housing")
 
-		run_regression(df, label_col, cat_cols, cont_cols, CategoryEncoding.LEGACY_DIRECT, "XGBoost", "Housing", numericType = FloatType)
+		run_regression(df, label_col, cat_cols, cont_cols, CategoryEncoding.LEGACY_DIRECT_NUMERIC, "XGBoost", "Housing", numericType = FloatType)
 	}
 
 	def run_iris(): Unit = {
