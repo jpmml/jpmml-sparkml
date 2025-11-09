@@ -18,7 +18,13 @@
  */
 package org.jpmml.sparkml.feature;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import scala.collection.JavaConverters;
 import scala.jdk.CollectionConverters;
@@ -26,6 +32,45 @@ import scala.jdk.CollectionConverters;
 public class DomainUtil {
 
 	private DomainUtil(){
+	}
+
+	static
+	public <E> E[] toArray(List<?> values, Class<E> clazz){
+
+		if(values == null){
+			return null;
+		}
+
+		@SuppressWarnings("unchecked")
+		E[] result = (E[])Array.newInstance(clazz, values.size());
+
+		return values.toArray(result);
+	}
+
+	static
+	public <E> Map<String, E[]> toArrayMap(Map<String, List<?>> map, Class<E> clazz){
+		Collection<Map.Entry<String, List<?>>> entries = map.entrySet();
+
+		return entries.stream()
+			.collect(Collectors.toMap(entry -> entry.getKey(), entry -> toArray(entry.getValue(), clazz), (left, right) -> left, LinkedHashMap::new));
+	}
+
+	static
+	public Map<String, Object[]> toObjectArrayMap(Map<String, List<?>> map){
+		return toArrayMap(map, Object.class);
+	}
+
+	static
+	public Map<String, Number[]> toNumberArrayMap(Map<String, List<?>> map){
+		return toArrayMap(map, Number.class);
+	}
+
+	static
+	public <E> Map<String, List<E>> toListMap(Map<String, E[]> map){
+		Collection<Map.Entry<String, E[]>> entries = map.entrySet();
+
+		return entries.stream()
+			.collect(Collectors.toMap(entry -> entry.getKey(), entry -> Arrays.asList(entry.getValue()), (left, right) -> left, LinkedHashMap::new));
 	}
 
 	static
