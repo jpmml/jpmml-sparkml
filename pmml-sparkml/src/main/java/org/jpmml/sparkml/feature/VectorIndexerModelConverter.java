@@ -87,7 +87,9 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 			} else
 
 			{
-				result.add((ContinuousFeature)feature);
+				ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+				result.add(continuousFeature);
 			}
 		}
 

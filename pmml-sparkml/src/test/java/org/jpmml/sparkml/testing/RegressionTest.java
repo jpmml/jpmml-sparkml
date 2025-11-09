@@ -88,6 +88,11 @@ public class RegressionTest extends SimpleSparkMLEncoderBatchTest implements Spa
 	}
 
 	@Test
+	public void evaluateLinearRegressionAutoNA() throws Exception {
+		evaluate(LINEAR_REGRESION, AUTO_NA);
+	}
+
+	@Test
 	public void evaluateModelChainAuto() throws Exception {
 		evaluate(MODEL_CHAIN, AUTO);
 	}
