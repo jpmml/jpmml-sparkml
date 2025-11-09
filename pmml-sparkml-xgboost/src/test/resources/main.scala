@@ -3,16 +3,20 @@ import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.param.shared.HasOutputCol
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.types.{DataType, FloatType, StringType, StructType}
+import org.apache.spark.sql.types.{DataType, FloatType, StructType}
 import org.jpmml.sparkml.DatasetUtil
 import org.jpmml.sparkml.feature.SparseToDenseTransformer
 
 class XGBoostTest extends SparkMLTest {
 
 	override
-	def load_auto(name: String): DataFrame = {
-		val df = super.load_auto(name)
-		DatasetUtil.castColumn(df, "origin", StringType)
+	def load_housing(name: String): DataFrame = {
+		var df = super.load_iris(name)
+		
+		val schema = df.schema
+		val floatSchema = DataType.fromJson(schema.json.replaceAll("integer", "float").replace("double", "float"))
+		
+		DatasetUtil.castColumns(df, floatSchema.asInstanceOf[StructType])
 	}
 
 	override
@@ -26,8 +30,8 @@ class XGBoostTest extends SparkMLTest {
 	}
 
 	override
-	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding): Array[PipelineStage] = {
-		val features = super.build_features(cat_cols, cont_cols, cat_encoding)
+	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, maxCategories: Int = 100, dropLast: Boolean = false): Array[PipelineStage] = {
+		val features = super.build_features(cat_cols, cont_cols, cat_encoding, maxCategories, dropLast)
 
 		cat_encoding match {
 			case LEGACY_OHE | MODERN_DIRECT => {

@@ -8,7 +8,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, lit, udf}
 import org.apache.spark.sql.types.{DataType, DoubleType, FloatType, StringType}
 import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
-import org.jpmml.sparkml.feature.InvalidCategoryTransformer
+import org.jpmml.sparkml.feature.{CategoricalDomain, ContinuousDomain, InvalidCategoryTransformer}
 
 object CategoryEncoding extends Enumeration {
 
@@ -38,61 +38,70 @@ class SparkMLTest {
 		DatasetUtil.loadCsv(spark, new File("csv/" + name + ".csv"))
 	}
 
-	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding): Array[PipelineStage] = {
+	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, maxCategories: Int = 100, dropLast: Boolean = false): Array[PipelineStage] = {
+		val catDomain = new CategoricalDomain()
+			.setInputCols(cat_cols)
+			.setOutputCols(cat_cols.map(cat_col => "pmml_" + cat_col))
+
+		val contDomain = new ContinuousDomain()
+			.setInputCols(cont_cols)
+			.setOutputCols(cont_cols.map(cont_col => "pmml_" + cont_col))
+
 		cat_encoding match {
 			case null => {
 				val vecAssembler = new VectorAssembler()
-					.setInputCols(cont_cols)
+					.setInputCols(contDomain.getOutputCols)
 					.setOutputCol("featureVector")
 
-				Array(vecAssembler)
+				Array(contDomain, vecAssembler)
 			}
 
 			case LEGACY_DIRECT_NUMERIC => {
 				val vecAssembler = new VectorAssembler()
-					.setInputCols(cat_cols ++ cont_cols)
+					.setInputCols(catDomain.getOutputCols ++ contDomain.getOutputCols)
 					.setOutputCol("featureVec")
 
 				val vecIndexer = new VectorIndexer()
 					.setInputCol(vecAssembler.getOutputCol)
 					.setOutputCol("indexedFeatureVec")
+					.setMaxCategories(maxCategories)
 
-				Array(vecAssembler, vecIndexer)
+				Array(catDomain, contDomain, vecAssembler, vecIndexer)
 			}
 
 			case LEGACY_DIRECT_MIXED => {
 				val stringIndexer = new StringIndexer()
-					.setInputCols(cat_cols)
+					.setInputCols(catDomain.getOutputCols)
 					.setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
 
 				val vecAssembler = new VectorAssembler()
-					.setInputCols(stringIndexer.getOutputCols ++ cont_cols)
+					.setInputCols(stringIndexer.getOutputCols ++ contDomain.getOutputCols)
 					.setOutputCol("featureVec")
 
-				Array(stringIndexer, vecAssembler)
+				Array(catDomain, contDomain, stringIndexer, vecAssembler)
 			}
 
 			case LEGACY_OHE => {
 				var stringIndexer = new StringIndexer()
-					.setInputCols(cat_cols)
+					.setInputCols(catDomain.getOutputCols)
 					.setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
 
 				val ohe = new OneHotEncoder()
 					.setInputCols(stringIndexer.getOutputCols)
 					.setOutputCols(cat_cols.map(cat_col => "ohe_" + cat_col))
 					.setHandleInvalid("keep")
-					.setDropLast(true)
+					.setDropLast(dropLast)
 
 				val vecAssembler = new VectorAssembler()
-					.setInputCols(ohe.getOutputCols ++ cont_cols)
+					.setInputCols(ohe.getOutputCols ++ contDomain.getOutputCols)
 					.setOutputCol("featureVec")
 
-				Array(stringIndexer, ohe, vecAssembler)
+				Array(catDomain, contDomain, stringIndexer, ohe, vecAssembler)
 			}
 
 			case MODERN_DIRECT => {
 				var stringIndexer = new StringIndexer()
-					.setInputCols(cat_cols)
+					.setInputCols(catDomain.getOutputCols)
 					.setOutputCols(cat_cols.map(cat_col => "idx_" + cat_col))
 					.setHandleInvalid("keep")
 
@@ -101,11 +110,11 @@ class SparkMLTest {
 					.setOutputCols(cat_cols.map(cat_col => "idxTransformed_" + cat_col))
 
 				val vecAssembler = new VectorAssembler()
-					.setInputCols(indexTransformer.getOutputCols ++ cont_cols)
+					.setInputCols(indexTransformer.getOutputCols ++ contDomain.getOutputCols)
 					.setOutputCol("featureVector")
 					.setHandleInvalid("keep")
 
-				Array(stringIndexer, indexTransformer, vecAssembler)
+				Array(catDomain, contDomain, stringIndexer, indexTransformer, vecAssembler)
 			}
 		}
 	}

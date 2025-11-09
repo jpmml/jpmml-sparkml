@@ -1,16 +1,8 @@
 import com.microsoft.azure.synapse.ml.lightgbm.{LightGBMClassifier, LightGBMRegressor}
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.types.StringType
 import org.jpmml.sparkml.DatasetUtil
 
 class LightGBMTest extends SparkMLTest {
-
-	override
-	def load_auto(name: String): DataFrame = {
-		val df = super.load_auto(name)
-		DatasetUtil.castColumn(df, "origin", StringType)
-	}
 
 	override
 	def build_classification_pipeline(label_col: String, cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding): Pipeline = {
