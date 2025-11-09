@@ -6,7 +6,7 @@ from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVector
 from pyspark.ml.fpm import FPGrowth
 from pyspark.ml.regression import DecisionTreeRegressor, GBTRegressor, GeneralizedLinearRegression, LinearRegression, RandomForestRegressor
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder, TrainValidationSplit
-from pyspark.sql.types import BooleanType, DoubleType, StringType
+from pyspark.sql.types import BooleanType, DoubleType, IntegerType, StringType
 
 import sys
 
@@ -155,6 +155,34 @@ if "Audit" in datasets:
 	build_classification_audit(audit_df, NaiveBayes(), "NaiveBayesAudit")
 	build_classification_audit(audit_df, RandomForestClassifier(numTrees = 13, minInstancesPerNode = 20), "RandomForestAudit")
 
+def build_classification_auditna(audit_df, name):
+	adjustedIndexer = StringIndexer(inputCol = "Adjusted", outputCol = "adjustedIndex")
+	adjustedIndexerModel = adjustedIndexer.fit(audit_df)
+
+	catCols = ["Deductions", "Education", "Employment", "Gender", "Marital", "Occupation"]
+	contCols = ["Age", "Hours", "Income"]
+
+	features = build_linearmodel_features(catCols, contCols)
+
+	classifier = LogisticRegression(labelCol = adjustedIndexerModel.getOutputCol(), featuresCol = features[-1].getOutputCol())
+
+	pipeline = Pipeline(stages = [adjustedIndexer] + features + [classifier])
+
+	build_classification(audit_df, pipeline, adjustedIndexerModel, classifier.getPredictionCol(), classifier.getProbabilityCol(), name)
+
+if "Audit" in datasets:
+	audit_df = load_csv("AuditNA")
+	print(audit_df.dtypes)
+
+	audit_df = cast_col(audit_df, "Age", DoubleType())
+	audit_df = cast_col(audit_df, "Income", DoubleType())
+	audit_df = cast_col(audit_df, "Hours", DoubleType())
+	print(audit_df.dtypes)
+
+	store_schema(audit_df, "AuditNA")
+
+	build_classification_auditna(audit_df, "LogisticRegressionAuditNA")
+
 def build_formula_auto(auto_df, name):
 	sqlTransformer = SQLTransformer(statement = "SELECT *, CONCAT(origin, \"/\", cylinders) AS origin_cylinders FROM __THIS__")
 
@@ -259,6 +287,36 @@ if "Auto" in datasets:
 	build_regression_auto(auto_df, GBTRegressor(), "GBTAuto")
 	build_regression_auto(auto_df, GeneralizedLinearRegression(family = "gaussian", link = "identity"), "GLMAuto")
 	build_regression_auto(auto_df, RandomForestRegressor(numTrees = 13), "RandomForestAuto")
+
+def build_regression_autona(df, name):
+	catCols = ["cylinders", "model_year", "origin"]
+	contCols = ["acceleration", "displacement", "horsepower", "weight"]
+
+	features = build_linearmodel_features(catCols, contCols)
+
+	regressor = LinearRegression(labelCol = "mpg", featuresCol = features[-1].getOutputCol())
+
+	pipeline = Pipeline(stages = features + [regressor])
+
+	build_regression(auto_df, pipeline, "mpg", regressor.getPredictionCol(), name)
+
+if "Auto" in datasets:
+	auto_df = load_csv("AutoNA")
+	print(auto_df.dtypes)
+
+	auto_df = cast_col(auto_df, "mpg", DoubleType())
+
+	catCols = ["cylinders", "model_year", "origin"]
+	contCols = ["acceleration", "displacement", "horsepower", "weight"]
+	for catCol in catCols:
+		auto_df = cast_col(auto_df, catCol, StringType())	
+	for contCol in contCols:
+		auto_df = cast_col(auto_df, contCol, DoubleType())
+	print(auto_df.dtypes)
+
+	store_schema(auto_df, "AutoNA")
+
+	build_regression_autona(auto_df, "LinearRegressionAutoNA")
 
 def build_regression_housing(husing_df, regressor, name):
 	stages = []

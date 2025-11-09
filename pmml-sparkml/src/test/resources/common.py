@@ -1,15 +1,17 @@
 from pyspark.conf import SparkConf
 from pyspark.context import SparkContext
+from pyspark.ml.feature import OneHotEncoder, StringIndexer, VectorAssembler
 from pyspark.sql.functions import udf, col, collect_set
 from pyspark.sql.session import SparkSession
 from pyspark.sql.types import DoubleType, StringType
+from pyspark2pmml.ml.feature import CategoricalDomain, ContinuousDomain
 
 import pandas
 import shutil
 import tempfile
 
 def load_csv(name):
-	return spark.read.csv("csv/" + name + ".csv", header = True, inferSchema = True)
+	return spark.read.csv("csv/" + name + ".csv", header = True, inferSchema = not name.endswith("NA"), nullValue = "N/A")
 
 def store_schema(df, name):
 	with open("schema/" + name + ".json", "w") as schema_file:
@@ -45,6 +47,17 @@ def _extract_probability(probabilities, index):
 			raise ValueError()
 	else:
 		return float(probabilities[index])
+
+def build_linearmodel_features(catCols, contCols, dropLast = False):
+	catDomain = CategoricalDomain(missingValueTreatment = "asValue", missingValueReplacement = "(other)", inputCols = catCols, outputCols = ["domain" + catCol for catCol in catCols])
+	contDomain = ContinuousDomain(missingValueTreatment = "asValue", missingValueReplacement = 0, inputCols = contCols, outputCols = ["domain" + contCol for contCol in contCols])
+
+	stringIndexer = StringIndexer(inputCols = catDomain.getOutputCols(), outputCols = ["indexed" + catCol for catCol in catCols])
+	ohe = OneHotEncoder(dropLast = dropLast, inputCols = stringIndexer.getOutputCols(), outputCols = ["ohe" + catCol for catCol in catCols])
+
+	vecAssembler = VectorAssembler(inputCols = ohe.getOutputCols() + contDomain.getOutputCols(), outputCol = "featureVector")
+
+	return [catDomain, contDomain, stringIndexer, ohe, vecAssembler]
 
 def build_associationrules(df, pipeline, name):
 	pipelineModel = pipeline.fit(df)
