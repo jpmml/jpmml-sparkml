@@ -1,7 +1,7 @@
 <details>
   <summary>Apache Spark ML</summary>
 
-  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/3.0.X/pmml-sparkml/src/test/resources/main.py)
+  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/3.1.X/pmml-sparkml/src/test/resources/main.py)
 
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
