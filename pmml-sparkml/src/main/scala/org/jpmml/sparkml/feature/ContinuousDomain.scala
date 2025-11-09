@@ -128,16 +128,19 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	def validateParams(): Unit = {
 		super.validateParams()
 
+		val hasLowValue = isDefined(lowValue) && getLowValue != null
+		val hasHighValue = isDefined(highValue) && getHighValue != null
+
 		if(getOutlierTreatment == OutlierTreatment.AsIs.name){
 			
-			if(isDefined(lowValue) || isDefined(highValue)){
+			if(hasLowValue || hasHighValue){
 				throw new IllegalArgumentException(s"Outlier treatment ${getOutlierTreatment} does not support lowValue or highValue")
 			}
 		} else
 
 		if(getOutlierTreatment == OutlierTreatment.AsMissingValues.name || getOutlierTreatment == OutlierTreatment.AsExtremeValues.name){
 		
-			if(!isDefined(lowValue) || !isDefined(highValue)){
+			if(!hasLowValue || !hasHighValue){
 				throw new IllegalArgumentException(s"Outlier treatment ${getOutlierTreatment} requires lowValue and highValue")
 			}
 		} // End if
