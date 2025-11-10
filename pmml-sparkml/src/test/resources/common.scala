@@ -38,6 +38,10 @@ class SparkMLTest {
 		DatasetUtil.loadCsv(spark, new File("csv/" + name + ".csv"))
 	}
 
+	def load_visit(name: String): DataFrame = {
+		DatasetUtil.loadCsv(spark, new File("csv/" + name + ".csv"))
+	}
+
 	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, maxCategories: Int = 100, dropLast: Boolean = false): Array[PipelineStage] = {
 		val catDomain = new CategoricalDomain()
 			.setInputCols(cat_cols)
