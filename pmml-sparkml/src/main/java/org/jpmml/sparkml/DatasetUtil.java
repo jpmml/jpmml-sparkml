@@ -34,6 +34,7 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
+import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
@@ -51,6 +52,7 @@ import org.apache.spark.sql.types.IntegralType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.UserDefinedType;
 import org.dmg.pmml.DataType;
 
 public class DatasetUtil {
@@ -188,6 +190,10 @@ public class DatasetUtil {
 			return translateAtomicType((AtomicType)sparkDataType);
 		} else
 
+		if(sparkDataType instanceof UserDefinedType){
+			return translateUserDefinedType((UserDefinedType)sparkDataType);
+		} else
+
 		{
 			throw new IllegalArgumentException("Expected atomic data type, got " + sparkDataType.typeName() + " data type");
 		}
@@ -235,6 +241,18 @@ public class DatasetUtil {
 
 		{
 			throw new IllegalArgumentException("Expected float or double data type, got " + fractionalType.typeName() + " data type");
+		}
+	}
+
+	static
+	public DataType translateUserDefinedType(UserDefinedType userDefinedType){
+
+		if(userDefinedType instanceof VectorUDT){
+			return DataType.DOUBLE;
+		} else
+
+		{
+			throw new IllegalArgumentException("Expected vector data type, got " + userDefinedType.typeName() + " data type");
 		}
 	}
 

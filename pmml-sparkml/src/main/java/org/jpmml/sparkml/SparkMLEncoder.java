@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
+import org.apache.spark.ml.linalg.VectorUDT;
+import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.DataField;
@@ -43,6 +45,7 @@ import org.dmg.pmml.VisitorAction;
 import org.dmg.pmml.association.Item;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
+import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.ObjectFeature;
@@ -133,16 +136,48 @@ public class SparkMLEncoder extends ModelEncoder {
 		List<Feature> features = this.columnFeatures.get(column);
 
 		if(features == null){
-			String name = column;
+			StructType schema = getSchema();
 
-			DataField dataField = getDataField(name);
-			if(dataField == null){
-				dataField = createDataField(name);
+			StructField field = schema.apply(column);
+
+			org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
+
+			if(sparkDataType instanceof VectorUDT){
+				Metadata metadata = field.metadata();
+
+				int numFeatures = (int)metadata.getLong("numFeatures");
+				if(numFeatures < 0){
+					throw new IllegalArgumentException();
+				}
+
+				List<Feature> result = new ArrayList<>();
+
+				for(int i = 0; i < numFeatures; i++){
+					String name = FieldNameUtil.select(column, i);
+
+					DataField dataField = getDataField(name);
+					if(dataField == null){
+						dataField = createDataField(name, OpType.CONTINUOUS, DataType.DOUBLE);
+					}
+
+					result.add(createFeature(dataField));
+				}
+
+				return result;
+			} else
+
+			{
+				String name = column;
+
+				DataField dataField = getDataField(name);
+				if(dataField == null){
+					dataField = createDataField(name);
+				}
+
+				Feature feature = createFeature(dataField);
+
+				return Collections.singletonList(feature);
 			}
-
-			Feature feature = createFeature(dataField);
-
-			return Collections.singletonList(feature);
 		}
 
 		return features;
@@ -192,7 +227,9 @@ public class SparkMLEncoder extends ModelEncoder {
 
 		StructField field = schema.apply(name);
 
-		DataType dataType = DatasetUtil.translateDataType(field.dataType());
+		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
+
+		DataType dataType = DatasetUtil.translateDataType(sparkDataType);
 
 		OpType opType = TypeUtil.getOpType(dataType);
 
