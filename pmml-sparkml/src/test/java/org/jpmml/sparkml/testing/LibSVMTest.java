@@ -20,7 +20,6 @@ package org.jpmml.sparkml.testing;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,19 +27,15 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
-import org.apache.spark.ml.feature.StringIndexer;
-import org.apache.spark.ml.feature.StringIndexerModel;
-import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
 import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.Table;
 import org.jpmml.evaluator.TableCollector;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.sparkml.DatasetUtil;
 import org.junit.jupiter.api.Test;
 
 public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
@@ -104,37 +99,7 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 			protected Dataset<Row> loadInputDataset(SparkSession sparkSession, List<File> tmpResources) throws IOException {
 				Dataset<Row> dataset = super.loadInputDataset(sparkSession, tmpResources);
 
-				StructType schema = dataset.schema();
-
-				StructField[] fields = schema.fields();
-
-				String labelCol = fields[fields.length - 1].name();
-
-				StringIndexer labelIndexer = new StringIndexer()
-					.setInputCol(labelCol)
-					.setOutputCol("label");
-
-				StringIndexerModel labelIndexerModel = labelIndexer.fit(dataset);
-
-				Dataset<Row> result = labelIndexerModel.transform(dataset);
-
-				List<String> featureCols = new ArrayList<>();
-				for(int i = 0; i < fields.length - 1; i++){
-					String featureCol = fields[i].name();
-
-					featureCols.add(featureCol);
-				}
-
-				VectorAssembler vectorAssembler = new VectorAssembler()
-					.setInputCols(featureCols.toArray(new String[featureCols.size()]))
-					.setOutputCol("features");
-
-				result = vectorAssembler.transform(result);
-
-				result = result
-					.select("label", "features");
-
-				return result;
+				return DatasetUtil.toLibSVM(dataset);
 			}
 
 			@Override

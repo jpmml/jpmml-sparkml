@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,6 +36,9 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
+import org.apache.spark.ml.feature.StringIndexer;
+import org.apache.spark.ml.feature.StringIndexerModel;
+import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.DataFrameReader;
@@ -146,6 +151,43 @@ public class DatasetUtil {
 		Files.copy(csvFiles[0], file);
 
 		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+	}
+
+	static
+	public Dataset<Row> toLibSVM(Dataset<Row> dataset){
+		StructType schema = dataset.schema();
+
+		StructField[] fields = schema.fields();
+
+		// The last column
+		String labelCol = fields[fields.length - 1].name();
+
+		StringIndexer labelIndexer = new StringIndexer()
+			.setInputCol(labelCol)
+			.setOutputCol("label");
+
+		StringIndexerModel labelIndexerModel = labelIndexer.fit(dataset);
+
+		Dataset<Row> result = labelIndexerModel.transform(dataset);
+
+		// All columns except for the last column
+		List<String> featureCols = new ArrayList<>();
+		for(int i = 0; i < fields.length - 1; i++){
+			String featureCol = fields[i].name();
+
+			featureCols.add(featureCol);
+		}
+
+		VectorAssembler vectorAssembler = new VectorAssembler()
+			.setInputCols(featureCols.toArray(new String[featureCols.size()]))
+			.setOutputCol("features");
+
+		result = vectorAssembler.transform(result);
+
+		result = result
+			.select("label", "features");
+
+		return result;
 	}
 
 	static
