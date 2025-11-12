@@ -18,12 +18,15 @@
  */
 package org.jpmml.sparkml.testing;
 
+import java.io.File;
+import java.util.List;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import com.google.common.collect.Iterables;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.association.AssociationModel;
@@ -47,7 +50,7 @@ public class AssociationRulesTest extends SimpleSparkMLEncoderBatchTest implemen
 			}
 
 			@Override
-			public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
+			protected Dataset<Row> loadVerificationDataset(SparkSession sparkSession, List<File> tmpResources){
 				return null;
 			}
 		};

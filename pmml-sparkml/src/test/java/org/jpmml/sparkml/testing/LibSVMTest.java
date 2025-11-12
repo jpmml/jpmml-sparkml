@@ -92,11 +92,6 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 			}
 
 			@Override
-			public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
-				return null;
-			}
-
-			@Override
 			public String getInputCsvPath(){
 				String path = super.getInputCsvPath();
 
@@ -106,8 +101,8 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 			}
 
 			@Override
-			protected Dataset<Row> loadInput(SparkSession sparkSession, List<File> tmpResources) throws IOException {
-				Dataset<Row> dataset = super.loadInput(sparkSession, tmpResources);
+			protected Dataset<Row> loadInputDataset(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+				Dataset<Row> dataset = super.loadInputDataset(sparkSession, tmpResources);
 
 				StructType schema = dataset.schema();
 
@@ -140,6 +135,11 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 					.select("label", "features");
 
 				return result;
+			}
+
+			@Override
+			protected Dataset<Row> loadVerificationDataset(SparkSession sparkSession, List<File> tmpResources){
+				return null;
 			}
 		};
 

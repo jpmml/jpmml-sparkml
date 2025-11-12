@@ -36,6 +36,7 @@ import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.Column;
+import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -85,15 +86,31 @@ public class DatasetUtil {
 		}
 	}
 
+
 	static
 	public Dataset<Row> loadCsv(SparkSession sparkSession, File file) throws IOException {
-		return sparkSession.read()
+		return loadCsv(sparkSession, null, file);
+	}
+
+	static
+	public Dataset<Row> loadCsv(SparkSession sparkSession, StructType schema, File file) throws IOException {
+		DataFrameReader reader = sparkSession.read()
 			.format("csv")
 			.option("header", true)
-			.option("inferSchema", true)
 			.option("nullValue", "N/A")
-			.option("nanValue", "N/A")
-			.load(file.getAbsolutePath());
+			.option("nanValue", "N/A");
+
+		if(schema != null){
+			reader = reader
+				.schema(schema);
+		} else
+
+		{
+			reader = reader
+				.option("inferSchema", true);
+		}
+
+		return reader.load(file.getAbsolutePath());
 	}
 
 	static

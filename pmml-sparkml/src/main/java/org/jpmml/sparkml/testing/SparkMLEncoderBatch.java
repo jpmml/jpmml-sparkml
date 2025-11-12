@@ -89,22 +89,34 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 		List<File> tmpResources = new ArrayList<>();
 
+		PMMLBuilder pmmlBuilder = createPMMLBuilder(sparkSession, tmpResources);
+
+		PMML pmml = pmmlBuilder.build();
+
+		validatePMML(pmml);
+
+		for(File tmpResource : tmpResources){
+			MoreFiles.deleteRecursively(tmpResource.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+		}
+
+		return pmml;
+	}
+
+	protected PMMLBuilder createPMMLBuilder(SparkSession sparkSession, List<File> tmpResources) throws Exception {
 		StructType schema = loadSchema(sparkSession, tmpResources);
 
 		PipelineModel pipelineModel = loadPipelineModel(sparkSession, tmpResources);
 
 		schema = updateSchema(schema, pipelineModel);
 
-		Dataset<Row> inputDataset = loadInput(sparkSession, tmpResources);
-
-		inputDataset = DatasetUtil.castColumns(inputDataset, schema);
+		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel);
 
 		Map<String, Object> options = getOptions();
 
-		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel)
+		pmmlBuilder = pmmlBuilder
 			.putOptions(options);
 
-		Dataset<Row> verificationDataset = getVerificationDataset(inputDataset);
+		Dataset<Row> verificationDataset = loadVerificationDataset(sparkSession, tmpResources);
 		if(verificationDataset != null){
 			Equivalence<?> equivalence = getEquivalence();
 
@@ -118,18 +130,12 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 				zeroThreshold = pmmlEquivalence.getZeroThreshold();
 			}
 
+			verificationDataset = DatasetUtil.castColumns(verificationDataset, schema);
+
 			pmmlBuilder = pmmlBuilder.verify(verificationDataset, precision, zeroThreshold);
 		}
 
-		PMML pmml = pmmlBuilder.build();
-
-		validatePMML(pmml);
-
-		for(File tmpResource : tmpResources){
-			MoreFiles.deleteRecursively(tmpResource.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
-		}
-
-		return pmml;
+		return pmmlBuilder;
 	}
 
 	protected StructType loadSchema(SparkSession sparkSession, List<File> tmpResources) throws IOException {
@@ -158,11 +164,13 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		}
 	}
 
-	protected StructType updateSchema(StructType schema, PipelineModel pipelineModel){
-		return schema;
+	protected Dataset<Row> loadVerificationDataset(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+		Dataset<Row> dataset = loadInputDataset(sparkSession, tmpResources);
+
+		return dataset.sample(false, 0.05d, 63317);
 	}
 
-	protected Dataset<Row> loadInput(SparkSession sparkSession, List<File> tmpResources) throws IOException {
+	protected Dataset<Row> loadInputDataset(SparkSession sparkSession, List<File> tmpResources) throws IOException {
 
 		try(InputStream is = open(getInputCsvPath())){
 			File tmpCsvFile = toTmpFile(is, getDataset(), ".csv");
@@ -171,6 +179,10 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 			return DatasetUtil.loadCsv(sparkSession, tmpCsvFile);
 		}
+	}
+
+	protected StructType updateSchema(StructType schema, PipelineModel pipelineModel){
+		return schema;
 	}
 
 	static
