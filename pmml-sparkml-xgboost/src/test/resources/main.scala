@@ -30,8 +30,8 @@ class XGBoostTest extends SparkMLTest {
 	}
 
 	override
-	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, maxCategories: Int = 100, dropLast: Boolean = false): Array[PipelineStage] = {
-		val features = super.build_features(cat_cols, cont_cols, cat_encoding, maxCategories, dropLast)
+	def build_features(cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, withDomain: Boolean = true, maxCategories: Int = 100, dropLast: Boolean = false): Array[PipelineStage] = {
+		val features = super.build_features(cat_cols, cont_cols, cat_encoding, withDomain, maxCategories, dropLast)
 
 		cat_encoding match {
 			case LEGACY_DIRECT_MIXED | LEGACY_OHE | MODERN_DIRECT => {
@@ -54,7 +54,7 @@ class XGBoostTest extends SparkMLTest {
 			.setInputCol(label_col)
 			.setOutputCol("idx_" + label_col)
 
-		val features = build_features(cat_cols, cont_cols, cat_encoding)
+		val features = build_features(cat_cols, cont_cols, cat_encoding, withDomain = false)
 
 		val params = label_col match {
 			case "Adjusted" =>
@@ -83,7 +83,7 @@ class XGBoostTest extends SparkMLTest {
 
 	override
 	def build_regression_pipeline(label_col: String, cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding): Pipeline = {
-		val features = build_features(cat_cols, cont_cols, cat_encoding)
+		val features = build_features(cat_cols, cont_cols, cat_encoding, withDomain = false)
 
 		val params = label_col match {
 			case "docvis" =>

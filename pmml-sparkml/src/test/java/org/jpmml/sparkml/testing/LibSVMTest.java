@@ -40,6 +40,7 @@ import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.Table;
 import org.jpmml.evaluator.TableCollector;
+import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.junit.jupiter.api.Test;
 
 public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
@@ -146,7 +147,12 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 	}
 
 	@Test
+	public void evaluateLinearRegression() throws Exception {
+		evaluate(LINEAR_REGRESION, HOUSING + "Vec");
+	}
+
+	@Test
 	public void evaluateLogisticRegressionIris() throws Exception {
-		evaluate(LOGISTIC_REGRESSION, IRIS + "Vec");
+		evaluate(LOGISTIC_REGRESSION, IRIS + "Vec", new PMMLEquivalence(1e-12, 1e-12));
 	}
 }

@@ -1,1 +1,1 @@
-pyspark2pmml==0.7.1
+pyspark2pmml==0.7.2
