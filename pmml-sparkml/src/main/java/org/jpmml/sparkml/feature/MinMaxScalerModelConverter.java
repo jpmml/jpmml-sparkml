@@ -76,7 +76,7 @@ public class MinMaxScalerModelConverter extends FeatureConverter<MinMaxScalerMod
 				expression = ExpressionUtil.createApply(PMMLFunctions.ADD, expression, ExpressionUtil.createConstant(rescaleConstant));
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CONTINUOUS, DataType.DOUBLE, expression);
+			DerivedField derivedField = encoder.createDerivedField(formatName(i, length, encoder), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
 			result.add(new ContinuousFeature(encoder, derivedField));
 		}

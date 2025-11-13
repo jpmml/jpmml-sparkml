@@ -67,7 +67,7 @@ public class MaxAbsScalerModelConverter extends FeatureConverter<MaxAbsScalerMod
 
 				Expression expression = ExpressionUtil.createApply(PMMLFunctions.DIVIDE, continuousFeature.ref(), ExpressionUtil.createConstant(maxAbsUnzero));
 
-				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CONTINUOUS, DataType.DOUBLE, expression);
+				DerivedField derivedField = encoder.createDerivedField(formatName(i, length, encoder), OpType.CONTINUOUS, DataType.DOUBLE, expression);
 
 				feature = new ContinuousFeature(encoder, derivedField);
 			}
