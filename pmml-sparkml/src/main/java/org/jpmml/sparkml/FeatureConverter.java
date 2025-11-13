@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.util.List;
 
+import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
@@ -69,6 +70,54 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 				encoder.putOnlyFeature(outputCol, feature);
 			}
+		}
+	}
+
+	protected String formatName(SparkMLEncoder encoder){
+		T transformer = getTransformer();
+
+		HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+
+		String outputCol = hasOutputCol.getOutputCol();
+
+		List<String> fieldNames = encoder.getFieldNames(outputCol);
+		if(fieldNames != null){
+
+			if(fieldNames.size() != 1){
+				throw new IllegalArgumentException("Expected 1 derived field name for column \'" + outputCol + "\', got " + fieldNames.size() + " derived field names");
+			}
+
+			return Iterables.getOnlyElement(fieldNames);
+		} else
+
+		{
+			return outputCol;
+		}
+	}
+
+	protected String formatName(int index, int length, SparkMLEncoder encoder){
+		T transformer = getTransformer();
+
+		HasOutputCol hasOutputCol = (HasOutputCol)transformer;
+
+		String outputCol = hasOutputCol.getOutputCol();
+
+		List<String> fieldNames = encoder.getFieldNames(outputCol);
+		if(fieldNames != null){
+
+			if(fieldNames.size() != length){
+				throw new IllegalArgumentException("Expected " + length + " derived field name(s) for column \'" + outputCol + "\', got " + fieldNames.size() + " derived field name(s)");
+			}
+
+			return fieldNames.get(index);
+		} else
+
+		{
+			if(length > 1){
+				return outputCol + ("[" + index + "]");
+			}
+
+			return outputCol;
 		}
 	}
 
@@ -134,21 +183,6 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 		abstract
 		public <T extends Transformer> String[] getOutputCols(T transformer);
-	}
-
-	static
-	public <T extends Transformer & HasOutputCol> String formatName(T transformer){
-		return transformer.getOutputCol();
-	}
-
-	static
-	public <T extends Transformer & HasOutputCol> String formatName(T transformer, int index, int length){
-
-		if(length > 1){
-			return transformer.getOutputCol() + ("[" + index + "]");
-		}
-
-		return transformer.getOutputCol();
 	}
 
 	static

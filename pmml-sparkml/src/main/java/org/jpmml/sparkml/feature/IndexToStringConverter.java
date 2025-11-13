@@ -41,7 +41,7 @@ public class IndexToStringConverter extends FeatureConverter<IndexToString> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		IndexToString transformer = getTransformer();
 
-		DataField dataField = encoder.createDataField(formatName(transformer), OpType.CATEGORICAL, DataType.STRING, Arrays.asList(transformer.getLabels()));
+		DataField dataField = encoder.createDataField(formatName(encoder), OpType.CATEGORICAL, DataType.STRING, Arrays.asList(transformer.getLabels()));
 
 		return Collections.singletonList(new CategoricalFeature(encoder, dataField));
 	}

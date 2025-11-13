@@ -70,7 +70,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 		for(int i = 0, length = features.size(); i < length; i++){
 			Feature feature = features.get(i);
 
-			String name = formatName(transformer, i, length);
+			String name = formatName(i, length, encoder);
 
 			Expression expression = null;
 

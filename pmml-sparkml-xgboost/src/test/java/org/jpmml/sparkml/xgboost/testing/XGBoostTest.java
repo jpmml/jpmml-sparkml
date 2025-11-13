@@ -18,6 +18,8 @@
  */
 package org.jpmml.sparkml.xgboost.testing;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ import java.util.function.Predicate;
 import com.google.common.base.Equivalence;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.VerificationField;
 import org.dmg.pmml.Visitor;
@@ -95,7 +98,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 			}
 
 			@Override
-			public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
+			protected Dataset<Row> loadVerificationDataset(SparkSession sparkSession, List<File> tmpResources) throws IOException {
 				String algorithm = getAlgorithm();
 				String dataset = getDataset();
 
@@ -103,7 +106,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 					return null;
 				}
 
-				return super.getVerificationDataset(inputDataset);
+				return super.loadVerificationDataset(sparkSession, tmpResources);
 			}
 		};
 
@@ -138,6 +141,11 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 	@Test
 	public void evaluateIris() throws Exception {
 		evaluate("XGBoost", IRIS, new FloatEquivalence(24 + 4));
+	}
+
+	@Test
+	public void evaluateVisit() throws Exception {
+		evaluate("XGBoost", VISIT, new FloatEquivalence(16 + 8));
 	}
 
 	@BeforeAll

@@ -18,6 +18,9 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.List;
+
+import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
@@ -31,6 +34,36 @@ public class MultiFeatureConverter<T extends Transformer & HasInputCol & HasInpu
 		super(transformer);
 	}
 
+	protected String formatMultiName(int index, int length, SparkMLEncoder encoder){
+		T transformer = getTransformer();
+
+		if(transformer.isSet(transformer.outputCols())){
+			String[] outputCols = transformer.getOutputCols();
+
+			String outputCol = outputCols[index];
+
+			List<String> fieldNames = encoder.getFieldNames(outputCol);
+			if(fieldNames != null){
+
+				if(fieldNames.size() != 1){
+					throw new IllegalArgumentException("Expected 1 derived field name for column \'" + outputCol + "\', got " + fieldNames.size() + " derived field names");
+				}
+
+				return Iterables.getOnlyElement(fieldNames);
+			} else
+
+			{
+				return outputCol;
+			}
+		}
+
+		if(index != 0){
+			throw new IllegalArgumentException();
+		}
+
+		return super.formatName(index, length, encoder);
+	}
+
 	@Override
 	protected InOutMode getInputMode(){
 		T transformer = getTransformer();
@@ -41,19 +74,5 @@ public class MultiFeatureConverter<T extends Transformer & HasInputCol & HasInpu
 	@Override
 	public InOutMode getOutputMode(){
 		return getInputMode();
-	}
-
-	static
-	public <T extends Transformer & HasOutputCol & HasOutputCols> String formatName(T transformer, int index){
-
-		if(transformer.isSet(transformer.outputCols())){
-			return transformer.getOutputCols()[index];
-		} // End if
-
-		if(index != 0){
-			throw new IllegalArgumentException();
-		}
-
-		return transformer.getOutputCol();
 	}
 }

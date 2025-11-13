@@ -65,7 +65,7 @@ public class BucketizerConverter extends MultiFeatureConverter<Bucketizer> {
 
 		List<Feature> result = new ArrayList<>();
 
-		for(int i = 0; i < inputCols.length; i++){
+		for(int i = 0, length = inputCols.length; i < length; i++){
 			String inputCol = inputCols[i];
 			double[] splits = splitsArray[i];
 
@@ -95,7 +95,7 @@ public class BucketizerConverter extends MultiFeatureConverter<Bucketizer> {
 				discretize.addDiscretizeBins(discretizeBin);
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.INTEGER, discretize);
+			DerivedField derivedField = encoder.createDerivedField(formatMultiName(i, length, encoder), OpType.CATEGORICAL, DataType.INTEGER, discretize);
 
 			result.add(new IndexFeature(encoder, derivedField, categories));
 		}
