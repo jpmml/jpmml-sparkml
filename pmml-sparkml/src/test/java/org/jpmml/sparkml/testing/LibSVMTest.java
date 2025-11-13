@@ -31,7 +31,6 @@ import com.google.common.base.Equivalence;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.jpmml.converter.testing.Datasets;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.Table;
 import org.jpmml.evaluator.TableCollector;
@@ -40,7 +39,7 @@ import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.junit.jupiter.api.Test;
 
-public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets {
+public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, SparkMLDatasets {
 
 	@Override
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
@@ -60,7 +59,7 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 				String algorithm = getAlgorithm();
 				String dataset = getDataset();
 
-				if((LOGISTIC_REGRESSION).equals(algorithm) && (IRIS + "Vec").equals(dataset)){
+				if((LOGISTIC_REGRESSION).equals(algorithm) && (IRIS_VEC).equals(dataset)){
 					List<String> fieldNames = Arrays.asList("Sepal_Length", "Sepal_Width", "Petal_Length", "Petal_Width");
 
 					pmmlBuilder = pmmlBuilder
@@ -77,7 +76,7 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 				String algorithm = getAlgorithm();
 				String dataset = getDataset();
 
-				if((LINEAR_REGRESION).equals(algorithm) && (HOUSING + "Vec").equals(dataset)){
+				if((LINEAR_REGRESION).equals(algorithm) && (HOUSING_VEC).equals(dataset)){
 					table = toLibSVM(table);
 				}
 

@@ -25,7 +25,6 @@ import com.google.common.base.Equivalence;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
-import org.jpmml.converter.testing.Datasets;
 import org.jpmml.converter.testing.Fields;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
@@ -33,7 +32,7 @@ import org.jpmml.sparkml.model.HasRegressionTableOptions;
 import org.jpmml.sparkml.model.HasTreeOptions;
 import org.junit.jupiter.api.Test;
 
-public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, Datasets, Fields {
+public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, SparkMLDatasets, Fields {
 
 	@Override
 	public SparkMLEncoderBatch createBatch(String algorithm, String dataset, Predicate<ResultField> columnFilter, Equivalence<Object> equivalence){
