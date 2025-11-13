@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -286,13 +287,17 @@ public class PMMLBuilder {
 	}
 
 	public byte[] buildByteArray(){
-		return buildByteArray(1024 * 1024);
+		return buildByteArray(-1);
 	}
 
-	private byte[] buildByteArray(int size){
+	private byte[] buildByteArray(int expectedSize){
 		PMML pmml = build();
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream(size);
+		if(expectedSize < 0){
+			expectedSize = PMMLBuilder.DEFAULT_CAPACITY;
+		}
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream(expectedSize);
 
 		try {
 			serializePretty(pmml, os);
@@ -301,6 +306,20 @@ public class PMMLBuilder {
 		}
 
 		return os.toByteArray();
+	}
+
+	public String buildString(){
+		PMML pmml = build();
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream(PMMLBuilder.DEFAULT_CAPACITY);
+
+		try {
+			serializePretty(pmml, os);
+		} catch(JAXBException je){
+			throw new RuntimeException(je);
+		}
+
+		return os.toString(StandardCharsets.UTF_8);
 	}
 
 	public File buildFile(File file) throws IOException {
@@ -600,6 +619,8 @@ public class PMMLBuilder {
 			return this;
 		}
 	}
+
+	private static final int DEFAULT_CAPACITY = 1024 * 1024;
 
 	static {
 		init();
