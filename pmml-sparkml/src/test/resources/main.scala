@@ -30,6 +30,8 @@ class LibSVMTest extends SparkMLTest {
 		val stdScaler = new StandardScaler()
 			.setInputCol("features")
 			.setOutputCol("scaledFeatures")
+			.setWithMean(true)
+			.setWithStd(true)
 
 		val regressor = new LinearRegression()
 			.setLabelCol("label")
@@ -48,6 +50,8 @@ class LibSVMTest extends SparkMLTest {
 		val stdScaler = new StandardScaler()
 			.setInputCol("features")
 			.setOutputCol("scaledFeatures")
+			.setWithMean(true)
+			.setWithStd(true)
 
 		val classifier = new LogisticRegression()
 			.setLabelCol(labelIndexer.getOutputCol)
