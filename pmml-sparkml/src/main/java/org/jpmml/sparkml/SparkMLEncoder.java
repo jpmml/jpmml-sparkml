@@ -150,10 +150,23 @@ public class SparkMLEncoder extends ModelEncoder {
 					throw new IllegalArgumentException();
 				}
 
+				List<String> fieldNames = getFieldNames(column);
+				if(fieldNames != null && fieldNames.size() != numFeatures){
+					throw new IllegalArgumentException("Expected " + numFeatures + " data field names, got " + fieldNames.size()  + " data field names");
+				}
+
 				List<Feature> result = new ArrayList<>();
 
 				for(int i = 0; i < numFeatures; i++){
-					String name = FieldNameUtil.select(column, i);
+					String name;
+
+					if(fieldNames != null){
+						name = fieldNames.get(i);
+					} else
+
+					{
+						name = FieldNameUtil.select(column, i);
+					}
 
 					DataField dataField = getDataField(name);
 					if(dataField == null){
@@ -167,7 +180,20 @@ public class SparkMLEncoder extends ModelEncoder {
 			} else
 
 			{
-				String name = column;
+				List<String> fieldNames = getFieldNames(column);
+				if(fieldNames != null && fieldNames.size() != 1){
+					throw new IllegalArgumentException("Expected 1 data field name, got " + fieldNames.size() + " data field names");
+				}
+
+				String name;
+
+				if(fieldNames != null){
+					name = Iterables.getOnlyElement(fieldNames);
+				} else
+
+				{
+					name = column;
+				}
 
 				DataField dataField = getDataField(name);
 				if(dataField == null){
@@ -220,6 +246,10 @@ public class SparkMLEncoder extends ModelEncoder {
 		}
 
 		this.columnFeatures.put(column, features);
+	}
+
+	public List<String> getFieldNames(String column){
+		return null;
 	}
 
 	public DataField createDataField(String name){

@@ -77,6 +77,8 @@ public class PMMLBuilder {
 
 	private Map<RegexKey, Map<String, Object>> options = new LinkedHashMap<>();
 
+	private Map<String, List<String>> fieldNames = new LinkedHashMap<>();
+
 	private Verification verification = null;
 
 
@@ -93,11 +95,18 @@ public class PMMLBuilder {
 		StructType schema = getSchema();
 		PipelineModel pipelineModel = getPipelineModel();
 		Map<RegexKey, ? extends Map<String, ?>> options = getOptions();
+		Map<String, List<String>> fieldNames = getFieldNames();
 		Verification verification = getVerification();
 
 		ConverterFactory converterFactory = new ConverterFactory(options);
 
-		SparkMLEncoder encoder = new SparkMLEncoder(schema, converterFactory);
+		SparkMLEncoder encoder = new SparkMLEncoder(schema, converterFactory){
+
+			@Override
+			public List<String> getFieldNames(String column){
+				return fieldNames.get(column);
+			}
+		};
 
 		Map<String, DerivedField> derivedFields = encoder.getDerivedFields();
 
@@ -360,6 +369,22 @@ public class PMMLBuilder {
 		return this;
 	}
 
+	public PMMLBuilder putFieldName(String column, String name){
+		Map<String, List<String>> fieldNames = getFieldNames();
+
+		fieldNames.put(column, Collections.singletonList(name));
+
+		return this;
+	}
+
+	public PMMLBuilder putFieldNames(String column, List<String> names){
+		Map<String, List<String>> fieldNames = getFieldNames();
+
+		fieldNames.put(column, names);
+
+		return this;
+	}
+
 	public PMMLBuilder verify(Dataset<Row> dataset){
 		return verify(dataset, 1e-14, 1e-14);
 	}
@@ -402,6 +427,16 @@ public class PMMLBuilder {
 
 	private PMMLBuilder setOptions(Map<RegexKey, Map<String, Object>> options){
 		this.options = Objects.requireNonNull(options);
+
+		return this;
+	}
+
+	public Map<String, List<String>> getFieldNames(){
+		return this.fieldNames;
+	}
+
+	private PMMLBuilder setFieldNames(Map<String, List<String>> fieldNames){
+		this.fieldNames = fieldNames;
 
 		return this;
 	}
