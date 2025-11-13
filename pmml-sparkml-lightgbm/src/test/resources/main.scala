@@ -10,7 +10,7 @@ class LightGBMTest extends SparkMLTest {
 			.setInputCol(label_col)
 			.setOutputCol("idx_" + label_col)
 
-		val features = build_features(cat_cols, cont_cols, cat_encoding)
+		val features = build_features(cat_cols, cont_cols, cat_encoding, withDomain = true)
 
 		var classifier = new LightGBMClassifier()
 			.setLabelCol(labelIndexer.getOutputCol)
@@ -35,7 +35,7 @@ class LightGBMTest extends SparkMLTest {
 
 	override
 	def build_regression_pipeline(label_col: String, cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding): Pipeline = {
-		val features = build_features(cat_cols, cont_cols, cat_encoding)
+		val features = build_features(cat_cols, cont_cols, cat_encoding, withDomain = true)
 
 		val regressor = new LightGBMRegressor()
 			.setLabelCol(label_col)

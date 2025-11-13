@@ -26,7 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.beust.jcommander.DefaultUsageFormatter;
@@ -79,6 +82,15 @@ public class Main {
 	)
 	private File output = null;
 
+	@Parameter (
+		names = "--field-names",
+		description = "Mapping from column name to data field name(s)",
+		splitter = NullSplitter.class,
+		arity = 2,
+		order = 4
+	)
+	private List<String> fieldNames = new ArrayList<>();
+
 	/**
 	 * @see HasPredictionModelOptions#OPTION_KEEP_PREDICTIONCOL
 	 */
@@ -95,7 +107,7 @@ public class Main {
 	@Parameter (
 		names = "--X-compact",
 		arity = 1,
-		order = 4
+		order = 5
 	)
 	private Boolean compact = Boolean.TRUE;
 
@@ -105,7 +117,7 @@ public class Main {
 	@Parameter (
 		names = "--X-estimate_featureImportances",
 		arity = 1,
-		order = 5
+		order = 6
 	)
 	private Boolean estimateFeatureImportances = Boolean.FALSE;
 
@@ -114,7 +126,7 @@ public class Main {
 	 */
 	@Parameter (
 		names = "--X-representation",
-		order = 6
+		order = 7
 	)
 	private String representation = null;
 
@@ -228,11 +240,22 @@ public class Main {
 			throw e;
 		}
 
+		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel);
+
 		Map<String, Object> options = new LinkedHashMap<>();
 		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
 		options.put(HasTreeOptions.OPTION_COMPACT, this.compact);
 		options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, this.estimateFeatureImportances);
 		options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, this.representation);
+
+		pmmlBuilder.putOptions(options);
+
+		for(int i = 0; i < this.fieldNames.size(); i += 2){
+			String column = this.fieldNames.get(i);
+			List<String> names = Arrays.asList(this.fieldNames.get(i + 1).split(","));
+
+			pmmlBuilder.putFieldNames(column, names);
+		}
 
 		PMML pmml;
 
@@ -240,9 +263,7 @@ public class Main {
 			logger.info("Converting pipeline model to PMML..");
 
 			long begin = System.currentTimeMillis();
-			pmml = new PMMLBuilder(schema, pipelineModel)
-				.putOptions(options)
-				.build();
+			pmml = pmmlBuilder.build();
 			long end = System.currentTimeMillis();
 
 			logger.info("Converted pipeline to PMML in {} ms.", (end - begin));

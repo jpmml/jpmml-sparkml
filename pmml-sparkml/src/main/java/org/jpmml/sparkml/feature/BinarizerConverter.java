@@ -52,7 +52,7 @@ public class BinarizerConverter extends MultiFeatureConverter<Binarizer> {
 		List<Feature> result = new ArrayList<>();
 
 		String[] inputCols = inputMode.getInputCols(transformer);
-		for(int i = 0; i < inputCols.length; i++){
+		for(int i = 0, length = inputCols.length; i < length; i++){
 			String inputCol = inputCols[i];
 
 			Feature feature = encoder.getOnlyFeature(inputCol);
@@ -63,7 +63,7 @@ public class BinarizerConverter extends MultiFeatureConverter<Binarizer> {
 				.addExpressions(ExpressionUtil.createApply(PMMLFunctions.LESSOREQUAL, continuousFeature.ref(), ExpressionUtil.createConstant(threshold)))
 				.addExpressions(ExpressionUtil.createConstant(0d), ExpressionUtil.createConstant(1d));
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i), OpType.CATEGORICAL, DataType.DOUBLE, apply);
+			DerivedField derivedField = encoder.createDerivedField(formatMultiName(i, length, encoder), OpType.CATEGORICAL, DataType.DOUBLE, apply);
 
 			result.add(new IndexFeature(encoder, derivedField, Arrays.asList(0d, 1d)));
 		}

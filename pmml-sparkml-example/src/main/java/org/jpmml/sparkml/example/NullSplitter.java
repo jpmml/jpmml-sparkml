@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Villu Ruusmann
+ * Copyright (c) 2025 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.testing;
+package org.jpmml.sparkml.example;
 
-import org.jpmml.converter.FieldNameUtil;
-import org.junit.jupiter.api.Test;
+import java.util.Collections;
+import java.util.List;
 
-public class ClusteringTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, SparkMLDatasets {
+import com.beust.jcommander.converters.IParameterSplitter;
 
-	@Test
-	public void evaluateKMeansIris() throws Exception {
-		String[] outputFields = {FieldNameUtil.create("pmml", "cluster")};
+public class NullSplitter implements IParameterSplitter {
 
-		evaluate(K_MEANS, IRIS, excludeFields(outputFields));
+	@Override
+	public List<String> split(String value){
+		return Collections.singletonList(value);
 	}
 }

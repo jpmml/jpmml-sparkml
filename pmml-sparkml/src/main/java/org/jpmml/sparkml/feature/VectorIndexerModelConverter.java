@@ -81,7 +81,7 @@ public class VectorIndexerModelConverter extends FeatureConverter<VectorIndexerM
 				MapValues mapValues = ExpressionUtil.createMapValues(feature.getName(), categories, values)
 					.setDataType(DataType.INTEGER);
 
-				DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
+				DerivedField derivedField = encoder.createDerivedField(formatName(i, length, encoder), OpType.CATEGORICAL, DataType.INTEGER, mapValues);
 
 				result.add(new CategoricalFeature(encoder, derivedField, values));
 			} else

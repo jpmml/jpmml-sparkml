@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +78,8 @@ public class PMMLBuilder {
 
 	private Map<RegexKey, Map<String, Object>> options = new LinkedHashMap<>();
 
+	private Map<String, List<String>> fieldNames = new LinkedHashMap<>();
+
 	private Verification verification = null;
 
 
@@ -93,11 +96,18 @@ public class PMMLBuilder {
 		StructType schema = getSchema();
 		PipelineModel pipelineModel = getPipelineModel();
 		Map<RegexKey, ? extends Map<String, ?>> options = getOptions();
+		Map<String, List<String>> fieldNames = getFieldNames();
 		Verification verification = getVerification();
 
 		ConverterFactory converterFactory = new ConverterFactory(options);
 
-		SparkMLEncoder encoder = new SparkMLEncoder(schema, converterFactory);
+		SparkMLEncoder encoder = new SparkMLEncoder(schema, converterFactory){
+
+			@Override
+			public List<String> getFieldNames(String column){
+				return fieldNames.get(column);
+			}
+		};
 
 		Map<String, DerivedField> derivedFields = encoder.getDerivedFields();
 
@@ -277,13 +287,17 @@ public class PMMLBuilder {
 	}
 
 	public byte[] buildByteArray(){
-		return buildByteArray(1024 * 1024);
+		return buildByteArray(-1);
 	}
 
-	private byte[] buildByteArray(int size){
+	private byte[] buildByteArray(int expectedSize){
 		PMML pmml = build();
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream(size);
+		if(expectedSize < 0){
+			expectedSize = PMMLBuilder.DEFAULT_CAPACITY;
+		}
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream(expectedSize);
 
 		try {
 			serializePretty(pmml, os);
@@ -292,6 +306,20 @@ public class PMMLBuilder {
 		}
 
 		return os.toByteArray();
+	}
+
+	public String buildString(){
+		PMML pmml = build();
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream(PMMLBuilder.DEFAULT_CAPACITY);
+
+		try {
+			serializePretty(pmml, os);
+		} catch(JAXBException je){
+			throw new RuntimeException(je);
+		}
+
+		return os.toString(StandardCharsets.UTF_8);
 	}
 
 	public File buildFile(File file) throws IOException {
@@ -360,6 +388,22 @@ public class PMMLBuilder {
 		return this;
 	}
 
+	public PMMLBuilder putFieldName(String column, String name){
+		Map<String, List<String>> fieldNames = getFieldNames();
+
+		fieldNames.put(column, Collections.singletonList(name));
+
+		return this;
+	}
+
+	public PMMLBuilder putFieldNames(String column, List<String> names){
+		Map<String, List<String>> fieldNames = getFieldNames();
+
+		fieldNames.put(column, names);
+
+		return this;
+	}
+
 	public PMMLBuilder verify(Dataset<Row> dataset){
 		return verify(dataset, 1e-14, 1e-14);
 	}
@@ -402,6 +446,16 @@ public class PMMLBuilder {
 
 	private PMMLBuilder setOptions(Map<RegexKey, Map<String, Object>> options){
 		this.options = Objects.requireNonNull(options);
+
+		return this;
+	}
+
+	public Map<String, List<String>> getFieldNames(){
+		return this.fieldNames;
+	}
+
+	private PMMLBuilder setFieldNames(Map<String, List<String>> fieldNames){
+		this.fieldNames = fieldNames;
 
 		return this;
 	}
@@ -565,6 +619,8 @@ public class PMMLBuilder {
 			return this;
 		}
 	}
+
+	private static final int DEFAULT_CAPACITY = 1024 * 1024;
 
 	static {
 		init();

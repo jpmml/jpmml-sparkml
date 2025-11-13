@@ -58,7 +58,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 		List<Feature> result = new ArrayList<>();
 
 		String[] inputCols = inputMode.getInputCols(transformer);
-		for(int i = 0; i < inputCols.length; i++){
+		for(int i = 0, length = inputCols.length; i < length; i++){
 			String inputCol = inputCols[i];
 			String[] labels = labelsArray[i];
 

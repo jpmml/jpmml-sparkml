@@ -73,7 +73,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 				apply.addExpressions(expression);
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(transformer, i, length), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+			DerivedField derivedField = encoder.createDerivedField(formatName(i, length, encoder), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
 			result.add(new ContinuousFeature(encoder, derivedField));
 		}

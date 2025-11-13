@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,7 +36,12 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
+import org.apache.spark.ml.feature.StringIndexer;
+import org.apache.spark.ml.feature.StringIndexerModel;
+import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.Column;
+import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -51,6 +58,7 @@ import org.apache.spark.sql.types.IntegralType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.UserDefinedType;
 import org.dmg.pmml.DataType;
 
 public class DatasetUtil {
@@ -83,15 +91,31 @@ public class DatasetUtil {
 		}
 	}
 
+
 	static
 	public Dataset<Row> loadCsv(SparkSession sparkSession, File file) throws IOException {
-		return sparkSession.read()
+		return loadCsv(sparkSession, null, file);
+	}
+
+	static
+	public Dataset<Row> loadCsv(SparkSession sparkSession, StructType schema, File file) throws IOException {
+		DataFrameReader reader = sparkSession.read()
 			.format("csv")
 			.option("header", true)
-			.option("inferSchema", true)
 			.option("nullValue", "N/A")
-			.option("nanValue", "N/A")
-			.load(file.getAbsolutePath());
+			.option("nanValue", "N/A");
+
+		if(schema != null){
+			reader = reader
+				.schema(schema);
+		} else
+
+		{
+			reader = reader
+				.option("inferSchema", true);
+		}
+
+		return reader.load(file.getAbsolutePath());
 	}
 
 	static
@@ -127,6 +151,43 @@ public class DatasetUtil {
 		Files.copy(csvFiles[0], file);
 
 		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+	}
+
+	static
+	public Dataset<Row> toLibSVM(Dataset<Row> dataset){
+		StructType schema = dataset.schema();
+
+		StructField[] fields = schema.fields();
+
+		// The last column
+		String labelCol = fields[fields.length - 1].name();
+
+		StringIndexer labelIndexer = new StringIndexer()
+			.setInputCol(labelCol)
+			.setOutputCol("label");
+
+		StringIndexerModel labelIndexerModel = labelIndexer.fit(dataset);
+
+		Dataset<Row> result = labelIndexerModel.transform(dataset);
+
+		// All columns except for the last column
+		List<String> featureCols = new ArrayList<>();
+		for(int i = 0; i < fields.length - 1; i++){
+			String featureCol = fields[i].name();
+
+			featureCols.add(featureCol);
+		}
+
+		VectorAssembler vectorAssembler = new VectorAssembler()
+			.setInputCols(featureCols.toArray(new String[featureCols.size()]))
+			.setOutputCol("features");
+
+		result = vectorAssembler.transform(result);
+
+		result = result
+			.select("label", "features");
+
+		return result;
 	}
 
 	static
@@ -188,6 +249,10 @@ public class DatasetUtil {
 			return translateAtomicType((AtomicType)sparkDataType);
 		} else
 
+		if(sparkDataType instanceof UserDefinedType){
+			return translateUserDefinedType((UserDefinedType)sparkDataType);
+		} else
+
 		{
 			throw new IllegalArgumentException("Expected atomic data type, got " + sparkDataType.typeName() + " data type");
 		}
@@ -235,6 +300,18 @@ public class DatasetUtil {
 
 		{
 			throw new IllegalArgumentException("Expected float or double data type, got " + fractionalType.typeName() + " data type");
+		}
+	}
+
+	static
+	public DataType translateUserDefinedType(UserDefinedType userDefinedType){
+
+		if(userDefinedType instanceof VectorUDT){
+			return DataType.DOUBLE;
+		} else
+
+		{
+			throw new IllegalArgumentException("Expected vector data type, got " + userDefinedType.typeName() + " data type");
 		}
 	}
 
