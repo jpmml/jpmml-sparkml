@@ -84,6 +84,16 @@
 									</manifestEntries>
 								</transformer>
 							</transformers>
+							<relocations>
+								<relocation>
+									<pattern>jakarta.xml.bind</pattern>
+									<shadedPattern>shaded.jakarta.xml.bind</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.glassfish.jaxb</pattern>
+									<shadedPattern>shaded.org.glassfish.jaxb</shadedPattern>
+								</relocation>
+							</relocations>
 						</configuration>
 					</execution>
 				</executions>
