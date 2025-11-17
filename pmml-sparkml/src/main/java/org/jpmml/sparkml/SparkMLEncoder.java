@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
@@ -245,6 +246,18 @@ public class SparkMLEncoder extends ModelEncoder {
 	}
 
 	public List<String> mapFieldNames(String column, int size){
+		IntFunction<String> formatter = new IntFunction<>(){
+
+			@Override
+			public String apply(int index){
+				return FieldNameUtil.select(column, index);
+			}
+		};
+
+		return mapFieldNames(column, size, formatter);
+	}
+
+	public List<String> mapFieldNames(String column, int size, IntFunction<String> formatter){
 		List<String> fieldNames = getFieldNames(column);
 
 		if(fieldNames != null){
@@ -266,7 +279,7 @@ public class SparkMLEncoder extends ModelEncoder {
 
 				@Override
 				public String get(int index){
-					return FieldNameUtil.select(column, index);
+					return formatter.apply(index);
 				}
 			};
 

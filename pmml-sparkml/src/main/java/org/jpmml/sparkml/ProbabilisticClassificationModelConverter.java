@@ -20,6 +20,7 @@ package org.jpmml.sparkml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntFunction;
 
 import org.apache.spark.ml.classification./*Probabilistic*/ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
@@ -51,6 +52,18 @@ public class ProbabilisticClassificationModelConverter<T extends /*Probabilistic
 
 		String probabilityCol = model.getProbabilityCol();
 
+		IntFunction<String> formatter = new IntFunction<>(){
+
+			@Override
+			public String apply(int index){
+				Object value = categoricalLabel.getValue(index);
+
+				return FieldNameUtil.create(probabilityCol, value);
+			}
+		};
+
+		List<String> names = encoder.mapFieldNames(probabilityCol, categoricalLabel.size(), formatter);
+
 		result = new ArrayList<>(result);
 
 		List<Feature> features = new ArrayList<>();
@@ -58,7 +71,7 @@ public class ProbabilisticClassificationModelConverter<T extends /*Probabilistic
 		for(int i = 0; i < categoricalLabel.size(); i++){
 			Object value = categoricalLabel.getValue(i);
 
-			OutputField probabilityField = ModelUtil.createProbabilityField(FieldNameUtil.create(probabilityCol, value), DataType.DOUBLE, value);
+			OutputField probabilityField = ModelUtil.createProbabilityField(names.get(i), DataType.DOUBLE, value);
 
 			result.add(probabilityField);
 

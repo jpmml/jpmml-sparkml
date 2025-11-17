@@ -56,7 +56,7 @@ public class RegressionModelConverter<T extends RegressionModel<Vector, T>> exte
 
 		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
 
-		OutputField predictedOutputField = ModelUtil.createPredictedField(predictionCol, OpType.CONTINUOUS, scalarLabel.getDataType());
+		OutputField predictedOutputField = ModelUtil.createPredictedField(encoder.mapOnlyFieldName(predictionCol), OpType.CONTINUOUS, scalarLabel.getDataType());
 
 		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, keepPredictionCol);
 

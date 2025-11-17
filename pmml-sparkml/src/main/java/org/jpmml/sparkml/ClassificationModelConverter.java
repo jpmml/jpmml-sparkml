@@ -89,7 +89,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 		MapValues mapValues = ExpressionUtil.createMapValues(pmmlPredictedField.getName(), categoricalLabel.getValues(), categories)
 			.setDataType(DataType.DOUBLE);
 
-		OutputField predictedOutputField = new OutputField(predictionCol, OpType.CONTINUOUS, DataType.DOUBLE)
+		OutputField predictedOutputField = new OutputField(encoder.mapOnlyFieldName(predictionCol), OpType.CONTINUOUS, DataType.DOUBLE)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(mapValues);
 
