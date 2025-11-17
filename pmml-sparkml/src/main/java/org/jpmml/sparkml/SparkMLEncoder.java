@@ -197,7 +197,7 @@ public class SparkMLEncoder extends ModelEncoder {
 
 				DataField dataField = getDataField(name);
 				if(dataField == null){
-					dataField = createDataField(name);
+					dataField = createDataField(column, name);
 				}
 
 				Feature feature = createFeature(dataField);
@@ -252,10 +252,10 @@ public class SparkMLEncoder extends ModelEncoder {
 		return null;
 	}
 
-	public DataField createDataField(String name){
+	public DataField createDataField(String column, String name){
 		StructType schema = getSchema();
 
-		StructField field = schema.apply(name);
+		StructField field = schema.apply(column);
 
 		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
 

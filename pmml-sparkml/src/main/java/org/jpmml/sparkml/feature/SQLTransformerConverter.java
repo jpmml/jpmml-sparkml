@@ -178,7 +178,7 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 		} catch(IllegalArgumentException pmmlIae){
 
 			try {
-				return encoder.createDataField(name);
+				return encoder.createDataField(name, name);
 			} catch(IllegalArgumentException sparkIae){
 				return null;
 			}
