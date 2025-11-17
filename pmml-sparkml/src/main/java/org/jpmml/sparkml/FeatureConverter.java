@@ -20,7 +20,6 @@ package org.jpmml.sparkml;
 
 import java.util.List;
 
-import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
@@ -80,19 +79,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 		String outputCol = hasOutputCol.getOutputCol();
 
-		List<String> fieldNames = encoder.getFieldNames(outputCol);
-		if(fieldNames != null){
-
-			if(fieldNames.size() != 1){
-				throw new IllegalArgumentException("Expected 1 derived field name for column \'" + outputCol + "\', got " + fieldNames.size() + " derived field names");
-			}
-
-			return Iterables.getOnlyElement(fieldNames);
-		} else
-
-		{
-			return outputCol;
-		}
+		return encoder.mapOnlyFieldName(outputCol);
 	}
 
 	protected String formatName(int index, int length, SparkMLEncoder encoder){
@@ -102,23 +89,9 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 
 		String outputCol = hasOutputCol.getOutputCol();
 
-		List<String> fieldNames = encoder.getFieldNames(outputCol);
-		if(fieldNames != null){
+		List<String> names = encoder.mapFieldNames(outputCol, length);
 
-			if(fieldNames.size() != length){
-				throw new IllegalArgumentException("Expected " + length + " derived field name(s) for column \'" + outputCol + "\', got " + fieldNames.size() + " derived field name(s)");
-			}
-
-			return fieldNames.get(index);
-		} else
-
-		{
-			if(length > 1){
-				return outputCol + ("[" + index + "]");
-			}
-
-			return outputCol;
-		}
+		return names.get(index);
 	}
 
 	public T getTransformer(){
