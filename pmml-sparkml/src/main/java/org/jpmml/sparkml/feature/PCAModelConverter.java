@@ -53,6 +53,8 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 
 		MatrixUtil.checkRows(features.size(), pc);
 
+		List<String> names = formatNames(features.size(), encoder);
+
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0, length = transformer.getK(); i < length; i++){
@@ -73,7 +75,7 @@ public class PCAModelConverter extends FeatureConverter<PCAModel> {
 				apply.addExpressions(expression);
 			}
 
-			DerivedField derivedField = encoder.createDerivedField(formatName(i, length, encoder), OpType.CONTINUOUS, DataType.DOUBLE, apply);
+			DerivedField derivedField = encoder.createDerivedField(names.get(i), OpType.CONTINUOUS, DataType.DOUBLE, apply);
 
 			result.add(new ContinuousFeature(encoder, derivedField));
 		}

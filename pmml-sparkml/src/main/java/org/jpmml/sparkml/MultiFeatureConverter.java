@@ -18,6 +18,8 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.List;
+
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
@@ -46,7 +48,9 @@ public class MultiFeatureConverter<T extends Transformer & HasInputCol & HasInpu
 			throw new IllegalArgumentException();
 		}
 
-		return super.formatName(index, length, encoder);
+		List<String> names = formatNames(length, encoder);
+
+		return names.get(index);
 	}
 
 	@Override

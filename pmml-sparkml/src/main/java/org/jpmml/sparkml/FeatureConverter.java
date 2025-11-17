@@ -82,16 +82,14 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 		return encoder.mapOnlyFieldName(outputCol);
 	}
 
-	protected String formatName(int index, int length, SparkMLEncoder encoder){
+	protected List<String> formatNames(int length, SparkMLEncoder encoder){
 		T transformer = getTransformer();
 
 		HasOutputCol hasOutputCol = (HasOutputCol)transformer;
 
 		String outputCol = hasOutputCol.getOutputCol();
 
-		List<String> names = encoder.mapFieldNames(outputCol, length);
-
-		return names.get(index);
+		return encoder.mapFieldNames(outputCol, length);
 	}
 
 	public T getTransformer(){
