@@ -75,6 +75,7 @@
     * `org.jpmml.sparkml.feature.ContinuousDomainModel` (the result of fitting a `feature.ContinuousDomain`)
     * `org.jpmml.sparkml.feature.InvalidCategoryTransformer`
     * `org.jpmml.sparkml.feature.SparseToDenseTransformer`
+    * `org.jpmml.sparkml.feature.VectorDisassembler`
 </details>
 
 <details>
