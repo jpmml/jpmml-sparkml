@@ -20,6 +20,7 @@ package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.ml.feature.SQLTransformer;
 import org.apache.spark.sql.SparkSession;
@@ -155,7 +156,18 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 				@Override
 				public VisitorAction visit(FieldRef fieldRef){
-					ensureField(encoder, fieldRef.requireField());
+
+					if(encoder.hasFeatures(fieldRef.requireField())){
+						Feature feature = encoder.getOnlyFeature(fieldRef.requireField());
+
+						if(!Objects.equals(fieldRef.requireField(), feature.getName())){
+							fieldRef.setField(feature.getName());
+						}
+					} else
+
+					{
+						ensureField(encoder, fieldRef.requireField());
+					}
 
 					return super.visit(fieldRef);
 				}
