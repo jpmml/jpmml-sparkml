@@ -21,10 +21,11 @@ package org.jpmml.sparkml;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.regression.RegressionModel;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.ContinuousFeature;
@@ -47,14 +48,19 @@ public class RegressionModelConverter<T extends RegressionModel<Vector, T>> exte
 	}
 
 	@Override
-	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		T model = getModel();
+	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model pmmlModel, SparkMLEncoder encoder){
+		return RegressionModelConverter.registerPredictionOutputField(this, label, pmmlModel, encoder);
+	}
+
+	static
+	public <T extends Model<T> & HasPredictionCol> List<OutputField> registerPredictionOutputField(ModelConverter<T> converter, Label label, org.dmg.pmml.Model pmmlModel, SparkMLEncoder encoder){
+		T model = converter.getModel();
 
 		ScalarLabel scalarLabel = (ScalarLabel)label;
 
 		String predictionCol = model.getPredictionCol();
 
-		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
+		Boolean keepPredictionCol = (Boolean)converter.getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
 
 		OutputField predictedOutputField = ModelUtil.createPredictedField(encoder.mapOnlyFieldName(predictionCol), OpType.CONTINUOUS, scalarLabel.getDataType());
 

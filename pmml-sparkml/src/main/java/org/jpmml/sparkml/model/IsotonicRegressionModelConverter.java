@@ -36,15 +36,13 @@ import org.dmg.pmml.OutputField;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.ContinuousLabel;
-import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
-import org.jpmml.converter.ModelUtil;
-import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.regression.RegressionModelUtil;
 import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.RegressionModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
 public class IsotonicRegressionModelConverter extends ModelConverter<IsotonicRegressionModel> {
@@ -116,20 +114,6 @@ public class IsotonicRegressionModelConverter extends ModelConverter<IsotonicReg
 
 	@Override
 	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
-		IsotonicRegressionModel model = getModel();
-
-		ScalarLabel scalarLabel = (ScalarLabel)label;
-
-		String predictionCol = model.getPredictionCol();
-
-		Boolean keepPredictionCol = (Boolean)getOption(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, Boolean.TRUE);
-
-		OutputField predictedOutputField = ModelUtil.createPredictedField(encoder.mapOnlyFieldName(predictionCol), OpType.CONTINUOUS, scalarLabel.getDataType());
-
-		DerivedOutputField predictedField = encoder.createDerivedField(pmmlModel, predictedOutputField, keepPredictionCol);
-
-		encoder.putOnlyFeature(predictionCol, new ContinuousFeature(encoder, predictedField));
-
-		return Collections.emptyList();
+		return RegressionModelConverter.registerPredictionOutputField(this, label, pmmlModel, encoder);
 	}
 }
