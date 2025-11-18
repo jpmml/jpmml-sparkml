@@ -85,8 +85,6 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 		val inputColName = getInputCol
 		val outputColName = getOutputCol
 
-		transformSchema(dataset.schema, logging = true)
-
 		dataset.withColumn(outputColName, sparseToDenseUDF(dataset(inputColName)))
 	}
 }
