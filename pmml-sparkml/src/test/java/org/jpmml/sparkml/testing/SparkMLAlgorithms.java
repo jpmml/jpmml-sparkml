@@ -24,6 +24,7 @@ interface SparkMLAlgorithms {
 	String FP_GROWTH = "FPGrowth";
 	String GBT = "GBT";
 	String GLM = "GLM";
+	String ISOTONIC_REGRESSION = "IsotonicRegression";
 	String K_MEANS = "KMeans";
 	String LINEAR_REGRESION = "LinearRegression";
 	String LINEAR_SVC = "LinearSVC";
