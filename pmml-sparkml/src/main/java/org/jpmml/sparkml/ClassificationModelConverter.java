@@ -21,18 +21,26 @@ package org.jpmml.sparkml;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.spark.ml.Model;
 import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.param.shared.HasLabelCol;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.MapValues;
 import org.dmg.pmml.MiningFunction;
-import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.ResultFeature;
+import org.jpmml.converter.BooleanFeature;
+import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DerivedOutputField;
 import org.jpmml.converter.ExpressionUtil;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.IndexFeature;
 import org.jpmml.converter.Label;
@@ -61,6 +69,11 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 	}
 
 	@Override
+	public CategoricalLabel getLabel(SparkMLEncoder encoder){
+		return ClassificationModelConverter.getLabel(this, encoder);
+	}
+
+	@Override
 	public void checkSchema(Schema schema){
 		super.checkSchema(schema);
 
@@ -70,7 +83,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 	}
 
 	@Override
-	public List<OutputField> registerOutputFields(Label label, Model pmmlModel, SparkMLEncoder encoder){
+	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model pmmlModel, SparkMLEncoder encoder){
 		T model = getModel();
 
 		CategoricalLabel categoricalLabel = (CategoricalLabel)label;
@@ -98,5 +111,52 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 		encoder.putOnlyFeature(predictionCol, new IndexFeature(encoder, predictedField, categories));
 
 		return Collections.emptyList();
+	}
+
+	static
+	public <T extends Model<T> & HasLabelCol & HasPredictionCol> CategoricalLabel getLabel(ModelConverter<T> converter, SparkMLEncoder encoder){
+		T model = converter.getModel();
+
+		String labelCol = model.getLabelCol();
+
+		Feature feature = encoder.getOnlyFeature(labelCol);
+
+		if(feature instanceof BooleanFeature){
+			BooleanFeature booleanFeature = (BooleanFeature)feature;
+
+			return new CategoricalLabel(booleanFeature);
+		} else
+
+		if(feature instanceof CategoricalFeature){
+			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+
+			DataField dataField = (DataField)categoricalFeature.getField();
+
+			return new CategoricalLabel(dataField);
+		} else
+
+		if(feature instanceof ContinuousFeature){
+			ContinuousFeature continuousFeature = (ContinuousFeature)feature;
+
+			int numClasses = 2;
+
+			if(converter instanceof ClassificationModelConverter){
+				ClassificationModelConverter<?> classificationModelConverter = (ClassificationModelConverter<?>)converter;
+
+				numClasses = classificationModelConverter.getNumberOfClasses();
+			}
+
+			List<Integer> categories = LabelUtil.createTargetCategories(numClasses);
+
+			Field<?> field = encoder.toCategorical(continuousFeature, categories);
+
+			encoder.putOnlyFeature(labelCol, new IndexFeature(encoder, field, categories));
+
+			return new CategoricalLabel(field.requireName(), field.requireDataType(), categories);
+		} else
+
+		{
+			throw new IllegalArgumentException("Expected a categorical or categorical-like continuous feature, got " + feature);
+		}
 	}
 }

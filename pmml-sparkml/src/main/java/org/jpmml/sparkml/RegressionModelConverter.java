@@ -23,13 +23,18 @@ import java.util.List;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.regression.RegressionModel;
+import org.dmg.pmml.DataType;
+import org.dmg.pmml.Field;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.DerivedOutputField;
+import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ScalarLabel;
@@ -48,8 +53,28 @@ public class RegressionModelConverter<T extends RegressionModel<Vector, T>> exte
 	}
 
 	@Override
+	public ScalarLabel getLabel(SparkMLEncoder encoder){
+		return RegressionModelConverter.getLabel(this, encoder);
+	}
+
+	@Override
 	public List<OutputField> registerOutputFields(Label label, org.dmg.pmml.Model pmmlModel, SparkMLEncoder encoder){
 		return RegressionModelConverter.registerPredictionOutputField(this, label, pmmlModel, encoder);
+	}
+
+	static
+	public <T extends Model<T> & HasLabelCol & HasPredictionCol> ContinuousLabel getLabel(ModelConverter<T> converter, SparkMLEncoder encoder){
+		T model = converter.getModel();
+
+		String labelCol = model.getLabelCol();
+
+		Feature feature = encoder.getOnlyFeature(labelCol);
+
+		Field<?> field = encoder.toContinuous(feature);
+
+		field.setDataType(DataType.DOUBLE);
+
+		return new ContinuousLabel(field);
 	}
 
 	static

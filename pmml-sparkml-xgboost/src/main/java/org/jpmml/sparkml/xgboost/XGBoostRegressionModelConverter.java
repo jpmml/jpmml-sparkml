@@ -26,6 +26,7 @@ import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.mining.MiningModel;
+import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.PredictionModelConverter;
@@ -41,6 +42,11 @@ public class XGBoostRegressionModelConverter extends PredictionModelConverter<XG
 	@Override
 	public MiningFunction getMiningFunction(){
 		return MiningFunction.REGRESSION;
+	}
+
+	@Override
+	public ContinuousLabel getLabel(SparkMLEncoder encoder){
+		return RegressionModelConverter.getLabel(this, encoder);
 	}
 
 	@Override

@@ -25,7 +25,6 @@ import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.IsotonicRegressionModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DerivedField;
-import org.dmg.pmml.Field;
 import org.dmg.pmml.LinearNorm;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
@@ -58,17 +57,7 @@ public class IsotonicRegressionModelConverter extends ModelConverter<IsotonicReg
 
 	@Override
 	public ContinuousLabel getLabel(SparkMLEncoder encoder){
-		IsotonicRegressionModel model = getModel();
-
-		String labelCol = model.getLabelCol();
-
-		Feature feature = encoder.getOnlyFeature(labelCol);
-
-		Field<?> field = encoder.toContinuous(feature);
-
-		field.setDataType(DataType.DOUBLE);
-
-		return new ContinuousLabel(field);
+		return RegressionModelConverter.getLabel(this, encoder);
 	}
 
 	@Override
