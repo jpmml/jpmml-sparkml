@@ -20,7 +20,6 @@ package org.jpmml.sparkml;
 
 import java.util.List;
 
-import com.google.common.collect.Iterables;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.param.shared.HasInputCol;
 import org.apache.spark.ml.param.shared.HasInputCols;
@@ -42,26 +41,16 @@ public class MultiFeatureConverter<T extends Transformer & HasInputCol & HasInpu
 
 			String outputCol = outputCols[index];
 
-			List<String> fieldNames = encoder.getFieldNames(outputCol);
-			if(fieldNames != null){
-
-				if(fieldNames.size() != 1){
-					throw new IllegalArgumentException("Expected 1 derived field name for column \'" + outputCol + "\', got " + fieldNames.size() + " derived field names");
-				}
-
-				return Iterables.getOnlyElement(fieldNames);
-			} else
-
-			{
-				return outputCol;
-			}
+			return encoder.mapOnlyFieldName(outputCol);
 		}
 
 		if(index != 0){
 			throw new IllegalArgumentException();
 		}
 
-		return super.formatName(index, length, encoder);
+		List<String> names = formatNames(length, encoder);
+
+		return names.get(index);
 	}
 
 	@Override

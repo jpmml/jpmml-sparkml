@@ -31,9 +31,11 @@ import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
+import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
+import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.RegressionModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.VectorUtil;
@@ -54,6 +56,19 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 				return MiningFunction.CLASSIFICATION;
 			default:
 				return MiningFunction.REGRESSION;
+		}
+	}
+
+	@Override
+	public ScalarLabel getLabel(SparkMLEncoder encoder){
+		GeneralizedLinearRegressionModel model = getModel();
+
+		String family = model.getFamily();
+		switch(family){
+			case "binomial":
+				return ClassificationModelConverter.getLabel(this, encoder);
+			default:
+				return RegressionModelConverter.getLabel(this, encoder);
 		}
 	}
 

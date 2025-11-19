@@ -65,12 +65,14 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 			SchemaUtil.checkSize(std.size(), features);
 		}
 
+		List<String> names = formatNames(features.size(), encoder);
+
 		List<Feature> result = new ArrayList<>();
 
 		for(int i = 0, length = features.size(); i < length; i++){
 			Feature feature = features.get(i);
 
-			String name = formatName(i, length, encoder);
+			String name = names.get(i);
 
 			Expression expression = null;
 

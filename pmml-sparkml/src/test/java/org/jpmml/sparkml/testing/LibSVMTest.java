@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -64,6 +65,9 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 
 					pmmlBuilder = pmmlBuilder
 						.putFieldNames("features", fieldNames);
+
+					pmmlBuilder = pmmlBuilder
+						.extendSchema(Set.of("prediction", "probability", "probSetosa", "probVersicolor", "probVirginica"));
 				}
 
 				return pmmlBuilder;
@@ -115,7 +119,7 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 
 	@Test
 	public void evaluateLogisticRegressionIris() throws Exception {
-		evaluate(LOGISTIC_REGRESSION, IRIS + "Vec", new PMMLEquivalence(1e-12, 1e-12));
+		evaluate(LOGISTIC_REGRESSION, IRIS + "Vec", excludeFields("SpeciesDecision"), new PMMLEquivalence(1e-12, 1e-12));
 	}
 
 	static
