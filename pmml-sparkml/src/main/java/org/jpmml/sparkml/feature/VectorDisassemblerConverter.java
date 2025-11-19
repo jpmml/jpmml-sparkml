@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Villu Ruusmann
+ * Copyright (c) 2016 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,21 +16,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.testing;
+package org.jpmml.sparkml.feature;
 
-interface SparkMLAlgorithms {
+import java.util.List;
 
-	String DECISION_TREE = "DecisionTree";
-	String FP_GROWTH = "FPGrowth";
-	String GBT = "GBT";
-	String GLM = "GLM";
-	String ISOTONIC_REGRESSION = "IsotonicRegression";
-	String K_MEANS = "KMeans";
-	String LINEAR_REGRESION = "LinearRegression";
-	String LINEAR_SVC = "LinearSVC";
-	String LOGISTIC_REGRESSION = "LogisticRegression";
-	String MODEL_CHAIN = "ModelChain";
-	String NAIVE_BAYES = "NaiveBayes";
-	String NEURAL_NETWORK = "NeuralNetwork";
-	String RANDOM_FOREST = "RandomForest";
+import org.jpmml.converter.Feature;
+import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SparkMLEncoder;
+
+public class VectorDisassemblerConverter extends FeatureConverter<VectorDisassembler> {
+
+	public VectorDisassemblerConverter(VectorDisassembler transformer){
+		super(transformer);
+	}
+
+	@Override
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+		VectorDisassembler transformer = getTransformer();
+
+		String inputCol = transformer.getInputCol();
+
+		return encoder.getFeatures(inputCol);
+	}
 }

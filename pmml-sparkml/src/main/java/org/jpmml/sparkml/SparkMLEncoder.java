@@ -18,6 +18,7 @@
  */
 package org.jpmml.sparkml;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
@@ -150,23 +152,12 @@ public class SparkMLEncoder extends ModelEncoder {
 					throw new IllegalArgumentException();
 				}
 
-				List<String> fieldNames = getFieldNames(column);
-				if(fieldNames != null && fieldNames.size() != numFeatures){
-					throw new IllegalArgumentException("Expected " + numFeatures + " data field names, got " + fieldNames.size()  + " data field names");
-				}
+				List<String> names = mapFieldNames(column, numFeatures);
 
 				List<Feature> result = new ArrayList<>();
 
 				for(int i = 0; i < numFeatures; i++){
-					String name;
-
-					if(fieldNames != null){
-						name = fieldNames.get(i);
-					} else
-
-					{
-						name = FieldNameUtil.select(column, i);
-					}
+					String name = names.get(i);
 
 					DataField dataField = getDataField(name);
 					if(dataField == null){
@@ -180,24 +171,11 @@ public class SparkMLEncoder extends ModelEncoder {
 			} else
 
 			{
-				List<String> fieldNames = getFieldNames(column);
-				if(fieldNames != null && fieldNames.size() != 1){
-					throw new IllegalArgumentException("Expected 1 data field name, got " + fieldNames.size() + " data field names");
-				}
-
-				String name;
-
-				if(fieldNames != null){
-					name = Iterables.getOnlyElement(fieldNames);
-				} else
-
-				{
-					name = column;
-				}
+				String name = mapOnlyFieldName(column);
 
 				DataField dataField = getDataField(name);
 				if(dataField == null){
-					dataField = createDataField(name);
+					dataField = createDataField(column, name);
 				}
 
 				Feature feature = createFeature(dataField);
@@ -252,10 +230,71 @@ public class SparkMLEncoder extends ModelEncoder {
 		return null;
 	}
 
-	public DataField createDataField(String name){
+	public String mapOnlyFieldName(String column){
+		List<String> fieldNames = getFieldNames(column);
+
+		if(fieldNames != null){
+
+			if(fieldNames.size() != 1){
+				throw new IllegalArgumentException("Expected 1 field name for column \'" + column + "\', got " + fieldNames.size() + " field names");
+			}
+
+			return Iterables.getOnlyElement(fieldNames);
+		}
+
+		return column;
+	}
+
+	public List<String> mapFieldNames(String column, int size){
+		IntFunction<String> formatter = new IntFunction<>(){
+
+			@Override
+			public String apply(int index){
+				return FieldNameUtil.select(column, index);
+			}
+		};
+
+		return mapFieldNames(column, size, formatter);
+	}
+
+	public List<String> mapFieldNames(String column, int size, IntFunction<String> formatter){
+		List<String> fieldNames = getFieldNames(column);
+
+		if(fieldNames != null){
+
+			if(fieldNames.size() != size){
+				throw new IllegalArgumentException("Expected " + size + " field name(s) for column \'" + column +"\', got " + fieldNames.size() + " field name(s)");
+			}
+
+			return fieldNames;
+		}
+
+		if(size > 1){
+			List<String> result = new AbstractList<>(){
+
+				@Override
+				public int size(){
+					return size;
+				}
+
+				@Override
+				public String get(int index){
+					return formatter.apply(index);
+				}
+			};
+
+			return result;
+		} else
+
+		{
+			return Collections.singletonList(column);
+		}
+	}
+
+	public DataField createDataField(String column, String name){
 		StructType schema = getSchema();
 
-		StructField field = schema.apply(name);
+		StructField field = schema.apply(column);
 
 		org.apache.spark.sql.types.DataType sparkDataType = field.dataType();
 

@@ -80,6 +80,16 @@ public class RegressionTest extends SimpleSparkMLEncoderBatchTest implements Spa
 	}
 
 	@Test
+	public void evaluateIsotonicRegressionDecrAuto() throws Exception {
+		evaluate(ISOTONIC_REGRESSION + "Decr", AUTO);
+	}
+
+	@Test
+	public void evaluateIsotonicRegressionIncrAuto() throws Exception {
+		evaluate(ISOTONIC_REGRESSION + "Incr", AUTO);
+	}
+
+	@Test
 	public void evaluateLinearRegressionAuto() throws Exception {
 		String[] transformFields = {"mpgBucket"};
 

@@ -75,7 +75,7 @@ public class ClusteringModelConverter<T extends Model<T> & HasFeaturesCol & HasP
 
 		DerivedOutputField pmmlPredictedField = encoder.createDerivedField(pmmlModel, pmmlPredictedOutputField, true);
 
-		OutputField predictedOutputField = new OutputField(predictionCol, OpType.CATEGORICAL, DataType.INTEGER)
+		OutputField predictedOutputField = new OutputField(encoder.mapOnlyFieldName(predictionCol), OpType.CATEGORICAL, DataType.INTEGER)
 			.setResultFeature(ResultFeature.TRANSFORMED_VALUE)
 			.setExpression(new FieldRef(pmmlPredictedField));
 

@@ -4,7 +4,7 @@ from pyspark.ml.clustering import KMeans
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, RegressionEvaluator
 from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, QuantileDiscretizer, RegexTokenizer, RFormula, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
 from pyspark.ml.fpm import FPGrowth
-from pyspark.ml.regression import DecisionTreeRegressor, GBTRegressor, GeneralizedLinearRegression, LinearRegression, RandomForestRegressor
+from pyspark.ml.regression import DecisionTreeRegressor, GBTRegressor, GeneralizedLinearRegression, IsotonicRegression, LinearRegression, RandomForestRegressor
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder, TrainValidationSplit
 from pyspark.sql.types import BooleanType, DoubleType, IntegerType, StringType
 
@@ -269,6 +269,15 @@ def build_regression_auto(auto_df, regressor, name):
 
 	build_regression(auto_df, pipeline, "mpg", regressor.getPredictionCol(), name)
 
+def build_isotonic_auto(auto_df, regressor, name):
+	vectorAssembler = VectorAssembler(inputCols = ["acceleration", "weight"], outputCol = "featureVector")
+
+	regressor = regressor.setLabelCol("mpg").setFeaturesCol(vectorAssembler.getOutputCol())
+
+	pipeline = Pipeline(stages = [vectorAssembler, regressor])
+
+	build_regression(auto_df, pipeline, "mpg", regressor.getPredictionCol(), name)
+
 if "Auto" in datasets:
 	auto_df = load_csv("Auto")
 	print(auto_df.dtypes)
@@ -287,6 +296,9 @@ if "Auto" in datasets:
 	build_regression_auto(auto_df, GBTRegressor(), "GBTAuto")
 	build_regression_auto(auto_df, GeneralizedLinearRegression(family = "gaussian", link = "identity"), "GLMAuto")
 	build_regression_auto(auto_df, RandomForestRegressor(numTrees = 13), "RandomForestAuto")
+
+	build_isotonic_auto(auto_df, IsotonicRegression(isotonic = True, featureIndex = 0), "IsotonicRegressionIncrAuto")
+	build_isotonic_auto(auto_df, IsotonicRegression(isotonic = False, featureIndex = 1), "IsotonicRegressionDecrAuto")
 
 def build_regression_autona(df, name):
 	catCols = ["cylinders", "model_year", "origin"]

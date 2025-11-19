@@ -56,6 +56,7 @@
     * [`regression.DecisionTreeRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/DecisionTreeRegressionModel.html)
     * [`regression.GBTRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GBTRegressionModel.html)
     * [`regression.GeneralizedLinearRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/GeneralizedLinearRegressionModel.html)
+    * [`regression.IsotonicRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/IsotonicRegressionModel.html)
     * [`regression.LinearRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/LinearRegressionModel.html)
     * [`regression.RandomForestRegressionModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/regression/RandomForestRegressionModel.html)
   * Prediction model chains:
@@ -75,6 +76,7 @@
     * `org.jpmml.sparkml.feature.ContinuousDomainModel` (the result of fitting a `feature.ContinuousDomain`)
     * `org.jpmml.sparkml.feature.InvalidCategoryTransformer`
     * `org.jpmml.sparkml.feature.SparseToDenseTransformer`
+    * `org.jpmml.sparkml.feature.VectorDisassembler`
 </details>
 
 <details>

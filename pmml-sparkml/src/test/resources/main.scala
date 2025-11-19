@@ -1,9 +1,10 @@
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.LogisticRegression
-import org.apache.spark.ml.feature.StandardScaler
+import org.apache.spark.ml.feature.{StandardScaler, SQLTransformer}
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.sql.types.DataTypes
 import org.jpmml.sparkml.DatasetUtil
+import org.jpmml.sparkml.feature.VectorDisassembler
 
 class LibSVMTest extends SparkMLTest {
 
@@ -57,8 +58,27 @@ class LibSVMTest extends SparkMLTest {
 			.setLabelCol(labelIndexer.getOutputCol)
 			.setFeaturesCol(stdScaler.getOutputCol)
 
+		val vecDisassembler = new VectorDisassembler()
+			.setInputCol(classifier.getProbabilityCol)
+			.setOutputCols(Array("probSetosa", "probVersicolor", "probVirginica"))
+
+		val sqlTransformer = new SQLTransformer()
+			.setStatement("""
+				SELECT
+					prediction,
+					probability,
+					probSetosa, probVersicolor, probVirginica,
+					CASE
+						WHEN probSetosa >= 0.5 THEN 'Setosa'
+						WHEN probVersicolor >= 0.5 THEN 'Versicolor'
+						WHEN probVirginica >= 0.5 THEN 'Virginica'
+						ELSE '(mixed)'
+					END AS SpeciesDecision
+				FROM __THIS__
+			""")
+
 		new Pipeline()
-			.setStages(Array(labelIndexer, stdScaler, classifier))
+			.setStages(Array(labelIndexer, stdScaler, classifier, vecDisassembler, sqlTransformer))
 	}
 
 	def run_housing(): Unit = {

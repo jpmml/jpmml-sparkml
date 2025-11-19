@@ -145,6 +145,62 @@ public class ContinuousDomainTest extends DomainTest {
 		sparkClone(domainModel);
 	}
 
+	@Test
+	public void fitTransformValid(){
+		StructType schema = new StructType()
+			.add("x", DataTypes.DoubleType, true);
+
+		List<Row> rows = Arrays.asList(
+			RowFactory.create(1d),
+			RowFactory.create(new Object[]{null}),
+			RowFactory.create(2d),
+			RowFactory.create(-1d),
+			RowFactory.create(Double.NaN),
+			RowFactory.create(3d),
+			RowFactory.create(10d)
+		);
+
+		Dataset<Row> ds = SparkMLTest.sparkSession.createDataFrame(rows, schema);
+
+		Map<String, List<Object>> expectedColumns;
+
+		ContinuousDomain domain = new ContinuousDomain()
+			.setInputCols(new String[]{"x"})
+			.setOutputCols(new String[]{"pmml_x"});
+
+		domain
+			.setMissingValueTreatment("asIs")
+			.setInvalidValueTreatment("asIs");
+
+		domain
+			.setOutlierTreatment("asMissingValues")
+			.setLowValue(1d)
+			.setHighValue(3d);
+
+		expectedColumns = Map.of(
+			"pmml_x", Arrays.asList(1d, null, 2d, null, Double.NaN, 3d, null)
+		);
+
+		ContinuousDomainModel domainModel = domain.fit(ds);
+
+		Dataset<Row> transformedDs = domainModel.transform(ds);
+
+		checkDataset(expectedColumns, transformedDs);
+
+		expectedColumns = Map.of(
+			"pmml_x", Arrays.asList(1d, null, 2d, 1d, Double.NaN, 3d, 3d)
+		);
+
+		domain
+			.setOutlierTreatment("asExtremeValues");
+
+		domainModel = domain.fit(ds);
+
+		transformedDs = domainModel.transform(ds);
+
+		checkDataset(expectedColumns, transformedDs);
+	}
+
 	static
 	private void checkDataRanges(Map<String, Number[]> expected, Map<String, Number[]> actual){
 		Set<String> keys = expected.keySet();
