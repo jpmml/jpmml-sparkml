@@ -267,12 +267,14 @@ class ContinuousDomainModel(override val uid: String) extends DomainModel[Contin
 			case OutlierTreatment.AsMissingValues => {
 				val isOutlier = (col < getLowValue) || (col > getHighValue)
 				val nullifiedCol = when(isOutlier, lit(null)).otherwise(col)
-				transformMissing(nullifiedCol, isOutlier)
+				val afterMissingCol = transformMissing(nullifiedCol, isOutlier)
+				when(isValidCol, afterMissingCol).otherwise(col)
 			}
 			case OutlierTreatment.AsExtremeValues => {
 				val isNegativeOutlier = (col < getLowValue)
 				val isPositiveOutlier = (col > getHighValue)
-				when(isNegativeOutlier, lit(getLowValue)).otherwise(when(isPositiveOutlier, lit(getHighValue)).otherwise(col))
+				val clippedCol = when(isNegativeOutlier, lit(getLowValue)).otherwise(when(isPositiveOutlier, lit(getHighValue)).otherwise(col))
+				when(isValidCol, clippedCol).otherwise(col)
 			}
 			case _ =>
 				throw new IllegalArgumentException(outlierTreatment)
