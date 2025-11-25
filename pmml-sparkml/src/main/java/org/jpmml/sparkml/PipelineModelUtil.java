@@ -40,6 +40,11 @@ public class PipelineModelUtil {
 	}
 
 	static
+	public PipelineModel create(String uid, Transformer[] stages){
+		return new PipelineModel(uid, stages);
+	}
+
+	static
 	public void addStage(PipelineModel pipelineModel, int index, Transformer transformer){
 		List<Transformer> stages = new ArrayList<>(Arrays.asList(pipelineModel.stages()));
 
