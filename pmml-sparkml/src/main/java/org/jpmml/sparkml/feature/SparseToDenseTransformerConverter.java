@@ -23,7 +23,6 @@ import java.util.List;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
-import org.jpmml.sparkml.feature.SparseToDenseTransformer;
 
 public class SparseToDenseTransformerConverter extends FeatureConverter<SparseToDenseTransformer> {
 

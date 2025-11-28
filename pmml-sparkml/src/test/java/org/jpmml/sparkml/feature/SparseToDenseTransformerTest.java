@@ -38,10 +38,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SparseToDenseTransformerTest extends SparkMLTest {
 
@@ -80,17 +80,17 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 			Row transformedRow = transformedRows.get(i);
 
 			Vector vector = (Vector)transformedRow.get(0);
-			Vector denseVector = (Vector)transformedRow.get(1);
+			Vector transformedVector = (Vector)transformedRow.get(1);
 
 			assertEquals(i == 1 ? 3 : 1, vector.numActives());
 			assertEquals(1, vector.numNonzeros());
 			assertEquals(3, vector.size());
 
-			assertTrue(denseVector instanceof DenseVector);
+			assertInstanceOf(DenseVector.class, transformedVector);
 
-			assertEquals(3, denseVector.numActives());
-			assertEquals(1, denseVector.numNonzeros());
-			assertEquals(3, denseVector.size());
+			assertEquals(3, transformedVector.numActives());
+			assertEquals(1, transformedVector.numNonzeros());
+			assertEquals(3, transformedVector.size());
 		}
 	}
 
