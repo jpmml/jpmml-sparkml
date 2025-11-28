@@ -83,7 +83,10 @@ object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTrans
 
 	def sparseToDense(vec: Vector): DenseVector = {
 		if(vec != null){
-			vec.toDense
+			vec match {
+				case denseVec: DenseVector => denseVec
+				case _ => vec.toDense
+			}
 		} else
 
 		{

@@ -36,8 +36,11 @@ import org.apache.spark.sql.types.StructType;
 import org.jpmml.sparkml.SparkMLTest;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SparseToDenseTransformerTest extends SparkMLTest {
@@ -89,5 +92,20 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 			assertEquals(1, denseVector.numNonzeros());
 			assertEquals(3, denseVector.size());
 		}
+	}
+
+	@Test
+	public void sparseToDense(){
+		Vector vector = new DenseVector(new double[]{0, 0, 1d});
+		Vector transformedVector = SparseToDenseTransformer.sparseToDense(vector);
+
+		assertSame(vector, transformedVector);
+		assertArrayEquals(vector.toArray(), transformedVector.toArray());
+
+		vector = new SparseVector(3, new int[]{2}, new double[]{1d});
+		transformedVector = SparseToDenseTransformer.sparseToDense(vector);
+
+		assertNotSame(vector, transformedVector);
+		assertArrayEquals(vector.toArray(), transformedVector.toArray());
 	}
 }
