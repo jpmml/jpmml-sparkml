@@ -129,7 +129,8 @@ public class DatasetUtil {
 
 		DataFrameWriter<Row> writer = dataset.write()
 			.format("csv")
-			.option("header", "true");
+			.option("header", "true")
+			.option("nullValue", "N/A");
 
 		writer.save(tmpDir.getAbsolutePath());
 

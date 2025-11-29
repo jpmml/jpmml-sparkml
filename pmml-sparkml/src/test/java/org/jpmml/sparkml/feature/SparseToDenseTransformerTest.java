@@ -36,9 +36,12 @@ import org.apache.spark.sql.types.StructType;
 import org.jpmml.sparkml.SparkMLTest;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class SparseToDenseTransformerTest extends SparkMLTest {
 
@@ -77,17 +80,32 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 			Row transformedRow = transformedRows.get(i);
 
 			Vector vector = (Vector)transformedRow.get(0);
-			Vector denseVector = (Vector)transformedRow.get(1);
+			Vector transformedVector = (Vector)transformedRow.get(1);
 
 			assertEquals(i == 1 ? 3 : 1, vector.numActives());
 			assertEquals(1, vector.numNonzeros());
 			assertEquals(3, vector.size());
 
-			assertTrue(denseVector instanceof DenseVector);
+			assertInstanceOf(DenseVector.class, transformedVector);
 
-			assertEquals(3, denseVector.numActives());
-			assertEquals(1, denseVector.numNonzeros());
-			assertEquals(3, denseVector.size());
+			assertEquals(3, transformedVector.numActives());
+			assertEquals(1, transformedVector.numNonzeros());
+			assertEquals(3, transformedVector.size());
 		}
+	}
+
+	@Test
+	public void sparseToDense(){
+		Vector vector = new DenseVector(new double[]{0, 0, 1d});
+		Vector transformedVector = SparseToDenseTransformer.sparseToDense(vector);
+
+		assertSame(vector, transformedVector);
+		assertArrayEquals(vector.toArray(), transformedVector.toArray());
+
+		vector = new SparseVector(3, new int[]{2}, new double[]{1d});
+		transformedVector = SparseToDenseTransformer.sparseToDense(vector);
+
+		assertNotSame(vector, transformedVector);
+		assertArrayEquals(vector.toArray(), transformedVector.toArray());
 	}
 }

@@ -30,17 +30,7 @@ import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
 class InvalidCategoryTransformer(override val uid: String) extends Transformer with HasInputCol with HasInputCols with HasOutputCol with HasOutputCols with DefaultParamsWritable {
 
 	private
-	val convertUDF = udf {
-		(x: Double, size: Int) => {
-			if(x >= 0 && x < size){
-				x
-			} else
-
-			{
-				Double.NaN
-			}
-		}
-	}
+	val convertUDF = udf(InvalidCategoryTransformer.convert _)
 
 	/**
 	 * @group setParam
@@ -158,4 +148,15 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 	}
 }
 
-object InvalidCategoryTransformer extends DefaultParamsReadable[InvalidCategoryTransformer]
+object InvalidCategoryTransformer extends DefaultParamsReadable[InvalidCategoryTransformer] {
+
+	def convert(x: Double, size: Int): Double = {
+		if(x >= 0 && x < size){
+			x
+		} else
+
+		{
+			Double.NaN
+		}
+	}
+}

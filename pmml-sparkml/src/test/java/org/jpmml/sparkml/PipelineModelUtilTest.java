@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Villu Ruusmann
+ * Copyright (c) 2025 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,26 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.feature;
+package org.jpmml.sparkml;
 
-import java.util.List;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.feature.SQLTransformer;
 
-import org.jpmml.converter.Feature;
-import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SparkMLEncoder;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SparseToDenseTransformerConverter extends FeatureConverter<SparseToDenseTransformer> {
+public class PipelineModelUtilTest {
 
-	public SparseToDenseTransformerConverter(SparseToDenseTransformer transformer){
-		super(transformer);
-	}
+	public void create(){
+		Transformer identityTransformer = new SQLTransformer()
+			.setStatement("SELECT * FROM __THIS__");
 
-	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
-		SparseToDenseTransformer transformer = getTransformer();
+		PipelineModel pipelineModel = PipelineModelUtil.create("test", new Transformer[]{identityTransformer});
 
-		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
-
-		return features;
+		assertEquals("test", pipelineModel.uid());
+		assertArrayEquals(new Transformer[]{identityTransformer}, pipelineModel.stages());
 	}
 }

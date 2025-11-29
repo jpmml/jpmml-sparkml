@@ -118,7 +118,7 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateAuditNA() throws Exception {
-		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 8));
+		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64));
 	}
 
 	@Test
@@ -133,12 +133,12 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateHousing() throws Exception {
-		evaluate("XGBoost", HOUSING, new FloatEquivalence(24));
+		evaluate("XGBoost", HOUSING, new FloatEquivalence(12 + 4));
 	}
 
 	@Test
 	public void evaluateIris() throws Exception {
-		evaluate("XGBoost", IRIS, new FloatEquivalence(24 + 4));
+		evaluate("XGBoost", IRIS, new FloatEquivalence(12 + 4));
 	}
 
 	@Test
