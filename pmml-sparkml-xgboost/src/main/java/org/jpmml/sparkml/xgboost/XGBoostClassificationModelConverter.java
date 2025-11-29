@@ -20,6 +20,7 @@ package org.jpmml.sparkml.xgboost;
 
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.regression.RegressionModel;
 import org.jpmml.converter.Schema;
@@ -42,6 +43,11 @@ public class XGBoostClassificationModelConverter extends ProbabilisticClassifica
 		}
 
 		return super.getNumberOfClasses();
+	}
+
+	@Override
+	public DataType getDataType(){
+		return DataType.FLOAT;
 	}
 
 	@Override
