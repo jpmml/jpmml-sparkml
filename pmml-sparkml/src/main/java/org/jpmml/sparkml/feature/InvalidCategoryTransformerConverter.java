@@ -37,7 +37,6 @@ import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Decorator;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
-import org.jpmml.sparkml.FeatureConverter.InOutMode;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 

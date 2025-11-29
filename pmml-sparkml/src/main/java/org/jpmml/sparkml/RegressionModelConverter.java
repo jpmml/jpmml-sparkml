@@ -26,7 +26,6 @@ import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.ml.regression.RegressionModel;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.OpType;
@@ -72,7 +71,7 @@ public class RegressionModelConverter<T extends RegressionModel<Vector, T>> exte
 
 		Field<?> field = encoder.toContinuous(feature);
 
-		field.setDataType(DataType.DOUBLE);
+		field.setDataType(converter.getDataType());
 
 		return new ContinuousLabel(field);
 	}

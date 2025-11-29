@@ -25,7 +25,6 @@ import java.util.function.IntFunction;
 import org.apache.spark.ml.classification./*Probabilistic*/ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasProbabilityCol;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OutputField;
 import org.jpmml.converter.CategoricalLabel;
@@ -71,7 +70,7 @@ public class ProbabilisticClassificationModelConverter<T extends /*Probabilistic
 		for(int i = 0; i < categoricalLabel.size(); i++){
 			Object value = categoricalLabel.getValue(i);
 
-			OutputField probabilityField = ModelUtil.createProbabilityField(names.get(i), DataType.DOUBLE, value);
+			OutputField probabilityField = ModelUtil.createProbabilityField(names.get(i), getDataType(), value);
 
 			result.add(probabilityField);
 

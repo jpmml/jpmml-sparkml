@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.feature
 
 import org.apache.spark.ml.Transformer
-import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.{DenseVector, Vector}
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.param.shared.{HasInputCol, HasOutputCol}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
@@ -29,17 +29,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 
 class SparseToDenseTransformer(override val uid: String) extends Transformer with HasInputCol with HasOutputCol with DefaultParamsWritable {
 	private
-	val sparseToDenseUDF = udf {
-		(vec: Vector) => {
-			if(vec != null){
-				vec.toDense
-			} else
-
-			{
-				null
-			}
-		}
-	}
+	val sparseToDenseUDF = udf(SparseToDenseTransformer.sparseToDense _)
 
 	/**
 	 * @group setParam
@@ -89,4 +79,18 @@ class SparseToDenseTransformer(override val uid: String) extends Transformer wit
 	}
 }
 
-object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTransformer]
+object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTransformer] {
+
+	def sparseToDense(vec: Vector): DenseVector = {
+		if(vec != null){
+			vec match {
+				case denseVec: DenseVector => denseVec
+				case _ => vec.toDense
+			}
+		} else
+
+		{
+			null
+		}
+	}
+}

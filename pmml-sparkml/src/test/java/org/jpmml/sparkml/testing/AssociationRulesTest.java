@@ -33,7 +33,7 @@ import org.dmg.pmml.association.AssociationModel;
 import org.jpmml.evaluator.ResultField;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 public class AssociationRulesTest extends SimpleSparkMLEncoderBatchTest implements SparkMLAlgorithms, SparkMLDatasets {
 
@@ -67,7 +67,7 @@ public class AssociationRulesTest extends SimpleSparkMLEncoderBatchTest implemen
 
 			Model model = Iterables.getOnlyElement(pmml.getModels());
 
-			assertTrue(model instanceof AssociationModel);
+			assertInstanceOf(AssociationModel.class, model);
 		}
 	}
 }

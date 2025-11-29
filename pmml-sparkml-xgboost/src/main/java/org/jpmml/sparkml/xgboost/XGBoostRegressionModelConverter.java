@@ -22,6 +22,7 @@ import java.util.List;
 
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OutputField;
@@ -42,6 +43,11 @@ public class XGBoostRegressionModelConverter extends PredictionModelConverter<XG
 	@Override
 	public MiningFunction getMiningFunction(){
 		return MiningFunction.REGRESSION;
+	}
+
+	@Override
+	public DataType getDataType(){
+		return DataType.FLOAT;
 	}
 
 	@Override

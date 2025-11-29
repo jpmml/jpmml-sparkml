@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
@@ -48,6 +49,10 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 	abstract
 	public org.dmg.pmml.Model encodeModel(Schema schema);
+
+	public DataType getDataType(){
+		return DataType.DOUBLE;
+	}
 
 	public Schema encodeSchema(SparkMLEncoder encoder){
 		Label label = getLabel(encoder);
