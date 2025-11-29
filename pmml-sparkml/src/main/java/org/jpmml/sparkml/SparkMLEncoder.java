@@ -31,6 +31,7 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
+import com.google.common.math.DoubleMath;
 import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
@@ -226,6 +227,10 @@ public class SparkMLEncoder extends ModelEncoder {
 		this.columnFeatures.put(column, features);
 	}
 
+	public void removeFeatures(String column){
+		this.columnFeatures.remove(column);
+	}
+
 	public List<String> getFieldNames(String column){
 		return null;
 	}
@@ -352,7 +357,17 @@ public class SparkMLEncoder extends ModelEncoder {
 			case STRING:
 				return string;
 			case INTEGER:
-				return Long.valueOf(string);
+				try {
+					return Long.valueOf(string);
+				} catch(NumberFormatException nfe){
+					double doubleValue = Double.parseDouble(string);
+
+					if(DoubleMath.isMathematicalInteger(doubleValue)){
+						return (long)doubleValue;
+					}
+
+					throw nfe;
+				}
 			case FLOAT:
 			case DOUBLE:
 				return Double.valueOf(string);
