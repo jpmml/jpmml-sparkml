@@ -104,9 +104,9 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		MiningFunction miningFunction = getMiningFunction();
 		switch(miningFunction){
 			case CLASSIFICATION:
-				CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+				CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
-				SchemaUtil.checkSize(2, categoricalLabel);
+				SchemaUtil.checkCardinality(2, categoricalLabel);
 
 				targetCategory = categoricalLabel.getValue(1);
 				break;
@@ -116,7 +116,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 		List<Double> featureCoefficients = VectorUtil.toList(model.coefficients());
 
-		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), null, null, null)
+		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));

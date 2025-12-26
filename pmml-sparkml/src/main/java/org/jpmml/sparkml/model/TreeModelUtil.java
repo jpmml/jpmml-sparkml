@@ -124,7 +124,7 @@ public class TreeModelUtil {
 		if(model instanceof DecisionTreeClassificationModel){
 			ScoreEncoder scoreEncoder = new ScoreEncoder(){
 
-				private CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+				private CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
 
 				@Override
@@ -184,7 +184,7 @@ public class TreeModelUtil {
 	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(MiningFunction miningFunction, ScoreEncoder scoreEncoder, M model, PredicateManager predicateManager, Schema schema){
 		Node root = encodeNode(True.INSTANCE, scoreEncoder, model.rootNode(), predicateManager, new CategoryManager(), schema);
 
-		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
+		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
 
 		return treeModel;

@@ -64,7 +64,7 @@ public class GBTClassificationModelConverter extends ProbabilisticClassification
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, segmentSchema);
 
-		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema.getLabel()))
+		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(segmentSchema))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, Segmentation.MissingPredictionTreatment.RETURN_MISSING, treeModels, Doubles.asList(model.treeWeights())))
 			.setOutput(ModelUtil.createPredictedOutput("gbtValue", OpType.CONTINUOUS, DataType.DOUBLE));
 

@@ -96,7 +96,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 			Feature labelFeature = FeatureUtil.findLabelFeature(features, scalarLabel);
 			if(labelFeature != null){
-				throw new IllegalArgumentException("Label column '" + scalarLabel.getName() + "' is contained in the list of feature columns");
+				throw new IllegalArgumentException("Label column \'" + scalarLabel.getName() + "\' is contained in the list of feature columns");
 			}
 		}
 	}

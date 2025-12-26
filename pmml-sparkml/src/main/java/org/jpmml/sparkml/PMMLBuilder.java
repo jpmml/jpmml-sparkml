@@ -239,9 +239,9 @@ public class PMMLBuilder {
 
 				switch(usageType){
 					case ACTIVE:
-						String name = miningField.getName();
+						String fieldName = miningField.requireName();
 
-						inputColumns.add(name);
+						inputColumns.add(fieldName);
 						break;
 					default:
 						break;

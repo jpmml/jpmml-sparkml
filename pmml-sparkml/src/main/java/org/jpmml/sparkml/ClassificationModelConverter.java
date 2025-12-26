@@ -77,9 +77,9 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 	public void checkSchema(Schema schema){
 		super.checkSchema(schema);
 
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
-		SchemaUtil.checkSize(getNumberOfClasses(), categoricalLabel);
+		SchemaUtil.checkCardinality(getNumberOfClasses(), categoricalLabel);
 	}
 
 	@Override
