@@ -32,6 +32,7 @@ import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
@@ -78,13 +79,13 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 			case ASSOCIATION_RULES:
 			case CLUSTERING:
 				if(label != null){
-					throw new IllegalArgumentException("Expected no label, got " + label);
+					throw new SchemaException("Expected no label, got " + label);
 				}
 				break;
 			case CLASSIFICATION:
 			case REGRESSION:
 				if(label == null){
-					throw new IllegalArgumentException("Expected a label, got no label");
+					throw new SchemaException("Expected a label, got no label");
 				}
 				break;
 			default:

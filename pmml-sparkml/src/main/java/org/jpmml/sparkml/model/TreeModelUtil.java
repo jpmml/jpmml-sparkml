@@ -54,6 +54,8 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaException;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ScoreDistributionManager;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
@@ -283,12 +285,11 @@ public class TreeModelUtil {
 				if(feature instanceof CategoricalFeature){
 					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
+					SchemaUtil.checkCardinality(leftCategories.length + rightCategories.length, categoricalFeature);
+
 					String name = categoricalFeature.getName();
 
 					List<?> values = categoricalFeature.getValues();
-					if(values.size() != (leftCategories.length + rightCategories.length)){
-						throw new IllegalArgumentException();
-					}
 
 					java.util.function.Predicate<Object> valueFilter = categoryManager.getValueFilter(name);
 
@@ -303,7 +304,7 @@ public class TreeModelUtil {
 				} else
 
 				{
-					throw new IllegalArgumentException();
+					throw new SchemaException("Expected a categorical or categorical-like feature, got " + feature);
 				}
 			} else
 

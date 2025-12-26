@@ -32,9 +32,14 @@ import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 
+/**
+ * @see StringIndexerModelConverter
+ */
 public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<InvalidCategoryTransformer> {
 
 	public InvalidCategoryTransformerConverter(InvalidCategoryTransformer transformer){
@@ -54,7 +59,7 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
 			if(!(feature instanceof CategoricalFeature)){
-				throw new IllegalArgumentException();
+				throw new SchemaException("Expected a categorical feature, got " + feature);
 			}
 
 			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
@@ -62,22 +67,14 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			Field<?> field = categoricalFeature.getField();
 			List<?> values = categoricalFeature.getValues();
 
-			Object invalidCategory;
-
-			if(!values.isEmpty()){
-				invalidCategory = values.get(values.size() - 1);
-			} else
-
-			{
-				throw new IllegalArgumentException();
-			} // End if
+			Object invalidCategory = values.get(values.size() - 1);
 
 			if(Objects.equals(invalidCategory, "-999") || Objects.equals(invalidCategory, "__unknown")){
 				values = values.subList(0, values.size() - 1);
 			} else
 
 			{
-				throw new IllegalArgumentException();
+				throw new SparkMLException("Expected \'-999\' or \'__unknown\' as the last category level, got " + invalidCategory);
 			} // End if
 
 			if(field instanceof DataField){
@@ -94,15 +91,9 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 
 				List<Expression> expressions = apply.getExpressions();
 
-				if(!expressions.isEmpty()){
-					Constant constant = (Constant)expressions.remove(expressions.size() - 1);
+				Constant constant = (Constant)expressions.remove(expressions.size() - 1);
 
-					if(!Objects.equals(invalidCategory, constant.getValue())){
-						throw new IllegalArgumentException();
-					}
-				} else
-
-				{
+				if(!Objects.equals(invalidCategory, constant.getValue())){
 					throw new IllegalArgumentException();
 				}
 			} else

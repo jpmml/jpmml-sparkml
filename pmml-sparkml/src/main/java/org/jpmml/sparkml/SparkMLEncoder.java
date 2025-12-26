@@ -52,6 +52,7 @@ import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.ObjectFeature;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.TypeUtil;
 import org.jpmml.converter.ValueUtil;
@@ -322,7 +323,7 @@ public class SparkMLEncoder extends ModelEncoder {
 			case BOOLEAN:
 				return FeatureUtil.createFeature(field, this);
 			default:
-				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
+				throw new SchemaException("Data type " + dataType + " is not supported");
 		}
 	}
 
@@ -374,7 +375,7 @@ public class SparkMLEncoder extends ModelEncoder {
 			case BOOLEAN:
 				return Boolean.valueOf(string);
 			default:
-				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
+				throw new SchemaException("Data type " + dataType + " is not supported");
 		}
 	}
 }
