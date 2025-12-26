@@ -140,7 +140,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "poisson":
 				return GeneralRegressionModel.Distribution.POISSON;
 			default:
-				throw new SparkMLException("Distribution family " + family + " is not supported");
+				throw new SparkMLException("Distribution family \'" + family + "\' is not supported");
 		}
 	}
 
@@ -163,7 +163,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "sqrt":
 				return GeneralRegressionModel.LinkFunction.POWER;
 			default:
-				throw new SparkMLException("Link function " + link + " is not supported");
+				throw new SparkMLException("Link function \'" + link + "\' is not supported");
 		}
 	}
 

@@ -67,7 +67,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 			} else
 
 			{
-				throw new SparkMLException("Expected a subclass of " + FeatureConverter.class.getName() + ", got " + (converter != null ? ("class " + (converter.getClass()).getName()) : null));
+				throw new SparkMLException("Expected a \'" + FeatureConverter.class.getName() + "\' subclass, got " + (converter != null ? ("class \'" + (converter.getClass()).getName() + "\'") : null));
 			}
 		}
 	}

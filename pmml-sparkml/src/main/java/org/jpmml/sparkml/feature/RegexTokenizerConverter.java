@@ -50,7 +50,7 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 		} // End if
 
 		if(transformer.getMinTokenLength() != 1){
-			throw new SparkMLException("Expected 1 as minimum token length, got " + transformer.getMinTokenLength() + " as minimum token length");
+			throw new SparkMLException("Expected 1 as minimum token length, got " + transformer.getMinTokenLength());
 		}
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

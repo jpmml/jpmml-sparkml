@@ -674,7 +674,7 @@ public class ExpressionTranslator {
 			throw new SparkMLException("Expected " + dataType.value() + " literal, got " + (constant.getDataType()).value() + " literal");
 		}
 
-		throw new SparkMLException("Expected a literal");
+		throw new SparkMLException("Expected a literal, got expression");
 	}
 
 	static
@@ -695,7 +695,7 @@ public class ExpressionTranslator {
 			return null;
 		}
 
-		return "Spark SQL function \'" + String.valueOf(expression) + "\' (class " + (expression.getClass()).getName() + ") is not supported";
+		return "Spark SQL function \'" + String.valueOf(expression) + "\' (class \'" + (expression.getClass()).getName() + "\') is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");

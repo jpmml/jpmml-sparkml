@@ -39,7 +39,7 @@ public class NaiveBayesModelConverter extends ProbabilisticClassificationModelCo
 			case "multinomial":
 				break;
 			default:
-				throw new SparkMLException("Model type " + modelType + " is not supported");
+				throw new SparkMLException("Model type \'" + modelType + "\' is not supported");
 		}
 
 		if(model.isSet(model.thresholds())){

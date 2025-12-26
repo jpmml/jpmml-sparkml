@@ -226,7 +226,7 @@ public class TreeModelUtil {
 					BooleanFeature booleanFeature = (BooleanFeature)feature;
 
 					if(threshold != 0.5d){
-						throw new SparkMLException("Invalid split threshold value " + threshold + " for a boolean feature");
+						throw new SparkMLException("Expected 0.5 threshold value, got " + threshold);
 					}
 
 					leftPredicate = predicateManager.createSimplePredicate(booleanFeature, SimplePredicate.Operator.EQUAL, booleanFeature.getValue(0));
@@ -304,7 +304,7 @@ public class TreeModelUtil {
 				} else
 
 				{
-					throw new SchemaException("Expected a categorical or categorical-like feature, got " + feature);
+					throw new SchemaException("Expected a binary or categorical feature, got " + feature);
 				}
 			} else
 

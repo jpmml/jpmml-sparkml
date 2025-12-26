@@ -74,7 +74,7 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			} else
 
 			{
-				throw new SparkMLException("Expected \'-999\' or \'__unknown\' as the last category level, got " + invalidCategory);
+				throw new SparkMLException("Expected \'-999\' or \'__unknown\' as the last category level, got \'" + invalidCategory + "\'");
 			} // End if
 
 			if(field instanceof DataField){

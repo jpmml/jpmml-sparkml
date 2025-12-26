@@ -58,7 +58,7 @@ public class GBTClassificationModelConverter extends ProbabilisticClassification
 			case "logistic":
 				break;
 			default:
-				throw new SparkMLException("Loss function " + lossType + " is not supported");
+				throw new SparkMLException("Loss function \'" + lossType + "\' is not supported");
 		}
 
 		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);

@@ -100,7 +100,7 @@ public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 			case "median":
 				return MissingValueTreatmentMethod.AS_MEDIAN;
 			default:
-				throw new SparkMLException("Strategy " + strategy + " is not supported");
+				throw new SparkMLException("Imputation strategy \'" + strategy + "\' is not supported");
 		}
 	}
 }

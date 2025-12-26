@@ -93,7 +93,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 						}
 						break;
 					default:
-						throw new SparkMLException("Invalid value handling strategy " + handleInvalid + " is not supported");
+						throw new SparkMLException("Invalid value handling strategy \'" + handleInvalid + "\' is not supported");
 				}
 
 				encoder.addDecorator(dataField, invalidValueDecorator);
@@ -123,7 +123,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 						}
 						break;
 					default:
-						throw new SparkMLException("Invalid value handling strategy " + handleInvalid + " is not supported");
+						throw new SparkMLException("Invalid value handling strategy \'" + handleInvalid + "\' is not supported");
 				}
 			} else
 

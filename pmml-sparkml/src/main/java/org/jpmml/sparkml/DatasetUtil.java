@@ -255,7 +255,7 @@ public class DatasetUtil {
 		} else
 
 		{
-			throw new SparkMLException("Expected atomic data type, got " + sparkDataType.typeName() + " data type");
+			throw new SparkMLException("Expected atomic data type, got " + sparkDataType.typeName());
 		}
 	}
 
@@ -279,7 +279,7 @@ public class DatasetUtil {
 		} else
 
 		{
-			throw new SparkMLException("Expected string, integral, fractional or boolean data type, got " + atomicType.typeName() + " data type");
+			throw new SparkMLException("Expected string, integral, fractional or boolean data type, got " + atomicType.typeName());
 		}
 	}
 
@@ -300,7 +300,7 @@ public class DatasetUtil {
 		} else
 
 		{
-			throw new SparkMLException("Expected float or double data type, got " + fractionalType.typeName() + " data type");
+			throw new SparkMLException("Expected float or double data type, got " + fractionalType.typeName());
 		}
 	}
 
@@ -312,7 +312,7 @@ public class DatasetUtil {
 		} else
 
 		{
-			throw new SparkMLException("Expected vector data type, got " + userDefinedType.typeName() + " data type");
+			throw new SparkMLException("Expected vector data type, got " + userDefinedType.typeName());
 		}
 	}
 

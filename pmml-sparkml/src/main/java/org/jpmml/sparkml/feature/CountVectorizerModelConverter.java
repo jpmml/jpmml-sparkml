@@ -83,7 +83,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 					tokenRE = "(\\W+)(" + JOINER.join(stopWordSet) + ")(\\W+)";
 					break;
 				default:
-					throw new SparkMLException("Expected \"\\s+\" or \"\\W+\" as splitter regex pattern, got \"" + wordSeparatorRE + "\"");
+					throw new SparkMLException("Expected \'\\s+\' or \'\\W+\' as splitter regex pattern, got \'" + wordSeparatorRE + "\'");
 			}
 
 			Map<String, List<String>> data = new LinkedHashMap<>();
@@ -110,7 +110,7 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 			String term = vocabulary[i];
 
 			if(TermUtil.hasPunctuation(term)){
-				throw new SparkMLException("Punctuated vocabulary terms (" + term + ") are not supported");
+				throw new SparkMLException("Punctuated vocabulary terms (\'" + term + "\') are not supported");
 			}
 
 			result.add(new TermFeature(encoder, defineFunction, documentFeature, term));

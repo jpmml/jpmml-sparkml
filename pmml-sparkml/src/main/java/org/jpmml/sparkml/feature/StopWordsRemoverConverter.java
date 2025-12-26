@@ -64,7 +64,7 @@ public class StopWordsRemoverConverter extends MultiFeatureConverter<StopWordsRe
 				} // End if
 
 				if(TermUtil.hasPunctuation(stopWord)){
-					throw new SparkMLException("Punctuated stop words (" + stopWord + ") are not supported");
+					throw new SparkMLException("Punctuated stop words (\'" + stopWord + "\') are not supported");
 				}
 
 				stopWordSet.add(stopWord);

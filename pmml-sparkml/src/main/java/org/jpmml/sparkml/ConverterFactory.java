@@ -52,7 +52,7 @@ public class ConverterFactory {
 
 		Class<? extends TransformerConverter<?>> converterClazz = ConverterFactory.converters.get(clazz);
 		if(converterClazz == null){
-			throw new SparkMLException("Transformer class " + clazz.getName() + " is not supported");
+			throw new SparkMLException("Transformer class \'" + clazz.getName() + "\' is not supported");
 		}
 
 		TransformerConverter<?> converter;
@@ -62,7 +62,7 @@ public class ConverterFactory {
 
 			converter = converterConstructor.newInstance(transformer);
 		} catch(ReflectiveOperationException roe){
-			throw new SparkMLException("Transformer class " + clazz.getName() + " is not supported", roe);
+			throw new SparkMLException("Transformer class \'" + clazz.getName() + "\' is not supported", roe);
 		}
 
 		if(converter != null){
@@ -106,7 +106,7 @@ public class ConverterFactory {
 		int[] version = parseVersion(sparkContext.version());
 
 		if(!Arrays.equals(ConverterFactory.VERSION, version)){
-			throw new SparkMLException("Expected Apache Spark ML version " + formatVersion(ConverterFactory.VERSION) + ", got version " + formatVersion(version) + " (" + sparkContext.version() + ")");
+			throw new SparkMLException("Expected Apache Spark ML version \'" + formatVersion(ConverterFactory.VERSION) + "\', got \'" + formatVersion(version) + "\' (" + sparkContext.version() + ")");
 		}
 	}
 
@@ -117,7 +117,7 @@ public class ConverterFactory {
 		String name = _package.getName();
 
 		if(!(name).equals("org.jpmml.sparkml")){
-			throw new SparkMLException("Expected JPMML-SparkML converter classes to have package name prefix \'org.jpmml.sparkml\', got package name prefix \'" + name + "\'");
+			throw new SparkMLException("Expected JPMML-SparkML converter classes to have package name prefix \'org.jpmml.sparkml\', got \'" + name + "\'");
 		}
 	}
 
@@ -174,8 +174,8 @@ public class ConverterFactory {
 			}
 
 			if(!(Transformer.class).isAssignableFrom(clazz)){
-				throw new SparkMLException("Transformer class " + clazz.getName() + " is not a subclass of " + Transformer.class.getName());
-			} // End if
+				throw new SparkMLException("Transformer class \'" + clazz.getName() + "\' is not a subclass of \'" + Transformer.class.getName() + "\'");
+			}
 
 			Class<?> converterClazz;
 
@@ -188,7 +188,7 @@ public class ConverterFactory {
 			}
 
 			if(!(TransformerConverter.class).isAssignableFrom(converterClazz)){
-				throw new SparkMLException("Transformer converter class " + converterClazz.getName() + " is not a subclass of " + TransformerConverter.class.getName());
+				throw new SparkMLException("Transformer converter class \'" + converterClazz.getName() + "\' is not a subclass of \'" + TransformerConverter.class.getName() + "\'");
 			}
 
 			ConverterFactory.converters.put((Class)clazz, (Class)converterClazz);
