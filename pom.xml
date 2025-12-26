@@ -57,7 +57,7 @@
 		<jpmml-converter.version>1.6.7</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.6</jpmml-evaluator.version>
 		<jpmml-lightgbm.version>1.6.3</jpmml-lightgbm.version>
-		<jpmml-xgboost.version>1.9.3</jpmml-xgboost.version>
+		<jpmml-xgboost.version>1.9.4</jpmml-xgboost.version>
 		<spark.version>3.4.0</spark.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.1.0]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
