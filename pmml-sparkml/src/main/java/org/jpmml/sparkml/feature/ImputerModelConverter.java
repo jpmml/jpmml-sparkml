@@ -34,6 +34,7 @@ import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.MissingValueDecorator;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 
 public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 
@@ -53,7 +54,7 @@ public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 
 		List<Row> surrogateRows = surrogateDF.collectAsList();
 		if(surrogateRows.size() != 1){
-			throw new IllegalArgumentException();
+			throw new SparkMLException("Expected one surrogate row, got " + surrogateRows.size());
 		}
 
 		Row surrogateRow = surrogateRows.get(0);
@@ -99,7 +100,7 @@ public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 			case "median":
 				return MissingValueTreatmentMethod.AS_MEDIAN;
 			default:
-				throw new IllegalArgumentException(strategy);
+				throw new SparkMLException("Imputation strategy \'" + strategy + "\' is not supported");
 		}
 	}
 }

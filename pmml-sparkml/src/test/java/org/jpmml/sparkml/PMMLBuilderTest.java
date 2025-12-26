@@ -41,7 +41,7 @@ public class PMMLBuilderTest {
 			PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, model);
 
 			fail();
-		} catch(IllegalArgumentException iae){
+		} catch(SparkMLException se){
 			// Ignored
 		}
 
@@ -49,8 +49,8 @@ public class PMMLBuilderTest {
 
 		try {
 			PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel);
-		} catch(IllegalArgumentException iae){
-			throw iae;
+		} catch(SparkMLException se){
+			throw se;
 		}
 	}
 }

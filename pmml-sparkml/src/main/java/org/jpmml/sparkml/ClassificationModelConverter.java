@@ -47,6 +47,7 @@ import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
@@ -77,9 +78,9 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 	public void checkSchema(Schema schema){
 		super.checkSchema(schema);
 
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
-		SchemaUtil.checkSize(getNumberOfClasses(), categoricalLabel);
+		SchemaUtil.checkCardinality(getNumberOfClasses(), categoricalLabel);
 	}
 
 	@Override
@@ -156,7 +157,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 		} else
 
 		{
-			throw new IllegalArgumentException("Expected a categorical or categorical-like continuous feature, got " + feature);
+			throw new SchemaException("Expected a categorical or categorical-like continuous feature, got " + feature);
 		}
 	}
 }

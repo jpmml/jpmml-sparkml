@@ -51,7 +51,7 @@ public class GBTRegressionModelConverter extends RegressionModelConverter<GBTReg
 
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, schema);
 
-		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(schema.getLabel()))
+		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(schema))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.WEIGHTED_SUM, Segmentation.MissingPredictionTreatment.RETURN_MISSING, treeModels, Doubles.asList(model.treeWeights())));
 
 		return miningModel;

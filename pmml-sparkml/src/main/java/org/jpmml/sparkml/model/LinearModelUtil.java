@@ -47,7 +47,7 @@ public class LinearModelUtil {
 
 	static
 	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createRegression(C converter, Vector coefficients, double intercept, Schema schema){
-		ContinuousLabel continuousLabel = (ContinuousLabel)schema.getLabel();
+		ContinuousLabel continuousLabel = schema.requireContinuousLabel();
 		List<? extends Feature> features = schema.getFeatures();
 
 		String representation = (String)converter.getOption(HasRegressionTableOptions.OPTION_REPRESENTATION, null);
@@ -67,7 +67,7 @@ public class LinearModelUtil {
 
 	static
 	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createBinaryLogisticClassification(C converter, Vector coefficients, double intercept, Schema schema){
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 		List<? extends Feature> features = schema.getFeatures();
 
 		String representation = (String)converter.getOption(HasRegressionTableOptions.OPTION_REPRESENTATION, null);
@@ -90,7 +90,7 @@ public class LinearModelUtil {
 
 	static
 	public <C extends ModelConverter<?> & HasRegressionTableOptions> Model createSoftmaxClassification(C converter, Matrix coefficients, Vector intercepts, Schema schema){
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 		List<? extends Feature> features = schema.getFeatures();
 
 		MatrixUtil.checkRows(categoricalLabel.size(), coefficients);

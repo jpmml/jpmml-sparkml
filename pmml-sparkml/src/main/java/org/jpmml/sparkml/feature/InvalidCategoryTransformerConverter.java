@@ -19,12 +19,9 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-import com.google.common.collect.ListMultimap;
 import org.dmg.pmml.Apply;
 import org.dmg.pmml.Constant;
 import org.dmg.pmml.DataField;
@@ -32,14 +29,17 @@ import org.dmg.pmml.DerivedField;
 import org.dmg.pmml.Expression;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
-import org.dmg.pmml.Model;
 import org.jpmml.converter.CategoricalFeature;
-import org.jpmml.converter.Decorator;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 
+/**
+ * @see StringIndexerModelConverter
+ */
 public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<InvalidCategoryTransformer> {
 
 	public InvalidCategoryTransformerConverter(InvalidCategoryTransformer transformer){
@@ -59,7 +59,7 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
 			if(!(feature instanceof CategoricalFeature)){
-				throw new IllegalArgumentException();
+				throw new SchemaException("Expected a categorical feature, got " + feature);
 			}
 
 			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
@@ -67,28 +67,21 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			Field<?> field = categoricalFeature.getField();
 			List<?> values = categoricalFeature.getValues();
 
-			Object invalidCategory;
-
-			if(!values.isEmpty()){
-				invalidCategory = values.get(values.size() - 1);
-			} else
-
-			{
-				throw new IllegalArgumentException();
-			} // End if
+			Object invalidCategory = values.get(values.size() - 1);
 
 			if(Objects.equals(invalidCategory, "-999") || Objects.equals(invalidCategory, "__unknown")){
 				values = values.subList(0, values.size() - 1);
 			} else
 
 			{
-				throw new IllegalArgumentException();
+				throw new SparkMLException("Expected \'-999\' or \'__unknown\' as the last category level, got \'" + invalidCategory + "\'");
 			} // End if
 
 			if(field instanceof DataField){
 				DataField dataField = (DataField)field;
 
-				replaceDecorator(dataField, new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_MISSING, null), encoder);
+				encoder.removeDecorator(dataField, InvalidValueDecorator.class);
+				encoder.addDecorator(dataField, new InvalidValueDecorator(InvalidValueTreatmentMethod.AS_MISSING, null));
 			} else
 
 			if(field instanceof DerivedField){
@@ -98,15 +91,9 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 
 				List<Expression> expressions = apply.getExpressions();
 
-				if(!expressions.isEmpty()){
-					Constant constant = (Constant)expressions.remove(expressions.size() - 1);
+				Constant constant = (Constant)expressions.remove(expressions.size() - 1);
 
-					if(!Objects.equals(invalidCategory, constant.getValue())){
-						throw new IllegalArgumentException();
-					}
-				} else
-
-				{
+				if(!Objects.equals(invalidCategory, constant.getValue())){
 					throw new IllegalArgumentException();
 				}
 			} else
@@ -119,28 +106,5 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 		}
 
 		return result;
-	}
-
-	static
-	private void replaceDecorator(Field<?> field, Decorator decorator, SparkMLEncoder encoder){
-		Map<Model, ListMultimap<String, Decorator>> modelDecorators = encoder.getDecorators();
-
-		ListMultimap<String, Decorator> decorators = modelDecorators.get(null);
-		if(decorators != null){
-			List<Decorator> fieldDecorators = decorators.get(field.requireName());
-
-			if(fieldDecorators != null && !fieldDecorators.isEmpty()){
-
-				for(Iterator<Decorator> it = fieldDecorators.iterator(); it.hasNext(); ){
-					Decorator fieldDecorator = it.next();
-
-					if(Objects.equals(fieldDecorator.getClass(), decorator.getClass())){
-						it.remove();
-					}
-				}
-			}
-		}
-
-		decorators.put(field.requireName(), decorator);
 	}
 }

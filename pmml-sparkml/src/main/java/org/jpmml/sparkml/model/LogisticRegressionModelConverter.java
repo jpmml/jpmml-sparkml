@@ -34,7 +34,7 @@ public class LogisticRegressionModelConverter extends ProbabilisticClassificatio
 	public Model encodeModel(Schema schema){
 		LogisticRegressionModel model = getModel();
 
-		CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
 		if(categoricalLabel.size() == 2){
 			Model linearModel = LinearModelUtil.createBinaryLogisticClassification(this, model.coefficients(), model.intercept(), schema)

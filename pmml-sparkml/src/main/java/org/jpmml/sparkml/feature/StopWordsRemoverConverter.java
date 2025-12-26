@@ -27,6 +27,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 import org.jpmml.sparkml.TermUtil;
 
 public class StopWordsRemoverConverter extends MultiFeatureConverter<StopWordsRemover> {
@@ -63,7 +64,7 @@ public class StopWordsRemoverConverter extends MultiFeatureConverter<StopWordsRe
 				} // End if
 
 				if(TermUtil.hasPunctuation(stopWord)){
-					throw new IllegalArgumentException("Punctuated stop words (" + stopWord + ") are not supported");
+					throw new SparkMLException("Punctuated stop words (\'" + stopWord + "\') are not supported");
 				}
 
 				stopWordSet.add(stopWord);

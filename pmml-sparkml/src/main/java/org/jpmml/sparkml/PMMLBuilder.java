@@ -89,7 +89,7 @@ public class PMMLBuilder {
 	}
 
 	public PMMLBuilder(StructType schema, PipelineStage pipelineStage){
-		throw new IllegalArgumentException("Expected a fitted pipeline model (class " + PipelineModel.class.getName() + "), got a pipeline stage (" + (pipelineStage != null ? ("class " + (pipelineStage.getClass()).getName()) : null) + ")");
+		throw new SparkMLException("Expected a fitted pipeline model (class \'" + PipelineModel.class.getName() + "\'), got a pipeline stage (" + (pipelineStage != null ? ("class \'" + (pipelineStage.getClass()).getName() + "\'") : null) + ")");
 	}
 
 	public PMML build(){
@@ -181,7 +181,7 @@ public class PMMLBuilder {
 			} else
 
 			{
-				throw new IllegalArgumentException("Expected a subclass of " + FeatureConverter.class.getName() + " or " + ModelConverter.class.getName() + ", got " + (converter != null ? ("class " + (converter.getClass()).getName()) : null));
+				throw new SparkMLException("Expected a \'" + FeatureConverter.class.getName() + "\' or \'" + ModelConverter.class.getName() + "\' subclass, got " + (converter != null ? ("\'" + (converter.getClass()).getName() + "\'") : null));
 			}
 		}
 
@@ -239,9 +239,9 @@ public class PMMLBuilder {
 
 				switch(usageType){
 					case ACTIVE:
-						String name = miningField.getName();
+						String fieldName = miningField.requireName();
 
-						inputColumns.add(name);
+						inputColumns.add(fieldName);
 						break;
 					default:
 						break;

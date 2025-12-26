@@ -179,7 +179,7 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(formatMessage(binaryMathExpression));
+				throw new SparkMLException(formatMessage(binaryMathExpression));
 			}
 
 			return ExpressionUtil.createApply(function, translateInternal(left), translateInternal(right));
@@ -205,7 +205,7 @@ public class ExpressionTranslator {
 						function = PMMLFunctions.OR;
 						break;
 					default:
-						throw new IllegalArgumentException(formatMessage(binaryOperator));
+						throw new SparkMLException(formatMessage(binaryOperator));
 				}
 			} else
 
@@ -226,7 +226,7 @@ public class ExpressionTranslator {
 						function = PMMLFunctions.SUBTRACT;
 						break;
 					default:
-						throw new IllegalArgumentException(formatMessage(binaryArithmetic));
+						throw new SparkMLException(formatMessage(binaryArithmetic));
 				}
 			} else
 
@@ -250,12 +250,12 @@ public class ExpressionTranslator {
 						function = PMMLFunctions.LESSOREQUAL;
 						break;
 					default:
-						throw new IllegalArgumentException(formatMessage(binaryComparison));
+						throw new SparkMLException(formatMessage(binaryComparison));
 				}
 			} else
 
 			{
-				throw new IllegalArgumentException(formatMessage(binaryOperator));
+				throw new SparkMLException(formatMessage(binaryOperator));
 			}
 
 			return ExpressionUtil.createApply(function, translateInternal(left), translateInternal(right));
@@ -474,7 +474,7 @@ public class ExpressionTranslator {
 			Expression srcStr = stringTrim.srcStr();
 			Option<Expression> trimStr = stringTrim.trimStr();
 			if(trimStr.isDefined()){
-				throw new IllegalArgumentException();
+				throw new SparkMLException("Argument \'trimStr\' is not supported");
 			}
 
 			return ExpressionUtil.createApply(PMMLFunctions.TRIMBLANKS, translateInternal(srcStr));
@@ -489,7 +489,7 @@ public class ExpressionTranslator {
 
 			int posValue = ValueUtil.asInt((Number)pos.value());
 			if(posValue <= 0){
-				throw new IllegalArgumentException("Expected absolute start position, got relative start position " + (pos));
+				throw new SparkMLException("Expected absolute start position, got relative start position " + (pos));
 			}
 
 			int lenValue = ValueUtil.asInt((Number)len.value());
@@ -615,12 +615,12 @@ public class ExpressionTranslator {
 			} else
 
 			{
-				throw new IllegalArgumentException(formatMessage(unaryExpression));
+				throw new SparkMLException(formatMessage(unaryExpression));
 			}
 		} else
 
 		{
-			throw new IllegalArgumentException(formatMessage(expression));
+			throw new SparkMLException(formatMessage(expression));
 		}
 	}
 
@@ -653,15 +653,27 @@ public class ExpressionTranslator {
 
 	static
 	private Constant transformString(org.dmg.pmml.Expression pmmlExpression, Function<String, String> function){
-		Constant constant = (Constant)pmmlExpression;
-
-		if(constant.getDataType() != DataType.STRING){
-			throw new IllegalArgumentException();
-		}
+		Constant constant = asLiteral(pmmlExpression, DataType.STRING);
 
 		constant.setValue(function.apply((String)constant.getValue()));
 
 		return constant;
+	}
+
+	static
+	private Constant asLiteral(org.dmg.pmml.Expression pmmlExpression, DataType dataType){
+
+		if(pmmlExpression instanceof Constant){
+			Constant constant = (Constant)pmmlExpression;
+
+			if(constant.getDataType() == dataType){
+				return constant;
+			}
+
+			throw new SparkMLException("Expected " + dataType.value() + " literal, got " + (constant.getDataType()).value() + " literal");
+		}
+
+		throw new SparkMLException("Expected a literal, got expression");
 	}
 
 	static
@@ -682,7 +694,7 @@ public class ExpressionTranslator {
 			return null;
 		}
 
-		return "Spark SQL function \'" + String.valueOf(expression) + "\' (class " + (expression.getClass()).getName() + ") is not supported";
+		return "Spark SQL function \'" + String.valueOf(expression) + "\' (class \'" + (expression.getClass()).getName() + "\') is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");

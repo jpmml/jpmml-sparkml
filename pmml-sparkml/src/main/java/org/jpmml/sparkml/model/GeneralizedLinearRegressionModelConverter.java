@@ -38,6 +38,7 @@ import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.RegressionModelConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 import org.jpmml.sparkml.VectorUtil;
 
 public class GeneralizedLinearRegressionModelConverter extends RegressionModelConverter<GeneralizedLinearRegressionModel> implements HasRegressionTableOptions {
@@ -104,9 +105,9 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		MiningFunction miningFunction = getMiningFunction();
 		switch(miningFunction){
 			case CLASSIFICATION:
-				CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+				CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
-				SchemaUtil.checkSize(2, categoricalLabel);
+				SchemaUtil.checkCardinality(2, categoricalLabel);
 
 				targetCategory = categoricalLabel.getValue(1);
 				break;
@@ -116,7 +117,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 
 		List<Double> featureCoefficients = VectorUtil.toList(model.coefficients());
 
-		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), null, null, null)
+		GeneralRegressionModel generalRegressionModel = new GeneralRegressionModel(GeneralRegressionModel.ModelType.GENERALIZED_LINEAR, miningFunction, ModelUtil.createMiningSchema(schema), null, null, null)
 			.setDistribution(parseFamily(model.getFamily()))
 			.setLinkFunction(parseLinkFunction(model.getLink()))
 			.setLinkParameter(parseLinkParameter(model.getLink()));
@@ -139,7 +140,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "poisson":
 				return GeneralRegressionModel.Distribution.POISSON;
 			default:
-				throw new IllegalArgumentException("Distribution family " + family + " is not supported");
+				throw new SparkMLException("Distribution family \'" + family + "\' is not supported");
 		}
 	}
 
@@ -162,7 +163,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "sqrt":
 				return GeneralRegressionModel.LinkFunction.POWER;
 			default:
-				throw new IllegalArgumentException("Link function " + link + " is not supported");
+				throw new SparkMLException("Link function \'" + link + "\' is not supported");
 		}
 	}
 

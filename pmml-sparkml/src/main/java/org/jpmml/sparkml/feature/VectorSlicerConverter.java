@@ -24,6 +24,7 @@ import org.apache.spark.ml.feature.VectorSlicer;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 
 public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 
@@ -37,7 +38,7 @@ public class VectorSlicerConverter extends FeatureConverter<VectorSlicer> {
 
 		String[] names = transformer.getNames();
 		if(names != null && names.length > 0){
-			throw new IllegalArgumentException("Expected index mode, got name mode");
+			throw new SparkMLException("Expected index mode, got name mode");
 		}
 
 		return encoder.getFeatures(transformer.getInputCol(), transformer.getIndices());

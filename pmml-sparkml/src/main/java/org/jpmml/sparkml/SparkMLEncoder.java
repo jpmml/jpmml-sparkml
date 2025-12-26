@@ -52,6 +52,7 @@ import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.ModelEncoder;
 import org.jpmml.converter.ObjectFeature;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.TypeUtil;
 import org.jpmml.converter.ValueUtil;
@@ -219,7 +220,7 @@ public class SparkMLEncoder extends ModelEncoder {
 				Feature feature = features.get(i);
 
 				if(!(feature.getName()).equals(existingFeature.getName())){
-					throw new IllegalArgumentException("Expected feature column '" + existingFeature.getName() + "', got feature column '" + feature.getName() + "'");
+					throw new SparkMLException("Expected \'" + existingFeature.getName() + "\' feature column, got \'" + feature.getName() + "\'");
 				}
 			}
 		}
@@ -241,7 +242,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(fieldNames != null){
 
 			if(fieldNames.size() != 1){
-				throw new IllegalArgumentException("Expected 1 field name for column \'" + column + "\', got " + fieldNames.size() + " field names");
+				throw new SparkMLException("Expected one field name for column \'" + column + "\', got " + fieldNames.size());
 			}
 
 			return Iterables.getOnlyElement(fieldNames);
@@ -268,7 +269,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(fieldNames != null){
 
 			if(fieldNames.size() != size){
-				throw new IllegalArgumentException("Expected " + size + " field name(s) for column \'" + column +"\', got " + fieldNames.size() + " field name(s)");
+				throw new SparkMLException("Expected " + size + " field name(s) for column \'" + column +"\', got " + fieldNames.size());
 			}
 
 			return fieldNames;
@@ -322,7 +323,7 @@ public class SparkMLEncoder extends ModelEncoder {
 			case BOOLEAN:
 				return FeatureUtil.createFeature(field, this);
 			default:
-				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
+				throw new SchemaException("Expected primitive data type, got " + dataType.value());
 		}
 	}
 
@@ -374,7 +375,7 @@ public class SparkMLEncoder extends ModelEncoder {
 			case BOOLEAN:
 				return Boolean.valueOf(string);
 			default:
-				throw new IllegalArgumentException("Data type " + dataType + " is not supported");
+				throw new SchemaException("Expected primitive data type, got " + dataType.value());
 		}
 	}
 }
