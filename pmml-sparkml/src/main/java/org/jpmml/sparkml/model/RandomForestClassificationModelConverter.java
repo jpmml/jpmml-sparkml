@@ -48,7 +48,7 @@ public class RandomForestClassificationModelConverter extends ProbabilisticClass
 	public MiningModel encodeModel(Schema schema){
 		List<TreeModel> treeModels = TreeModelUtil.encodeDecisionTreeEnsemble(this, schema);
 
-		MiningModel miningModel = new MiningModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema.getLabel()))
+		MiningModel miningModel = new MiningModel(MiningFunction.CLASSIFICATION, ModelUtil.createMiningSchema(schema))
 			.setSegmentation(MiningModelUtil.createSegmentation(Segmentation.MultipleModelMethod.AVERAGE, Segmentation.MissingPredictionTreatment.RETURN_MISSING, treeModels));
 
 		return miningModel;

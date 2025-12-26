@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Villu Ruusmann
+ * Copyright (c) 2020 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,17 +16,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.example;
+package org.jpmml.sparkml.feature;
 
-import java.util.Collections;
 import java.util.List;
 
-import com.beust.jcommander.converters.IParameterSplitter;
+import org.jpmml.converter.Feature;
+import org.jpmml.sparkml.FeatureConverter;
+import org.jpmml.sparkml.SparkMLEncoder;
 
-public class NullSplitter implements IParameterSplitter {
+public class VectorDensifierConverter extends FeatureConverter<VectorDensifier> {
+
+	public VectorDensifierConverter(VectorDensifier transformer){
+		super(transformer);
+	}
+
+	public VectorDensifierConverter(SparseToDenseTransformer transformer){
+		super((VectorDensifier)transformer);
+	}
 
 	@Override
-	public List<String> split(String value){
-		return Collections.singletonList(value);
+	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
+		VectorDensifier transformer = getTransformer();
+
+		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
+
+		return features;
 	}
 }

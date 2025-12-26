@@ -237,7 +237,7 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 			checkValue("SQL", "substr(\"Spark SQL\", -3)");
 
 			fail();
-		} catch(IllegalArgumentException iae){
+		} catch(SparkMLException se){
 			// Ignored
 		}
 

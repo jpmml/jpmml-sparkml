@@ -97,7 +97,7 @@ public class FeatureConverter<T extends Transformer> extends TransformerConverte
 	}
 
 	protected InOutMode getInputMode(){
-		throw new IllegalArgumentException();
+		throw new UnsupportedOperationException();
 	}
 
 	protected InOutMode getOutputMode(){

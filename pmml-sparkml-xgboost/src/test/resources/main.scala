@@ -5,7 +5,7 @@ import org.apache.spark.ml.param.shared.HasOutputCol
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.{DataType, FloatType, StructType}
 import org.jpmml.sparkml.DatasetUtil
-import org.jpmml.sparkml.feature.SparseToDenseTransformer
+import org.jpmml.sparkml.feature.VectorDensifier
 
 class XGBoostTest extends SparkMLTest {
 
@@ -36,11 +36,11 @@ class XGBoostTest extends SparkMLTest {
 		cat_encoding match {
 			case LEGACY_DIRECT_MIXED | LEGACY_OHE | MODERN_DIRECT => {
 				// java.lang.IllegalArgumentException: We've detected sparse vectors in the dataset that need conversion to dense format. 
-				val sparse2dense = new SparseToDenseTransformer()
+				val vecDensifier = new VectorDensifier()
 					.setInputCol(features.last.asInstanceOf[HasOutputCol].getOutputCol)
 					.setOutputCol("denseFeatureVec")
 
-				features :+ sparse2dense
+				features :+ vecDensifier
 			}
 			case _ => {
 				features

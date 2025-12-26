@@ -46,7 +46,7 @@ For a full list of supported transformer and estimator classes see the [`feature
 
 # Prerequisites #
 
-* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X, 3.5.X or 4.0.X.
+* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X, 3.5.X, 4.0.X or 4.1.X.
 
 # Installation #
 
@@ -72,7 +72,8 @@ Active development branches:
 |----------------------|----------------------|
 | [`3.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.0.X) | 3.4.X |
 | [`3.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.1.X) | 3.5.X |
-| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 4.0.X |
+| [`3.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.2.X) | 4.0.X |
+| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 4.1.X |
 
 Stale development branches:
 

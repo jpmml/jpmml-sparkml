@@ -33,6 +33,7 @@ import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 
 public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 
@@ -45,11 +46,11 @@ public class RegexTokenizerConverter extends FeatureConverter<RegexTokenizer> {
 		RegexTokenizer transformer = getTransformer();
 
 		if(!transformer.getGaps()){
-			throw new IllegalArgumentException("Expected splitter mode, got token matching mode");
+			throw new SparkMLException("Expected splitter mode, got token matching mode");
 		} // End if
 
 		if(transformer.getMinTokenLength() != 1){
-			throw new IllegalArgumentException("Expected 1 as minimum token length, got " + transformer.getMinTokenLength() + " as minimum token length");
+			throw new SparkMLException("Expected 1 as minimum token length, got " + transformer.getMinTokenLength());
 		}
 
 		Feature feature = encoder.getOnlyFeature(transformer.getInputCol());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Villu Ruusmann
+ * Copyright (c) 2025 Villu Ruusmann
  *
  * This file is part of JPMML-SparkML
  *
@@ -16,26 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with JPMML-SparkML.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jpmml.sparkml.feature;
+package org.jpmml.sparkml;
 
-import java.util.List;
+import org.jpmml.converter.ConversionException;
 
-import org.jpmml.converter.Feature;
-import org.jpmml.sparkml.FeatureConverter;
-import org.jpmml.sparkml.SparkMLEncoder;
+public class SparkMLException extends ConversionException {
 
-public class SparseToDenseTransformerConverter extends FeatureConverter<SparseToDenseTransformer> {
-
-	public SparseToDenseTransformerConverter(SparseToDenseTransformer transformer){
-		super(transformer);
+	public SparkMLException(String message){
+		super(message);
 	}
 
-	@Override
-	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
-		SparseToDenseTransformer transformer = getTransformer();
-
-		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
-
-		return features;
+	public SparkMLException(String message, Throwable cause){
+		super(message, cause);
 	}
 }

@@ -89,7 +89,7 @@ public class TermFeature extends Feature {
 		Feature feature = getFeature();
 		String value = getValue();
 
-		Constant constant = ExpressionUtil.createConstant(DataType.STRING, value);
+		Constant constant = ExpressionUtil.createConstant(value);
 
 		return ExpressionUtil.createApply(defineFunction, feature.ref(), constant);
 	}

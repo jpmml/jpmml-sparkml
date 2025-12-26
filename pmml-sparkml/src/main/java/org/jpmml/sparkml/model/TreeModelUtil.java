@@ -54,9 +54,12 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
+import org.jpmml.converter.SchemaException;
+import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ScoreDistributionManager;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.SparkMLException;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
 public class TreeModelUtil {
@@ -124,7 +127,7 @@ public class TreeModelUtil {
 		if(model instanceof DecisionTreeClassificationModel){
 			ScoreEncoder scoreEncoder = new ScoreEncoder(){
 
-				private CategoricalLabel categoricalLabel = (CategoricalLabel)schema.getLabel();
+				private CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 
 
 				@Override
@@ -184,7 +187,7 @@ public class TreeModelUtil {
 	private <M extends Model<M> & DecisionTreeModel> TreeModel encodeTreeModel(MiningFunction miningFunction, ScoreEncoder scoreEncoder, M model, PredicateManager predicateManager, Schema schema){
 		Node root = encodeNode(True.INSTANCE, scoreEncoder, model.rootNode(), predicateManager, new CategoryManager(), schema);
 
-		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema.getLabel()), root)
+		TreeModel treeModel = new TreeModel(miningFunction, ModelUtil.createMiningSchema(schema), root)
 			.setSplitCharacteristic(TreeModel.SplitCharacteristic.BINARY_SPLIT);
 
 		return treeModel;
@@ -223,7 +226,7 @@ public class TreeModelUtil {
 					BooleanFeature booleanFeature = (BooleanFeature)feature;
 
 					if(threshold != 0.5d){
-						throw new IllegalArgumentException("Invalid split threshold value " + threshold + " for a boolean feature");
+						throw new SparkMLException("Expected 0.5 threshold value, got " + threshold);
 					}
 
 					leftPredicate = predicateManager.createSimplePredicate(booleanFeature, SimplePredicate.Operator.EQUAL, booleanFeature.getValue(0));
@@ -270,7 +273,7 @@ public class TreeModelUtil {
 					} else
 
 					{
-						throw new IllegalArgumentException();
+						throw new SparkMLException("Expected left and right categories to be [0] and [1], or vice versa, got " + Arrays.toString(leftCategories) + " and " + Arrays.toString(rightCategories));
 					}
 
 					Object value = binaryFeature.getValue();
@@ -282,12 +285,11 @@ public class TreeModelUtil {
 				if(feature instanceof CategoricalFeature){
 					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
+					SchemaUtil.checkCardinality(leftCategories.length + rightCategories.length, categoricalFeature);
+
 					String name = categoricalFeature.getName();
 
 					List<?> values = categoricalFeature.getValues();
-					if(values.size() != (leftCategories.length + rightCategories.length)){
-						throw new IllegalArgumentException();
-					}
 
 					java.util.function.Predicate<Object> valueFilter = categoryManager.getValueFilter(name);
 
@@ -302,7 +304,7 @@ public class TreeModelUtil {
 				} else
 
 				{
-					throw new IllegalArgumentException();
+					throw new SchemaException("Expected a binary or categorical feature, got " + feature);
 				}
 			} else
 
