@@ -219,7 +219,7 @@ public class SparkMLEncoder extends ModelEncoder {
 				Feature feature = features.get(i);
 
 				if(!(feature.getName()).equals(existingFeature.getName())){
-					throw new IllegalArgumentException("Expected feature column '" + existingFeature.getName() + "', got feature column '" + feature.getName() + "'");
+					throw new SparkMLException("Expected feature column '" + existingFeature.getName() + "', got feature column '" + feature.getName() + "'");
 				}
 			}
 		}
@@ -241,7 +241,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(fieldNames != null){
 
 			if(fieldNames.size() != 1){
-				throw new IllegalArgumentException("Expected 1 field name for column \'" + column + "\', got " + fieldNames.size() + " field names");
+				throw new SparkMLException("Expected 1 field name for column \'" + column + "\', got " + fieldNames.size() + " field names");
 			}
 
 			return Iterables.getOnlyElement(fieldNames);
@@ -268,7 +268,7 @@ public class SparkMLEncoder extends ModelEncoder {
 		if(fieldNames != null){
 
 			if(fieldNames.size() != size){
-				throw new IllegalArgumentException("Expected " + size + " field name(s) for column \'" + column +"\', got " + fieldNames.size() + " field name(s)");
+				throw new SparkMLException("Expected " + size + " field name(s) for column \'" + column +"\', got " + fieldNames.size() + " field name(s)");
 			}
 
 			return fieldNames;

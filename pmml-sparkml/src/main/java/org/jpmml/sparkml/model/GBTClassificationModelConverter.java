@@ -34,6 +34,7 @@ import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
+import org.jpmml.sparkml.SparkMLException;
 
 public class GBTClassificationModelConverter extends ProbabilisticClassificationModelConverter<GBTClassificationModel> implements HasFeatureImportances, HasTreeOptions {
 
@@ -57,7 +58,7 @@ public class GBTClassificationModelConverter extends ProbabilisticClassification
 			case "logistic":
 				break;
 			default:
-				throw new IllegalArgumentException("Loss function " + lossType + " is not supported");
+				throw new SparkMLException("Loss function " + lossType + " is not supported");
 		}
 
 		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);

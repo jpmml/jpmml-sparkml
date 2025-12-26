@@ -22,6 +22,7 @@ import org.apache.spark.ml.classification.NaiveBayesModel;
 import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
+import org.jpmml.sparkml.SparkMLException;
 
 public class NaiveBayesModelConverter extends ProbabilisticClassificationModelConverter<NaiveBayesModel> implements HasRegressionTableOptions {
 
@@ -38,7 +39,7 @@ public class NaiveBayesModelConverter extends ProbabilisticClassificationModelCo
 			case "multinomial":
 				break;
 			default:
-				throw new IllegalArgumentException("Model type " + modelType + " is not supported");
+				throw new SparkMLException("Model type " + modelType + " is not supported");
 		}
 
 		if(model.isSet(model.thresholds())){
@@ -48,7 +49,7 @@ public class NaiveBayesModelConverter extends ProbabilisticClassificationModelCo
 				double threshold = thresholds[i];
 
 				if(threshold != 0d){
-					throw new IllegalArgumentException("Non-zero thresholds are not supported");
+					throw new SparkMLException("Non-zero thresholds are not supported");
 				}
 			}
 		}

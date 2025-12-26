@@ -57,6 +57,7 @@ import org.jpmml.converter.Schema;
 import org.jpmml.converter.ScoreDistributionManager;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
+import org.jpmml.sparkml.SparkMLException;
 import org.jpmml.sparkml.visitors.TreeModelCompactor;
 
 public class TreeModelUtil {
@@ -223,7 +224,7 @@ public class TreeModelUtil {
 					BooleanFeature booleanFeature = (BooleanFeature)feature;
 
 					if(threshold != 0.5d){
-						throw new IllegalArgumentException("Invalid split threshold value " + threshold + " for a boolean feature");
+						throw new SparkMLException("Invalid split threshold value " + threshold + " for a boolean feature");
 					}
 
 					leftPredicate = predicateManager.createSimplePredicate(booleanFeature, SimplePredicate.Operator.EQUAL, booleanFeature.getValue(0));
@@ -270,7 +271,7 @@ public class TreeModelUtil {
 					} else
 
 					{
-						throw new IllegalArgumentException();
+						throw new SparkMLException("Expected left and right categories to be [0] and [1], or vice versa, got " + Arrays.toString(leftCategories) + " and " + Arrays.toString(rightCategories));
 					}
 
 					Object value = binaryFeature.getValue();

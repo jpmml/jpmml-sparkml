@@ -39,6 +39,7 @@ import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.InvalidValueDecorator;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 
 public class StringIndexerModelConverter extends MultiFeatureConverter<StringIndexerModel> {
 
@@ -92,7 +93,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 						}
 						break;
 					default:
-						throw new IllegalArgumentException("Invalid value handling strategy " + handleInvalid + " is not supported");
+						throw new SparkMLException("Invalid value handling strategy " + handleInvalid + " is not supported");
 				}
 
 				encoder.addDecorator(dataField, invalidValueDecorator);
@@ -122,7 +123,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 						}
 						break;
 					default:
-						throw new IllegalArgumentException(handleInvalid);
+						throw new SparkMLException("Invalid value handling strategy " + handleInvalid + " is not supported");
 				}
 			} else
 

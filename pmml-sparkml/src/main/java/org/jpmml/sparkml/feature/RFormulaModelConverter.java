@@ -28,6 +28,7 @@ import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
+import org.jpmml.sparkml.SparkMLException;
 import org.jpmml.sparkml.TransformerConverter;
 
 public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
@@ -66,7 +67,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 			} else
 
 			{
-				throw new IllegalArgumentException("Expected a subclass of " + FeatureConverter.class.getName() + ", got " + (converter != null ? ("class " + (converter.getClass()).getName()) : null));
+				throw new SparkMLException("Expected a subclass of " + FeatureConverter.class.getName() + ", got " + (converter != null ? ("class " + (converter.getClass()).getName()) : null));
 			}
 		}
 	}
