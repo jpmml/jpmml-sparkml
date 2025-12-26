@@ -24,15 +24,19 @@ import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
-public class SparseToDenseTransformerConverter extends FeatureConverter<SparseToDenseTransformer> {
+public class VectorDensifierConverter extends FeatureConverter<VectorDensifier> {
 
-	public SparseToDenseTransformerConverter(SparseToDenseTransformer transformer){
+	public VectorDensifierConverter(VectorDensifier transformer){
 		super(transformer);
+	}
+
+	public VectorDensifierConverter(SparseToDenseTransformer transformer){
+		super((VectorDensifier)transformer);
 	}
 
 	@Override
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
-		SparseToDenseTransformer transformer = getTransformer();
+		VectorDensifier transformer = getTransformer();
 
 		List<Feature> features = encoder.getFeatures(transformer.getInputCol());
 

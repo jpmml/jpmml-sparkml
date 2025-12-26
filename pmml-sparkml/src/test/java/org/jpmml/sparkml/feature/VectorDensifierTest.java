@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class SparseToDenseTransformerTest extends SparkMLTest {
+public class VectorDensifierTest extends SparkMLTest {
 
 	@Test
 	public void transform(){
@@ -58,7 +58,7 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 
 		Dataset<Row> ds = SparkMLTest.sparkSession.createDataFrame(rows, schema);
 
-		Transformer transformer = new SparseToDenseTransformer()
+		Transformer transformer = new VectorDensifier()
 			.setInputCol("featureVec")
 			.setOutputCol("denseFeatureVec");
 
@@ -95,15 +95,15 @@ public class SparseToDenseTransformerTest extends SparkMLTest {
 	}
 
 	@Test
-	public void sparseToDense(){
+	public void toDense(){
 		Vector vector = new DenseVector(new double[]{0, 0, 1d});
-		Vector transformedVector = SparseToDenseTransformer.sparseToDense(vector);
+		Vector transformedVector = VectorDensifier.toDense(vector);
 
 		assertSame(vector, transformedVector);
 		assertArrayEquals(vector.toArray(), transformedVector.toArray());
 
 		vector = new SparseVector(3, new int[]{2}, new double[]{1d});
-		transformedVector = SparseToDenseTransformer.sparseToDense(vector);
+		transformedVector = VectorDensifier.toDense(vector);
 
 		assertNotSame(vector, transformedVector);
 		assertArrayEquals(vector.toArray(), transformedVector.toArray());
