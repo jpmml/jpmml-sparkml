@@ -1,13 +1,13 @@
 Run `spark-submit`:
 
 ```bash
-$SPARK_HOME/bin/spark-submit --jars ../../../../pmml-sparkml-example/target/pmml-sparkml-example-executable-3.2-SNAPSHOT.jar main.py
+$SPARK_HOME/bin/spark-submit --jars ../../../../pmml-sparkml-example/target/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar main.py
 ```
 
 Launch `spark-shell`:
 
 ```bash
-$SPARK_HOME/bin/spark-shell --jars ../../../../pmml-sparkml-example/target/pmml-sparkml-example-executable-3.2-SNAPSHOT.jar
+$SPARK_HOME/bin/spark-shell --jars ../../../../pmml-sparkml-example/target/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar
 ```
 
 Load scripts:
