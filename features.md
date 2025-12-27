@@ -1,7 +1,7 @@
 <details>
   <summary>Apache Spark ML</summary>
 
-  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/master/pmml-sparkml/src/test/resources/main.py)
+  Examples: [main.py](https://github.com/jpmml/jpmml-sparkml/blob/3.2.X/pmml-sparkml/src/test/resources/main.py)
 
   * Feature extractors, transformers and selectors:
     * [`feature.Binarizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/Binarizer.html)
@@ -82,7 +82,7 @@
 <details>
   <summary>LightGBM</summary>
 
-  Examples: [main.scala](https://github.com/jpmml/jpmml-sparkml/blob/master/pmml-sparkml-lightgbm/src/test/resources/main.scala)
+  Examples: [main.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.2.X/pmml-sparkml-lightgbm/src/test/resources/main.scala)
 
   * Prediction models:
     * [`com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel`](https://mmlspark.blob.core.windows.net/docs/0.9.5/scala/com/microsoft/azure/synapse/ml/lightgbm/LightGBMClassificationModel.html)
@@ -92,7 +92,7 @@
 <details>
   <summary>XGBoost</summary>
 
-  Examples: [main.scala](https://github.com/jpmml/jpmml-sparkml/blob/master/pmml-sparkml-xgboost/src/test/resources/main.scala)
+  Examples: [main.scala](https://github.com/jpmml/jpmml-sparkml/blob/3.2.X/pmml-sparkml-xgboost/src/test/resources/main.scala)
 
   * Prediction models:
     * [`ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel`](https://xgboost.readthedocs.io/en/latest/jvm/scaladocs/xgboost4j-spark/ml/dmlc/xgboost4j/scala/spark/XGBoostClassificationModel.html)
