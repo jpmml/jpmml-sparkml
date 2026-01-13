@@ -28,12 +28,12 @@ import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.model.ToStringHelper;
 
-public class BinarizedCategoricalFeature extends Feature {
+public class BinarizedDiscreteFeature extends Feature {
 
 	private List<BinaryFeature> binaryFeatures = null;
 
 
-	public BinarizedCategoricalFeature(PMMLEncoder encoder, DiscreteFeature discreteFeature, List<BinaryFeature> binaryFeatures){
+	public BinarizedDiscreteFeature(PMMLEncoder encoder, DiscreteFeature discreteFeature, List<BinaryFeature> binaryFeatures){
 		super(encoder, discreteFeature.getName(), discreteFeature.getDataType());
 
 		setBinaryFeatures(binaryFeatures);
@@ -52,8 +52,8 @@ public class BinarizedCategoricalFeature extends Feature {
 	@Override
 	public boolean equals(Object object){
 
-		if(object instanceof BinarizedCategoricalFeature){
-			BinarizedCategoricalFeature that = (BinarizedCategoricalFeature)object;
+		if(object instanceof BinarizedDiscreteFeature){
+			BinarizedDiscreteFeature that = (BinarizedDiscreteFeature)object;
 
 			return super.equals(that) && Objects.equals(this.getBinaryFeatures(), that.getBinaryFeatures());
 		}

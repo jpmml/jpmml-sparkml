@@ -30,7 +30,7 @@ import org.jpmml.converter.DiscreteFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.converter.SchemaUtil;
-import org.jpmml.sparkml.BinarizedCategoricalFeature;
+import org.jpmml.sparkml.BinarizedDiscreteFeature;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 
@@ -80,7 +80,7 @@ public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEnc
 				// Ignored: No-op
 			}
 
-			result.add(new BinarizedCategoricalFeature(encoder, discreteFeature, binaryFeatures));
+			result.add(new BinarizedDiscreteFeature(encoder, discreteFeature, binaryFeatures));
 		}
 
 		return result;
@@ -97,9 +97,9 @@ public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEnc
 		if(outputMode == InOutMode.SINGLE){
 			String outputCol = transformer.getOutputCol();
 
-			BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)Iterables.getOnlyElement(features);
+			BinarizedDiscreteFeature binarizedDiscreteFeature = (BinarizedDiscreteFeature)Iterables.getOnlyElement(features);
 
-			encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
+			encoder.putFeatures(outputCol, (List)binarizedDiscreteFeature.getBinaryFeatures());
 		} else
 
 		if(outputMode == InOutMode.MULTIPLE){
@@ -111,9 +111,9 @@ public class OneHotEncoderModelConverter extends MultiFeatureConverter<OneHotEnc
 				String outputCol = outputCols[i];
 				Feature feature = features.get(i);
 
-				BinarizedCategoricalFeature binarizedCategoricalFeature = (BinarizedCategoricalFeature)feature;
+				BinarizedDiscreteFeature binarizedDiscreteFeature = (BinarizedDiscreteFeature)feature;
 
-				encoder.putFeatures(outputCol, (List)binarizedCategoricalFeature.getBinaryFeatures());
+				encoder.putFeatures(outputCol, (List)binarizedDiscreteFeature.getBinaryFeatures());
 			}
 		}
 	}
