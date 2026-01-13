@@ -212,7 +212,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 		val dataRanges = dataset
 			.select(selectCols: _*)
 			.groupBy()
-			.agg(aggCols.head, aggCols.tail: _*)
+			.agg(aggCols.head, aggCols.tail.toSeq: _*)
 			.collect()
 			.headOption
 			.map {

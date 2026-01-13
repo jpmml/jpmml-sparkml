@@ -139,7 +139,7 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 			}
 		}
 
-		dataset.select(dataset("*") +: outputCols: _*)
+		dataset.select(dataset("*") +: outputCols.toSeq: _*)
 	}
 }
 

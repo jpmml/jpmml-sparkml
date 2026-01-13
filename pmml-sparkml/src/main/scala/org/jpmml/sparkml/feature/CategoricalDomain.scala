@@ -108,7 +108,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 		val dataValues = dataset
 			.select(selectCols: _*)
 			.groupBy()
-			.agg(aggCols.head, aggCols.tail: _*)
+			.agg(aggCols.head, aggCols.tail.toSeq: _*)
 			.collect()
 			.headOption
 			.map {

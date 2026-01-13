@@ -456,6 +456,6 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 			}
 		}
 
-		dataset.select(dataset("*") +: outputCols: _*)
+		dataset.select(dataset("*") +: outputCols.toSeq: _*)
 	}
 }
