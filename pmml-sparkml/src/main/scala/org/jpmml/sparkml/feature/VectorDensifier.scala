@@ -29,8 +29,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 
 class VectorDensifier(override val uid: String) extends Transformer with HasInputCol with HasOutputCol with DefaultParamsWritable {
 
-	private
-	val toDenseUDF = udf(VectorDensifier.toDense _)
+	private val toDenseUDF = udf(VectorDensifier.toDense _)
 
 	/**
 	 * @group setParam
@@ -48,8 +47,7 @@ class VectorDensifier(override val uid: String) extends Transformer with HasInpu
 	override
 	def copy(extra: ParamMap): VectorDensifier = defaultCopy(extra)
 
-	protected 
-	def validateParams(): Unit = {
+	protected def validateParams(): Unit = {
 		require(isDefined(inputCol) && isDefined(outputCol), "inputCol and outputCol must be defined")
 	}
 

@@ -18,10 +18,10 @@
  */
 package org.jpmml.sparkml.feature
 
-import org.apache.spark.ml.param.{Param, ParamMap, Params}
+import org.apache.spark.ml.param.{Param, ParamMap}
 import org.apache.spark.ml.util.{DefaultParamsReadable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset}
-import org.apache.spark.sql.functions.{col, collect_set, not, when}
+import org.apache.spark.sql.functions.collect_set
 
 trait HasCategoricalDomainParams[T <: HasCategoricalDomainParams[T]] extends HasDomainParams[T] {
 
@@ -96,8 +96,7 @@ class CategoricalDomain(override val uid: String) extends Domain[CategoricalDoma
 		copyValues(model)
 	}
 
-	protected
-	def collectDataValues(dataset: Dataset[_]): Map[String, Array[Object]] = {
+	protected def collectDataValues(dataset: Dataset[_]): Map[String, Array[Object]] = {
 		val inputColNames = getInputCols
 
 		val selectCols = selectNonMissing(inputColNames)
@@ -130,8 +129,7 @@ object CategoricalDomain extends DefaultParamsReadable[CategoricalDomain]
 class CategoricalDomainModel(override val uid: String) extends DomainModel[CategoricalDomainModel](uid) with HasCategoricalDomainParams[CategoricalDomainModel] {
 
 	override
-	protected 
-	def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
+	protected def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
 
 		if(getDataValues.nonEmpty){
 			val values = getDataValues.getOrElse(colName, Array.empty[Object])

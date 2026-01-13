@@ -175,8 +175,7 @@ class MapParam[T <: AnyRef](parent: Params, name: String, doc: String, isValid: 
 		rawMap.asInstanceOf[Map[String, Array[T]]]
 	}
 
-	protected
-	def formatMap(value: Map[String, Array[T]]): JValue = {
+	protected def formatMap(value: Map[String, Array[T]]): JValue = {
 		val fields = value.map {
 			case (k, v) => {
 				k -> JArray(v.map(ValueMapper.javaToJS).toList)
@@ -185,15 +184,14 @@ class MapParam[T <: AnyRef](parent: Params, name: String, doc: String, isValid: 
 		JObject(fields.toList)
 	}
 
-	protected
-	def parseMap(jsValue: JValue): Map[String, Array[AnyRef]] = {
+	protected def parseMap(jsValue: JValue): Map[String, Array[AnyRef]] = {
 		jsValue match {
 			case JObject(fields) => {
 				fields.map {
 					case (k, JArray(jsValues)) => {
 						k -> jsValues.map(ValueMapper.jsToJava).toArray
 					}
-					case (k, _) =>
+					case _ =>
 						throw new IllegalArgumentException()
 				}.toMap
 			}
