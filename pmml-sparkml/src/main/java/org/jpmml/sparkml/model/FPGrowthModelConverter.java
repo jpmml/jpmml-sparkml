@@ -82,9 +82,7 @@ public class FPGrowthModelConverter extends AssociationRulesModelConverter<FPGro
 
 		List<? extends Feature> features = schema.getFeatures();
 
-		SchemaUtil.checkSize(1, features);
-
-		Feature feature = features.get(0);
+		Feature feature = SchemaUtil.getOnlyFeature(features);
 
 		Map<String, Item> items = new LinkedHashMap<>();
 		Map<List<String>, Itemset> itemsets = new LinkedHashMap<>();

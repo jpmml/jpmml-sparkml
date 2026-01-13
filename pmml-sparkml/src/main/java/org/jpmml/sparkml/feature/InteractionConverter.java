@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.apache.spark.ml.feature.Interaction;
 import org.dmg.pmml.DataType;
-import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.DiscreteFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.InteractionFeature;
@@ -55,12 +55,12 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				Feature feature = features.get(0);
 
 				categorical:
-				if(feature instanceof CategoricalFeature){
-					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+				if(feature instanceof DiscreteFeature){
+					DiscreteFeature discreteFeature = (DiscreteFeature)feature;
 
-					String name = categoricalFeature.getName();
+					String name = discreteFeature.getName();
 
-					DataType dataType = categoricalFeature.getDataType();
+					DataType dataType = discreteFeature.getDataType();
 					switch(dataType){
 						case INTEGER:
 							break;
@@ -74,7 +74,7 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 					// XXX
 					inputCol = name;
 
-					features = (List)OneHotEncoderModelConverter.encodeFeature(encoder, categoricalFeature, categoricalFeature.getValues());
+					features = (List)OneHotEncoderModelConverter.encodeFeature(encoder, discreteFeature, discreteFeature.getValues());
 				}
 			} // End if
 

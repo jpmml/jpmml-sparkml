@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.jpmml.converter.BinaryFeature;
-import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.DiscreteFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.PMMLEncoder;
 import org.jpmml.model.ToStringHelper;
@@ -33,8 +33,8 @@ public class BinarizedCategoricalFeature extends Feature {
 	private List<BinaryFeature> binaryFeatures = null;
 
 
-	public BinarizedCategoricalFeature(PMMLEncoder encoder, CategoricalFeature categoricalFeature, List<BinaryFeature> binaryFeatures){
-		super(encoder, categoricalFeature.getName(), categoricalFeature.getDataType());
+	public BinarizedCategoricalFeature(PMMLEncoder encoder, DiscreteFeature discreteFeature, List<BinaryFeature> binaryFeatures){
+		super(encoder, discreteFeature.getName(), discreteFeature.getDataType());
 
 		setBinaryFeatures(binaryFeatures);
 	}

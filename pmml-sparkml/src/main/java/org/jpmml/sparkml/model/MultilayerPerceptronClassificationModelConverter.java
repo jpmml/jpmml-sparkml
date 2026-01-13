@@ -54,7 +54,8 @@ public class MultilayerPerceptronClassificationModelConverter extends Probabilis
 		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
 		List<? extends Feature> features = schema.getFeatures();
 
-		SchemaUtil.checkCardinality(layers[layers.length - 1], categoricalLabel);
+		categoricalLabel.expectCardinality(layers[layers.length - 1]);
+
 		SchemaUtil.checkSize(layers[0], features);
 
 		NeuralInputs neuralInputs = NeuralNetworkUtil.createNeuralInputs(features, DataType.DOUBLE);
