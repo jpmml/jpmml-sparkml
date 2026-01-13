@@ -54,13 +54,13 @@ For a full list of supported transformer and estimator classes see the [`feature
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](https://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **3.1.8** (26 December, 2025).
+The current version is **3.1.9** (13 January, 2026).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml</artifactId>
-	<version>3.1.8</version>
+	<version>3.1.9</version>
 </dependency>
 ```
 
