@@ -196,7 +196,22 @@
 					</jvmArgs>
 					<release>${java.version}</release>
 					<scalaVersion>${scala.version}</scalaVersion>
+					<scalaCompatVersion>${scala.binary.version}</scalaCompatVersion>
 					<sourceDir>src/main/scala</sourceDir>
+					<args>
+						<arg>-deprecation</arg>
+						<arg>-feature</arg>
+						<arg>-unchecked</arg>
+						<arg>-Xlint</arg>
+						<arg>-Ywarn-dead-code</arg>
+						<arg>-Ywarn-value-discard</arg>
+						<arg>-Ywarn-unused:imports</arg>
+						<arg>-Ywarn-unused:patvars</arg>
+						<arg>-Ywarn-unused:privates</arg>
+						<arg>-Ywarn-unused:locals</arg>
+						<arg>-Ywarn-unused:implicits</arg>
+						<arg>-Xfatal-warnings</arg>
+					</args>
 				</configuration>
 				<executions>
 					<execution>
