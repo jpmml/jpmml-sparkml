@@ -24,6 +24,7 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.feature.RFormulaModel;
 import org.apache.spark.ml.feature.ResolvedRFormula;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.ConverterFactory;
 import org.jpmml.sparkml.FeatureConverter;
@@ -67,7 +68,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 			} else
 
 			{
-				throw new SparkMLException("Expected a \'" + FeatureConverter.class.getName() + "\' subclass, got " + (converter != null ? ("class \'" + (converter.getClass()).getName() + "\'") : null));
+				throw new SparkMLException("Expected a " + ExceptionUtil.formatClass(FeatureConverter.class) + " subclass, got " + (converter != null ? ("class " + ExceptionUtil.formatClass(converter.getClass())) : null));
 			}
 		}
 	}

@@ -54,10 +54,10 @@
 	<properties>
 		<scala.version>2.12.18</scala.version>
 		<scala.binary.version>2.12</scala.binary.version>
-		<jpmml-converter.version>1.6.7</jpmml-converter.version>
+		<jpmml-converter.version>1.6.8</jpmml-converter.version>
 		<jpmml-evaluator.version>1.7.6</jpmml-evaluator.version>
-		<jpmml-lightgbm.version>1.6.3</jpmml-lightgbm.version>
-		<jpmml-xgboost.version>1.9.4</jpmml-xgboost.version>
+		<jpmml-lightgbm.version>1.6.4</jpmml-lightgbm.version>
+		<jpmml-xgboost.version>1.9.5</jpmml-xgboost.version>
 		<spark.version>3.5.0</spark.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.1.0]</synapseml-lightgbm.version>
 		<!-- XXX: The 2.0.2 and 2.0.3 versions are invalid -->
@@ -136,7 +136,7 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>telemetry-client</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.3</version>
 			</dependency>
 
 			<dependency>
@@ -196,7 +196,22 @@
 					</jvmArgs>
 					<release>${java.version}</release>
 					<scalaVersion>${scala.version}</scalaVersion>
+					<scalaCompatVersion>${scala.binary.version}</scalaCompatVersion>
 					<sourceDir>src/main/scala</sourceDir>
+					<args>
+						<arg>-deprecation</arg>
+						<arg>-feature</arg>
+						<arg>-unchecked</arg>
+						<arg>-Xlint</arg>
+						<arg>-Ywarn-dead-code</arg>
+						<arg>-Ywarn-value-discard</arg>
+						<arg>-Ywarn-unused:imports</arg>
+						<arg>-Ywarn-unused:patvars</arg>
+						<arg>-Ywarn-unused:privates</arg>
+						<arg>-Ywarn-unused:locals</arg>
+						<arg>-Ywarn-unused:implicits</arg>
+						<arg>-Xfatal-warnings</arg>
+					</args>
 				</configuration>
 				<executions>
 					<execution>

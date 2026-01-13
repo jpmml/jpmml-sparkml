@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.spark.ml.feature.StopWordsRemover;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.sparkml.DocumentFeature;
 import org.jpmml.sparkml.MultiFeatureConverter;
@@ -64,7 +65,7 @@ public class StopWordsRemoverConverter extends MultiFeatureConverter<StopWordsRe
 				} // End if
 
 				if(TermUtil.hasPunctuation(stopWord)){
-					throw new SparkMLException("Punctuated stop words (\'" + stopWord + "\') are not supported");
+					throw new SparkMLException("Punctuated stop words (" + ExceptionUtil.formatLiteral(stopWord) + ") are not supported");
 				}
 
 				stopWordSet.add(stopWord);

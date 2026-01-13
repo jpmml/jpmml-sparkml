@@ -33,6 +33,7 @@ import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
 import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
@@ -93,7 +94,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 						}
 						break;
 					default:
-						throw new SparkMLException("Invalid value handling strategy \'" + handleInvalid + "\' is not supported");
+						throw new SparkMLException("Invalid value handling strategy " + ExceptionUtil.formatParameter(handleInvalid) + " is not supported");
 				}
 
 				encoder.addDecorator(dataField, invalidValueDecorator);
@@ -123,7 +124,7 @@ public class StringIndexerModelConverter extends MultiFeatureConverter<StringInd
 						}
 						break;
 					default:
-						throw new SparkMLException("Invalid value handling strategy \'" + handleInvalid + "\' is not supported");
+						throw new SparkMLException("Invalid value handling strategy " + ExceptionUtil.formatParameter(handleInvalid) + " is not supported");
 				}
 			} else
 

@@ -29,6 +29,7 @@ import org.dmg.pmml.DataField;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.MissingValueTreatmentMethod;
 import org.dmg.pmml.Value;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldUtil;
 import org.jpmml.converter.MissingValueDecorator;
@@ -100,7 +101,7 @@ public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 			case "median":
 				return MissingValueTreatmentMethod.AS_MEDIAN;
 			default:
-				throw new SparkMLException("Imputation strategy \'" + strategy + "\' is not supported");
+				throw new SparkMLException("Imputation strategy " + ExceptionUtil.formatParameter(strategy) + " is not supported");
 		}
 	}
 }

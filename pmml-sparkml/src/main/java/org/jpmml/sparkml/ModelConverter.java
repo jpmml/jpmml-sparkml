@@ -26,13 +26,15 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Output;
 import org.dmg.pmml.OutputField;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.Label;
+import org.jpmml.converter.MissingLabelException;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.SchemaException;
+import org.jpmml.converter.UnsupportedLabelException;
 import org.jpmml.converter.mining.MiningModelUtil;
 
 abstract
@@ -79,13 +81,13 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 			case ASSOCIATION_RULES:
 			case CLUSTERING:
 				if(label != null){
-					throw new SchemaException("Expected no label, got " + label);
+					throw new UnsupportedLabelException("Expected no label, got " + label.typeString());
 				}
 				break;
 			case CLASSIFICATION:
 			case REGRESSION:
 				if(label == null){
-					throw new SchemaException("Expected a label, got no label");
+					throw new MissingLabelException();
 				}
 				break;
 			default:
@@ -97,7 +99,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 
 			Feature labelFeature = FeatureUtil.findLabelFeature(features, scalarLabel);
 			if(labelFeature != null){
-				throw new SparkMLException("Label column \'" + scalarLabel.getName() + "\' is contained in the list of feature columns");
+				throw new SparkMLException("Label column " + ExceptionUtil.formatName(scalarLabel.getName()) + " is contained in the list of feature columns");
 			}
 		}
 	}

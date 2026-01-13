@@ -28,12 +28,12 @@ import org.dmg.pmml.Model;
 import org.dmg.pmml.OutputField;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.CategoricalLabel;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.ScalarLabel;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.general_regression.GeneralRegressionModelUtil;
 import org.jpmml.sparkml.ClassificationModelConverter;
 import org.jpmml.sparkml.RegressionModelConverter;
@@ -105,9 +105,8 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 		MiningFunction miningFunction = getMiningFunction();
 		switch(miningFunction){
 			case CLASSIFICATION:
-				CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
-
-				SchemaUtil.checkCardinality(2, categoricalLabel);
+				CategoricalLabel categoricalLabel = schema.requireCategoricalLabel()
+					.expectCardinality(2);
 
 				targetCategory = categoricalLabel.getValue(1);
 				break;
@@ -140,7 +139,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "poisson":
 				return GeneralRegressionModel.Distribution.POISSON;
 			default:
-				throw new SparkMLException("Distribution family \'" + family + "\' is not supported");
+				throw new SparkMLException("Distribution family " + ExceptionUtil.formatParameter(family) + " is not supported");
 		}
 	}
 
@@ -163,7 +162,7 @@ public class GeneralizedLinearRegressionModelConverter extends RegressionModelCo
 			case "sqrt":
 				return GeneralRegressionModel.LinkFunction.POWER;
 			default:
-				throw new SparkMLException("Link function \'" + link + "\' is not supported");
+				throw new SparkMLException("Link function " + ExceptionUtil.formatParameter(link) + " is not supported");
 		}
 	}
 

@@ -94,6 +94,7 @@ import org.dmg.pmml.FieldRef;
 import org.dmg.pmml.HasDataType;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMMLFunctions;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.FieldNameUtil;
 import org.jpmml.converter.IfElseBuilder;
@@ -671,7 +672,7 @@ public class ExpressionTranslator {
 				return constant;
 			}
 
-			throw new SparkMLException("Expected " + dataType.value() + " literal, got " + (constant.getDataType()).value() + " literal");
+			throw new SparkMLException("Expected " + ExceptionUtil.formatValue(dataType) + " literal, got " + ExceptionUtil.formatValue(constant.getDataType()) + " literal");
 		}
 
 		throw new SparkMLException("Expected a literal, got expression");
@@ -695,7 +696,7 @@ public class ExpressionTranslator {
 			return null;
 		}
 
-		return "Spark SQL function \'" + String.valueOf(expression) + "\' (class \'" + (expression.getClass()).getName() + "\') is not supported";
+		return "Spark SQL function " + ExceptionUtil.formatLiteral(String.valueOf(expression)) + " (class " + ExceptionUtil.formatClass(expression.getClass()) + ") is not supported";
 	}
 
 	private static final Package javaLangPackage = Package.getPackage("java.lang");
