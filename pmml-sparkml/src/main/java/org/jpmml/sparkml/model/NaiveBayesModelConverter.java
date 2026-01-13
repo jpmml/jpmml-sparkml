@@ -20,6 +20,7 @@ package org.jpmml.sparkml.model;
 
 import org.apache.spark.ml.classification.NaiveBayesModel;
 import org.dmg.pmml.Model;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
 import org.jpmml.sparkml.SparkMLException;
@@ -39,7 +40,7 @@ public class NaiveBayesModelConverter extends ProbabilisticClassificationModelCo
 			case "multinomial":
 				break;
 			default:
-				throw new SparkMLException("Model type \'" + modelType + "\' is not supported");
+				throw new SparkMLException("Model type " + ExceptionUtil.formatParameter(modelType) + " is not supported");
 		}
 
 		if(model.isSet(model.thresholds())){

@@ -36,7 +36,7 @@ import org.dmg.pmml.Visitor;
 import org.dmg.pmml.VisitorAction;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
-import org.jpmml.converter.ResolutionException;
+import org.jpmml.converter.SchemaException;
 import org.jpmml.converter.TypeUtil;
 import org.jpmml.model.visitors.AbstractVisitor;
 import org.jpmml.sparkml.AliasExpression;
@@ -188,11 +188,11 @@ public class SQLTransformerConverter extends FeatureConverter<SQLTransformer> {
 
 		try {
 			return encoder.getField(name);
-		} catch(ResolutionException pmmlRe){
+		} catch(SchemaException pmmlSe){
 
 			try {
 				return encoder.createDataField(name, name);
-			} catch(IllegalArgumentException iae){
+			} catch(SchemaException se){
 				return null;
 			}
 		}

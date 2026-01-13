@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.linalg.Matrix;
+import org.jpmml.converter.ConversionException;
+import org.jpmml.converter.ExceptionUtil;
 
 public class MatrixUtil {
 
@@ -31,7 +33,7 @@ public class MatrixUtil {
 	public void checkColumns(int columns, Matrix matrix){
 
 		if(matrix.numCols() != columns){
-			throw new IllegalArgumentException("Expected " + columns + " column(s), got " + matrix.numCols() + " column(s)");
+			throw new ConversionException("Expected " + ExceptionUtil.formatCount(columns, "column") + ", got " + matrix.numCols());
 		}
 	}
 
@@ -39,7 +41,7 @@ public class MatrixUtil {
 	public void checkRows(int rows, Matrix matrix){
 
 		if(matrix.numRows() != rows){
-			throw new IllegalArgumentException("Expected " + rows + " row(s), got " + matrix.numRows() + " row(s)");
+			throw new ConversionException("Expected " + ExceptionUtil.formatCount(rows, "row") + ", got " + matrix.numRows());
 		}
 	}
 

@@ -46,17 +46,16 @@ import org.dmg.pmml.tree.Node;
 import org.dmg.pmml.tree.TreeModel;
 import org.jpmml.converter.BinaryFeature;
 import org.jpmml.converter.BooleanFeature;
-import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.CategoryManager;
 import org.jpmml.converter.ContinuousFeature;
+import org.jpmml.converter.DiscreteFeature;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.PredicateManager;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.SchemaException;
-import org.jpmml.converter.SchemaUtil;
 import org.jpmml.converter.ScoreDistributionManager;
+import org.jpmml.converter.UnsupportedFeatureException;
 import org.jpmml.converter.ValueUtil;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.sparkml.SparkMLException;
@@ -282,14 +281,13 @@ public class TreeModelUtil {
 					rightPredicate = predicateManager.createSimplePredicate(binaryFeature, rightOperator, value);
 				} else
 
-				if(feature instanceof CategoricalFeature){
-					CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+				if(feature instanceof DiscreteFeature){
+					DiscreteFeature discreteFeature = ((DiscreteFeature)feature)
+						.expectCardinality(leftCategories.length + rightCategories.length);
 
-					SchemaUtil.checkCardinality(leftCategories.length + rightCategories.length, categoricalFeature);
+					String name = discreteFeature.getName();
 
-					String name = categoricalFeature.getName();
-
-					List<?> values = categoricalFeature.getValues();
+					List<?> values = discreteFeature.getValues();
 
 					java.util.function.Predicate<Object> valueFilter = categoryManager.getValueFilter(name);
 
@@ -299,12 +297,12 @@ public class TreeModelUtil {
 					leftCategoryManager = categoryManager.fork(name, leftValues);
 					rightCategoryManager = categoryManager.fork(name, rightValues);
 
-					leftPredicate = predicateManager.createPredicate(categoricalFeature, leftValues);
-					rightPredicate = predicateManager.createPredicate(categoricalFeature, rightValues);
+					leftPredicate = predicateManager.createPredicate(discreteFeature, leftValues);
+					rightPredicate = predicateManager.createPredicate(discreteFeature, rightValues);
 				} else
 
 				{
-					throw new SchemaException("Expected a binary or categorical feature, got " + feature);
+					throw new UnsupportedFeatureException("Expected a binary or categorical feature, got " + feature.typeString());
 				}
 			} else
 

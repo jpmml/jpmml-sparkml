@@ -18,10 +18,10 @@
  */
 package org.jpmml.sparkml.feature
 
-import org.apache.spark.ml.param.{Param, ParamMap, Params, ParamValidators}
+import org.apache.spark.ml.param.{Param, ParamMap, ParamValidators}
 import org.apache.spark.ml.util.{DefaultParamsReadable, Identifiable}
 import org.apache.spark.sql.{Column, Dataset}
-import org.apache.spark.sql.functions.{col, isnan, lit, max, min, not, when}
+import org.apache.spark.sql.functions.{col, isnan, lit, max, min, when}
 
 sealed
 trait OutlierTreatment {
@@ -74,7 +74,7 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	/**
 	 * @group getParam
 	 */
-	def getOutlierTreatment(): String = $(outlierTreatment)
+	def getOutlierTreatment: String = $(outlierTreatment)
 
 	/**
 	 * @group setParam
@@ -87,7 +87,7 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	/**
 	 * @group getParam
 	 */
-	def getLowValue(): Number = $(lowValue)
+	def getLowValue: Number = $(lowValue)
 
 	/**
 	 * @group setParam
@@ -100,7 +100,7 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	/**
 	 * @group getParam
 	 */
-	def getHighValue(): Number = $(highValue)
+	def getHighValue: Number = $(highValue)
 
 	/**
 	 * @group setParam
@@ -113,7 +113,7 @@ trait HasContinuousDomainParams[T <: HasContinuousDomainParams[T]] extends HasDo
 	/**
 	 * @group getParam
 	 */
-	def getDataRanges(): Map[String, Array[Number]] = $(dataRanges)
+	def getDataRanges: Map[String, Array[Number]] = $(dataRanges)
 
 	/**
 	 * @group setParam
@@ -193,8 +193,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 		copyValues(model)
 	}
 
-	protected
-	def collectDataRanges(dataset: Dataset[_]): Map[String, Array[Number]] = {
+	protected def collectDataRanges(dataset: Dataset[_]): Map[String, Array[Number]] = {
 		val inputColNames = getInputCols
 
 		val selectCols = selectNonMissing(inputColNames)
@@ -213,7 +212,7 @@ class ContinuousDomain(override val uid: String) extends Domain[ContinuousDomain
 		val dataRanges = dataset
 			.select(selectCols: _*)
 			.groupBy()
-			.agg(aggCols.head, aggCols.tail: _*)
+			.agg(aggCols.head, aggCols.tail.toSeq: _*)
 			.collect()
 			.headOption
 			.map {
@@ -236,8 +235,7 @@ object ContinuousDomain extends DefaultParamsReadable[ContinuousDomain]
 class ContinuousDomainModel(override val uid: String) extends DomainModel[ContinuousDomainModel](uid) with HasContinuousDomainParams[ContinuousDomainModel] {
 
 	override
-	protected
-	def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
+	protected def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
 		
 		if(getDataRanges.nonEmpty){
 			val (dataMin, dataMax) = getDataRanges.get(colName) match {
@@ -257,8 +255,7 @@ class ContinuousDomainModel(override val uid: String) extends DomainModel[Contin
 	}
 
 	override
-	protected
-	def transformValid(col: Column, isValidCol: Column): Column = {
+	protected def transformValid(col: Column, isValidCol: Column): Column = {
 		val outlierTreatment = getOutlierTreatment
 
 		OutlierTreatment.forName(outlierTreatment) match {

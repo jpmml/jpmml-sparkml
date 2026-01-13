@@ -21,7 +21,6 @@ package org.jpmml.sparkml.feature
 import java.util.Arrays
 
 import org.apache.spark.ml.Transformer
-import org.apache.spark.ml.functions.vector_to_array
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.param.shared.{HasInputCol, HasOutputCols}
@@ -32,8 +31,7 @@ import org.apache.spark.sql.types.{DoubleType, StructType, StructField}
 
 class VectorDisassembler(override val uid: String) extends Transformer with HasInputCol with HasOutputCols with DefaultParamsWritable {
 
-	private
-	val extractElement = udf((vector: Vector, index: Int) => {
+	private val extractElement = udf((vector: Vector, index: Int) => {
 		(vector match {
 			case sparseVec: SparseVector => {
 				val pos = Arrays.binarySearch(sparseVec.indices, index)
@@ -67,8 +65,7 @@ class VectorDisassembler(override val uid: String) extends Transformer with HasI
 	override
 	def copy(extra: ParamMap): VectorDisassembler = defaultCopy(extra)
 
-	protected 
-	def validateParams(): Unit = {
+	protected def validateParams(): Unit = {
 		require(isDefined(inputCol) && isDefined(outputCols), "inputCol and outputCols must be defined")
 	}
 

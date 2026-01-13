@@ -21,7 +21,7 @@ package org.jpmml.sparkml.feature
 import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.ml.param.{BooleanParam, Param, ParamMap, Params, ParamValidators}
 import org.apache.spark.ml.param.shared.{HasInputCols, HasOutputCols}
-import org.apache.spark.ml.util.{DefaultParamsWritable, Identifiable}
+import org.apache.spark.ml.util.DefaultParamsWritable
 import org.apache.spark.sql.{Column, Dataset, DataFrame}
 import org.apache.spark.sql.functions.{col, lit, not, raise_error, when}
 import org.apache.spark.sql.types.{StructField, StructType}
@@ -172,8 +172,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 	val withData: BooleanParam = new BooleanParam(this, "withData", "Collect valid value information during fitting?")
 
 
-	protected
-	def self: T = this.asInstanceOf[T]
+	protected def self: T = this.asInstanceOf[T]
 
 	/**
 	 * @group setParam
@@ -269,9 +268,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 		self
 	}
 
-
-	protected
-	def isMissing(colName: String, col: Column): Column = {
+	protected def isMissing(colName: String, col: Column): Column = {
 		val missingValuesSet = if(isDefined(missingValues)){
 			getMissingValues.toSet
 		} else
@@ -289,18 +286,15 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 		}
 	}
 
-	protected
-	def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
+	protected def isValid(colName: String, col: Column, isNotMissingCol: Column): Column = {
 		isNotMissingCol
 	}
 
-	protected
-	def isInvalid(colName: String, col: Column, isMissingCol: Column, isValidCol: Column): Column = {
+	protected def isInvalid(colName: String, col: Column, isMissingCol: Column, isValidCol: Column): Column = {
 		not(isMissingCol) && not(isValidCol)
 	}
 
-	protected 
-	def validateParams(): Unit = {
+	protected def validateParams(): Unit = {
 		require(isDefined(inputCols) && isDefined(outputCols), "inputCols and outputCols must be defined")
 		require(getInputCols.length == getOutputCols.length, "inputCols and outputCols must have the same length")
 
@@ -345,8 +339,7 @@ trait HasDomainParams[T <: HasDomainParams[T]] extends Params with HasInputCols 
 		StructType(inputFields ++ outputFields)
 	}
 
-	private
-	def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
+	private def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
 		val inputField = schema(inputColName)
 
 		StructField(outputColName, inputField.dataType, nullable = true)
@@ -374,8 +367,7 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 	override
 	def copy(extra: ParamMap): Domain[E, M] = defaultCopy(extra)
 
-	protected
-	def selectNonMissing(inputColNames: Array[String]): Seq[Column] = {
+	protected def selectNonMissing(inputColNames: Array[String]): Seq[Column] = {
 		inputColNames.map {
 			inputColName => {
 				val inputCol = col(inputColName)
@@ -386,7 +378,7 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 
 				when(isNotMissingCol, inputCol).as(inputColName)
 			}
-		}
+		}.toSeq
 	}
 }
 
@@ -398,8 +390,7 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 abstract
 class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M] with HasDomainParams[M] with DefaultParamsWritable {
 
-	protected
-	def transformMissing(col: Column, isMissingCol: Column): Column = {
+	protected def transformMissing(col: Column, isMissingCol: Column): Column = {
 		val missingValueTreatment = getMissingValueTreatment
 
 		MissingValueTreatment.forName(missingValueTreatment) match {
@@ -415,13 +406,11 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 		}
 	}
 
-	protected
-	def transformValid(col: Column, isValidCol: Column): Column = {
+	protected def transformValid(col: Column, isValidCol: Column): Column = {
 		col
 	}
 
-	protected
-	def transformInvalid(col: Column, isInvalidCol: Column): Column = {
+	protected def transformInvalid(col: Column, isInvalidCol: Column): Column = {
 		val invalidValueTreatment = getInvalidValueTreatment
 
 		InvalidValueTreatment.forName(invalidValueTreatment) match {
@@ -467,6 +456,6 @@ class DomainModel[M <: DomainModel[M]](override val uid: String) extends Model[M
 			}
 		}
 
-		dataset.select(dataset("*") +: outputCols: _*)
+		dataset.select(dataset("*") +: outputCols.toSeq: _*)
 	}
 }

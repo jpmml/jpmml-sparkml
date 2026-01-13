@@ -30,6 +30,7 @@ import org.dmg.pmml.mining.MiningModel;
 import org.dmg.pmml.mining.Segmentation;
 import org.dmg.pmml.regression.RegressionModel;
 import org.dmg.pmml.tree.TreeModel;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
@@ -58,7 +59,7 @@ public class GBTClassificationModelConverter extends ProbabilisticClassification
 			case "logistic":
 				break;
 			default:
-				throw new SparkMLException("Loss function \'" + lossType + "\' is not supported");
+				throw new SparkMLException("Loss function " + ExceptionUtil.formatParameter(lossType) + " is not supported");
 		}
 
 		Schema segmentSchema = schema.toAnonymousRegressorSchema(DataType.DOUBLE);
