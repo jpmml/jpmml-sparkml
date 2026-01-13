@@ -30,9 +30,11 @@ import org.dmg.pmml.Expression;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.InvalidValueTreatmentMethod;
 import org.jpmml.converter.CategoricalFeature;
+import org.jpmml.converter.DiscreteFeature;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.InvalidValueDecorator;
-import org.jpmml.converter.SchemaException;
+import org.jpmml.converter.UnsupportedFeatureException;
 import org.jpmml.sparkml.MultiFeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
 import org.jpmml.sparkml.SparkMLException;
@@ -58,14 +60,14 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 		for(String inputCol : inputCols){
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
-			if(!(feature instanceof CategoricalFeature)){
-				throw new SchemaException("Expected a categorical feature, got " + feature);
+			if(!(feature instanceof DiscreteFeature)){
+				throw new UnsupportedFeatureException("Expected a categorical feature, got " + feature.typeString());
 			}
 
-			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
+			DiscreteFeature discreteFeature = (DiscreteFeature)feature;
 
-			Field<?> field = categoricalFeature.getField();
-			List<?> values = categoricalFeature.getValues();
+			Field<?> field = discreteFeature.getField();
+			List<?> values = discreteFeature.getValues();
 
 			Object invalidCategory = values.get(values.size() - 1);
 
@@ -74,7 +76,7 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			} else
 
 			{
-				throw new SparkMLException("Expected \'-999\' or \'__unknown\' as the last category level, got \'" + invalidCategory + "\'");
+				throw new SparkMLException("Expected " + ExceptionUtil.formatLiteral("-999") + " or " + ExceptionUtil.formatLiteral("__unknown") + " as the last category level, got " + ExceptionUtil.formatLiteral(String.valueOf(invalidCategory)));
 			} // End if
 
 			if(field instanceof DataField){

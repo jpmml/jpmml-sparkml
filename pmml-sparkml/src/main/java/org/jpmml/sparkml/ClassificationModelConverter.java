@@ -26,7 +26,6 @@ import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.param.shared.HasLabelCol;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.Field;
 import org.dmg.pmml.MapValues;
@@ -47,8 +46,7 @@ import org.jpmml.converter.Label;
 import org.jpmml.converter.LabelUtil;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.Schema;
-import org.jpmml.converter.SchemaException;
-import org.jpmml.converter.SchemaUtil;
+import org.jpmml.converter.UnsupportedFeatureException;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
 
 abstract
@@ -78,9 +76,8 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 	public void checkSchema(Schema schema){
 		super.checkSchema(schema);
 
-		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel();
-
-		SchemaUtil.checkCardinality(getNumberOfClasses(), categoricalLabel);
+		CategoricalLabel categoricalLabel = schema.requireCategoricalLabel()
+			.expectCardinality(getNumberOfClasses());
 	}
 
 	@Override
@@ -131,9 +128,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 		if(feature instanceof CategoricalFeature){
 			CategoricalFeature categoricalFeature = (CategoricalFeature)feature;
 
-			DataField dataField = (DataField)categoricalFeature.getField();
-
-			return new CategoricalLabel(dataField);
+			return new CategoricalLabel(categoricalFeature);
 		} else
 
 		if(feature instanceof ContinuousFeature){
@@ -157,7 +152,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 		} else
 
 		{
-			throw new SchemaException("Expected a categorical or categorical-like continuous feature, got " + feature);
+			throw new UnsupportedFeatureException("Expected a categorical or categorical-like continuous feature, got " + feature.typeString());
 		}
 	}
 }

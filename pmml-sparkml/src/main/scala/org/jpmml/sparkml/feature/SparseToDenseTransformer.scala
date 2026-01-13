@@ -21,12 +21,15 @@ package org.jpmml.sparkml.feature
 import org.apache.spark.ml.linalg.{DenseVector, Vector}
 import org.apache.spark.ml.util.{DefaultParamsReadable, Identifiable}
 
+import scala.annotation.nowarn
+
 @deprecated("Use VectorDensifier instead", "3.2.7")
 class SparseToDenseTransformer(override val uid: String) extends VectorDensifier(uid) {
 
 	def this() = this(Identifiable.randomUID("sparse2dense"))
 }
 
+@nowarn("cat=deprecation")
 object SparseToDenseTransformer extends DefaultParamsReadable[SparseToDenseTransformer] {
 
 	def sparseToDense(vec: Vector): DenseVector = {

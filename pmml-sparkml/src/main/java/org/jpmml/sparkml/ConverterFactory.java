@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.sql.SparkSession;
+import org.jpmml.converter.ExceptionUtil;
 
 public class ConverterFactory {
 
@@ -52,7 +53,7 @@ public class ConverterFactory {
 
 		Class<? extends TransformerConverter<?>> converterClazz = ConverterFactory.converters.get(clazz);
 		if(converterClazz == null){
-			throw new SparkMLException("Transformer class \'" + clazz.getName() + "\' is not supported");
+			throw new SparkMLException("Transformer class " + ExceptionUtil.formatClass(clazz) + " is not supported");
 		}
 
 		TransformerConverter<?> converter;
@@ -62,7 +63,7 @@ public class ConverterFactory {
 
 			converter = converterConstructor.newInstance(transformer);
 		} catch(ReflectiveOperationException roe){
-			throw new SparkMLException("Transformer class \'" + clazz.getName() + "\' is not supported", roe);
+			throw new SparkMLException("Transformer class " + ExceptionUtil.formatClass(clazz) + " is not supported", roe);
 		}
 
 		if(converter != null){
@@ -106,7 +107,7 @@ public class ConverterFactory {
 		int[] version = parseVersion(sparkContext.version());
 
 		if(!Arrays.equals(ConverterFactory.VERSION, version)){
-			throw new SparkMLException("Expected Apache Spark ML version \'" + formatVersion(ConverterFactory.VERSION) + "\', got \'" + formatVersion(version) + "\' (" + sparkContext.version() + ")");
+			throw new SparkMLException("Expected Apache Spark ML version " + ExceptionUtil.formatVersion(formatVersion(ConverterFactory.VERSION)) + ", got " + ExceptionUtil.formatVersion(formatVersion(version)) + " (" + sparkContext.version() + ")");
 		}
 	}
 
@@ -117,7 +118,7 @@ public class ConverterFactory {
 		String name = _package.getName();
 
 		if(!(name).equals("org.jpmml.sparkml")){
-			throw new SparkMLException("Expected JPMML-SparkML converter classes to have package name prefix \'org.jpmml.sparkml\', got \'" + name + "\'");
+			throw new SparkMLException("Expected JPMML-SparkML converter classes to have package name prefix " + ExceptionUtil.formatName("org.jpmml.sparkml") + ", got " + ExceptionUtil.formatName(name));
 		}
 	}
 
@@ -174,7 +175,7 @@ public class ConverterFactory {
 			}
 
 			if(!(Transformer.class).isAssignableFrom(clazz)){
-				throw new SparkMLException("Transformer class \'" + clazz.getName() + "\' is not a subclass of \'" + Transformer.class.getName() + "\'");
+				throw new SparkMLException("Transformer class " + ExceptionUtil.formatClass(clazz) + " is not a subclass of " + ExceptionUtil.formatClass(Transformer.class));
 			}
 
 			Class<?> converterClazz;
@@ -188,7 +189,7 @@ public class ConverterFactory {
 			}
 
 			if(!(TransformerConverter.class).isAssignableFrom(converterClazz)){
-				throw new SparkMLException("Transformer converter class \'" + converterClazz.getName() + "\' is not a subclass of \'" + TransformerConverter.class.getName() + "\'");
+				throw new SparkMLException("Transformer converter class " + ExceptionUtil.formatClass(converterClazz) + " is not a subclass of " + ExceptionUtil.formatClass(TransformerConverter.class));
 			}
 
 			ConverterFactory.converters.put((Class)clazz, (Class)converterClazz);

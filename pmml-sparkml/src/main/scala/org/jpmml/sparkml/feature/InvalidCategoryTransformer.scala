@@ -29,8 +29,7 @@ import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
 
 class InvalidCategoryTransformer(override val uid: String) extends Transformer with HasInputCol with HasInputCols with HasOutputCol with HasOutputCols with DefaultParamsWritable {
 
-	private
-	val convertUDF = udf(InvalidCategoryTransformer.convert _)
+	private val convertUDF = udf(InvalidCategoryTransformer.convert _)
 
 	/**
 	 * @group setParam
@@ -52,8 +51,7 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 	 */
 	def setOutputCols(value: Array[String]): this.type = set(outputCols, value)
 
-	protected 
-	def getInOutCols(): (Array[String], Array[String]) = {
+	protected def getInOutCols(): (Array[String], Array[String]) = {
 
 		if(isSet(inputCol)){
 			(Array(getInputCol), Array(getOutputCol))
@@ -70,8 +68,7 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 	override
 	def copy(extra: ParamMap): InvalidCategoryTransformer = defaultCopy(extra)
 
-	protected 
-	def validateParams(): Unit = {
+	protected def validateParams(): Unit = {
 		ParamValidators.checkSingleVsMultiColumnParams(this, Seq(inputCol, outputCol), Seq(inputCols, outputCols))
 
 		if(isSet(inputCol)){
@@ -104,17 +101,15 @@ class InvalidCategoryTransformer(override val uid: String) extends Transformer w
 		StructType(inputFields ++ outputFields)
 	}
 
-	private
-	def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
+	private def transformField(schema: StructType, inputColName: String, outputColName: String): StructField = {
 		val inputField = schema(inputColName)
 
 		require(inputField.dataType == DoubleType, s"Input column ${inputColName} must be of type DoubleType, found ${inputField.dataType}")
 
-		val inputMlAttr = NominalAttribute.fromStructField(inputField).asInstanceOf[NominalAttribute]
-		// XXX
-		//require(inputMlAttr.values.isDefined && inputMlAttr.values.get.last == "__unknown", s"Input column ${inputColName} must have StringIndexer-like NominalAttribute metadata")
+		// Fails if non-nominal
+		val _ = NominalAttribute.fromStructField(inputField)
 
-		var outputMlAttr = NominalAttribute.defaultAttr
+		val outputMlAttr = NominalAttribute.defaultAttr
 			.withName(outputColName)
 			.toMetadata()
 

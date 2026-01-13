@@ -62,6 +62,7 @@ import org.dmg.pmml.PMML;
 import org.dmg.pmml.ResultFeature;
 import org.dmg.pmml.VerificationField;
 import org.dmg.pmml.mining.Segmentation;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelUtil;
 import org.jpmml.converter.SchemaUtil;
@@ -89,7 +90,7 @@ public class PMMLBuilder {
 	}
 
 	public PMMLBuilder(StructType schema, PipelineStage pipelineStage){
-		throw new SparkMLException("Expected a fitted pipeline model (class \'" + PipelineModel.class.getName() + "\'), got a pipeline stage (" + (pipelineStage != null ? ("class \'" + (pipelineStage.getClass()).getName() + "\'") : null) + ")");
+		throw new SparkMLException("Expected a fitted pipeline model (class " + ExceptionUtil.formatClass(PipelineModel.class) + "), got a pipeline stage (" + (pipelineStage != null ? ("class " + ExceptionUtil.formatClass(pipelineStage.getClass())) : null) + ")");
 	}
 
 	public PMML build(){
@@ -181,7 +182,7 @@ public class PMMLBuilder {
 			} else
 
 			{
-				throw new SparkMLException("Expected a \'" + FeatureConverter.class.getName() + "\' or \'" + ModelConverter.class.getName() + "\' subclass, got " + (converter != null ? ("\'" + (converter.getClass()).getName() + "\'") : null));
+				throw new SparkMLException("Expected a " + ExceptionUtil.formatClass(FeatureConverter.class) + " or " + ExceptionUtil.formatClass(ModelConverter.class) + " subclass, got " + (converter != null ? ExceptionUtil.formatClass(converter.getClass()) : null));
 			}
 		}
 

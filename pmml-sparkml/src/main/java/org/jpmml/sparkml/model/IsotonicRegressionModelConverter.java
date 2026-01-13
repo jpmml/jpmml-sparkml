@@ -96,9 +96,9 @@ public class IsotonicRegressionModelConverter extends ModelConverter<IsotonicReg
 
 		List<? extends Feature> features = schema.getFeatures();
 
-		SchemaUtil.checkSize(1, features);
+		Feature feature = SchemaUtil.getOnlyFeature(features);
 
-		return RegressionModelUtil.createRegression(features, Collections.singletonList(1d), null, RegressionModel.NormalizationMethod.NONE, schema);
+		return RegressionModelUtil.createRegression(Collections.singletonList(feature), Collections.singletonList(1d), null, RegressionModel.NormalizationMethod.NONE, schema);
 	}
 
 	@Override
