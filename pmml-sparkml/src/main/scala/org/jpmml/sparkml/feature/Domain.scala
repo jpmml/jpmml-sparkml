@@ -378,7 +378,7 @@ class Domain[E <: Domain[E, M], M <: DomainModel[M]](override val uid: String) e
 
 				when(isNotMissingCol, inputCol).as(inputColName)
 			}
-		}
+		}.toSeq
 	}
 }
 
