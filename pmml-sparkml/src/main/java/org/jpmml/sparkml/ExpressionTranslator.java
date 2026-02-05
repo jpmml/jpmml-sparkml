@@ -682,7 +682,7 @@ public class ExpressionTranslator {
 	private Object toSimpleObject(Object value){
 		Class<?> clazz = value.getClass();
 
-		if(!(ExpressionTranslator.javaLangPackage).equals(clazz.getPackage())){
+		if(!Objects.equals(ExpressionTranslator.javaLangPackage, clazz.getPackage())){
 			return value.toString();
 		}
 
@@ -699,7 +699,7 @@ public class ExpressionTranslator {
 		return "Spark SQL function " + ExceptionUtil.formatLiteral(String.valueOf(expression)) + " (class " + ExceptionUtil.formatClass(expression.getClass()) + ") is not supported";
 	}
 
-	private static final Package javaLangPackage = Package.getPackage("java.lang");
+	private static final Package javaLangPackage = Object.class.getPackage();
 
 	private static final int MAX_STRING_LENGTH = 65536;
 }

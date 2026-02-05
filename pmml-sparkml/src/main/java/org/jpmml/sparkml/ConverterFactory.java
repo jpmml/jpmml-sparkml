@@ -117,7 +117,7 @@ public class ConverterFactory {
 
 		String name = _package.getName();
 
-		if(!(name).equals("org.jpmml.sparkml")){
+		if(!Objects.equals("org.jpmml.sparkml", name)){
 			throw new SparkMLException("Expected JPMML-SparkML converter classes to have package name prefix " + ExceptionUtil.formatName("org.jpmml.sparkml") + ", got " + ExceptionUtil.formatName(name));
 		}
 	}

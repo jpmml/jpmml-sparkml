@@ -98,12 +98,12 @@ public class DatasetUtil {
 
 
 	static
-	public Dataset<Row> loadCsv(SparkSession sparkSession, File file) throws IOException {
+	public Dataset<Row> loadCsv(SparkSession sparkSession, File file){
 		return loadCsv(sparkSession, null, file);
 	}
 
 	static
-	public Dataset<Row> loadCsv(SparkSession sparkSession, StructType schema, File file) throws IOException {
+	public Dataset<Row> loadCsv(SparkSession sparkSession, StructType schema, File file){
 		DataFrameReader reader = sparkSession.read()
 			.format("csv")
 			.option("header", true)

@@ -19,6 +19,7 @@
 package org.jpmml.sparkml.testing;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
@@ -52,11 +53,11 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 
 				Map<String, Object> options = super.getOptions();
 
-				if((LOGISTIC_REGRESSION).equals(algorithm) && (AUDIT).equals(dataset)){
+				if(Objects.equals(LOGISTIC_REGRESSION, algorithm) && Objects.equals(AUDIT, dataset)){
 					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
 				} // End if
 
-				if((DECISION_TREE).equals(algorithm) || (GBT).equals(algorithm) || (RANDOM_FOREST).equals(algorithm)){
+				if(Objects.equals(DECISION_TREE, algorithm) || Objects.equals(GBT, algorithm) || Objects.equals(RANDOM_FOREST, algorithm)){
 					options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.TRUE);
 				}
 
@@ -68,7 +69,7 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 				String algorithm = getAlgorithm();
 				String dataset = getDataset();
 
-				if((MODEL_CHAIN).equals(algorithm) && (AUDIT).equals(dataset)){
+				if(Objects.equals(MODEL_CHAIN, algorithm) && Objects.equals(AUDIT, dataset)){
 					StructType transformedSchema = pipelineModel.transformSchema(schema);
 
 					return schema
