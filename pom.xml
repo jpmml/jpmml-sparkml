@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.jpmml</groupId>
 		<artifactId>jpmml-parent</artifactId>
-		<version>1.0.11</version>
+		<version>1.0.13</version>
 	</parent>
 
 	<groupId>org.jpmml</groupId>
@@ -55,12 +55,12 @@
 		<java.version>17</java.version>
 		<scala.version>2.13.16</scala.version>
 		<scala.binary.version>2.13</scala.binary.version>
-		<jpmml-converter.version>1.6.8</jpmml-converter.version>
-		<jpmml-evaluator.version>1.7.6</jpmml-evaluator.version>
-		<jpmml-lightgbm.version>1.6.4</jpmml-lightgbm.version>
-		<jpmml-xgboost.version>1.9.5</jpmml-xgboost.version>
+		<jpmml-converter.version>1.6.9</jpmml-converter.version>
+		<jpmml-evaluator.version>1.7.7</jpmml-evaluator.version>
+		<jpmml-lightgbm.version>1.6.5</jpmml-lightgbm.version>
+		<jpmml-xgboost.version>1.9.6</jpmml-xgboost.version>
 		<spark.version>4.0.0</spark.version>
-		<synapseml-lightgbm.version>[0.9.5, 1.1.0]</synapseml-lightgbm.version>
+		<synapseml-lightgbm.version>[0.9.5, 1.1.2]</synapseml-lightgbm.version>
 		<xgboost4j-spark.version>[2.1.0, 3.1.1]</xgboost4j-spark.version>
 		<project.build.outputTimestamp>2026-01-13T20:15:28Z</project.build.outputTimestamp>
 	</properties>

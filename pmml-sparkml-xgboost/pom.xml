@@ -8,9 +8,7 @@
 		<version>3.2-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml-xgboost</artifactId>
-	<packaging>jar</packaging>
 
 	<name>JPMML Spark ML XGBoost converter</name>
 	<description>JPMML Apache Spark ML XGBoost to PMML converter</description>

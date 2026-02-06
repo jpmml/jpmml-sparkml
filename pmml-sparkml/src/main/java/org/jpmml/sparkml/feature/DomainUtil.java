@@ -74,7 +74,7 @@ public class DomainUtil {
 
 	static
 	public <V> Map<String, V[]> toJavaMap(scala.collection.immutable.Map scalaMap){
-		Map<String, V[]> javaMap = (Map)CollectionConverters.asJava(scalaMap);
+		Map<String, V[]> javaMap = CollectionConverters.asJava(scalaMap);
 
 		return javaMap;
 	}

@@ -219,7 +219,7 @@ public class SparkMLEncoder extends ModelEncoder {
 				Feature existingFeature = existingFeatures.get(i);
 				Feature feature = features.get(i);
 
-				if(!(feature.getName()).equals(existingFeature.getName())){
+				if(!Objects.equals(feature.getName(), existingFeature.getName())){
 					throw new SparkMLException("Expected " + ExceptionUtil.formatName(existingFeature) + " feature column, got " + ExceptionUtil.formatName(feature));
 				}
 			}

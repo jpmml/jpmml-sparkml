@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.PipelineModel;
@@ -190,7 +189,7 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 		File tmpFile = File.createTempFile(prefix, suffix);
 
 		try(OutputStream os = new FileOutputStream(tmpFile)){
-			ByteStreams.copy(is, os);
+			is.transferTo(os);
 		}
 
 		return tmpFile;

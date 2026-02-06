@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.base.Joiner;
 import org.apache.spark.ml.feature.CountVectorizerModel;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.DefineFunction;
@@ -78,10 +77,10 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 			String wordSeparatorRE = documentFeature.getWordSeparatorRE();
 			switch(wordSeparatorRE){
 				case "\\s+":
-					tokenRE = "(^|\\s+)\\p{Punct}*(" + JOINER.join(stopWordSet) + ")\\p{Punct}*(\\s+|$)";
+					tokenRE = "(^|\\s+)\\p{Punct}*(" + String.join("|", stopWordSet) + ")\\p{Punct}*(\\s+|$)";
 					break;
 				case "\\W+":
-					tokenRE = "(\\W+)(" + JOINER.join(stopWordSet) + ")(\\W+)";
+					tokenRE = "(\\W+)(" + String.join("|", stopWordSet) + ")(\\W+)";
 					break;
 				default:
 					throw new SparkMLException("Expected " + ExceptionUtil.formatLiteral("\\s+") + " or " + ExceptionUtil.formatLiteral("\\W+") + " as splitter regex pattern, got " + ExceptionUtil.formatLiteral(wordSeparatorRE));
@@ -119,8 +118,6 @@ public class CountVectorizerModelConverter extends FeatureConverter<CountVectori
 
 		return result;
 	}
-
-	private static final Joiner JOINER = Joiner.on("|");
 
 	private static final AtomicInteger SEQUENCE = new AtomicInteger(1);
 }

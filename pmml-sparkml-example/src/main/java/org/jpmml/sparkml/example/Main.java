@@ -19,12 +19,9 @@
 package org.jpmml.sparkml.example;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,16 +34,15 @@ import com.beust.jcommander.IUsageFormatter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.google.common.io.CharStreams;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.converter.NullSplitter;
 import org.jpmml.model.JAXBSerializer;
 import org.jpmml.model.metro.MetroJAXBSerializer;
 import org.jpmml.sparkml.ArchiveUtil;
+import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
 import org.jpmml.sparkml.PipelineModelUtil;
 import org.jpmml.sparkml.model.HasPredictionModelOptions;
@@ -225,13 +221,11 @@ public class Main {
 
 		StructType schema;
 
-		try(InputStream is = new FileInputStream(this.schemaInput)){
+		try {
 			logger.info("Loading schema..");
 
-			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
-
 			long begin = System.currentTimeMillis();
-			schema = (StructType)DataType.fromJson(json);
+			schema = DatasetUtil.loadSchema(this.schemaInput);
 			long end = System.currentTimeMillis();
 
 			logger.info("Loaded schema in {} ms.", (end - begin));

@@ -282,13 +282,6 @@ public class ExpressionTranslatorTest extends SparkMLTest {
 	}
 
 	static
-	private Object evaluate(String sqlExpression){
-		Expression expression = translateInternal("SELECT " + sqlExpression + " FROM __THIS__");
-
-		return expression.eval(InternalRow.empty());
-	}
-
-	static
 	private Expression translateInternal(String sqlStatement){
 		LogicalPlan logicalPlan = DatasetUtil.createAnalyzedLogicalPlan(SparkMLTest.sparkSession, ExpressionTranslatorTest.schema, sqlStatement);
 

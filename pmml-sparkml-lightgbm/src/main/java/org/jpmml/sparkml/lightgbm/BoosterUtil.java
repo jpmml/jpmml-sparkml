@@ -18,13 +18,13 @@
  */
 package org.jpmml.sparkml.lightgbm;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.google.common.io.CharStreams;
 import com.microsoft.azure.synapse.ml.lightgbm.LightGBMModelMethods;
 import com.microsoft.azure.synapse.ml.lightgbm.booster.LightGBMBooster;
 import org.apache.spark.ml.Model;
@@ -75,10 +75,11 @@ public class BoosterUtil {
 
 		String string = modelStr.get();
 
-		try(StringReader reader = new StringReader(string)){
-			List<String> lines = CharStreams.readLines(reader);
+		try(BufferedReader reader = new BufferedReader(new StringReader(string))){
+			Iterator<String> linesIt = reader.lines()
+				.iterator();
 
-			return LightGBMUtil.loadGBDT(lines.iterator());
+			return LightGBMUtil.loadGBDT(linesIt);
 		} catch(IOException ioe){
 			throw new RuntimeException(ioe);
 		}

@@ -8,9 +8,7 @@
 		<version>3.2-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml-example</artifactId>
-	<packaging>jar</packaging>
 
 	<name>JPMML Spark ML converter example applications</name>
 	<description>JPMML Apache Spark ML to PMML converter example command-line applications</description>
@@ -97,6 +95,14 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
