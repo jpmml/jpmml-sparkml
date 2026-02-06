@@ -20,20 +20,21 @@ package org.jpmml.sparkml;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.io.CharStreams;
-import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.feature.StringIndexer;
@@ -69,8 +70,12 @@ public class DatasetUtil {
 	static
 	public StructType loadSchema(File file) throws IOException {
 
-		try(InputStream is = new FileInputStream(file)){
-			String json = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
+		try(Reader reader = new FileReader(file, StandardCharsets.UTF_8)){
+			StringWriter writer = new StringWriter();
+
+			reader.transferTo(writer);
+
+			String json = writer.toString();
 
 			return (StructType)StructType.fromJson(json);
 		}
@@ -93,12 +98,12 @@ public class DatasetUtil {
 
 
 	static
-	public Dataset<Row> loadCsv(SparkSession sparkSession, File file) throws IOException {
+	public Dataset<Row> loadCsv(SparkSession sparkSession, File file){
 		return loadCsv(sparkSession, null, file);
 	}
 
 	static
-	public Dataset<Row> loadCsv(SparkSession sparkSession, StructType schema, File file) throws IOException {
+	public Dataset<Row> loadCsv(SparkSession sparkSession, StructType schema, File file){
 		DataFrameReader reader = sparkSession.read()
 			.format("csv")
 			.option("header", true)
@@ -149,7 +154,7 @@ public class DatasetUtil {
 			throw new IOException();
 		}
 
-		Files.copy(csvFiles[0], file);
+		Files.copy(csvFiles[0].toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 		MoreFiles.deleteRecursively(tmpDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
 	}
