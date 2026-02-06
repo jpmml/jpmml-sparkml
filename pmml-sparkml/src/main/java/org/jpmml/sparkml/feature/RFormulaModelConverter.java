@@ -19,6 +19,7 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.Transformer;
@@ -47,7 +48,7 @@ public class RFormulaModelConverter extends FeatureConverter<RFormulaModel> {
 		String targetCol = resolvedFormula.label();
 
 		String labelCol = transformer.getLabelCol();
-		if(!(targetCol).equals(labelCol)){
+		if(!Objects.equals(targetCol, labelCol)){
 			List<Feature> features = encoder.getFeatures(targetCol);
 
 			encoder.putFeatures(labelCol, features);

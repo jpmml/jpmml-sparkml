@@ -8,9 +8,7 @@
 		<version>3.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml-lightgbm</artifactId>
-	<packaging>jar</packaging>
 
 	<name>JPMML Spark ML LightGBM converter</name>
 	<description>JPMML Apache Spark ML LightGBM to PMML converter</description>

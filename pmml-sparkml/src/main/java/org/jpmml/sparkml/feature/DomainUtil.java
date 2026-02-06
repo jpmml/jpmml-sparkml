@@ -75,14 +75,14 @@ public class DomainUtil {
 
 	static
 	public <V> Map<String, V[]> toJavaMap(scala.collection.immutable.Map scalaMap){
-		Map<String, V[]> javaMap = (Map)CollectionConverters.mapAsJavaMap(scalaMap);
+		Map<String, V[]> javaMap = CollectionConverters.mapAsJavaMap(scalaMap);
 
 		return javaMap;
 	}
 
 	static
 	public <V> scala.collection.immutable.Map toScalaMap(Map<String, V[]> javaMap){
-		scala.collection.mutable.Map scalaMap = (scala.collection.mutable.Map)JavaConverters.mapAsScalaMap(javaMap);
+		scala.collection.mutable.Map scalaMap = JavaConverters.mapAsScalaMap(javaMap);
 
 		return scalaMap.toMap(scala.Predef$.MODULE$.conforms());
 	}

@@ -19,6 +19,7 @@
 package org.jpmml.sparkml.testing;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
@@ -49,11 +50,11 @@ public class RegressionTest extends SimpleSparkMLEncoderBatchTest implements Spa
 
 				Map<String, Object> options = super.getOptions();
 
-				if((LINEAR_REGRESION).equals(algorithm) && (AUTO).equals(dataset)){
+				if(Objects.equals(LINEAR_REGRESION, algorithm) && Objects.equals(AUTO, dataset)){
 					options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, GeneralRegressionModel.class.getSimpleName());
 				} // End if
 
-				if((DECISION_TREE).equals(algorithm) || (GBT).equals(algorithm) || (RANDOM_FOREST).equals(algorithm)){
+				if(Objects.equals(DECISION_TREE, algorithm) || Objects.equals(GBT, algorithm) || Objects.equals(RANDOM_FOREST, algorithm)){
 					options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, Boolean.TRUE);
 				}
 

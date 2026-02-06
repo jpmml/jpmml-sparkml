@@ -36,7 +36,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import com.google.common.io.ByteStreams;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import org.apache.spark.ml.PipelineStage;
@@ -102,7 +101,7 @@ public class ArchiveUtil {
 					zos.putNextEntry(entry);
 
 					try(InputStream is = new FileInputStream(dirFile)){
-						ByteStreams.copy(is, zos);
+						is.transferTo(zos);
 					}
 
 					zos.closeEntry();
@@ -168,7 +167,7 @@ public class ArchiveUtil {
 				}
 
 				try(OutputStream os = new FileOutputStream(file)){
-					ByteStreams.copy(is, os);
+					is.transferTo(os);
 				}
 			}
 		}

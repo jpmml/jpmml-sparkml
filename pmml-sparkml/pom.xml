@@ -8,9 +8,7 @@
 		<version>3.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml</artifactId>
-	<packaging>jar</packaging>
 
 	<name>JPMML Spark ML converter</name>
 	<description>JPMML Apache Spark ML to PMML converter</description>

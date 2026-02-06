@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -60,7 +61,7 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 				String algorithm = getAlgorithm();
 				String dataset = getDataset();
 
-				if((LOGISTIC_REGRESSION).equals(algorithm) && (IRIS_VEC).equals(dataset)){
+				if(Objects.equals(LOGISTIC_REGRESSION, algorithm) && Objects.equals(IRIS_VEC, dataset)){
 					List<String> fieldNames = Arrays.asList("Sepal_Length", "Sepal_Width", "Petal_Length", "Petal_Width");
 
 					pmmlBuilder = pmmlBuilder
@@ -80,7 +81,7 @@ public class LibSVMTest extends SimpleSparkMLEncoderBatchTest implements SparkML
 				String algorithm = getAlgorithm();
 				String dataset = getDataset();
 
-				if((LINEAR_REGRESION).equals(algorithm) && (HOUSING_VEC).equals(dataset)){
+				if(Objects.equals(LINEAR_REGRESION, algorithm) && Objects.equals(HOUSING_VEC, dataset)){
 					table = toLibSVM(table);
 				}
 
