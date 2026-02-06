@@ -10,7 +10,7 @@
 
 	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
-	<version>3.3.2</version>
+	<version>3.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>JPMML-SparkML</name>
@@ -44,7 +44,7 @@
 		<connection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</connection>
 		<developerConnection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</developerConnection>
 		<url>git://github.com/jpmml/jpmml-sparkml.git</url>
-		<tag>3.3.2</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
@@ -62,7 +62,7 @@
 		<spark.version>4.1.0</spark.version>
 		<synapseml-lightgbm.version>[0.9.5, 1.1.2]</synapseml-lightgbm.version>
 		<xgboost4j-spark.version>[2.1.0, 3.1.1]</xgboost4j-spark.version>
-		<project.build.outputTimestamp>2026-02-06T07:59:40Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2026-02-06T08:00:41Z</project.build.outputTimestamp>
 	</properties>
 
 	<dependencyManagement>
@@ -70,27 +70,27 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml</artifactId>
-				<version>3.3.2</version>
+				<version>3.3-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-evaluator</artifactId>
-				<version>3.3.2</version>
+				<version>3.3-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-example</artifactId>
-				<version>3.3.2</version>
+				<version>3.3-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-lightgbm</artifactId>
-				<version>3.3.2</version>
+				<version>3.3-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-sparkml-xgboost</artifactId>
-				<version>3.3.2</version>
+				<version>3.3-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
