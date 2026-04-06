@@ -2,7 +2,7 @@ from pyspark.ml import Pipeline
 from pyspark.ml.classification import DecisionTreeClassifier, GBTClassifier, LinearSVC, LogisticRegression, MultilayerPerceptronClassifier, NaiveBayes, RandomForestClassifier
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, RegressionEvaluator
-from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, QuantileDiscretizer, RegexTokenizer, RFormula, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
+from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, PolynomialExpansion, QuantileDiscretizer, RegexTokenizer, RFormula, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
 from pyspark.ml.fpm import FPGrowth
 from pyspark.ml.regression import DecisionTreeRegressor, GBTRegressor, GeneralizedLinearRegression, IsotonicRegression, LinearRegression, RandomForestRegressor
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder, TrainValidationSplit
@@ -278,6 +278,50 @@ def build_isotonic_auto(auto_df, regressor, name):
 
 	build_regression(auto_df, pipeline, "mpg", regressor.getPredictionCol(), name)
 
+def build_polynomial_expansion_auto(auto_df, regressor, name):
+	stages = []
+
+	stringCols = ["cylinders", "model_year", "origin"]
+	for stringCol in stringCols:
+		stringIndexer = StringIndexer(inputCol = stringCol, outputCol = stringCol.lower() + "Index")
+		stringIndexerModel = stringIndexer.fit(auto_df)
+
+		ohe = OneHotEncoder(inputCol = stringIndexerModel.getOutputCol(), outputCol = stringCol.lower() + "ClassVector")
+
+		stages += [stringIndexerModel, ohe]
+
+	engineContCols = ["displacement", "horsepower"]
+	engineContAssembler = VectorAssembler(inputCols = engineContCols, outputCol = "engineContVector")
+	engineContScaler = StandardScaler(inputCol = engineContAssembler.getOutputCol(), outputCol = "scaledEngineContVector")
+
+	stages += [engineContAssembler, engineContScaler]
+
+	carContCols = ["acceleration", "weight"]
+	carContAssembler = VectorAssembler(inputCols = carContCols, outputCol = "carContVector")
+	carContScaler = StandardScaler(inputCol = carContAssembler.getOutputCol(), outputCol = "scaledCarContVector")
+
+	stages += [carContAssembler, carContScaler]
+
+	engineAssembler = VectorAssembler(inputCols = ["cylindersClassVector", "originClassVector", engineContScaler.getOutputCol()], outputCol = "engineVector")
+	enginePolyExp = PolynomialExpansion(degree = 3, inputCol = engineAssembler.getOutputCol(), outputCol = "enginePolyExpVector")
+
+	stages += [engineAssembler, enginePolyExp]
+
+	carAssembler = VectorAssembler(inputCols = ["model_yearClassVector", carContScaler.getOutputCol()], outputCol = "carVector")
+	carPolyExp = PolynomialExpansion(degree = 2, inputCol = carAssembler.getOutputCol(), outputCol = "carPolyExpVector")
+
+	stages += [carAssembler, carPolyExp]
+
+	vectorAssembler = VectorAssembler(inputCols = [enginePolyExp.getOutputCol(), carPolyExp.getOutputCol()], outputCol = "featureVector")
+
+	regressor = regressor.setLabelCol("mpg").setFeaturesCol(vectorAssembler.getOutputCol())
+
+	stages += [vectorAssembler, regressor]
+
+	pipeline = Pipeline(stages = stages)
+
+	build_regression(auto_df, pipeline, "mpg", regressor.getPredictionCol(), name)
+
 if "Auto" in datasets:
 	auto_df = load_csv("Auto")
 	print(auto_df.dtypes)
@@ -299,6 +343,8 @@ if "Auto" in datasets:
 
 	build_isotonic_auto(auto_df, IsotonicRegression(isotonic = True, featureIndex = 0), "IsotonicRegressionIncrAuto")
 	build_isotonic_auto(auto_df, IsotonicRegression(isotonic = False, featureIndex = 1), "IsotonicRegressionDecrAuto")
+
+	build_polynomial_expansion_auto(auto_df, LinearRegression(), "PolynomialRegressionAuto")
 
 def build_regression_autona(df, name):
 	catCols = ["cylinders", "model_year", "origin"]
