@@ -22,6 +22,7 @@
     * [`feature.QuantileDiscretizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/QuantileDiscretizer.html)
     * [`feature.RegexTokenizer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RegexTokenizer.html)
     * [`feature.RFormulaModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RFormulaModel.html) (the result of fitting a `feature.RFormula`)
+    * [`feature.RobustScalerModel`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/RobustScalerModel.html) (the result of fitting a `feature.RobustScaler`)
     * [`feature.SQLTransformer`](https://spark.apache.org/docs/latest/api/java/org/apache/spark/ml/feature/SQLTransformer.html)
       * Subqueries.
       * Control flow expressions `case when` and `if`.

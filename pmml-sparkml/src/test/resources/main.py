@@ -2,7 +2,7 @@ from pyspark.ml import Pipeline
 from pyspark.ml.classification import DecisionTreeClassifier, GBTClassifier, LinearSVC, LogisticRegression, MultilayerPerceptronClassifier, NaiveBayes, RandomForestClassifier
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, RegressionEvaluator
-from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, PolynomialExpansion, QuantileDiscretizer, RegexTokenizer, RFormula, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
+from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, PolynomialExpansion, QuantileDiscretizer, RegexTokenizer, RFormula, RobustScaler, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
 from pyspark.ml.fpm import FPGrowth
 from pyspark.ml.regression import DecisionTreeRegressor, GBTRegressor, GeneralizedLinearRegression, IsotonicRegression, LinearRegression, RandomForestRegressor
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder, TrainValidationSplit
@@ -292,13 +292,13 @@ def build_polynomial_expansion_auto(auto_df, regressor, name):
 
 	engineContCols = ["displacement", "horsepower"]
 	engineContAssembler = VectorAssembler(inputCols = engineContCols, outputCol = "engineContVector")
-	engineContScaler = StandardScaler(inputCol = engineContAssembler.getOutputCol(), outputCol = "scaledEngineContVector")
+	engineContScaler = RobustScaler(withCentering = True, withScaling = True, inputCol = engineContAssembler.getOutputCol(), outputCol = "scaledEngineContVector")
 
 	stages += [engineContAssembler, engineContScaler]
 
 	carContCols = ["acceleration", "weight"]
 	carContAssembler = VectorAssembler(inputCols = carContCols, outputCol = "carContVector")
-	carContScaler = StandardScaler(inputCol = carContAssembler.getOutputCol(), outputCol = "scaledCarContVector")
+	carContScaler = RobustScaler(withCentering = False, withScaling = True, inputCol = carContAssembler.getOutputCol(), outputCol = "scaledCarContVector")
 
 	stages += [carContAssembler, carContScaler]
 

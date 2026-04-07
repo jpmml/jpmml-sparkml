@@ -74,7 +74,10 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 
 			String name = names.get(i);
 
-			feature = encodeTransformation(feature, name, withMean ? mean.apply(i) : null, withStd ? std.apply(i) : null, encoder);
+			Number meanValue = (withMean ? mean.apply(i) : null);
+			Number stdValue = (withStd ? std.apply(i) : null);
+
+			feature = encodeTransformation(feature, name, meanValue, stdValue, encoder);
 
 			result.add(feature);
 		}
@@ -83,7 +86,7 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 	}
 
 	static
-	private Feature encodeTransformation(Feature feature, String name, Number shift, Number scale, SparkMLEncoder encoder){
+	Feature encodeTransformation(Feature feature, String name, Number shift, Number scale, SparkMLEncoder encoder){
 		Expression expression = null;
 
 		if(shift != null && !ValueUtil.isZero(shift)){
