@@ -74,58 +74,57 @@ public class StandardScalerModelConverter extends FeatureConverter<StandardScale
 
 			String name = names.get(i);
 
-			Expression expression = null;
+			feature = encodeTransformation(feature, name, withMean ? mean.apply(i) : null, withStd ? std.apply(i) : null, encoder);
 
-			if(withMean){
-				double meanValue = mean.apply(i);
-
-				if(!ValueUtil.isZero(meanValue)){
-					ContinuousFeature continuousFeature = feature.toContinuousFeature();
-
-					expression = ExpressionUtil.createApply(PMMLFunctions.SUBTRACT, continuousFeature.ref(), ExpressionUtil.createConstant(meanValue));
-				}
-			} // End if
-
-			if(withStd){
-				double stdValue = std.apply(i);
-
-				if(!ValueUtil.isOne(stdValue)){
-					Double factor = (1d / stdValue);
-
-					if(expression != null){
-						expression = ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, expression, ExpressionUtil.createConstant(factor));
-					} else
-
-					{
-						feature = new ProductFeature(encoder, feature, factor){
-
-							@Override
-							public ContinuousFeature toContinuousFeature(){
-								Supplier<Apply> applySupplier = () -> {
-									Feature feature = getFeature();
-									Number factor = getFactor();
-
-									return ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, (feature.toContinuousFeature()).ref(), ExpressionUtil.createConstant(factor));
-								};
-
-								return toContinuousFeature(name, DataType.DOUBLE, applySupplier);
-							}
-						};
-					}
-				}
-			} // End if
-
-			if(expression != null){
-				DerivedField derivedField = encoder.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
-
-				result.add(new ContinuousFeature(encoder, derivedField));
-			} else
-
-			{
-				result.add(feature);
-			}
+			result.add(feature);
 		}
 
 		return result;
+	}
+
+	static
+	private Feature encodeTransformation(Feature feature, String name, Number shift, Number scale, SparkMLEncoder encoder){
+		Expression expression = null;
+
+		if(shift != null && !ValueUtil.isZero(shift)){
+			ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+			expression = ExpressionUtil.createApply(PMMLFunctions.SUBTRACT, continuousFeature.ref(), ExpressionUtil.createConstant(shift));
+		} // End if
+
+		if(scale != null && !ValueUtil.isOne(scale)){
+			Double factor = (1d / scale.doubleValue());
+
+			if(expression != null){
+				expression = ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, expression, ExpressionUtil.createConstant(factor));
+			} else
+
+			{
+				feature = new ProductFeature(encoder, feature, factor){
+
+					@Override
+					public ContinuousFeature toContinuousFeature(){
+						Supplier<Apply> applySupplier = () -> {
+							Feature feature = getFeature();
+							Number factor = getFactor();
+
+							return ExpressionUtil.createApply(PMMLFunctions.MULTIPLY, (feature.toContinuousFeature()).ref(), ExpressionUtil.createConstant(factor));
+						};
+
+						return toContinuousFeature(name, DataType.DOUBLE, applySupplier);
+					}
+				};
+			}
+		} // End if
+
+		if(expression != null){
+			DerivedField derivedField = encoder.createDerivedField(name, OpType.CONTINUOUS, DataType.DOUBLE, expression);
+
+			return new ContinuousFeature(encoder, derivedField);
+		} else
+
+		{
+			return feature;
+		}
 	}
 }
