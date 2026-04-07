@@ -2,8 +2,9 @@ from pyspark.ml import Pipeline
 from pyspark.ml.classification import DecisionTreeClassifier, GBTClassifier, LinearSVC, LogisticRegression, MultilayerPerceptronClassifier, NaiveBayes, RandomForestClassifier
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, RegressionEvaluator
-from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, PolynomialExpansion, QuantileDiscretizer, RegexTokenizer, RFormula, RobustScaler, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
+from pyspark.ml.feature import Binarizer, Bucketizer, ChiSqSelector, CountVectorizer, ElementwiseProduct, IDF, Imputer, Interaction, MaxAbsScaler, MinMaxScaler, NGram, OneHotEncoder, PCA, PolynomialExpansion, QuantileDiscretizer, RegexTokenizer, RFormula, RobustScaler, SQLTransformer, StandardScaler, StopWordsRemover, StringIndexer, VectorAssembler, VectorIndexer, VectorSizeHint, VectorSlicer
 from pyspark.ml.fpm import FPGrowth
+from pyspark.ml.linalg import Vectors
 from pyspark.ml.regression import DecisionTreeRegressor, GBTRegressor, GeneralizedLinearRegression, IsotonicRegression, LinearRegression, RandomForestRegressor
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder, TrainValidationSplit
 from pyspark.sql.types import BooleanType, DoubleType, IntegerType, StringType
@@ -272,9 +273,14 @@ def build_regression_auto(auto_df, regressor, name):
 def build_isotonic_auto(auto_df, regressor, name):
 	vectorAssembler = VectorAssembler(inputCols = ["acceleration", "weight"], outputCol = "featureVector")
 
-	regressor = regressor.setLabelCol("mpg").setFeaturesCol(vectorAssembler.getOutputCol())
+	scalingVec = [0] * len(vectorAssembler.getInputCols())
+	scalingVec[regressor.getFeatureIndex()] = 0.5
 
-	pipeline = Pipeline(stages = [vectorAssembler, regressor])
+	elementwiseProduct = ElementwiseProduct(scalingVec = Vectors.dense(scalingVec), inputCol = vectorAssembler.getOutputCol(), outputCol = "scaledFeatureVector")
+
+	regressor = regressor.setLabelCol("mpg").setFeaturesCol(elementwiseProduct.getOutputCol())
+
+	pipeline = Pipeline(stages = [vectorAssembler, elementwiseProduct, regressor])
 
 	build_regression(auto_df, pipeline, "mpg", regressor.getPredictionCol(), name)
 
