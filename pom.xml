@@ -1,14 +1,13 @@
 <?xml version="1.0" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" child.project.url.inherit.append.path="false">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.jpmml</groupId>
 		<artifactId>jpmml-parent</artifactId>
-		<version>1.0.13</version>
+		<version>1.0.20</version>
 	</parent>
 
-	<groupId>org.jpmml</groupId>
 	<artifactId>jpmml-sparkml</artifactId>
 	<version>3.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -21,16 +20,8 @@
 		<license>
 			<name>GNU Affero General Public License (AGPL) version 3.0</name>
 			<url>http://www.gnu.org/licenses/agpl-3.0.html</url>
-			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<developers>
-		<developer>
-			<id>villu.ruusmann</id>
-			<name>Villu Ruusmann</name>
-		</developer>
-	</developers>
 
 	<modules>
 		<module>pmml-sparkml</module>
@@ -40,10 +31,10 @@
 		<module>pmml-sparkml-xgboost</module>
 	</modules>
 
-	<scm>
+	<scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
 		<connection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</connection>
 		<developerConnection>scm:git:git@github.com:jpmml/jpmml-sparkml.git</developerConnection>
-		<url>git://github.com/jpmml/jpmml-sparkml.git</url>
+		<url>https://github.com/jpmml/jpmml-sparkml.git</url>
 		<tag>HEAD</tag>
 	</scm>
 	<issueManagement>
