@@ -108,6 +108,11 @@ public class RegressionTest extends SimpleSparkMLEncoderBatchTest implements Spa
 	}
 
 	@Test
+	public void evaluatePolynomialRegressionAuto() throws Exception {
+		evaluate("PolynomialRegression", AUTO);
+	}
+
+	@Test
 	public void evaluateRandomForestAuto() throws Exception {
 		evaluate(RANDOM_FOREST, AUTO);
 	}

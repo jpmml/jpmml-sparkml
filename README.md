@@ -103,11 +103,13 @@ Archived development branches:
 ### Example application
 
 Enter the project root directory and build using [Apache Maven](https://maven.apache.org/):
-```
+
+```bash
 mvn clean install
 ```
 
 The build produces two JAR files:
+
 * `pmml-sparkml/target/pmml-sparkml-3.3-SNAPSHOT.jar` - Library JAR file.
 * `pmml-sparkml-exampletarget/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar` - Example application JAR file.
 
@@ -116,6 +118,7 @@ The build produces two JAR files:
 ### Library
 
 Fitting a Spark ML pipeline:
+
 ```scala
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
@@ -132,6 +135,7 @@ val pipelineModel = pipeline.fit(irisData)
 ```
 
 Converting the fitted Spark ML pipeline to an in-memory PMML class model object:
+
 ```scala
 import org.jpmml.sparkml.PMMLBuilder
 
@@ -139,6 +143,7 @@ val pmml = new PMMLBuilder(irisSchema, pipelineModel).build()
 ```
 
 The representation of individual Spark ML pipeline stages can be customized via conversion options:
+
 ```scala
 import org.jpmml.sparkml.PMMLBuilder
 import org.jpmml.sparkml.model.HasTreeOptions
@@ -149,6 +154,7 @@ val pmml = new PMMLBuilder(irisSchema, pipelineModel).putOption(dtClassifierMode
 ```
 
 Viewing the in-memory PMML class model object:
+
 ```scala
 import javax.xml.transform.stream.StreamResult
 import org.jpmml.model.JAXBUtil
@@ -163,13 +169,15 @@ The example application JAR file contains an executable class `org.jpmml.sparkml
 The example application JAR file does not include Apache Spark runtime libraries. Therefore, this executable class must be executed using Apache Spark's `spark-submit` helper script.
 
 For example, converting a pair of Spark ML schema and pipeline serialization files `pmml-sparkml/src/test/resources/schema/Iris.json` and `pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip`, respectively, to a PMML file `DecisionTreeIris.pmml`:
-```
-spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar --schema-input pmml-sparkml/src/test/resources/schema/Iris.json --pipeline-input pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
+
+```bash
+$SPARK_HOME/bin/spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar --schema-input pmml-sparkml/src/test/resources/schema/Iris.json --pipeline-input pmml-sparkml/src/test/resources/pipeline/DecisionTreeIris.zip --pmml-output DecisionTreeIris.pmml
 ```
 
 Getting help:
-```
-spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar --help
+
+```bash
+$SPARK_HOME/bin/spark-submit --master local --class org.jpmml.sparkml.example.Main pmml-sparkml-example/target/pmml-sparkml-example-executable-3.3-SNAPSHOT.jar --help
 ```
 
 # Documentation #

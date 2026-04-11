@@ -26,7 +26,7 @@ import org.apache.spark.ml.feature.Interaction;
 import org.dmg.pmml.DataType;
 import org.jpmml.converter.DiscreteFeature;
 import org.jpmml.converter.Feature;
-import org.jpmml.converter.FieldNameUtil;
+import org.jpmml.converter.FeatureUtil;
 import org.jpmml.converter.InteractionFeature;
 import org.jpmml.sparkml.FeatureConverter;
 import org.jpmml.sparkml.SparkMLEncoder;
@@ -41,11 +41,34 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 	public List<Feature> encodeFeatures(SparkMLEncoder encoder){
 		Interaction transformer = getTransformer();
 
-		StringBuilder sb = new StringBuilder();
+		String[] inputCols = transformer.getInputCols();
+
+		int outputSize = 1;
+
+		for(int i = 0; i < inputCols.length; i++){
+			String inputCol = inputCols[i];
+
+			List<Feature> features = encoder.getFeatures(inputCol);
+
+			if(features.size() == 1){
+				Feature feature = features.get(0);
+
+				if(feature instanceof DiscreteFeature){
+					DiscreteFeature discreteFeature = (DiscreteFeature)feature;
+
+					outputSize *= discreteFeature.size();
+
+					continue;
+				}
+			}
+
+			outputSize *= features.size();
+		}
+
+		List<String> names = formatNames(outputSize, encoder);
 
 		List<Feature> result = new ArrayList<>();
 
-		String[] inputCols = transformer.getInputCols();
 		for(int i = 0; i < inputCols.length; i++){
 			String inputCol = inputCols[i];
 
@@ -71,22 +94,15 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 							break;
 					}
 
-					// XXX
-					inputCol = name;
-
 					features = (List)OneHotEncoderModelConverter.encodeFeature(encoder, discreteFeature, discreteFeature.getValues());
 				}
 			} // End if
 
 			if(i == 0){
-				sb.append(inputCol);
-
 				result = features;
 			} else
 
 			{
-				sb.append(':').append(inputCol);
-
 				List<Feature> interactionFeatures = new ArrayList<>();
 
 				int index = 0;
@@ -94,7 +110,17 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 				for(Feature left : result){
 
 					for(Feature right : features){
-						interactionFeatures.add(new InteractionFeature(encoder, FieldNameUtil.select(sb.toString(), index), DataType.DOUBLE, Arrays.asList(left, right)));
+						String name;
+
+						if((i > 0) && i < (inputCols.length - 1)){
+							name = FeatureUtil.getName(left) + ":" + FeatureUtil.getName(right);
+						} else
+
+						{
+							name = names.get(index);
+						}
+
+						interactionFeatures.add(new InteractionFeature(encoder, name, DataType.DOUBLE, Arrays.asList(left, right)));
 
 						index++;
 					}

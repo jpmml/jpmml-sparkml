@@ -75,7 +75,9 @@ public class IsotonicRegressionModelConverter extends ModelConverter<IsotonicReg
 
 		Feature feature = features.get(featureIndex);
 
-		NormContinuous normContinuous = new NormContinuous(feature.getName(), null)
+		ContinuousFeature continuousFeature = feature.toContinuousFeature();
+
+		NormContinuous normContinuous = new NormContinuous(continuousFeature.getName(), null)
 			.setOutlierTreatment(OutlierTreatmentMethod.AS_EXTREME_VALUES);
 
 		for(int i = 0, length = boundaries.size(); i < length; i++){
