@@ -73,7 +73,10 @@ public class PolynomialExpansionConverter extends FeatureConverter<PolynomialExp
 			if(parentTermFeatures.size() >= 2){
 				String name = names.get(result.size());
 
-				result.add(new InteractionFeature(encoder, name, DataType.DOUBLE, parentTermFeatures));
+				Feature feature = new InteractionFeature(encoder, name, DataType.DOUBLE, parentTermFeatures)
+					.simplify();
+
+				result.add(feature);
 			}
 		} else
 

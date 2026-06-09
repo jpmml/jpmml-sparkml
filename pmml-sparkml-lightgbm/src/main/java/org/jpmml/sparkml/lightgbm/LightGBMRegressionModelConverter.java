@@ -19,7 +19,7 @@
 package org.jpmml.sparkml.lightgbm;
 
 import com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressionModel;
-import org.dmg.pmml.mining.MiningModel;
+import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.RegressionModelConverter;
 
@@ -30,9 +30,7 @@ public class LightGBMRegressionModelConverter extends RegressionModelConverter<L
 	}
 
 	@Override
-	public MiningModel encodeModel(Schema schema){
-		LightGBMRegressionModel model = getModel();
-
+	public Model encodeModel(Schema schema){
 		return BoosterUtil.encodeModel(this, schema);
 	}
 }

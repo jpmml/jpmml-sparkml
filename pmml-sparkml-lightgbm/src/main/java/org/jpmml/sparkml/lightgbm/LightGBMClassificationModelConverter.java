@@ -19,8 +19,7 @@
 package org.jpmml.sparkml.lightgbm;
 
 import com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel;
-import org.dmg.pmml.mining.MiningModel;
-import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
@@ -43,14 +42,12 @@ public class LightGBMClassificationModelConverter extends ProbabilisticClassific
 	}
 
 	@Override
-	public MiningModel encodeModel(Schema schema){
-		LightGBMClassificationModel model = getModel();
+	public Model encodeModel(Schema schema){
+		Model result = BoosterUtil.encodeModel(this, schema);
 
-		MiningModel miningModel = BoosterUtil.encodeModel(this, schema);
+		Model finalModel = MiningModelUtil.getFinalModel(result);
+		finalModel.setOutput(null);
 
-		RegressionModel regressionModel = (RegressionModel)MiningModelUtil.getFinalModel(miningModel);
-		regressionModel.setOutput(null);
-
-		return miningModel;
+		return result;
 	}
 }
