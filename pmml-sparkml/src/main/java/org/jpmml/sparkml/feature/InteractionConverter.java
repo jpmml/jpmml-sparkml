@@ -120,7 +120,10 @@ public class InteractionConverter extends FeatureConverter<Interaction> {
 							name = names.get(index);
 						}
 
-						interactionFeatures.add(new InteractionFeature(encoder, name, DataType.DOUBLE, Arrays.asList(left, right)));
+						Feature feature = new InteractionFeature(encoder, name, DataType.DOUBLE, Arrays.asList(left, right))
+							.simplify();
+
+						interactionFeatures.add(feature);
 
 						index++;
 					}

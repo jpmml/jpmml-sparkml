@@ -31,7 +31,6 @@ import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.params.GeneralParams;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.sparkml.ModelConverter;
 import org.jpmml.xgboost.HasXGBoostOptions;
@@ -44,7 +43,7 @@ public class BoosterUtil {
 	}
 
 	static
-	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M>> MiningModel encodeBooster(C converter, Booster booster, Schema schema){
+	public <M extends Model<M> & HasPredictionCol & GeneralParams, C extends ModelConverter<M>> org.dmg.pmml.Model encodeBooster(C converter, Booster booster, Schema schema){
 		M model = converter.getModel();
 
 		Learner learner;

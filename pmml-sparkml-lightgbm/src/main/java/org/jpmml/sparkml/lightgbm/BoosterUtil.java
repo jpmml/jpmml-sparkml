@@ -29,7 +29,6 @@ import com.microsoft.azure.synapse.ml.lightgbm.LightGBMModelMethods;
 import com.microsoft.azure.synapse.ml.lightgbm.booster.LightGBMBooster;
 import org.apache.spark.ml.Model;
 import org.apache.spark.ml.param.shared.HasPredictionCol;
-import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.Schema;
 import org.jpmml.lightgbm.GBDT;
 import org.jpmml.lightgbm.HasLightGBMOptions;
@@ -43,7 +42,7 @@ public class BoosterUtil {
 	}
 
 	static
-	public <C extends ModelConverter<M>, M extends Model<M> & HasPredictionCol & LightGBMModelMethods> MiningModel encodeModel(C converter, Schema schema){
+	public <C extends ModelConverter<M>, M extends Model<M> & HasPredictionCol & LightGBMModelMethods> org.dmg.pmml.Model encodeModel(C converter, Schema schema){
 		M model = converter.getModel();
 
 		GBDT gbdt = BoosterUtil.getGBDT(model);
@@ -59,9 +58,7 @@ public class BoosterUtil {
 
 		Schema lgbmSchema = gbdt.toLightGBMSchema(schema);
 
-		MiningModel miningModel = gbdt.encodeModel(options, lgbmSchema);
-
-		return miningModel;
+		return gbdt.encodeModel(options, lgbmSchema);
 	}
 
 	static
