@@ -26,7 +26,6 @@ import org.dmg.pmml.DataType;
 import org.dmg.pmml.MiningFunction;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.mining.MiningModel;
 import org.jpmml.converter.ContinuousLabel;
 import org.jpmml.converter.Label;
 import org.jpmml.converter.Schema;
@@ -56,7 +55,7 @@ public class XGBoostRegressionModelConverter extends PredictionModelConverter<XG
 	}
 
 	@Override
-	public MiningModel encodeModel(Schema schema){
+	public Model encodeModel(Schema schema){
 		XGBoostRegressionModel model = getModel();
 
 		Booster booster = model.nativeBooster();

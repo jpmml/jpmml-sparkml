@@ -21,8 +21,7 @@ package org.jpmml.sparkml.xgboost;
 import ml.dmlc.xgboost4j.scala.Booster;
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel;
 import org.dmg.pmml.DataType;
-import org.dmg.pmml.mining.MiningModel;
-import org.dmg.pmml.regression.RegressionModel;
+import org.dmg.pmml.Model;
 import org.jpmml.converter.Schema;
 import org.jpmml.converter.mining.MiningModelUtil;
 import org.jpmml.sparkml.ProbabilisticClassificationModelConverter;
@@ -51,16 +50,16 @@ public class XGBoostClassificationModelConverter extends ProbabilisticClassifica
 	}
 
 	@Override
-	public MiningModel encodeModel(Schema schema){
+	public Model encodeModel(Schema schema){
 		XGBoostClassificationModel model = getModel();
 
 		Booster booster = model.nativeBooster();
 
-		MiningModel miningModel = BoosterUtil.encodeBooster(this, booster, schema);
+		Model result = BoosterUtil.encodeBooster(this, booster, schema);
 
-		RegressionModel regressionModel = (RegressionModel)MiningModelUtil.getFinalModel(miningModel);
-		regressionModel.setOutput(null);
+		Model finalModel = MiningModelUtil.getFinalModel(result);
+		finalModel.setOutput(null);
 
-		return miningModel;
+		return result;
 	}
 }

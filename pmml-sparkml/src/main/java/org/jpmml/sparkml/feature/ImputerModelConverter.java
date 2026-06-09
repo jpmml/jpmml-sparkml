@@ -19,7 +19,6 @@
 package org.jpmml.sparkml.feature;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.ml.feature.ImputerModel;
@@ -78,7 +77,7 @@ public class ImputerModelConverter extends MultiFeatureConverter<ImputerModel> {
 				encoder.addDecorator(dataField, new MissingValueDecorator(missingValueTreatmentMethod, surrogate));
 
 				if(missingValue != null && !missingValue.isNaN()){
-					FieldUtil.addValues(dataField, Value.Property.MISSING, Collections.singletonList(missingValue));
+					FieldUtil.addValue(dataField, Value.Property.MISSING, missingValue);
 				}
 			} else
 
