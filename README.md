@@ -46,7 +46,7 @@ For a full list of supported transformer and estimator classes see the [`feature
 
 # Prerequisites #
 
-* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X, 3.5.X, 4.0.X or 4.1.X.
+* Apache Spark 3.0.X, 3.1.X, 3.2.X, 3.3.X, 3.4.X, 3.5.X, 4.0.X, 4.1.X or 4.2.X.
 
 # Installation #
 
@@ -54,13 +54,13 @@ For a full list of supported transformer and estimator classes see the [`feature
 
 JPMML-SparkML library JAR file (together with accompanying Java source and Javadocs JAR files) is released via [Maven Central Repository](https://repo1.maven.org/maven2/org/jpmml/).
 
-The current version is **3.1.12** (9 June, 2026).
+The current version is **3.1.13** (22 August, 2026).
 
 ```xml
 <dependency>
 	<groupId>org.jpmml</groupId>
 	<artifactId>pmml-sparkml</artifactId>
-	<version>3.1.12</version>
+	<version>3.1.13</version>
 </dependency>
 ```
 
@@ -73,7 +73,8 @@ Active development branches:
 | [`3.0.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.0.X) | 3.4.X |
 | [`3.1.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.1.X) | 3.5.X |
 | [`3.2.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.2.X) | 4.0.X |
-| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 4.1.X |
+| [`3.3.X`](https://github.com/jpmml/jpmml-sparkml/tree/3.3.X) | 4.1.X |
+| [`master`](https://github.com/jpmml/jpmml-sparkml/tree/master) | 4.2.X |
 
 Stale development branches:
 
