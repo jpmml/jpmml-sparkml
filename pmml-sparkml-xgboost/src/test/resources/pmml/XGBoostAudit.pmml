@@ -1,0 +1,3671 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-SparkML command-line application" version="3.3-SNAPSHOT"/>
+		<Timestamp>2026-08-22T18:58:27Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="Adjusted" optype="categorical" dataType="string">
+			<Value value="0"/>
+			<Value value="1"/>
+		</DataField>
+		<DataField name="Education" optype="categorical" dataType="string">
+			<Value value="HSgrad"/>
+			<Value value="College"/>
+			<Value value="Bachelor"/>
+			<Value value="Master"/>
+			<Value value="Vocational"/>
+			<Value value="Associate"/>
+			<Value value="Yr11"/>
+			<Value value="Yr10"/>
+			<Value value="Yr7t8"/>
+			<Value value="Yr9"/>
+			<Value value="Doctorate"/>
+			<Value value="Professional"/>
+			<Value value="Yr5t6"/>
+			<Value value="Yr12"/>
+			<Value value="Preschool"/>
+			<Value value="Yr1t4"/>
+		</DataField>
+		<DataField name="Employment" optype="categorical" dataType="string">
+			<Value value="Private"/>
+			<Value value="Consultant"/>
+			<Value value="PSLocal"/>
+			<Value value="SelfEmp"/>
+			<Value value="PSState"/>
+			<Value value="PSFederal"/>
+			<Value value="Volunteer"/>
+		</DataField>
+		<DataField name="Gender" optype="categorical" dataType="string">
+			<Value value="Male"/>
+			<Value value="Female"/>
+		</DataField>
+		<DataField name="Marital" optype="categorical" dataType="string">
+			<Value value="Married"/>
+			<Value value="Absent"/>
+			<Value value="Divorced"/>
+			<Value value="Unmarried"/>
+			<Value value="Widowed"/>
+			<Value value="Married-spouse-absent"/>
+		</DataField>
+		<DataField name="Occupation" optype="categorical" dataType="string">
+			<Value value="Executive"/>
+			<Value value="Professional"/>
+			<Value value="Clerical"/>
+			<Value value="Repair"/>
+			<Value value="Service"/>
+			<Value value="Sales"/>
+			<Value value="Machinist"/>
+			<Value value="Transport"/>
+			<Value value="Cleaner"/>
+			<Value value="Farming"/>
+			<Value value="Support"/>
+			<Value value="Protective"/>
+			<Value value="Home"/>
+			<Value value="Military"/>
+		</DataField>
+		<DataField name="Age" optype="continuous" dataType="integer"/>
+		<DataField name="Hours" optype="continuous" dataType="integer"/>
+		<DataField name="Income" optype="continuous" dataType="float"/>
+	</DataDictionary>
+	<MiningModel functionName="classification" algorithmName="XGBoost (GBTree)" x-mathContext="float">
+		<MiningSchema>
+			<MiningField name="Adjusted" usageType="target"/>
+			<MiningField name="Education"/>
+			<MiningField name="Employment"/>
+			<MiningField name="Gender"/>
+			<MiningField name="Marital"/>
+			<MiningField name="Occupation"/>
+			<MiningField name="Age"/>
+			<MiningField name="Hours"/>
+			<MiningField name="Income"/>
+		</MiningSchema>
+		<Output>
+			<OutputField name="pmml(prediction)" optype="categorical" dataType="string" isFinalResult="false"/>
+			<OutputField name="prediction" optype="continuous" dataType="double" feature="transformedValue">
+				<MapValues outputColumn="data:output" dataType="double">
+					<FieldColumnPair field="pmml(prediction)" column="data:input"/>
+					<InlineTable>
+						<row>
+							<data:input>0</data:input>
+							<data:output>0</data:output>
+						</row>
+						<row>
+							<data:input>1</data:input>
+							<data:output>1</data:output>
+						</row>
+					</InlineTable>
+				</MapValues>
+			</OutputField>
+		</Output>
+		<Segmentation multipleModelMethod="modelChain" missingPredictionTreatment="returnMissing">
+			<Segment id="1">
+				<True/>
+				<MiningModel functionName="regression" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="Education"/>
+						<MiningField name="Employment"/>
+						<MiningField name="Gender"/>
+						<MiningField name="Marital"/>
+						<MiningField name="Occupation"/>
+						<MiningField name="Age"/>
+						<MiningField name="Hours"/>
+						<MiningField name="Income"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="xgbValue" optype="continuous" dataType="float" isFinalResult="false"/>
+					</Output>
+					<Targets>
+						<Target rescaleConstant="-1.1781386"/>
+					</Targets>
+					<Segmentation multipleModelMethod="sum" missingPredictionTreatment="returnMissing">
+						<Segment id="1">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Gender"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="3.0829813E-8" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.29280785" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.3229162" defaultChild="8">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+											<Node id="7" score="-0.34876522" defaultChild="16">
+												<SimplePredicate field="Hours" operator="lessThan" value="50"/>
+												<Node id="15" score="-0.3527007" defaultChild="32">
+													<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													<Node id="31" score="-0.3627327">
+														<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													</Node>
+													<Node id="32" score="-0.24480605">
+														<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.046767168">
+													<SimplePredicate field="Education" operator="equal" value="Master"/>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.14735362" defaultChild="18">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="50"/>
+												<Node id="17" score="-0.228275" defaultChild="34">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Executive"/>
+													<Node id="33" score="-1.1671891E-4">
+														<SimplePredicate field="Income" operator="lessThan" value="50548.68"/>
+													</Node>
+													<Node id="34" score="-0.27827802">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="50548.68"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.09087053" defaultChild="36">
+													<SimplePredicate field="Occupation" operator="equal" value="Executive"/>
+													<Node id="35" score="0.2500573">
+														<SimplePredicate field="Income" operator="lessThan" value="80043.25"/>
+													</Node>
+													<Node id="36" score="-0.110413775">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="80043.25"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.08343894" defaultChild="10">
+											<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+											<Node id="9" score="-0.1642572" defaultChild="20">
+												<SimplePredicate field="Age" operator="lessThan" value="48"/>
+												<Node id="19" score="-0.28282258" defaultChild="38">
+													<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+													<Node id="37" score="-0.29977557">
+														<SimplePredicate field="Hours" operator="lessThan" value="46"/>
+													</Node>
+													<Node id="38" score="-0.05947298">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="46"/>
+													</Node>
+												</Node>
+												<Node id="20" score="0.030672785" defaultChild="40">
+													<SimplePredicate field="Gender" operator="equal" value="Male"/>
+													<Node id="39" score="-0.14090183">
+														<SimplePredicate field="Age" operator="lessThan" value="32"/>
+													</Node>
+													<Node id="40" score="0.2500573">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="32"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="0.15390283" defaultChild="22">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="48"/>
+												<Node id="21" score="0.22449268" defaultChild="42">
+													<SimplePredicate field="Marital" operator="notEqual" value="Absent"/>
+													<Node id="41" score="0.353917">
+														<SimplePredicate field="Income" operator="lessThan" value="75278.41"/>
+													</Node>
+													<Node id="42" score="0.016648958">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="75278.41"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.085984424">
+													<SimplePredicate field="Marital" operator="equal" value="Absent"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.34019768" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.23915021" defaultChild="12">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Executive"/>
+											<Node id="11" score="0.1428747" defaultChild="24">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+												<Node id="23" score="-0.03482653" defaultChild="44">
+													<SimplePredicate field="Age" operator="lessThan" value="37"/>
+													<Node id="43" score="-0.13785543">
+														<SimplePredicate field="Hours" operator="lessThan" value="42"/>
+													</Node>
+													<Node id="44" score="0.1335245">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="42"/>
+													</Node>
+												</Node>
+												<Node id="24" score="0.2453941" defaultChild="46">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="37"/>
+													<Node id="45" score="0.19533072">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+													</Node>
+													<Node id="46" score="0.5918247">
+														<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="0.69516206" defaultChild="26">
+												<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												<Node id="25" score="0.7902258" defaultChild="48">
+													<SimplePredicate field="Education" operator="notEqual" value="College"/>
+													<Node id="47" score="0.08476612">
+														<SimplePredicate field="Hours" operator="lessThan" value="26"/>
+													</Node>
+													<Node id="48" score="0.82726717">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="26"/>
+													</Node>
+												</Node>
+												<Node id="26" score="-0.02517971" defaultChild="50">
+													<SimplePredicate field="Education" operator="equal" value="College"/>
+													<Node id="49" score="-0.10858453">
+														<SimplePredicate field="Age" operator="lessThan" value="44"/>
+													</Node>
+													<Node id="50" score="0.08476612">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.7183079" defaultChild="14">
+											<SimplePredicate field="Occupation" operator="equal" value="Executive"/>
+											<Node id="13" score="0.14950821" defaultChild="28">
+												<SimplePredicate field="Age" operator="lessThan" value="32"/>
+												<Node id="27" score="-0.09521982" defaultChild="52">
+													<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													<Node id="51" score="0.046767168">
+														<SimplePredicate field="Income" operator="lessThan" value="42628.43"/>
+													</Node>
+													<Node id="52" score="-0.20371209">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="42628.43"/>
+													</Node>
+												</Node>
+												<Node id="28" score="0.445022">
+													<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+												</Node>
+											</Node>
+											<Node id="14" score="0.782783" defaultChild="30">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="32"/>
+												<Node id="29" score="0.8508541" defaultChild="54">
+													<SimplePredicate field="Employment" operator="notEqual" value="Consultant"/>
+													<Node id="53" score="0.9247243">
+														<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+													</Node>
+													<Node id="54" score="0.48802486">
+														<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+													</Node>
+												</Node>
+												<Node id="30" score="0.14767893" defaultChild="56">
+													<SimplePredicate field="Employment" operator="equal" value="Consultant"/>
+													<Node id="55" score="0.28353417">
+														<SimplePredicate field="Income" operator="lessThan" value="41358.63"/>
+													</Node>
+													<Node id="56" score="-0.085984424">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="41358.63"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="2">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.009666307" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.2536579" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.26355886" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+											<Node id="7" score="-0.2717338" defaultChild="14">
+												<SimplePredicate field="Education" operator="notEqual" value="Doctorate"/>
+												<Node id="13" score="-0.304325" defaultChild="24">
+													<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													<Node id="23" score="-0.31580323">
+														<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+													</Node>
+													<Node id="24" score="-0.059388794">
+														<SimplePredicate field="Education" operator="equal" value="Associate"/>
+													</Node>
+												</Node>
+												<Node id="14" score="-0.10141765" defaultChild="26">
+													<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													<Node id="25" score="-0.19806314">
+														<SimplePredicate field="Age" operator="lessThan" value="42"/>
+													</Node>
+													<Node id="26" score="0.12787305">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="42"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="0.27183172">
+												<SimplePredicate field="Education" operator="equal" value="Doctorate"/>
+											</Node>
+										</Node>
+										<Node id="4" score="0.35489047">
+											<SimplePredicate field="Education" operator="equal" value="Professional"/>
+										</Node>
+									</Node>
+									<Node id="2" score="0.20085551" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.27238122" defaultChild="10">
+											<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+											<Node id="9" score="0.29581103" defaultChild="16">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+												<Node id="15" score="0.31115624" defaultChild="28">
+													<SimplePredicate field="Education" operator="notEqual" value="Yr7t8"/>
+													<Node id="27" score="0.3475901">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													</Node>
+													<Node id="28" score="0.049227465">
+														<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.29336587">
+													<SimplePredicate field="Education" operator="equal" value="Yr7t8"/>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.17179802" defaultChild="18">
+												<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+												<Node id="17" score="-0.21523361" defaultChild="30">
+													<SimplePredicate field="Income" operator="lessThan" value="51958.85"/>
+													<Node id="29" score="-0.023434142">
+														<SimplePredicate field="Income" operator="lessThan" value="26834.22"/>
+													</Node>
+													<Node id="30" score="-0.29539347">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="26834.22"/>
+													</Node>
+												</Node>
+												<Node id="18" score="-0.013841027">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="51958.85"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.041777447" defaultChild="12">
+											<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+											<Node id="11" score="-0.13938509" defaultChild="20">
+												<SimplePredicate field="Income" operator="lessThan" value="26834.22"/>
+												<Node id="19" score="-0.1848766" defaultChild="32">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Executive"/>
+													<Node id="31" score="-0.24175961">
+														<SimplePredicate field="Hours" operator="lessThan" value="50"/>
+													</Node>
+													<Node id="32" score="-0.008782253">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="50"/>
+													</Node>
+												</Node>
+												<Node id="20" score="0.1667733">
+													<SimplePredicate field="Occupation" operator="equal" value="Executive"/>
+												</Node>
+											</Node>
+											<Node id="12" score="0.11441641" defaultChild="22">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="26834.22"/>
+												<Node id="21" score="-0.06592374" defaultChild="34">
+													<SimplePredicate field="Age" operator="lessThan" value="38"/>
+													<Node id="33" score="0.28956532">
+														<SimplePredicate field="Income" operator="lessThan" value="31008.6"/>
+													</Node>
+													<Node id="34" score="-0.12177371">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="31008.6"/>
+													</Node>
+												</Node>
+												<Node id="22" score="0.20676245" defaultChild="36">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="38"/>
+													<Node id="35" score="-0.16459873">
+														<SimplePredicate field="Hours" operator="lessThan" value="33"/>
+													</Node>
+													<Node id="36" score="0.25649473">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="33"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="3">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.012926499" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.2190542" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.2554709" defaultChild="8">
+											<SimplePredicate field="Hours" operator="lessThan" value="50"/>
+											<Node id="7" score="-0.2858972" defaultChild="16">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+												<Node id="15" score="-0.29135516" defaultChild="28">
+													<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													<Node id="27" score="-0.32695955">
+														<SimplePredicate field="Age" operator="lessThan" value="35"/>
+													</Node>
+													<Node id="28" score="-0.22938491">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="35"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.09623096">
+													<SimplePredicate field="Education" operator="equal" value="Master"/>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.08659742" defaultChild="18">
+												<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												<Node id="17" score="-0.22773786" defaultChild="30">
+													<SimplePredicate field="Age" operator="lessThan" value="41"/>
+													<Node id="29" score="-0.1405318">
+														<SimplePredicate field="Income" operator="lessThan" value="89889.54"/>
+													</Node>
+													<Node id="30" score="-0.28645605">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="89889.54"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.04951174" defaultChild="32">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="41"/>
+													<Node id="31" score="0.20934835">
+														<SimplePredicate field="Income" operator="lessThan" value="77664.69"/>
+													</Node>
+													<Node id="32" score="-0.08712533">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="77664.69"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.016900867" defaultChild="10">
+											<SimplePredicate field="Hours" operator="greaterOrEqual" value="50"/>
+											<Node id="9" score="-0.2704631">
+												<SimplePredicate field="Age" operator="lessThan" value="26"/>
+											</Node>
+											<Node id="10" score="0.04216796" defaultChild="20">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="26"/>
+												<Node id="19" score="0.10796036" defaultChild="34">
+													<SimplePredicate field="Income" operator="lessThan" value="126888.91"/>
+													<Node id="33" score="0.1467351">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+													</Node>
+													<Node id="34" score="-0.19891241">
+														<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.26131678">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="126888.91"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.13051313" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.104165666" defaultChild="12">
+											<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+											<Node id="11" score="0.046315543" defaultChild="22">
+												<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+												<Node id="21" score="-0.14609909" defaultChild="36">
+													<SimplePredicate field="Hours" operator="lessThan" value="37"/>
+													<Node id="35" score="-0.22280975">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+													</Node>
+													<Node id="36" score="0.16811258">
+														<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+													</Node>
+												</Node>
+												<Node id="22" score="0.07442515" defaultChild="38">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="37"/>
+													<Node id="37" score="0.19598536">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="38" score="0.019771775">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="0.27943492" defaultChild="24">
+												<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+												<Node id="23" score="0.15582788" defaultChild="40">
+													<SimplePredicate field="Hours" operator="lessThan" value="41"/>
+													<Node id="39" score="-0.033371147">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="40" score="0.21699014">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+												<Node id="24" score="0.38611594" defaultChild="42">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="41"/>
+													<Node id="41" score="0.18603593">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="42" score="0.44884706">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.41860303" defaultChild="14">
+											<SimplePredicate field="Education" operator="equal" value="Master"/>
+											<Node id="13" score="0.052771833">
+												<SimplePredicate field="Hours" operator="lessThan" value="21"/>
+											</Node>
+											<Node id="14" score="0.44262013" defaultChild="26">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="21"/>
+												<Node id="25" score="0.06075102">
+													<SimplePredicate field="Income" operator="lessThan" value="14717.12"/>
+												</Node>
+												<Node id="26" score="0.47408727" defaultChild="44">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="14717.12"/>
+													<Node id="43" score="0.55374455">
+														<SimplePredicate field="Hours" operator="lessThan" value="48"/>
+													</Node>
+													<Node id="44" score="0.28034893">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="48"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="4">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.012429405" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.19045515" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.25942153" defaultChild="8">
+											<SimplePredicate field="Age" operator="lessThan" value="39"/>
+											<Node id="7" score="-0.28549162" defaultChild="16">
+												<SimplePredicate field="Hours" operator="lessThan" value="49"/>
+												<Node id="15" score="-0.29895154" defaultChild="30">
+													<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+													<Node id="29" score="-0.3031615">
+														<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													</Node>
+													<Node id="30" score="-0.06546815">
+														<SimplePredicate field="Education" operator="equal" value="Master"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.013072276" defaultChild="32">
+													<SimplePredicate field="Education" operator="equal" value="Associate"/>
+													<Node id="31" score="-0.18523563">
+														<SimplePredicate field="Income" operator="lessThan" value="75278.41"/>
+													</Node>
+													<Node id="32" score="0.18425484">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="75278.41"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.11420875" defaultChild="18">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="49"/>
+												<Node id="17" score="-0.16414595" defaultChild="34">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													<Node id="33" score="-0.24368294">
+														<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													</Node>
+													<Node id="34" score="0.08370221">
+														<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.17793518">
+													<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.0815447" defaultChild="10">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="39"/>
+											<Node id="9" score="-0.10372468" defaultChild="20">
+												<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+												<Node id="19" score="0.112221815" defaultChild="36">
+													<SimplePredicate field="Income" operator="lessThan" value="47063.94"/>
+													<Node id="35" score="-0.103490815">
+														<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													</Node>
+													<Node id="36" score="0.45862636">
+														<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.14818466" defaultChild="38">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="47063.94"/>
+													<Node id="37" score="-0.16495264">
+														<SimplePredicate field="Education" operator="notEqual" value="Doctorate"/>
+													</Node>
+													<Node id="38" score="0.22020134">
+														<SimplePredicate field="Education" operator="equal" value="Doctorate"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="0.37058505">
+												<SimplePredicate field="Education" operator="equal" value="Professional"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.0934157" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.06340197" defaultChild="12">
+											<SimplePredicate field="Income" operator="lessThan" value="60796.94"/>
+											<Node id="11" score="0.02191696" defaultChild="22">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Executive"/>
+												<Node id="21" score="-0.049123157" defaultChild="40">
+													<SimplePredicate field="Hours" operator="lessThan" value="42"/>
+													<Node id="39" score="-0.12870488">
+														<SimplePredicate field="Age" operator="lessThan" value="44"/>
+													</Node>
+													<Node id="40" score="0.03124659">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+													</Node>
+												</Node>
+												<Node id="22" score="0.118061736" defaultChild="42">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="42"/>
+													<Node id="41" score="-0.00937424">
+														<SimplePredicate field="Age" operator="lessThan" value="36"/>
+													</Node>
+													<Node id="42" score="0.17660904">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="36"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="0.20331927" defaultChild="24">
+												<SimplePredicate field="Occupation" operator="equal" value="Executive"/>
+												<Node id="23" score="-0.06255868" defaultChild="44">
+													<SimplePredicate field="Age" operator="lessThan" value="33"/>
+													<Node id="43" score="-0.16966756">
+														<SimplePredicate field="Hours" operator="lessThan" value="41"/>
+													</Node>
+													<Node id="44" score="0.04872076">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="41"/>
+													</Node>
+												</Node>
+												<Node id="24" score="0.23274188" defaultChild="46">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="33"/>
+													<Node id="45" score="-0.10049002">
+														<SimplePredicate field="Hours" operator="lessThan" value="33"/>
+													</Node>
+													<Node id="46" score="0.25481477">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="33"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.25891352" defaultChild="14">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="60796.94"/>
+											<Node id="13" score="0.30161828" defaultChild="26">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+												<Node id="25" score="0.34974262" defaultChild="48">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Machinist"/>
+													<Node id="47" score="0.1779398">
+														<SimplePredicate field="Hours" operator="lessThan" value="37"/>
+													</Node>
+													<Node id="48" score="0.39880505">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="37"/>
+													</Node>
+												</Node>
+												<Node id="26" score="-0.12949415" defaultChild="50">
+													<SimplePredicate field="Occupation" operator="equal" value="Machinist"/>
+													<Node id="49" score="0.03464001">
+														<SimplePredicate field="Income" operator="lessThan" value="172504.16"/>
+													</Node>
+													<Node id="50" score="-0.22629927">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="172504.16"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="14" score="-0.18219365" defaultChild="28">
+												<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+												<Node id="27" score="-0.057693195">
+													<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+												</Node>
+												<Node id="28" score="-0.21802543">
+													<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="5">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Gender"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.011498466" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.1614235" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.23431417" defaultChild="8">
+											<SimplePredicate field="Age" operator="lessThan" value="39"/>
+											<Node id="7" score="-0.26392394" defaultChild="16">
+												<SimplePredicate field="Hours" operator="lessThan" value="49"/>
+												<Node id="15" score="-0.27954274" defaultChild="30">
+													<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+													<Node id="29" score="-0.28452048">
+														<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													</Node>
+													<Node id="30" score="-0.056170255">
+														<SimplePredicate field="Education" operator="equal" value="Master"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.0063323197" defaultChild="32">
+													<SimplePredicate field="Education" operator="equal" value="Associate"/>
+													<Node id="31" score="-0.06857101">
+														<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+													</Node>
+													<Node id="32" score="0.08234558">
+														<SimplePredicate field="Gender" operator="equal" value="Male"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.090867594" defaultChild="18">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="49"/>
+												<Node id="17" score="-0.13727959" defaultChild="34">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													<Node id="33" score="-0.21487756">
+														<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													</Node>
+													<Node id="34" score="0.06342168">
+														<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.139926">
+													<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.059658043" defaultChild="10">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="39"/>
+											<Node id="9" score="-0.12171347" defaultChild="20">
+												<SimplePredicate field="Hours" operator="lessThan" value="41"/>
+												<Node id="19" score="-0.20634115" defaultChild="36">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													<Node id="35" score="-0.055930395">
+														<SimplePredicate field="Age" operator="lessThan" value="43"/>
+													</Node>
+													<Node id="36" score="-0.25726506">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="43"/>
+													</Node>
+												</Node>
+												<Node id="20" score="0.07406784" defaultChild="38">
+													<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													<Node id="37" score="0.17529958">
+														<SimplePredicate field="Income" operator="lessThan" value="106737.31"/>
+													</Node>
+													<Node id="38" score="-0.12013697">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="106737.31"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="0.0755505" defaultChild="22">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="41"/>
+												<Node id="21" score="0.1280824" defaultChild="40">
+													<SimplePredicate field="Income" operator="lessThan" value="139318.3"/>
+													<Node id="39" score="0.18894859">
+														<SimplePredicate field="Hours" operator="lessThan" value="58"/>
+													</Node>
+													<Node id="40" score="-0.062275343">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="58"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.20633091">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="139318.3"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.06567354" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.046903368" defaultChild="12">
+											<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+											<Node id="11" score="0.008943617" defaultChild="24">
+												<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+												<Node id="23" score="-0.024924278" defaultChild="42">
+													<SimplePredicate field="Education" operator="notEqual" value="College"/>
+													<Node id="41" score="-0.055663586">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="42" score="0.30007106">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+												<Node id="24" score="0.09379599" defaultChild="44">
+													<SimplePredicate field="Education" operator="equal" value="College"/>
+													<Node id="43" score="0.11656459">
+														<SimplePredicate field="Age" operator="lessThan" value="61"/>
+													</Node>
+													<Node id="44" score="-0.1600264">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="61"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="0.16551557" defaultChild="26">
+												<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+												<Node id="25" score="0.18359399" defaultChild="46">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+													<Node id="45" score="0.12757635">
+														<SimplePredicate field="Income" operator="lessThan" value="57497.3"/>
+													</Node>
+													<Node id="46" score="0.397524">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="57497.3"/>
+													</Node>
+												</Node>
+												<Node id="26" score="-0.16977324">
+													<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.28771093" defaultChild="14">
+											<SimplePredicate field="Education" operator="equal" value="Master"/>
+											<Node id="13" score="0.054686245">
+												<SimplePredicate field="Income" operator="lessThan" value="12951.57"/>
+											</Node>
+											<Node id="14" score="0.30463418" defaultChild="28">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="12951.57"/>
+												<Node id="27" score="0.3412814">
+													<SimplePredicate field="Age" operator="lessThan" value="58"/>
+												</Node>
+												<Node id="28" score="-0.0030271497">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="58"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="6">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.010111026" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.1377802" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.26504874" defaultChild="8">
+											<SimplePredicate field="Age" operator="lessThan" value="28"/>
+											<Node id="7" score="-0.28503093" defaultChild="16">
+												<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+												<Node id="15" score="-0.29558167" defaultChild="30">
+													<SimplePredicate field="Hours" operator="lessThan" value="54"/>
+													<Node id="29" score="-0.30604213">
+														<SimplePredicate field="Age" operator="lessThan" value="27"/>
+													</Node>
+													<Node id="30" score="-0.12824921">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="27"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.038501468">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="54"/>
+												</Node>
+											</Node>
+											<Node id="8" score="0.04246883">
+												<SimplePredicate field="Education" operator="equal" value="Associate"/>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.08253492" defaultChild="10">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="28"/>
+											<Node id="9" score="-0.12647504" defaultChild="18">
+												<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+												<Node id="17" score="-0.14820564" defaultChild="32">
+													<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+													<Node id="31" score="-0.16752839">
+														<SimplePredicate field="Education" operator="notEqual" value="Doctorate"/>
+													</Node>
+													<Node id="32" score="0.16751349">
+														<SimplePredicate field="Education" operator="equal" value="Doctorate"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.22132061" defaultChild="34">
+													<SimplePredicate field="Education" operator="equal" value="Professional"/>
+													<Node id="33" score="0.2669264">
+														<SimplePredicate field="Income" operator="lessThan" value="91953.88"/>
+													</Node>
+													<Node id="34" score="0.06381901">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="91953.88"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="0.05240782" defaultChild="20">
+												<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+												<Node id="19" score="0.23695174" defaultChild="36">
+													<SimplePredicate field="Income" operator="lessThan" value="45375.02"/>
+													<Node id="35" score="-0.04309674">
+														<SimplePredicate field="Age" operator="lessThan" value="40"/>
+													</Node>
+													<Node id="36" score="0.32995552">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="40"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.023726577" defaultChild="38">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="45375.02"/>
+													<Node id="37" score="-0.13543427">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="38" score="0.053631518">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.048620667" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.063522376" defaultChild="12">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Transport"/>
+											<Node id="11" score="0.07615469" defaultChild="22">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+												<Node id="21" score="0.08752546" defaultChild="40">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Cleaner"/>
+													<Node id="39" score="0.061453495">
+														<SimplePredicate field="Income" operator="lessThan" value="59534.87"/>
+													</Node>
+													<Node id="40" score="0.21483673">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="59534.87"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.17812707" defaultChild="42">
+													<SimplePredicate field="Occupation" operator="equal" value="Cleaner"/>
+													<Node id="41" score="-0.26010373">
+														<SimplePredicate field="Hours" operator="lessThan" value="45"/>
+													</Node>
+													<Node id="42" score="0.08708595">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="45"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.1513758" defaultChild="24">
+												<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+												<Node id="23" score="-0.2267622" defaultChild="44">
+													<SimplePredicate field="Income" operator="lessThan" value="40009.78"/>
+													<Node id="43" score="-0.011778298">
+														<SimplePredicate field="Age" operator="lessThan" value="38"/>
+													</Node>
+													<Node id="44" score="-0.311606">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="38"/>
+													</Node>
+												</Node>
+												<Node id="24" score="-0.04139736" defaultChild="46">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="40009.78"/>
+													<Node id="45" score="-0.26497918">
+														<SimplePredicate field="Age" operator="lessThan" value="41"/>
+													</Node>
+													<Node id="46" score="0.20202512">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="41"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.12242747" defaultChild="14">
+											<SimplePredicate field="Occupation" operator="equal" value="Transport"/>
+											<Node id="13" score="-0.2880171" defaultChild="26">
+												<SimplePredicate field="Age" operator="lessThan" value="44"/>
+												<Node id="25" score="-0.07389007">
+													<SimplePredicate field="Age" operator="lessThan" value="29"/>
+												</Node>
+												<Node id="26" score="-0.31468588" defaultChild="48">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="29"/>
+													<Node id="47" score="-0.3438487">
+														<SimplePredicate field="Hours" operator="lessThan" value="52"/>
+													</Node>
+													<Node id="48" score="-0.082912914">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="52"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="14" score="0.047829993" defaultChild="28">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+												<Node id="27" score="0.12845202" defaultChild="50">
+													<SimplePredicate field="Income" operator="lessThan" value="50241.5"/>
+													<Node id="49" score="-0.069834344">
+														<SimplePredicate field="Income" operator="lessThan" value="22745.9"/>
+													</Node>
+													<Node id="50" score="0.20153284">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="22745.9"/>
+													</Node>
+												</Node>
+												<Node id="28" score="-0.24911296">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="50241.5"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="7">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.010225943" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.20084836" defaultChild="4">
+										<SimplePredicate field="Age" operator="lessThan" value="28"/>
+										<Node id="3" score="-0.30640104">
+											<SimplePredicate field="Hours" operator="lessThan" value="40"/>
+										</Node>
+										<Node id="4" score="-0.14038193" defaultChild="8">
+											<SimplePredicate field="Hours" operator="greaterOrEqual" value="40"/>
+											<Node id="7" score="-0.22451703" defaultChild="14">
+												<SimplePredicate field="Age" operator="lessThan" value="25"/>
+												<Node id="13" score="-0.29724962">
+													<SimplePredicate field="Income" operator="lessThan" value="79468.38"/>
+												</Node>
+												<Node id="14" score="-0.11773691" defaultChild="24">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="79468.38"/>
+													<Node id="23" score="0.0967289">
+														<SimplePredicate field="Marital" operator="notEqual" value="Absent"/>
+													</Node>
+													<Node id="24" score="-0.18962273">
+														<SimplePredicate field="Marital" operator="equal" value="Absent"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.06598632" defaultChild="16">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="25"/>
+												<Node id="15" score="-0.12014442" defaultChild="26">
+													<SimplePredicate field="Hours" operator="lessThan" value="49"/>
+													<Node id="25" score="-0.2611335">
+														<SimplePredicate field="Income" operator="lessThan" value="29811.43"/>
+													</Node>
+													<Node id="26" score="-0.059359517">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="29811.43"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.068341054" defaultChild="28">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="49"/>
+													<Node id="27" score="-0.10761193">
+														<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+													</Node>
+													<Node id="28" score="0.28605688">
+														<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.018590664" defaultChild="6">
+										<SimplePredicate field="Age" operator="greaterOrEqual" value="28"/>
+										<Node id="5" score="0.03353181" defaultChild="10">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+											<Node id="9" score="-0.09124408" defaultChild="18">
+												<SimplePredicate field="Hours" operator="lessThan" value="38"/>
+												<Node id="17" score="-0.14501116" defaultChild="30">
+													<SimplePredicate field="Income" operator="lessThan" value="192599.61"/>
+													<Node id="29" score="0.0582512">
+														<SimplePredicate field="Income" operator="lessThan" value="26155.21"/>
+													</Node>
+													<Node id="30" score="-0.2134833">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="26155.21"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.12763268" defaultChild="32">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="192599.61"/>
+													<Node id="31" score="0.23435037">
+														<SimplePredicate field="Age" operator="lessThan" value="48"/>
+													</Node>
+													<Node id="32" score="-0.12545243">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="48"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="0.05037299" defaultChild="20">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="38"/>
+												<Node id="19" score="0.06723002" defaultChild="34">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Machinist"/>
+													<Node id="33" score="0.081443146">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Transport"/>
+													</Node>
+													<Node id="34" score="-0.10291486">
+														<SimplePredicate field="Occupation" operator="equal" value="Transport"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.123379014" defaultChild="36">
+													<SimplePredicate field="Occupation" operator="equal" value="Machinist"/>
+													<Node id="35" score="0.098134436">
+														<SimplePredicate field="Income" operator="lessThan" value="19608.66"/>
+													</Node>
+													<Node id="36" score="-0.16079645">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="19608.66"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.20239733" defaultChild="12">
+											<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+											<Node id="11" score="-0.28288943">
+												<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+											</Node>
+											<Node id="12" score="-0.120177515" defaultChild="22">
+												<SimplePredicate field="Marital" operator="equal" value="Married"/>
+												<Node id="21" score="-0.17530468" defaultChild="38">
+													<SimplePredicate field="Income" operator="lessThan" value="48301.94"/>
+													<Node id="37" score="-0.018326553">
+														<SimplePredicate field="Age" operator="lessThan" value="38"/>
+													</Node>
+													<Node id="38" score="-0.23235366">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="38"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.006464324" defaultChild="40">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="48301.94"/>
+													<Node id="39" score="-0.20745029">
+														<SimplePredicate field="Age" operator="lessThan" value="41"/>
+													</Node>
+													<Node id="40" score="0.1681708">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="41"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="8">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.010652069" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.17501366" defaultChild="4">
+										<SimplePredicate field="Age" operator="lessThan" value="28"/>
+										<Node id="3" score="-0.29215935">
+											<SimplePredicate field="Hours" operator="lessThan" value="40"/>
+										</Node>
+										<Node id="4" score="-0.11738505" defaultChild="8">
+											<SimplePredicate field="Hours" operator="greaterOrEqual" value="40"/>
+											<Node id="7" score="-0.20137098" defaultChild="14">
+												<SimplePredicate field="Age" operator="lessThan" value="25"/>
+												<Node id="13" score="-0.27445486">
+													<SimplePredicate field="Income" operator="lessThan" value="79468.38"/>
+												</Node>
+												<Node id="14" score="-0.09949372" defaultChild="24">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="79468.38"/>
+													<Node id="23" score="0.07978999">
+														<SimplePredicate field="Marital" operator="notEqual" value="Absent"/>
+													</Node>
+													<Node id="24" score="-0.1691466">
+														<SimplePredicate field="Marital" operator="equal" value="Absent"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.052033026" defaultChild="16">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="25"/>
+												<Node id="15" score="-0.087307416" defaultChild="26">
+													<SimplePredicate field="Hours" operator="lessThan" value="54"/>
+													<Node id="25" score="-0.18972199">
+														<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+													</Node>
+													<Node id="26" score="-0.01978302">
+														<SimplePredicate field="Marital" operator="equal" value="Married"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.11521683">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="54"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.011401538" defaultChild="6">
+										<SimplePredicate field="Age" operator="greaterOrEqual" value="28"/>
+										<Node id="5" score="0.022857267" defaultChild="10">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+											<Node id="9" score="0.03073062" defaultChild="18">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Cleaner"/>
+												<Node id="17" score="0.023445828" defaultChild="28">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Protective"/>
+													<Node id="27" score="0.03624432">
+														<SimplePredicate field="Marital" operator="notEqual" value="Divorced"/>
+													</Node>
+													<Node id="28" score="-0.09368701">
+														<SimplePredicate field="Marital" operator="equal" value="Divorced"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.26867953" defaultChild="30">
+													<SimplePredicate field="Occupation" operator="equal" value="Protective"/>
+													<Node id="29" score="0.3666808">
+														<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+													</Node>
+													<Node id="30" score="-0.06811565">
+														<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.19955191" defaultChild="20">
+												<SimplePredicate field="Occupation" operator="equal" value="Cleaner"/>
+												<Node id="19" score="-0.25204018">
+													<SimplePredicate field="Age" operator="lessThan" value="57"/>
+												</Node>
+												<Node id="20" score="0.052780807">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="57"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.17935875" defaultChild="12">
+											<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+											<Node id="11" score="-0.2663584">
+												<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+											</Node>
+											<Node id="12" score="-0.10207338" defaultChild="22">
+												<SimplePredicate field="Marital" operator="equal" value="Married"/>
+												<Node id="21" score="-0.14644672" defaultChild="32">
+													<SimplePredicate field="Age" operator="lessThan" value="52"/>
+													<Node id="31" score="-0.021434823">
+														<SimplePredicate field="Income" operator="lessThan" value="26834.22"/>
+													</Node>
+													<Node id="32" score="-0.1871057">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="26834.22"/>
+													</Node>
+												</Node>
+												<Node id="22" score="0.033361055">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="52"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="9">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.010005286" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.14064768" defaultChild="4">
+										<SimplePredicate field="Hours" operator="lessThan" value="38"/>
+										<Node id="3" score="-0.30018827">
+											<SimplePredicate field="Age" operator="lessThan" value="32"/>
+										</Node>
+										<Node id="4" score="-0.07589184" defaultChild="8">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="32"/>
+											<Node id="7" score="-0.02335521" defaultChild="14">
+												<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+												<Node id="13" score="0.12039553" defaultChild="24">
+													<SimplePredicate field="Income" operator="lessThan" value="26834.22"/>
+													<Node id="23" score="-0.069782734">
+														<SimplePredicate field="Age" operator="lessThan" value="51"/>
+													</Node>
+													<Node id="24" score="0.25727195">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="51"/>
+													</Node>
+												</Node>
+												<Node id="14" score="-0.07678065" defaultChild="26">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="26834.22"/>
+													<Node id="25" score="-0.2449475">
+														<SimplePredicate field="Income" operator="lessThan" value="73617.56"/>
+													</Node>
+													<Node id="26" score="0.07980303">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="73617.56"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.20586456" defaultChild="16">
+												<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+												<Node id="15" score="-0.24841835" defaultChild="28">
+													<SimplePredicate field="Income" operator="lessThan" value="194054.27"/>
+													<Node id="27" score="-0.28347427">
+														<SimplePredicate field="Employment" operator="notEqual" value="Consultant"/>
+													</Node>
+													<Node id="28" score="-0.04980231">
+														<SimplePredicate field="Employment" operator="equal" value="Consultant"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.0023434893">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="194054.27"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.010601464" defaultChild="6">
+										<SimplePredicate field="Hours" operator="greaterOrEqual" value="38"/>
+										<Node id="5" score="-0.0017045381" defaultChild="10">
+											<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+											<Node id="9" score="0.0043572374" defaultChild="18">
+												<SimplePredicate field="Education" operator="notEqual" value="Yr9"/>
+												<Node id="17" score="-0.057013113" defaultChild="30">
+													<SimplePredicate field="Age" operator="lessThan" value="37"/>
+													<Node id="29" score="-0.08262265">
+														<SimplePredicate field="Hours" operator="lessThan" value="56"/>
+													</Node>
+													<Node id="30" score="0.091665864">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="56"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.038058616" defaultChild="32">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="37"/>
+													<Node id="31" score="0.03084795">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Protective"/>
+													</Node>
+													<Node id="32" score="0.27435037">
+														<SimplePredicate field="Occupation" operator="equal" value="Protective"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.32207853">
+												<SimplePredicate field="Education" operator="equal" value="Yr9"/>
+											</Node>
+										</Node>
+										<Node id="6" score="0.17753442" defaultChild="12">
+											<SimplePredicate field="Education" operator="equal" value="Master"/>
+											<Node id="11" score="0.2358567" defaultChild="20">
+												<SimplePredicate field="Age" operator="lessThan" value="52"/>
+												<Node id="19" score="-0.09890536">
+													<SimplePredicate field="Income" operator="lessThan" value="22446.29"/>
+												</Node>
+												<Node id="20" score="0.3122581" defaultChild="34">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="22446.29"/>
+													<Node id="33" score="0.35381293">
+														<SimplePredicate field="Employment" operator="notEqual" value="PSLocal"/>
+													</Node>
+													<Node id="34" score="0.050213296">
+														<SimplePredicate field="Employment" operator="equal" value="PSLocal"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="0.032880537" defaultChild="22">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="52"/>
+												<Node id="21" score="0.28610945">
+													<SimplePredicate field="Income" operator="lessThan" value="27661.6"/>
+												</Node>
+												<Node id="22" score="-0.13728766" defaultChild="36">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="27661.6"/>
+													<Node id="35" score="0.03299348">
+														<SimplePredicate field="Hours" operator="lessThan" value="46"/>
+													</Node>
+													<Node id="36" score="-0.22101745">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="46"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="10">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0081440415" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.084694356" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.029567719" defaultChild="8">
+											<SimplePredicate field="Income" operator="lessThan" value="106737.31"/>
+											<Node id="7" score="0.00342519" defaultChild="16">
+												<SimplePredicate field="Education" operator="notEqual" value="College"/>
+												<Node id="15" score="-0.038977258" defaultChild="26">
+													<SimplePredicate field="Income" operator="lessThan" value="87725.56"/>
+													<Node id="25" score="-0.22832051">
+														<SimplePredicate field="Age" operator="lessThan" value="29"/>
+													</Node>
+													<Node id="26" score="0.0068106335">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="29"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.13522644" defaultChild="28">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="87725.56"/>
+													<Node id="27" score="0.4387143">
+														<SimplePredicate field="Income" operator="lessThan" value="91953.88"/>
+													</Node>
+													<Node id="28" score="0.015552495">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="91953.88"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.19964908" defaultChild="18">
+												<SimplePredicate field="Education" operator="equal" value="College"/>
+												<Node id="17" score="-0.26788968">
+													<SimplePredicate field="Age" operator="lessThan" value="47"/>
+												</Node>
+												<Node id="18" score="0.041589674">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="47"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.1876104" defaultChild="10">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="106737.31"/>
+											<Node id="9" score="-0.20706676" defaultChild="20">
+												<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+												<Node id="19" score="-0.22891124" defaultChild="30">
+													<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+													<Node id="29" score="-0.25057417">
+														<SimplePredicate field="Marital" operator="notEqual" value="Widowed"/>
+													</Node>
+													<Node id="30" score="0.058401387">
+														<SimplePredicate field="Marital" operator="equal" value="Widowed"/>
+													</Node>
+												</Node>
+												<Node id="20" score="0.09332262">
+													<SimplePredicate field="Education" operator="equal" value="Associate"/>
+												</Node>
+											</Node>
+											<Node id="10" score="0.09565357">
+												<SimplePredicate field="Education" operator="equal" value="Master"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.020224532" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="0.02851873" defaultChild="12">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Farming"/>
+											<Node id="11" score="0.03420279" defaultChild="22">
+												<SimplePredicate field="Education" operator="notEqual" value="Yr9"/>
+												<Node id="21" score="-0.07676209" defaultChild="32">
+													<SimplePredicate field="Hours" operator="lessThan" value="38"/>
+													<Node id="31" score="-0.1374765">
+														<SimplePredicate field="Income" operator="lessThan" value="96057.04"/>
+													</Node>
+													<Node id="32" score="0.053028483">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="96057.04"/>
+													</Node>
+												</Node>
+												<Node id="22" score="0.047903787" defaultChild="34">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="38"/>
+													<Node id="33" score="0.010063164">
+														<SimplePredicate field="Income" operator="lessThan" value="36235.39"/>
+													</Node>
+													<Node id="34" score="0.09103945">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="36235.39"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.28547654">
+												<SimplePredicate field="Education" operator="equal" value="Yr9"/>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.1960014" defaultChild="14">
+											<SimplePredicate field="Occupation" operator="equal" value="Farming"/>
+											<Node id="13" score="-0.23781677" defaultChild="24">
+												<SimplePredicate field="Age" operator="lessThan" value="62"/>
+												<Node id="23" score="-0.08095889">
+													<SimplePredicate field="Age" operator="lessThan" value="44"/>
+												</Node>
+												<Node id="24" score="-0.28407618">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+												</Node>
+											</Node>
+											<Node id="14" score="-0.0013491985">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="62"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="11">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0078003635" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.20448963" defaultChild="4">
+										<SimplePredicate field="Age" operator="lessThan" value="25"/>
+										<Node id="3" score="-0.22393684" defaultChild="8">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Cleaner"/>
+											<Node id="7" score="-0.25025555">
+												<SimplePredicate field="Age" operator="lessThan" value="24"/>
+											</Node>
+											<Node id="8" score="-0.07645107">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="24"/>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.019290373">
+											<SimplePredicate field="Occupation" operator="equal" value="Cleaner"/>
+										</Node>
+									</Node>
+									<Node id="2" score="7.718171E-4" defaultChild="6">
+										<SimplePredicate field="Age" operator="greaterOrEqual" value="25"/>
+										<Node id="5" score="-0.005427412" defaultChild="10">
+											<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+											<Node id="9" score="-0.025163481" defaultChild="14">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Executive"/>
+												<Node id="13" score="-0.039033443" defaultChild="18">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Sales"/>
+													<Node id="17" score="-0.046453">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Protective"/>
+													</Node>
+													<Node id="18" score="0.12957223">
+														<SimplePredicate field="Occupation" operator="equal" value="Protective"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.06542046" defaultChild="20">
+													<SimplePredicate field="Occupation" operator="equal" value="Sales"/>
+													<Node id="19" score="0.15740812">
+														<SimplePredicate field="Income" operator="lessThan" value="38866.78"/>
+													</Node>
+													<Node id="20" score="-0.03869716">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="38866.78"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="0.071236566" defaultChild="16">
+												<SimplePredicate field="Occupation" operator="equal" value="Executive"/>
+												<Node id="15" score="-0.09411928" defaultChild="22">
+													<SimplePredicate field="Age" operator="lessThan" value="31"/>
+													<Node id="21" score="-0.013431179">
+														<SimplePredicate field="Marital" operator="notEqual" value="Absent"/>
+													</Node>
+													<Node id="22" score="-0.19235398">
+														<SimplePredicate field="Marital" operator="equal" value="Absent"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.0890546" defaultChild="24">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="31"/>
+													<Node id="23" score="0.042146277">
+														<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													</Node>
+													<Node id="24" score="0.16926298">
+														<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.24478029" defaultChild="12">
+											<SimplePredicate field="Education" operator="equal" value="Professional"/>
+											<Node id="11" score="-0.01231704">
+												<SimplePredicate field="Hours" operator="lessThan" value="44"/>
+											</Node>
+											<Node id="12" score="0.3590909">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="44"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="12">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Gender"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0055297166" defaultChild="2">
+									<True/>
+									<Node id="1" score="0.0026521771" defaultChild="4">
+										<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+										<Node id="3" score="0.007075907" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr7t8"/>
+											<Node id="7" score="-0.16469201" defaultChild="12">
+												<SimplePredicate field="Age" operator="lessThan" value="25"/>
+												<Node id="11" score="-0.24110416">
+													<SimplePredicate field="Income" operator="lessThan" value="79468.38"/>
+												</Node>
+												<Node id="12" score="-0.07271315" defaultChild="18">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="79468.38"/>
+													<Node id="17" score="-0.17632489">
+														<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+													</Node>
+													<Node id="18" score="0.04577971">
+														<SimplePredicate field="Gender" operator="equal" value="Male"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="0.0132013345" defaultChild="14">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="25"/>
+												<Node id="13" score="0.008158576" defaultChild="20">
+													<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+													<Node id="19" score="-5.9976394E-4">
+														<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													</Node>
+													<Node id="20" score="0.1098615">
+														<SimplePredicate field="Education" operator="equal" value="Master"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.20498696" defaultChild="22">
+													<SimplePredicate field="Education" operator="equal" value="Professional"/>
+													<Node id="21" score="-0.0010801143">
+														<SimplePredicate field="Hours" operator="lessThan" value="44"/>
+													</Node>
+													<Node id="22" score="0.2948138">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="44"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.26519594">
+											<SimplePredicate field="Education" operator="equal" value="Yr7t8"/>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.15809402" defaultChild="6">
+										<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+										<Node id="5" score="-0.2537294">
+											<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										</Node>
+										<Node id="6" score="-0.07742721" defaultChild="10">
+											<SimplePredicate field="Marital" operator="equal" value="Married"/>
+											<Node id="9" score="-0.121093884" defaultChild="16">
+												<SimplePredicate field="Age" operator="lessThan" value="52"/>
+												<Node id="15" score="-0.0403925" defaultChild="24">
+													<SimplePredicate field="Income" operator="lessThan" value="59260.14"/>
+													<Node id="23" score="-0.10771934">
+														<SimplePredicate field="Education" operator="notEqual" value="College"/>
+													</Node>
+													<Node id="24" score="0.0973464">
+														<SimplePredicate field="Education" operator="equal" value="College"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.22180597">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="59260.14"/>
+												</Node>
+											</Node>
+											<Node id="10" score="0.047610078">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="52"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="13">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Gender"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0051075323" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.022923017" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+										<Node id="3" score="-0.09459364" defaultChild="8">
+											<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+											<Node id="7" score="-0.1880896" defaultChild="16">
+												<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+												<Node id="15" score="-0.2169279" defaultChild="32">
+													<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+													<Node id="31" score="-0.23921171">
+														<SimplePredicate field="Income" operator="lessThan" value="194054.27"/>
+													</Node>
+													<Node id="32" score="-0.034596432">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="194054.27"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.052154113" defaultChild="34">
+													<SimplePredicate field="Education" operator="equal" value="Associate"/>
+													<Node id="33" score="0.11599407">
+														<SimplePredicate field="Income" operator="lessThan" value="84121.07"/>
+													</Node>
+													<Node id="34" score="-0.036491588">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="84121.07"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.0047165467" defaultChild="18">
+												<SimplePredicate field="Gender" operator="equal" value="Male"/>
+												<Node id="17" score="-0.12363881" defaultChild="36">
+													<SimplePredicate field="Age" operator="lessThan" value="35"/>
+													<Node id="35" score="-0.16447616">
+														<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+													</Node>
+													<Node id="36" score="0.116080135">
+														<SimplePredicate field="Education" operator="equal" value="Associate"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.08163754" defaultChild="38">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="35"/>
+													<Node id="37" score="-0.21597879">
+														<SimplePredicate field="Income" operator="lessThan" value="40415.76"/>
+													</Node>
+													<Node id="38" score="0.13611521">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="40415.76"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-1.9386798E-4" defaultChild="10">
+											<SimplePredicate field="Marital" operator="equal" value="Married"/>
+											<Node id="9" score="0.009123629" defaultChild="20">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Farming"/>
+												<Node id="19" score="0.0687175" defaultChild="40">
+													<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													<Node id="39" score="-0.079704724">
+														<SimplePredicate field="Age" operator="lessThan" value="42"/>
+													</Node>
+													<Node id="40" score="0.13834527">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="42"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.020080825" defaultChild="42">
+													<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													<Node id="41" score="-0.10984355">
+														<SimplePredicate field="Income" operator="lessThan" value="30080.78"/>
+													</Node>
+													<Node id="42" score="0.021584678">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="30080.78"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.21582894" defaultChild="22">
+												<SimplePredicate field="Occupation" operator="equal" value="Farming"/>
+												<Node id="21" score="-0.2576937">
+													<SimplePredicate field="Age" operator="lessThan" value="54"/>
+												</Node>
+												<Node id="22" score="-0.07552484">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="54"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.05378288" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+										<Node id="5" score="-0.08691679" defaultChild="12">
+											<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+											<Node id="11" score="0.036951095" defaultChild="24">
+												<SimplePredicate field="Income" operator="lessThan" value="45375.02"/>
+												<Node id="23" score="0.16574213" defaultChild="44">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													<Node id="43" score="-0.034755938">
+														<SimplePredicate field="Age" operator="lessThan" value="43"/>
+													</Node>
+													<Node id="44" score="0.2682167">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="43"/>
+													</Node>
+												</Node>
+												<Node id="24" score="-0.32067692">
+													<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.19404085" defaultChild="26">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="45375.02"/>
+												<Node id="25" score="-0.26435927" defaultChild="46">
+													<SimplePredicate field="Age" operator="lessThan" value="56"/>
+													<Node id="45" score="-0.050150063">
+														<SimplePredicate field="Age" operator="lessThan" value="34"/>
+													</Node>
+													<Node id="46" score="-0.33888116">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="34"/>
+													</Node>
+												</Node>
+												<Node id="26" score="0.17204404">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="56"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.11365997" defaultChild="14">
+											<SimplePredicate field="Employment" operator="equal" value="Private"/>
+											<Node id="13" score="-0.076208144" defaultChild="28">
+												<SimplePredicate field="Age" operator="lessThan" value="30"/>
+												<Node id="27" score="-0.14971231" defaultChild="48">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													<Node id="47" score="-0.0150373755">
+														<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+													</Node>
+													<Node id="48" score="-0.23344612">
+														<SimplePredicate field="Gender" operator="equal" value="Male"/>
+													</Node>
+												</Node>
+												<Node id="28" score="0.15001813">
+													<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												</Node>
+											</Node>
+											<Node id="14" score="0.14781804" defaultChild="30">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="30"/>
+												<Node id="29" score="0.079331815" defaultChild="50">
+													<SimplePredicate field="Hours" operator="lessThan" value="41"/>
+													<Node id="49" score="0.01115988">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="50" score="0.18561636">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+												<Node id="30" score="0.21729413" defaultChild="52">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="41"/>
+													<Node id="51" score="0.25072145">
+														<SimplePredicate field="Hours" operator="lessThan" value="56"/>
+													</Node>
+													<Node id="52" score="0.036498033">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="56"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="14">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0052544684" defaultChild="2">
+									<True/>
+									<Node id="1" score="0.08490606" defaultChild="4">
+										<SimplePredicate field="Income" operator="lessThan" value="20632.31"/>
+										<Node id="3" score="-0.05688511" defaultChild="8">
+											<SimplePredicate field="Income" operator="lessThan" value="13567.01"/>
+											<Node id="7" score="-0.17071843" defaultChild="16">
+												<SimplePredicate field="Hours" operator="lessThan" value="41"/>
+												<Node id="15" score="0.11652693">
+													<SimplePredicate field="Hours" operator="lessThan" value="39"/>
+												</Node>
+												<Node id="16" score="-0.2323368" defaultChild="30">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="39"/>
+													<Node id="29" score="-0.29332402">
+														<SimplePredicate field="Age" operator="lessThan" value="59"/>
+													</Node>
+													<Node id="30" score="0.04318946">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="59"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="0.09952576" defaultChild="18">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="41"/>
+												<Node id="17" score="0.19969957" defaultChild="32">
+													<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+													<Node id="31" score="0.22958954">
+														<SimplePredicate field="Income" operator="lessThan" value="11703.44"/>
+													</Node>
+													<Node id="32" score="0.04438714">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="11703.44"/>
+													</Node>
+												</Node>
+												<Node id="18" score="-0.13815387">
+													<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="0.1922572" defaultChild="10">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="13567.01"/>
+											<Node id="9" score="0.22561426" defaultChild="20">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Transport"/>
+												<Node id="19" score="-0.028163694">
+													<SimplePredicate field="Hours" operator="lessThan" value="34"/>
+												</Node>
+												<Node id="20" score="0.25216302" defaultChild="34">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="34"/>
+													<Node id="33" score="0.3109608">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													</Node>
+													<Node id="34" score="0.07831382">
+														<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.054992676">
+												<SimplePredicate field="Occupation" operator="equal" value="Transport"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.01846999" defaultChild="6">
+										<SimplePredicate field="Income" operator="greaterOrEqual" value="20632.31"/>
+										<Node id="5" score="-0.15247093" defaultChild="12">
+											<SimplePredicate field="Income" operator="lessThan" value="26205.4"/>
+											<Node id="11" score="-0.2464885" defaultChild="22">
+												<SimplePredicate field="Age" operator="lessThan" value="45"/>
+												<Node id="21" score="-0.31488788" defaultChild="36">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													<Node id="35" score="-0.0605104">
+														<SimplePredicate field="Income" operator="lessThan" value="21737.96"/>
+													</Node>
+													<Node id="36" score="-0.34374404">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="21737.96"/>
+													</Node>
+												</Node>
+												<Node id="22" score="0.031868637">
+													<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.03180301" defaultChild="24">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="45"/>
+												<Node id="23" score="0.05498547" defaultChild="38">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													<Node id="37" score="-0.21703084">
+														<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+													</Node>
+													<Node id="38" score="0.12845331">
+														<SimplePredicate field="Marital" operator="equal" value="Married"/>
+													</Node>
+												</Node>
+												<Node id="24" score="-0.28144714">
+													<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.004351065" defaultChild="14">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="26205.4"/>
+											<Node id="13" score="-0.1215615" defaultChild="26">
+												<SimplePredicate field="Hours" operator="lessThan" value="36"/>
+												<Node id="25" score="-0.19507621" defaultChild="40">
+													<SimplePredicate field="Income" operator="lessThan" value="115759.45"/>
+													<Node id="39" score="-0.009818944">
+														<SimplePredicate field="Income" operator="lessThan" value="41358.63"/>
+													</Node>
+													<Node id="40" score="-0.2828013">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="41358.63"/>
+													</Node>
+												</Node>
+												<Node id="26" score="-0.013966337" defaultChild="42">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="115759.45"/>
+													<Node id="41" score="-0.21241304">
+														<SimplePredicate field="Age" operator="lessThan" value="32"/>
+													</Node>
+													<Node id="42" score="0.06531454">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="32"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="14" score="0.010180891" defaultChild="28">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="36"/>
+												<Node id="27" score="0.015210558" defaultChild="44">
+													<SimplePredicate field="Education" operator="notEqual" value="Yr9"/>
+													<Node id="43" score="0.025655014">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Machinist"/>
+													</Node>
+													<Node id="44" score="-0.10495365">
+														<SimplePredicate field="Occupation" operator="equal" value="Machinist"/>
+													</Node>
+												</Node>
+												<Node id="28" score="-0.2586879">
+													<SimplePredicate field="Education" operator="equal" value="Yr9"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="15">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0060216216" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.002537946" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Yr7t8"/>
+										<Node id="3" score="0.0037597402" defaultChild="6">
+											<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+											<Node id="5" score="0.011119168" defaultChild="10">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Transport"/>
+												<Node id="9" score="0.08024038" defaultChild="16">
+													<SimplePredicate field="Income" operator="lessThan" value="20632.31"/>
+													<Node id="15" score="0.025904568">
+														<SimplePredicate field="Income" operator="lessThan" value="18754.25"/>
+													</Node>
+													<Node id="16" score="0.26556936">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="18754.25"/>
+													</Node>
+												</Node>
+												<Node id="10" score="6.980042E-4" defaultChild="18">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="20632.31"/>
+													<Node id="17" score="-0.13102105">
+														<SimplePredicate field="Income" operator="lessThan" value="25889.7"/>
+													</Node>
+													<Node id="18" score="0.0125111425">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="25889.7"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="6" score="-0.09566454" defaultChild="12">
+												<SimplePredicate field="Occupation" operator="equal" value="Transport"/>
+												<Node id="11" score="-0.21256107" defaultChild="20">
+													<SimplePredicate field="Age" operator="lessThan" value="47"/>
+													<Node id="19" score="-0.057156686">
+														<SimplePredicate field="Income" operator="lessThan" value="27896.05"/>
+													</Node>
+													<Node id="20" score="-0.24803096">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="27896.05"/>
+													</Node>
+												</Node>
+												<Node id="12" score="0.066899404" defaultChild="22">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="47"/>
+													<Node id="21" score="0.19145432">
+														<SimplePredicate field="Income" operator="lessThan" value="42878.48"/>
+													</Node>
+													<Node id="22" score="-0.23807845">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="42878.48"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.13338414" defaultChild="8">
+											<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+											<Node id="7" score="-0.22790807">
+												<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+											</Node>
+											<Node id="8" score="-0.070563495" defaultChild="14">
+												<SimplePredicate field="Marital" operator="equal" value="Married"/>
+												<Node id="13" score="-0.14128049" defaultChild="24">
+													<SimplePredicate field="Income" operator="lessThan" value="40009.78"/>
+													<Node id="23" score="0.049387787">
+														<SimplePredicate field="Age" operator="lessThan" value="38"/>
+													</Node>
+													<Node id="24" score="-0.24233282">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="38"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.013254759" defaultChild="26">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="40009.78"/>
+													<Node id="25" score="-0.19009222">
+														<SimplePredicate field="Age" operator="lessThan" value="41"/>
+													</Node>
+													<Node id="26" score="0.15526754">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="41"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.24158292">
+										<SimplePredicate field="Education" operator="equal" value="Yr7t8"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="16">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0058883443" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.0024807693" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Yr5t6"/>
+										<Node id="3" score="4.2308794E-4" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr7t8"/>
+											<Node id="7" score="-0.16090687" defaultChild="10">
+												<SimplePredicate field="Age" operator="lessThan" value="24"/>
+												<Node id="9" score="-0.07280952" defaultChild="14">
+													<SimplePredicate field="Income" operator="lessThan" value="91953.88"/>
+													<Node id="13" score="-0.18054849">
+														<SimplePredicate field="Income" operator="lessThan" value="48466.38"/>
+													</Node>
+													<Node id="14" score="0.08222064">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="48466.38"/>
+													</Node>
+												</Node>
+												<Node id="10" score="-0.2027107">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="91953.88"/>
+												</Node>
+											</Node>
+											<Node id="8" score="0.004332797" defaultChild="12">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="24"/>
+												<Node id="11" score="0.008806617" defaultChild="16">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Cleaner"/>
+													<Node id="15" score="0.013010648">
+														<SimplePredicate field="Age" operator="lessThan" value="67"/>
+													</Node>
+													<Node id="16" score="-0.1464503">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="67"/>
+													</Node>
+												</Node>
+												<Node id="12" score="-0.13268615" defaultChild="18">
+													<SimplePredicate field="Occupation" operator="equal" value="Cleaner"/>
+													<Node id="17" score="1.7353956E-4">
+														<SimplePredicate field="Income" operator="lessThan" value="33730.79"/>
+													</Node>
+													<Node id="18" score="-0.230445">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="33730.79"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.22104123">
+											<SimplePredicate field="Education" operator="equal" value="Yr7t8"/>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.2155321" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Yr5t6"/>
+										<Node id="5" score="-0.25488123">
+											<SimplePredicate field="Income" operator="lessThan" value="49018.21"/>
+										</Node>
+										<Node id="6" score="-0.060887717">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="49018.21"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="17">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.006006478" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.0098356465" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+										<Node id="3" score="-0.016864568" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+											<Node id="7" score="-0.034234438" defaultChild="12">
+												<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+												<Node id="11" score="-0.04157441" defaultChild="20">
+													<SimplePredicate field="Employment" operator="notEqual" value="PSState"/>
+													<Node id="19" score="-0.049116828">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Support"/>
+													</Node>
+													<Node id="20" score="0.20275693">
+														<SimplePredicate field="Occupation" operator="equal" value="Support"/>
+													</Node>
+												</Node>
+												<Node id="12" score="0.18261014" defaultChild="22">
+													<SimplePredicate field="Employment" operator="equal" value="PSState"/>
+													<Node id="21" score="0.29118863">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="22" score="-0.11843628">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="0.03354837" defaultChild="14">
+												<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+												<Node id="13" score="-0.08132242" defaultChild="24">
+													<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													<Node id="23" score="0.12988807">
+														<SimplePredicate field="Income" operator="lessThan" value="25092.81"/>
+													</Node>
+													<Node id="24" score="-0.12232005">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="25092.81"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.083832376" defaultChild="26">
+													<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													<Node id="25" score="0.09988207">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													</Node>
+													<Node id="26" score="-0.17813668">
+														<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="0.08164566" defaultChild="10">
+											<SimplePredicate field="Education" operator="equal" value="Master"/>
+											<Node id="9" score="0.19362132" defaultChild="16">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+												<Node id="15" score="0.03940691">
+													<SimplePredicate field="Income" operator="lessThan" value="20632.31"/>
+												</Node>
+												<Node id="16" score="0.21135035" defaultChild="28">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="20632.31"/>
+													<Node id="27" score="0.2711447">
+														<SimplePredicate field="Age" operator="lessThan" value="55"/>
+													</Node>
+													<Node id="28" score="0.0028453656">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="55"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.032757178" defaultChild="18">
+												<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+												<Node id="17" score="-0.19457579">
+													<SimplePredicate field="Hours" operator="lessThan" value="38"/>
+												</Node>
+												<Node id="18" score="0.018626375" defaultChild="30">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="38"/>
+													<Node id="29" score="0.07867064">
+														<SimplePredicate field="Marital" operator="notEqual" value="Absent"/>
+													</Node>
+													<Node id="30" score="-0.124288805">
+														<SimplePredicate field="Marital" operator="equal" value="Absent"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.15904883" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Professional"/>
+										<Node id="5" score="0.26144236">
+											<SimplePredicate field="Income" operator="lessThan" value="49018.21"/>
+										</Node>
+										<Node id="6" score="4.454178E-5">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="49018.21"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="18">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0035322425" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.04619772" defaultChild="4">
+										<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+										<Node id="3" score="-0.019871004" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="College"/>
+											<Node id="7" score="0.015046028" defaultChild="16">
+												<SimplePredicate field="Income" operator="lessThan" value="117629.97"/>
+												<Node id="15" score="0.029512852" defaultChild="28">
+													<SimplePredicate field="Education" operator="notEqual" value="Vocational"/>
+													<Node id="27" score="-0.008822014">
+														<SimplePredicate field="Income" operator="lessThan" value="87725.56"/>
+													</Node>
+													<Node id="28" score="0.11571387">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="87725.56"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.19586833">
+													<SimplePredicate field="Education" operator="equal" value="Vocational"/>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.12296504" defaultChild="18">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="117629.97"/>
+												<Node id="17" score="-0.15309203" defaultChild="30">
+													<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													<Node id="29" score="-0.075743765">
+														<SimplePredicate field="Income" operator="lessThan" value="197192.92"/>
+													</Node>
+													<Node id="30" score="-0.25611493">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="197192.92"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.091840714">
+													<SimplePredicate field="Education" operator="equal" value="Master"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.20296834" defaultChild="10">
+											<SimplePredicate field="Education" operator="equal" value="College"/>
+											<Node id="9" score="-0.2610692">
+												<SimplePredicate field="Age" operator="lessThan" value="47"/>
+											</Node>
+											<Node id="10" score="-0.0232058">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="47"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.0105468705" defaultChild="6">
+										<SimplePredicate field="Marital" operator="equal" value="Married"/>
+										<Node id="5" score="-0.0065853703" defaultChild="12">
+											<SimplePredicate field="Income" operator="lessThan" value="59534.87"/>
+											<Node id="11" score="0.058242396" defaultChild="20">
+												<SimplePredicate field="Income" operator="lessThan" value="20632.31"/>
+												<Node id="19" score="0.1164395" defaultChild="32">
+													<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+													<Node id="31" score="0.028463807">
+														<SimplePredicate field="Age" operator="lessThan" value="48"/>
+													</Node>
+													<Node id="32" score="0.22933018">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="48"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.07499214" defaultChild="34">
+													<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+													<Node id="33" score="-0.17388462">
+														<SimplePredicate field="Income" operator="lessThan" value="18754.25"/>
+													</Node>
+													<Node id="34" score="0.18595281">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="18754.25"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.021511164" defaultChild="22">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="20632.31"/>
+												<Node id="21" score="-0.20419195" defaultChild="36">
+													<SimplePredicate field="Income" operator="lessThan" value="22446.29"/>
+													<Node id="35" score="-0.26249778">
+														<SimplePredicate field="Hours" operator="lessThan" value="49"/>
+													</Node>
+													<Node id="36" score="-0.02106289">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="49"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.011860948" defaultChild="38">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="22446.29"/>
+													<Node id="37" score="0.0039340653">
+														<SimplePredicate field="Employment" operator="notEqual" value="Consultant"/>
+													</Node>
+													<Node id="38" score="-0.12524791">
+														<SimplePredicate field="Employment" operator="equal" value="Consultant"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.100361235" defaultChild="14">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="59534.87"/>
+											<Node id="13" score="0.17519554" defaultChild="24">
+												<SimplePredicate field="Income" operator="lessThan" value="166688.97"/>
+												<Node id="23" score="0.109644264" defaultChild="40">
+													<SimplePredicate field="Income" operator="lessThan" value="97678.27"/>
+													<Node id="39" score="0.15301508">
+														<SimplePredicate field="Education" operator="notEqual" value="College"/>
+													</Node>
+													<Node id="40" score="-0.06823921">
+														<SimplePredicate field="Education" operator="equal" value="College"/>
+													</Node>
+												</Node>
+												<Node id="24" score="0.2839145">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="97678.27"/>
+												</Node>
+											</Node>
+											<Node id="14" score="-0.013709859" defaultChild="26">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="166688.97"/>
+												<Node id="25" score="0.062445637" defaultChild="42">
+													<SimplePredicate field="Age" operator="lessThan" value="48"/>
+													<Node id="41" score="-0.03144732">
+														<SimplePredicate field="Age" operator="lessThan" value="43"/>
+													</Node>
+													<Node id="42" score="0.29550093">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="43"/>
+													</Node>
+												</Node>
+												<Node id="26" score="-0.2064656" defaultChild="44">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="48"/>
+													<Node id="43" score="-0.044708725">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="44" score="-0.2706868">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="19">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.003548285" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.009050119" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+										<Node id="3" score="-0.19601168">
+											<SimplePredicate field="Age" operator="lessThan" value="25"/>
+										</Node>
+										<Node id="4" score="-0.0042561614" defaultChild="8">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="25"/>
+											<Node id="7" score="-0.026585335" defaultChild="14">
+												<SimplePredicate field="Hours" operator="lessThan" value="42"/>
+												<Node id="13" score="-0.03326752" defaultChild="22">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Protective"/>
+													<Node id="21" score="-0.04395083">
+														<SimplePredicate field="Employment" operator="notEqual" value="Consultant"/>
+													</Node>
+													<Node id="22" score="0.08011492">
+														<SimplePredicate field="Employment" operator="equal" value="Consultant"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.17018667">
+													<SimplePredicate field="Occupation" operator="equal" value="Protective"/>
+												</Node>
+											</Node>
+											<Node id="8" score="0.026395623" defaultChild="16">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="42"/>
+												<Node id="15" score="0.26034027">
+													<SimplePredicate field="Hours" operator="lessThan" value="43"/>
+												</Node>
+												<Node id="16" score="0.017321914" defaultChild="24">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="43"/>
+													<Node id="23" score="0.14527744">
+														<SimplePredicate field="Income" operator="lessThan" value="19394.14"/>
+													</Node>
+													<Node id="24" score="0.0032166285">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="19394.14"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.099396124" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Associate"/>
+										<Node id="5" score="0.026422067" defaultChild="10">
+											<SimplePredicate field="Income" operator="lessThan" value="80894.68"/>
+											<Node id="9" score="0.14267258" defaultChild="18">
+												<SimplePredicate field="Income" operator="lessThan" value="48110.95"/>
+												<Node id="17" score="-0.012017171">
+													<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+												</Node>
+												<Node id="18" score="0.21576212" defaultChild="26">
+													<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													<Node id="25" score="0.06614654">
+														<SimplePredicate field="Income" operator="lessThan" value="34666.62"/>
+													</Node>
+													<Node id="26" score="0.258137">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="34666.62"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.13031808" defaultChild="20">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="48110.95"/>
+												<Node id="19" score="-0.16727808">
+													<SimplePredicate field="Income" operator="lessThan" value="60209.96"/>
+												</Node>
+												<Node id="20" score="-0.027646376">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="60209.96"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.21053943" defaultChild="12">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="80894.68"/>
+											<Node id="11" score="0.3188358">
+												<SimplePredicate field="Income" operator="lessThan" value="194054.27"/>
+											</Node>
+											<Node id="12" score="0.005946656">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="194054.27"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="20">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0015419597" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.06545204" defaultChild="4">
+										<SimplePredicate field="Hours" operator="lessThan" value="38"/>
+										<Node id="3" score="-0.24904966">
+											<SimplePredicate field="Age" operator="lessThan" value="32"/>
+										</Node>
+										<Node id="4" score="-0.025489604" defaultChild="8">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="32"/>
+											<Node id="7" score="0.014522286" defaultChild="12">
+												<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+												<Node id="11" score="0.18550476">
+													<SimplePredicate field="Age" operator="lessThan" value="36"/>
+												</Node>
+												<Node id="12" score="-0.014773625" defaultChild="20">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="36"/>
+													<Node id="19" score="0.11619278">
+														<SimplePredicate field="Hours" operator="lessThan" value="17"/>
+													</Node>
+													<Node id="20" score="-0.06896473">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="17"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.14501789" defaultChild="14">
+												<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+												<Node id="13" score="-0.01558013">
+													<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+												</Node>
+												<Node id="14" score="-0.20058767">
+													<SimplePredicate field="Employment" operator="equal" value="Private"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.0063381973" defaultChild="6">
+										<SimplePredicate field="Hours" operator="greaterOrEqual" value="38"/>
+										<Node id="5" score="0.009411612" defaultChild="10">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr9"/>
+											<Node id="9" score="0.013718578" defaultChild="16">
+												<SimplePredicate field="Education" operator="notEqual" value="Yr10"/>
+												<Node id="15" score="0.017790513" defaultChild="22">
+													<SimplePredicate field="Income" operator="lessThan" value="233344.97"/>
+													<Node id="21" score="0.013146338">
+														<SimplePredicate field="Income" operator="lessThan" value="190439.05"/>
+													</Node>
+													<Node id="22" score="0.22381178">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="190439.05"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.12607017" defaultChild="24">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="233344.97"/>
+													<Node id="23" score="-0.20116091">
+														<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+													</Node>
+													<Node id="24" score="-0.045206863">
+														<SimplePredicate field="Marital" operator="equal" value="Married"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.14919241" defaultChild="18">
+												<SimplePredicate field="Education" operator="equal" value="Yr10"/>
+												<Node id="17" score="-0.01415907" defaultChild="26">
+													<SimplePredicate field="Income" operator="lessThan" value="37530.82"/>
+													<Node id="25" score="0.11058518">
+														<SimplePredicate field="Age" operator="lessThan" value="43"/>
+													</Node>
+													<Node id="26" score="-0.12073686">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="43"/>
+													</Node>
+												</Node>
+												<Node id="18" score="-0.2511289">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="37530.82"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.22167794">
+											<SimplePredicate field="Education" operator="equal" value="Yr9"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="21">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.002464281" defaultChild="2">
+									<True/>
+									<Node id="1" score="3.0842825E-4" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Yr5t6"/>
+										<Node id="3" score="0.0026816553" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr7t8"/>
+											<Node id="7" score="-0.02930233" defaultChild="10">
+												<SimplePredicate field="Age" operator="lessThan" value="37"/>
+												<Node id="9" score="-0.039619938" defaultChild="14">
+													<SimplePredicate field="Hours" operator="lessThan" value="70"/>
+													<Node id="13" score="-0.06231195">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													</Node>
+													<Node id="14" score="0.086634666">
+														<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+													</Node>
+												</Node>
+												<Node id="10" score="0.2824868">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="70"/>
+												</Node>
+											</Node>
+											<Node id="8" score="0.017099498" defaultChild="12">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="37"/>
+												<Node id="11" score="0.03196016" defaultChild="16">
+													<SimplePredicate field="Hours" operator="lessThan" value="60"/>
+													<Node id="15" score="-0.19933338">
+														<SimplePredicate field="Income" operator="lessThan" value="7568.23"/>
+													</Node>
+													<Node id="16" score="0.0391467">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="7568.23"/>
+													</Node>
+												</Node>
+												<Node id="12" score="-0.09783246" defaultChild="18">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="60"/>
+													<Node id="17" score="0.14977512">
+														<SimplePredicate field="Age" operator="lessThan" value="41"/>
+													</Node>
+													<Node id="18" score="-0.17590874">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="41"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.19845496">
+											<SimplePredicate field="Education" operator="equal" value="Yr7t8"/>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.18105514" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Yr5t6"/>
+										<Node id="5" score="-0.04877288">
+											<SimplePredicate field="Age" operator="lessThan" value="50"/>
+										</Node>
+										<Node id="6" score="-0.21913712">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="50"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="22">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0023901036" defaultChild="2">
+									<True/>
+									<Node id="1" score="0.0021221621" defaultChild="4">
+										<SimplePredicate field="Occupation" operator="notEqual" value="Service"/>
+										<Node id="3" score="-0.0012249583" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+											<Node id="7" score="0.0017294249" defaultChild="14">
+												<SimplePredicate field="Education" operator="notEqual" value="Yr11"/>
+												<Node id="13" score="0.00802777" defaultChild="20">
+													<SimplePredicate field="Marital" operator="notEqual" value="Divorced"/>
+													<Node id="19" score="0.003942543">
+														<SimplePredicate field="Education" operator="notEqual" value="Doctorate"/>
+													</Node>
+													<Node id="20" score="0.13385019">
+														<SimplePredicate field="Education" operator="equal" value="Doctorate"/>
+													</Node>
+												</Node>
+												<Node id="14" score="-0.06478044" defaultChild="22">
+													<SimplePredicate field="Marital" operator="equal" value="Divorced"/>
+													<Node id="21" score="-0.023415925">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+													</Node>
+													<Node id="22" score="-0.2324342">
+														<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.15348113" defaultChild="16">
+												<SimplePredicate field="Education" operator="equal" value="Yr11"/>
+												<Node id="15" score="0.05669046">
+													<SimplePredicate field="Age" operator="lessThan" value="35"/>
+												</Node>
+												<Node id="16" score="-0.25970742">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="35"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="0.14533587" defaultChild="10">
+											<SimplePredicate field="Education" operator="equal" value="Professional"/>
+											<Node id="9" score="-0.03178677">
+												<SimplePredicate field="Hours" operator="lessThan" value="44"/>
+											</Node>
+											<Node id="10" score="0.23541151">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="44"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.10699049" defaultChild="6">
+										<SimplePredicate field="Occupation" operator="equal" value="Service"/>
+										<Node id="5" score="-0.14365093" defaultChild="12">
+											<SimplePredicate field="Age" operator="lessThan" value="54"/>
+											<Node id="11" score="0.0072753415">
+												<SimplePredicate field="Income" operator="lessThan" value="26834.22"/>
+											</Node>
+											<Node id="12" score="-0.18807523" defaultChild="18">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="26834.22"/>
+												<Node id="17" score="-0.2412237">
+													<SimplePredicate field="Age" operator="lessThan" value="42"/>
+												</Node>
+												<Node id="18" score="-0.041456148">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="42"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.018759297">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="54"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="23">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0023815848" defaultChild="2">
+									<True/>
+									<Node id="1" score="-4.3104996E-5" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Yr5t6"/>
+										<Node id="3" score="0.0019519704" defaultChild="6">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr7t8"/>
+											<Node id="5" score="-0.0307677" defaultChild="8">
+												<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+												<Node id="7" score="-0.008918917" defaultChild="12">
+													<SimplePredicate field="Education" operator="notEqual" value="College"/>
+													<Node id="11" score="0.018513242">
+														<SimplePredicate field="Income" operator="lessThan" value="117629.97"/>
+													</Node>
+													<Node id="12" score="-0.098937385">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="117629.97"/>
+													</Node>
+												</Node>
+												<Node id="8" score="-0.17904706" defaultChild="14">
+													<SimplePredicate field="Education" operator="equal" value="College"/>
+													<Node id="13" score="-0.24943577">
+														<SimplePredicate field="Marital" operator="notEqual" value="Divorced"/>
+													</Node>
+													<Node id="14" score="-0.013535968">
+														<SimplePredicate field="Marital" operator="equal" value="Divorced"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="6" score="0.0123835225" defaultChild="10">
+												<SimplePredicate field="Marital" operator="equal" value="Married"/>
+												<Node id="9" score="-0.0014371244" defaultChild="16">
+													<SimplePredicate field="Income" operator="lessThan" value="59534.87"/>
+													<Node id="15" score="-0.008975562">
+														<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													</Node>
+													<Node id="16" score="0.09961916">
+														<SimplePredicate field="Education" operator="equal" value="Master"/>
+													</Node>
+												</Node>
+												<Node id="10" score="0.085310906" defaultChild="18">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="59534.87"/>
+													<Node id="17" score="0.1412005">
+														<SimplePredicate field="Income" operator="lessThan" value="166688.97"/>
+													</Node>
+													<Node id="18" score="-0.0029070931">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="166688.97"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.18208838">
+											<SimplePredicate field="Education" operator="equal" value="Yr7t8"/>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.16060223">
+										<SimplePredicate field="Education" operator="equal" value="Yr5t6"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="24">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0025206646" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.007129059" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+										<Node id="3" score="-0.011317933" defaultChild="8">
+											<SimplePredicate field="Hours" operator="lessThan" value="70"/>
+											<Node id="7" score="-0.006553082" defaultChild="16">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Cleaner"/>
+												<Node id="15" score="-0.002228887" defaultChild="24">
+													<SimplePredicate field="Age" operator="lessThan" value="67"/>
+													<Node id="23" score="-0.027821353">
+														<SimplePredicate field="Age" operator="lessThan" value="45"/>
+													</Node>
+													<Node id="24" score="0.03201877">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="45"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.14461358" defaultChild="26">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="67"/>
+													<Node id="25" score="-0.23420501">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Executive"/>
+													</Node>
+													<Node id="26" score="0.08932869">
+														<SimplePredicate field="Occupation" operator="equal" value="Executive"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.15143292" defaultChild="18">
+												<SimplePredicate field="Occupation" operator="equal" value="Cleaner"/>
+												<Node id="17" score="-0.19189519" defaultChild="28">
+													<SimplePredicate field="Age" operator="lessThan" value="56"/>
+													<Node id="27" score="-0.058493577">
+														<SimplePredicate field="Income" operator="lessThan" value="31952.02"/>
+													</Node>
+													<Node id="28" score="-0.2502421">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="31952.02"/>
+													</Node>
+												</Node>
+												<Node id="18" score="0.022409659">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="56"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="0.12491255" defaultChild="10">
+											<SimplePredicate field="Hours" operator="greaterOrEqual" value="70"/>
+											<Node id="9" score="0.26892227">
+												<SimplePredicate field="Age" operator="lessThan" value="44"/>
+											</Node>
+											<Node id="10" score="-0.124619566">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.07966285" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Associate"/>
+										<Node id="5" score="0.12099703" defaultChild="12">
+											<SimplePredicate field="Marital" operator="notEqual" value="Absent"/>
+											<Node id="11" score="0.21122347" defaultChild="20">
+												<SimplePredicate field="Age" operator="lessThan" value="42"/>
+												<Node id="19" score="0.32524508" defaultChild="30">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+													<Node id="29" score="0.114372015">
+														<SimplePredicate field="Age" operator="lessThan" value="37"/>
+													</Node>
+													<Node id="30" score="0.40801057">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="37"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.12505187">
+													<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.0067561623" defaultChild="22">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="42"/>
+												<Node id="21" score="0.083155856" defaultChild="32">
+													<SimplePredicate field="Hours" operator="lessThan" value="46"/>
+													<Node id="31" score="-0.05628862">
+														<SimplePredicate field="Age" operator="lessThan" value="51"/>
+													</Node>
+													<Node id="32" score="0.19634311">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="51"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.16377808">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="46"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="-0.06032242" defaultChild="14">
+											<SimplePredicate field="Marital" operator="equal" value="Absent"/>
+											<Node id="13" score="0.110501744">
+												<SimplePredicate field="Age" operator="lessThan" value="30"/>
+											</Node>
+											<Node id="14" score="-0.19719617">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="30"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="25">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0019553716" defaultChild="2">
+									<True/>
+									<Node id="1" score="0.0013866605" defaultChild="4">
+										<SimplePredicate field="Occupation" operator="notEqual" value="Farming"/>
+										<Node id="3" score="0.0038026322" defaultChild="8">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr9"/>
+											<Node id="7" score="-0.06617669" defaultChild="14">
+												<SimplePredicate field="Hours" operator="lessThan" value="35"/>
+												<Node id="13" score="0.03620775" defaultChild="18">
+													<SimplePredicate field="Hours" operator="lessThan" value="17"/>
+													<Node id="17" score="0.11377387">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="18" score="-0.16710374">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+												<Node id="14" score="-0.121112294" defaultChild="20">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="17"/>
+													<Node id="19" score="-0.17559439">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="20" score="0.08968256">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="0.009738865" defaultChild="16">
+												<SimplePredicate field="Hours" operator="greaterOrEqual" value="35"/>
+												<Node id="15" score="0.013290845" defaultChild="22">
+													<SimplePredicate field="Education" operator="notEqual" value="Yr10"/>
+													<Node id="21" score="0.0057642846">
+														<SimplePredicate field="Age" operator="lessThan" value="58"/>
+													</Node>
+													<Node id="22" score="0.08235257">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="58"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.12771079" defaultChild="24">
+													<SimplePredicate field="Education" operator="equal" value="Yr10"/>
+													<Node id="23" score="-0.0131370425">
+														<SimplePredicate field="Income" operator="lessThan" value="37530.82"/>
+													</Node>
+													<Node id="24" score="-0.22617634">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="37530.82"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.20193891">
+											<SimplePredicate field="Education" operator="equal" value="Yr9"/>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.10062483" defaultChild="6">
+										<SimplePredicate field="Occupation" operator="equal" value="Farming"/>
+										<Node id="5" score="-0.18714875" defaultChild="10">
+											<SimplePredicate field="Age" operator="lessThan" value="54"/>
+											<Node id="9" score="-0.23321053">
+												<SimplePredicate field="Employment" operator="notEqual" value="Consultant"/>
+											</Node>
+											<Node id="10" score="-0.06727778">
+												<SimplePredicate field="Employment" operator="equal" value="Consultant"/>
+											</Node>
+										</Node>
+										<Node id="6" score="0.04423785" defaultChild="12">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="54"/>
+											<Node id="11" score="-0.011889827">
+												<SimplePredicate field="Education" operator="notEqual" value="HSgrad"/>
+											</Node>
+											<Node id="12" score="0.084948175">
+												<SimplePredicate field="Education" operator="equal" value="HSgrad"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="26">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0026534353" defaultChild="2">
+									<True/>
+									<Node id="1" score="0.009740786" defaultChild="4">
+										<SimplePredicate field="Age" operator="lessThan" value="50"/>
+										<Node id="3" score="-0.0052531157" defaultChild="8">
+											<SimplePredicate field="Age" operator="lessThan" value="47"/>
+											<Node id="7" score="0.0043845815" defaultChild="14">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Transport"/>
+												<Node id="13" score="-0.02322018" defaultChild="24">
+													<SimplePredicate field="Hours" operator="lessThan" value="50"/>
+													<Node id="23" score="-0.0136990575">
+														<SimplePredicate field="Hours" operator="lessThan" value="48"/>
+													</Node>
+													<Node id="24" score="-0.2325987">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="48"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.06116141" defaultChild="26">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="50"/>
+													<Node id="25" score="-0.043703105">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="26" score="0.10997019">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.16759433" defaultChild="16">
+												<SimplePredicate field="Occupation" operator="equal" value="Transport"/>
+												<Node id="15" score="-0.19966342" defaultChild="28">
+													<SimplePredicate field="Age" operator="lessThan" value="44"/>
+													<Node id="27" score="-0.05706622">
+														<SimplePredicate field="Income" operator="lessThan" value="27896.05"/>
+													</Node>
+													<Node id="28" score="-0.22352481">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="27896.05"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.018204">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="0.12906174" defaultChild="10">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="47"/>
+											<Node id="9" score="0.21573575" defaultChild="18">
+												<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+												<Node id="17" score="0.28766477" defaultChild="30">
+													<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													<Node id="29" score="0.35092354">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													</Node>
+													<Node id="30" score="0.01949099">
+														<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+													</Node>
+												</Node>
+												<Node id="18" score="-0.0766774">
+													<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+												</Node>
+											</Node>
+											<Node id="10" score="0.014829227" defaultChild="20">
+												<SimplePredicate field="Employment" operator="equal" value="Private"/>
+												<Node id="19" score="0.14567116" defaultChild="32">
+													<SimplePredicate field="Age" operator="lessThan" value="49"/>
+													<Node id="31" score="0.17859559">
+														<SimplePredicate field="Education" operator="notEqual" value="College"/>
+													</Node>
+													<Node id="32" score="3.7949707E-4">
+														<SimplePredicate field="Education" operator="equal" value="College"/>
+													</Node>
+												</Node>
+												<Node id="20" score="-0.22913365">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="49"/>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.03274157" defaultChild="6">
+										<SimplePredicate field="Age" operator="greaterOrEqual" value="50"/>
+										<Node id="5" score="-0.043444008" defaultChild="12">
+											<SimplePredicate field="Employment" operator="notEqual" value="PSFederal"/>
+											<Node id="11" score="-0.053714026" defaultChild="22">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Support"/>
+												<Node id="21" score="-0.041276455" defaultChild="34">
+													<SimplePredicate field="Income" operator="lessThan" value="164221.31"/>
+													<Node id="33" score="-0.08823287">
+														<SimplePredicate field="Income" operator="lessThan" value="36235.39"/>
+													</Node>
+													<Node id="34" score="0.0044074627">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="36235.39"/>
+													</Node>
+												</Node>
+												<Node id="22" score="-0.23531505" defaultChild="36">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="164221.31"/>
+													<Node id="35" score="-0.28258625">
+														<SimplePredicate field="Age" operator="lessThan" value="58"/>
+													</Node>
+													<Node id="36" score="-0.062402632">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="58"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="12" score="0.20114528">
+												<SimplePredicate field="Occupation" operator="equal" value="Support"/>
+											</Node>
+										</Node>
+										<Node id="6" score="0.20351522">
+											<SimplePredicate field="Employment" operator="equal" value="PSFederal"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="27">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0024366467" defaultChild="2">
+									<True/>
+									<Node id="1" score="-6.112616E-4" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Yr12"/>
+										<Node id="3" score="0.004770416" defaultChild="6">
+											<SimplePredicate field="Marital" operator="notEqual" value="Divorced"/>
+											<Node id="5" score="-0.0018260686" defaultChild="10">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+												<Node id="9" score="-0.016320586" defaultChild="16">
+													<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													<Node id="15" score="-0.0039683455">
+														<SimplePredicate field="Income" operator="lessThan" value="108664.63"/>
+													</Node>
+													<Node id="16" score="-0.14227733">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="108664.63"/>
+													</Node>
+												</Node>
+												<Node id="10" score="0.043573547" defaultChild="18">
+													<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													<Node id="17" score="0.0028860497">
+														<SimplePredicate field="Income" operator="lessThan" value="57497.3"/>
+													</Node>
+													<Node id="18" score="0.15354382">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="57497.3"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="6" score="0.07786692" defaultChild="12">
+												<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+												<Node id="11" score="0.13488469" defaultChild="20">
+													<SimplePredicate field="Education" operator="notEqual" value="Bachelor"/>
+													<Node id="19" score="-0.1779767">
+														<SimplePredicate field="Income" operator="lessThan" value="30741.98"/>
+													</Node>
+													<Node id="20" score="0.243732">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="30741.98"/>
+													</Node>
+												</Node>
+												<Node id="12" score="-0.14490397" defaultChild="22">
+													<SimplePredicate field="Education" operator="equal" value="Bachelor"/>
+													<Node id="21" score="0.14690802">
+														<SimplePredicate field="Income" operator="lessThan" value="68020.6"/>
+													</Node>
+													<Node id="22" score="-0.3148455">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="68020.6"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.05717861" defaultChild="8">
+											<SimplePredicate field="Marital" operator="equal" value="Divorced"/>
+											<Node id="7" score="-0.025037458" defaultChild="14">
+												<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+												<Node id="13" score="-0.084390014" defaultChild="24">
+													<SimplePredicate field="Income" operator="lessThan" value="81343.45"/>
+													<Node id="23" score="0.007892617">
+														<SimplePredicate field="Income" operator="lessThan" value="67198.88"/>
+													</Node>
+													<Node id="24" score="-0.23745556">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="67198.88"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.034276854" defaultChild="26">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="81343.45"/>
+													<Node id="25" score="0.20844133">
+														<SimplePredicate field="Age" operator="lessThan" value="45"/>
+													</Node>
+													<Node id="26" score="-0.1118096">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="45"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="-0.21570355">
+												<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.1789179">
+										<SimplePredicate field="Education" operator="equal" value="Yr12"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="28">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0030566296" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.005713053" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+										<Node id="3" score="-0.038417622" defaultChild="8">
+											<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+											<Node id="7" score="-0.05070369" defaultChild="12">
+												<SimplePredicate field="Education" operator="notEqual" value="Doctorate"/>
+												<Node id="11" score="-0.19040297" defaultChild="18">
+													<SimplePredicate field="Hours" operator="lessThan" value="39"/>
+													<Node id="17" score="-0.21461782">
+														<SimplePredicate field="Income" operator="lessThan" value="172504.16"/>
+													</Node>
+													<Node id="18" score="-0.038590617">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="172504.16"/>
+													</Node>
+												</Node>
+												<Node id="12" score="-0.028229462" defaultChild="20">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="39"/>
+													<Node id="19" score="-0.049571123">
+														<SimplePredicate field="Age" operator="lessThan" value="57"/>
+													</Node>
+													<Node id="20" score="0.14781645">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="57"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="8" score="0.16679013">
+												<SimplePredicate field="Education" operator="equal" value="Doctorate"/>
+											</Node>
+										</Node>
+										<Node id="4" score="0.0045012427" defaultChild="10">
+											<SimplePredicate field="Marital" operator="equal" value="Married"/>
+											<Node id="9" score="0.017639503" defaultChild="14">
+												<SimplePredicate field="Age" operator="lessThan" value="55"/>
+												<Node id="13" score="-0.0050975378" defaultChild="22">
+													<SimplePredicate field="Age" operator="lessThan" value="45"/>
+													<Node id="21" score="-0.014318527">
+														<SimplePredicate field="Hours" operator="lessThan" value="70"/>
+													</Node>
+													<Node id="22" score="0.2428493">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="70"/>
+													</Node>
+												</Node>
+												<Node id="14" score="0.066721134" defaultChild="24">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="45"/>
+													<Node id="23" score="0.11000299">
+														<SimplePredicate field="Hours" operator="lessThan" value="56"/>
+													</Node>
+													<Node id="24" score="-0.1723461">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="56"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.049185064" defaultChild="16">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="55"/>
+												<Node id="15" score="-0.0010953071" defaultChild="26">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Repair"/>
+													<Node id="25" score="-0.023585802">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Clerical"/>
+													</Node>
+													<Node id="26" score="0.19408382">
+														<SimplePredicate field="Occupation" operator="equal" value="Clerical"/>
+													</Node>
+												</Node>
+												<Node id="16" score="-0.27120233" defaultChild="28">
+													<SimplePredicate field="Occupation" operator="equal" value="Repair"/>
+													<Node id="27" score="-0.09658888">
+														<SimplePredicate field="Income" operator="lessThan" value="31682.89"/>
+													</Node>
+													<Node id="28" score="-0.32890403">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="31682.89"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.11766443" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Professional"/>
+										<Node id="5" score="0.22002877">
+											<SimplePredicate field="Income" operator="lessThan" value="49018.21"/>
+										</Node>
+										<Node id="6" score="-0.019376468">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="49018.21"/>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="29">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Employment"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.002157516" defaultChild="2">
+									<True/>
+									<Node id="1" score="-0.005993523" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Associate"/>
+										<Node id="3" score="-0.1519592" defaultChild="8">
+											<SimplePredicate field="Age" operator="lessThan" value="25"/>
+											<Node id="7" score="-0.18150865">
+												<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+											</Node>
+											<Node id="8" score="-0.053469107">
+												<SimplePredicate field="Marital" operator="equal" value="Married"/>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.0030124597" defaultChild="10">
+											<SimplePredicate field="Age" operator="greaterOrEqual" value="25"/>
+											<Node id="9" score="0.042635467" defaultChild="16">
+												<SimplePredicate field="Age" operator="lessThan" value="32"/>
+												<Node id="15" score="0.21203357" defaultChild="24">
+													<SimplePredicate field="Income" operator="lessThan" value="20261.1"/>
+													<Node id="23" score="-0.026303599">
+														<SimplePredicate field="Age" operator="lessThan" value="28"/>
+													</Node>
+													<Node id="24" score="0.3255698">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="28"/>
+													</Node>
+												</Node>
+												<Node id="16" score="0.017233264" defaultChild="26">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="20261.1"/>
+													<Node id="25" score="-0.05810899">
+														<SimplePredicate field="Income" operator="lessThan" value="42315.24"/>
+													</Node>
+													<Node id="26" score="0.06619273">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="42315.24"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="10" score="-0.012085686" defaultChild="18">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="32"/>
+												<Node id="17" score="-0.0045808596" defaultChild="28">
+													<SimplePredicate field="Occupation" operator="notEqual" value="Machinist"/>
+													<Node id="27" score="-0.0015371337">
+														<SimplePredicate field="Education" operator="notEqual" value="Yr11"/>
+													</Node>
+													<Node id="28" score="-0.15957995">
+														<SimplePredicate field="Education" operator="equal" value="Yr11"/>
+													</Node>
+												</Node>
+												<Node id="18" score="-0.11209719" defaultChild="30">
+													<SimplePredicate field="Occupation" operator="equal" value="Machinist"/>
+													<Node id="29" score="0.082218684">
+														<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+													</Node>
+													<Node id="30" score="-0.14291346">
+														<SimplePredicate field="Employment" operator="equal" value="Private"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="0.0656156" defaultChild="6">
+										<SimplePredicate field="Education" operator="equal" value="Associate"/>
+										<Node id="5" score="-0.011054715" defaultChild="12">
+											<SimplePredicate field="Income" operator="lessThan" value="80894.68"/>
+											<Node id="11" score="0.08188965" defaultChild="20">
+												<SimplePredicate field="Income" operator="lessThan" value="48110.95"/>
+												<Node id="19" score="-0.025572928">
+													<SimplePredicate field="Employment" operator="notEqual" value="Private"/>
+												</Node>
+												<Node id="20" score="0.13693458">
+													<SimplePredicate field="Employment" operator="equal" value="Private"/>
+												</Node>
+											</Node>
+											<Node id="12" score="-0.13171907" defaultChild="22">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="48110.95"/>
+												<Node id="21" score="-0.16434911">
+													<SimplePredicate field="Income" operator="lessThan" value="60209.96"/>
+												</Node>
+												<Node id="22" score="-0.030066324">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="60209.96"/>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="6" score="0.1880713" defaultChild="14">
+											<SimplePredicate field="Income" operator="greaterOrEqual" value="80894.68"/>
+											<Node id="13" score="0.25202015">
+												<SimplePredicate field="Income" operator="lessThan" value="194054.27"/>
+											</Node>
+											<Node id="14" score="0.024177218">
+												<SimplePredicate field="Income" operator="greaterOrEqual" value="194054.27"/>
+											</Node>
+										</Node>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="30">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Gender"/>
+									<MiningField name="Marital"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0016964416" defaultChild="2">
+									<True/>
+									<Node id="1" score="-7.1751885E-5" defaultChild="4">
+										<SimplePredicate field="Education" operator="notEqual" value="Yr12"/>
+										<Node id="3" score="0.0017442656" defaultChild="6">
+											<SimplePredicate field="Education" operator="notEqual" value="Yr5t6"/>
+											<Node id="5" score="-0.030761493" defaultChild="8">
+												<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+												<Node id="7" score="-0.057610143" defaultChild="12">
+													<SimplePredicate field="Age" operator="lessThan" value="58"/>
+													<Node id="11" score="-0.117300265">
+														<SimplePredicate field="Marital" operator="notEqual" value="Married"/>
+													</Node>
+													<Node id="12" score="0.034250155">
+														<SimplePredicate field="Marital" operator="equal" value="Married"/>
+													</Node>
+												</Node>
+												<Node id="8" score="0.15227601" defaultChild="14">
+													<SimplePredicate field="Age" operator="greaterOrEqual" value="58"/>
+													<Node id="13" score="-0.06859741">
+														<SimplePredicate field="Hours" operator="lessThan" value="36"/>
+													</Node>
+													<Node id="14" score="0.26148266">
+														<SimplePredicate field="Hours" operator="greaterOrEqual" value="36"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="6" score="0.008759025" defaultChild="10">
+												<SimplePredicate field="Gender" operator="equal" value="Male"/>
+												<Node id="9" score="0.003021124" defaultChild="16">
+													<SimplePredicate field="Education" operator="notEqual" value="Master"/>
+													<Node id="15" score="-4.6729253E-4">
+														<SimplePredicate field="Education" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="16" score="0.14610943">
+														<SimplePredicate field="Education" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+												<Node id="10" score="0.086007155" defaultChild="18">
+													<SimplePredicate field="Education" operator="equal" value="Master"/>
+													<Node id="17" score="0.1597037">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="18" score="-0.017332407">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="-0.12948042">
+											<SimplePredicate field="Education" operator="equal" value="Yr5t6"/>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.16136932">
+										<SimplePredicate field="Education" operator="equal" value="Yr12"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="31">
+							<True/>
+							<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="Education"/>
+									<MiningField name="Gender"/>
+									<MiningField name="Occupation"/>
+									<MiningField name="Age"/>
+									<MiningField name="Hours"/>
+									<MiningField name="Income"/>
+								</MiningSchema>
+								<Node id="0" score="-0.0011591474" defaultChild="2">
+									<True/>
+									<Node id="1" score="4.3027982E-4" defaultChild="4">
+										<SimplePredicate field="Hours" operator="lessThan" value="84"/>
+										<Node id="3" score="-0.0025842744" defaultChild="6">
+											<SimplePredicate field="Hours" operator="lessThan" value="70"/>
+											<Node id="5" score="-0.006015504" defaultChild="10">
+												<SimplePredicate field="Education" operator="notEqual" value="Doctorate"/>
+												<Node id="9" score="0.0023392553" defaultChild="14">
+													<SimplePredicate field="Hours" operator="lessThan" value="60"/>
+													<Node id="13" score="-0.107558094">
+														<SimplePredicate field="Income" operator="lessThan" value="13567.01"/>
+													</Node>
+													<Node id="14" score="0.009595655">
+														<SimplePredicate field="Income" operator="greaterOrEqual" value="13567.01"/>
+													</Node>
+												</Node>
+												<Node id="10" score="-0.08577185" defaultChild="16">
+													<SimplePredicate field="Hours" operator="greaterOrEqual" value="60"/>
+													<Node id="15" score="-0.014096535">
+														<SimplePredicate field="Occupation" operator="notEqual" value="Professional"/>
+													</Node>
+													<Node id="16" score="-0.31181258">
+														<SimplePredicate field="Occupation" operator="equal" value="Professional"/>
+													</Node>
+												</Node>
+											</Node>
+											<Node id="6" score="0.11556589" defaultChild="12">
+												<SimplePredicate field="Education" operator="equal" value="Doctorate"/>
+												<Node id="11" score="-0.020339703" defaultChild="18">
+													<SimplePredicate field="Income" operator="lessThan" value="39249.37"/>
+													<Node id="17" score="0.08196707">
+														<SimplePredicate field="Age" operator="lessThan" value="51"/>
+													</Node>
+													<Node id="18" score="-0.10864166">
+														<SimplePredicate field="Age" operator="greaterOrEqual" value="51"/>
+													</Node>
+												</Node>
+												<Node id="12" score="0.21294208" defaultChild="20">
+													<SimplePredicate field="Income" operator="greaterOrEqual" value="39249.37"/>
+													<Node id="19" score="0.05846584">
+														<SimplePredicate field="Gender" operator="notEqual" value="Male"/>
+													</Node>
+													<Node id="20" score="0.26193768">
+														<SimplePredicate field="Gender" operator="equal" value="Male"/>
+													</Node>
+												</Node>
+											</Node>
+										</Node>
+										<Node id="4" score="0.12117423" defaultChild="8">
+											<SimplePredicate field="Hours" operator="greaterOrEqual" value="70"/>
+											<Node id="7" score="0.22739959">
+												<SimplePredicate field="Age" operator="lessThan" value="44"/>
+											</Node>
+											<Node id="8" score="-0.11647356">
+												<SimplePredicate field="Age" operator="greaterOrEqual" value="44"/>
+											</Node>
+										</Node>
+									</Node>
+									<Node id="2" score="-0.13919398">
+										<SimplePredicate field="Hours" operator="greaterOrEqual" value="84"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+					</Segmentation>
+				</MiningModel>
+			</Segment>
+			<Segment id="2">
+				<True/>
+				<RegressionModel functionName="classification" normalizationMethod="logit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="Adjusted" usageType="target"/>
+						<MiningField name="xgbValue"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="probability(0)" optype="continuous" dataType="float" feature="probability" value="0"/>
+						<OutputField name="probability(1)" optype="continuous" dataType="float" feature="probability" value="1"/>
+					</Output>
+					<RegressionTable intercept="0.0" targetCategory="1">
+						<NumericPredictor name="xgbValue" coefficient="1.0"/>
+					</RegressionTable>
+					<RegressionTable intercept="0.0" targetCategory="0"/>
+				</RegressionModel>
+			</Segment>
+		</Segmentation>
+	</MiningModel>
+</PMML>

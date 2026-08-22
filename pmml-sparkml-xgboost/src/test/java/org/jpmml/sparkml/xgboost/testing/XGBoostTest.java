@@ -45,14 +45,15 @@ import org.jpmml.sparkml.testing.SparkMLEncoderBatchTest;
 import org.jpmml.xgboost.HasXGBoostOptions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled
 public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
+	private boolean usePipelineModel = false;
+
+
 	public XGBoostTest(){
-		super(new FloatEquivalence(12));
+		super(new FloatEquivalence(8));
 	}
 
 	@Override
@@ -68,6 +69,12 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 			@Override
 			public List<Map<String, Object>> getOptionsMatrix(){
+
+				// XXX
+				if(!usePipelineModel){
+					return super.getOptionsMatrix();
+				}
+
 				Map<String, Object> options = new LinkedHashMap<>();
 
 				options.put(HasXGBoostOptions.OPTION_COMPACT, new Boolean[]{false, true});
@@ -79,6 +86,12 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 			@Override
 			public PMML getPMML() throws Exception {
+
+				// XXX
+				if(!usePipelineModel){
+					return loadPMML();
+				}
+
 				PMML pmml = super.getPMML();
 
 				Visitor visitor = new AbstractVisitor(){
@@ -115,12 +128,12 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateAudit() throws Exception {
-		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64 + 40));
+		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(24));
 	}
 
 	@Test
 	public void evaluateAuditNA() throws Exception {
-		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64));
+		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(28));
 	}
 
 	@Test
@@ -135,17 +148,17 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateHousing() throws Exception {
-		evaluate("XGBoost", HOUSING, new FloatEquivalence(12 + 4));
+		evaluate("XGBoost", HOUSING);
 	}
 
 	@Test
 	public void evaluateIris() throws Exception {
-		evaluate("XGBoost", IRIS, new FloatEquivalence(12 + 2));
+		evaluate("XGBoost", IRIS);
 	}
 
 	@Test
 	public void evaluateVisit() throws Exception {
-		evaluate("XGBoost", VISIT, new FloatEquivalence(16 + 8));
+		evaluate("XGBoost", VISIT, new FloatEquivalence(14));
 	}
 
 	@BeforeAll

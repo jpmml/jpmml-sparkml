@@ -1,13 +1,25 @@
 import ml.dmlc.xgboost4j.scala.spark.{XGBoostClassifier, XGBoostRegressor}
-import org.apache.spark.ml.{Pipeline, PipelineStage}
+import org.apache.spark.ml.{Pipeline, PipelineModel, PipelineStage}
 import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.param.shared.HasOutputCol
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.{DataType, FloatType, StructType}
 import org.jpmml.sparkml.DatasetUtil
 import org.jpmml.sparkml.feature.VectorDensifier
+import org.jpmml.xgboost.HasXGBoostOptions
 
 class XGBoostTest extends SparkMLTest {
+
+	override
+	def store_pipeline_model(df: DataFrame, pipelineModel: PipelineModel, algorithm: String, dataset: String): Unit = {
+		val options = Map(
+			HasXGBoostOptions.OPTION_COMPACT -> false,
+			HasXGBoostOptions.OPTION_INPUT_FLOAT -> true,
+			HasXGBoostOptions.OPTION_PRUNE -> false
+		)
+
+		store_pmml(df, pipelineModel, algorithm, dataset, options)
+	}
 
 	override
 	def load_housing(name: String): DataFrame = {
@@ -58,9 +70,9 @@ class XGBoostTest extends SparkMLTest {
 
 		val params = label_col match {
 			case "Adjusted" =>
-				Map("objective" -> "binary:logistic", "num_round" -> 101)
+				Map("objective" -> "binary:logistic", "num_round" -> 31, "max_depth" -> 5)
 			case "Species" =>
-				Map("objective" -> "multi:softprob", "num_class" -> 3, "num_round" -> 17)
+				Map("objective" -> "multi:softprob", "num_class" -> 3, "num_round" -> 11, "max_depth" -> 3)
 			case _ =>
 				throw new IllegalArgumentException()
 		}
@@ -87,9 +99,13 @@ class XGBoostTest extends SparkMLTest {
 
 		val params = label_col match {
 			case "docvis" =>
-				Map("objective" -> "count:poisson", "num_round" -> 101)
+				Map("objective" -> "count:poisson", "num_round" -> 31, "max_depth" -> 4)
+			case "MEDV" =>
+				Map("objective" -> "reg:squarederror", "num_round" -> 31, "max_depth" -> 4)
+			case "mpg" =>
+				Map("objective" -> "reg:squarederror", "num_round" -> 31, "max_depth" -> 3)
 			case _ =>
-				Map("objective" -> "reg:squarederror", "num_round" -> 101)
+				throw new IllegalArgumentException()
 		}
 
 		var regressor = new XGBoostRegressor(params)

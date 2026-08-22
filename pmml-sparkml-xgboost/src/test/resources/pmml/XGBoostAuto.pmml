@@ -1,0 +1,1707 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-SparkML command-line application" version="3.3-SNAPSHOT"/>
+		<Timestamp>2026-08-22T18:58:34Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="cylinders" optype="categorical" dataType="integer">
+			<Value value="4"/>
+			<Value value="8"/>
+			<Value value="6"/>
+			<Value value="3"/>
+			<Value value="5"/>
+		</DataField>
+		<DataField name="model_year" optype="categorical" dataType="integer">
+			<Value value="73"/>
+			<Value value="78"/>
+			<Value value="76"/>
+			<Value value="75"/>
+			<Value value="82"/>
+			<Value value="70"/>
+			<Value value="79"/>
+			<Value value="72"/>
+			<Value value="77"/>
+			<Value value="81"/>
+			<Value value="71"/>
+			<Value value="80"/>
+			<Value value="74"/>
+		</DataField>
+		<DataField name="origin" optype="categorical" dataType="integer">
+			<Value value="1"/>
+			<Value value="3"/>
+			<Value value="2"/>
+		</DataField>
+		<DataField name="acceleration" optype="continuous" dataType="float"/>
+		<DataField name="displacement" optype="continuous" dataType="float"/>
+		<DataField name="horsepower" optype="continuous" dataType="integer"/>
+		<DataField name="weight" optype="continuous" dataType="integer"/>
+		<DataField name="mpg" optype="continuous" dataType="float"/>
+	</DataDictionary>
+	<MiningModel functionName="regression" algorithmName="XGBoost (GBTree)" x-mathContext="float">
+		<MiningSchema>
+			<MiningField name="mpg" usageType="target"/>
+			<MiningField name="cylinders"/>
+			<MiningField name="model_year"/>
+			<MiningField name="origin"/>
+			<MiningField name="acceleration"/>
+			<MiningField name="displacement"/>
+			<MiningField name="horsepower"/>
+			<MiningField name="weight"/>
+		</MiningSchema>
+		<Output>
+			<OutputField name="prediction" optype="continuous" dataType="float"/>
+		</Output>
+		<Targets>
+			<Target field="mpg" rescaleConstant="23.445919"/>
+		</Targets>
+		<Segmentation multipleModelMethod="sum" missingPredictionTreatment="returnMissing">
+			<Segment id="1">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="-2.0238281E-7" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="1.5519364" recordCount="222.0" defaultChild="4">
+							<SimplePredicate field="displacement" operator="lessThan" value="198.0"/>
+							<Node id="3" score="3.0234993" recordCount="71.0" defaultChild="8">
+								<SimplePredicate field="horsepower" operator="lessThan" value="71"/>
+								<Node id="7" score="3.1008499" recordCount="69.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="72"/>
+								</Node>
+								<Node id="8" score="0.2108162" recordCount="2.0">
+									<SimplePredicate field="model_year" operator="equal" value="72"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.84467024" recordCount="151.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="71"/>
+								<Node id="9" score="1.6219792" recordCount="57.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="85"/>
+								</Node>
+								<Node id="10" score="0.36121142" recordCount="94.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="85"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-2.0238707" recordCount="170.0" defaultChild="6">
+							<SimplePredicate field="displacement" operator="greaterOrEqual" value="198.0"/>
+							<Node id="5" score="-1.1863921" recordCount="74.0" defaultChild="12">
+								<SimplePredicate field="horsepower" operator="lessThan" value="129"/>
+								<Node id="11" score="-1.2727652" recordCount="72.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="12" score="1.3108162" recordCount="2.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-2.650541" recordCount="96.0" defaultChild="14">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="129"/>
+								<Node id="13" score="-2.7310967" recordCount="90.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="78"/>
+								</Node>
+								<Node id="14" score="-1.2246648" recordCount="6.0">
+									<SimplePredicate field="model_year" operator="equal" value="78"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="2">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="model_year"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0010511428" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-1.2884029" recordCount="193.0" defaultChild="4">
+							<SimplePredicate field="cylinders" operator="notEqual" value="4"/>
+							<Node id="3" score="-0.7603902" recordCount="106.0" defaultChild="8">
+								<SimplePredicate field="weight" operator="lessThan" value="3730"/>
+								<Node id="7" score="-0.2134766" recordCount="34.0">
+									<SimplePredicate field="weight" operator="lessThan" value="3021"/>
+								</Node>
+								<Node id="8" score="-1.0121927" recordCount="72.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="3021"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-1.9157776" recordCount="87.0" defaultChild="10">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="3730"/>
+								<Node id="9" score="-2.0040715" recordCount="80.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="10" score="-0.78232837" recordCount="7.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="1.2518163" recordCount="199.0" defaultChild="6">
+							<SimplePredicate field="cylinders" operator="equal" value="4"/>
+							<Node id="5" score="2.008892" recordCount="93.0" defaultChild="12">
+								<SimplePredicate field="weight" operator="lessThan" value="2219"/>
+								<Node id="11" score="1.7906368" recordCount="82.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								</Node>
+								<Node id="12" score="3.3510823" recordCount="11.0">
+									<SimplePredicate field="model_year" operator="equal" value="80"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.57502276" recordCount="106.0" defaultChild="14">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="2219"/>
+								<Node id="13" score="0.3863324" recordCount="94.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								</Node>
+								<Node id="14" score="1.9096814" recordCount="12.0">
+									<SimplePredicate field="model_year" operator="equal" value="80"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="3">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0033509177" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.93706393" recordCount="191.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="2774"/>
+							<Node id="3" score="1.5619245" recordCount="69.0" defaultChild="8">
+								<SimplePredicate field="horsepower" operator="lessThan" value="71"/>
+								<Node id="7" score="1.3564306" recordCount="59.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								</Node>
+								<Node id="8" score="2.5408063" recordCount="10.0">
+									<SimplePredicate field="model_year" operator="equal" value="80"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.57383394" recordCount="122.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="71"/>
+								<Node id="9" score="0.3950337" recordCount="107.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="10" score="1.744871" recordCount="15.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.88415533" recordCount="201.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="2774"/>
+							<Node id="5" score="-0.5323747" recordCount="124.0" defaultChild="12">
+								<SimplePredicate field="horsepower" operator="lessThan" value="142"/>
+								<Node id="11" score="0.3096062" recordCount="17.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="87"/>
+								</Node>
+								<Node id="12" score="-0.66777545" recordCount="107.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="87"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-1.4365709" recordCount="77.0" defaultChild="14">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="142"/>
+								<Node id="13" score="-1.229287" recordCount="47.0">
+									<SimplePredicate field="weight" operator="lessThan" value="4363"/>
+								</Node>
+								<Node id="14" score="-1.7111858" recordCount="30.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="4363"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="4">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="0.0044362075" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.65595406" recordCount="196.0" defaultChild="4">
+							<SimplePredicate field="horsepower" operator="lessThan" value="94"/>
+							<Node id="3" score="0.9855585" recordCount="115.0" defaultChild="8">
+								<SimplePredicate field="displacement" operator="lessThan" value="113.0"/>
+								<Node id="7" score="1.0665836" recordCount="110.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								</Node>
+								<Node id="8" score="-0.6776674" recordCount="5.0">
+									<SimplePredicate field="model_year" operator="equal" value="73"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.181685" recordCount="81.0" defaultChild="10">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="113.0"/>
+								<Node id="9" score="0.0012114798" recordCount="69.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="10" score="1.1394897" recordCount="12.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.6471042" recordCount="196.0" defaultChild="6">
+							<SimplePredicate field="horsepower" operator="greaterOrEqual" value="94"/>
+							<Node id="5" score="-0.19313724" recordCount="71.0" defaultChild="12">
+								<SimplePredicate field="displacement" operator="lessThan" value="232.0"/>
+								<Node id="11" score="1.4585434" recordCount="2.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="11.5"/>
+								</Node>
+								<Node id="12" score="-0.26116446" recordCount="69.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="11.5"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.9013781" recordCount="125.0" defaultChild="14">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="232.0"/>
+								<Node id="13" score="-0.9232455" recordCount="124.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+								</Node>
+								<Node id="14" score="0.91602236" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="81"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="5">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0051815556" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.40451425" recordCount="228.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="3021"/>
+							<Node id="3" score="0.26014748" recordCount="203.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								<Node id="7" score="0.09705087" recordCount="173.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="8" score="1.1672012" recordCount="30.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+							<Node id="4" score="1.52168" recordCount="25.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="80"/>
+								<Node id="9" score="1.82408" recordCount="20.0">
+									<SimplePredicate field="origin" operator="notEqual" value="1"/>
+								</Node>
+								<Node id="10" score="0.20966664" recordCount="5.0">
+									<SimplePredicate field="origin" operator="equal" value="1"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.54907525" recordCount="164.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="3021"/>
+							<Node id="5" score="-0.59217435" recordCount="158.0" defaultChild="12">
+								<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+								<Node id="11" score="-0.66171324" recordCount="143.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="12" score="0.07068644" recordCount="15.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.50832975" recordCount="6.0" defaultChild="14">
+								<SimplePredicate field="model_year" operator="equal" value="81"/>
+								<Node id="13" score="-0.14986467" recordCount="3.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="17.2"/>
+								</Node>
+								<Node id="14" score="1.0394417" recordCount="3.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="17.2"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="6">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0063723996" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.38571814" recordCount="183.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="2720"/>
+							<Node id="3" score="0.47366905" recordCount="171.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								<Node id="7" score="0.56702816" recordCount="158.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="72"/>
+								</Node>
+								<Node id="8" score="-0.6204574" recordCount="13.0">
+									<SimplePredicate field="model_year" operator="equal" value="72"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.8076111" recordCount="12.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="73"/>
+								<Node id="9" score="-1.0842512" recordCount="6.0">
+									<SimplePredicate field="origin" operator="notEqual" value="2"/>
+								</Node>
+								<Node id="10" score="-0.415598" recordCount="6.0">
+									<SimplePredicate field="origin" operator="equal" value="2"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.32603705" recordCount="209.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="2720"/>
+							<Node id="5" score="-0.36486745" recordCount="202.0" defaultChild="12">
+								<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								<Node id="11" score="-0.26897582" recordCount="158.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="153"/>
+								</Node>
+								<Node id="12" score="-0.69557637" recordCount="44.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="153"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.7000389" recordCount="7.0" defaultChild="14">
+								<SimplePredicate field="model_year" operator="equal" value="80"/>
+								<Node id="13" score="1.1079514" recordCount="4.0">
+									<SimplePredicate field="weight" operator="lessThan" value="2957"/>
+								</Node>
+								<Node id="14" score="0.015138531" recordCount="3.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="2957"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="7">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0033960498" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.384937" recordCount="131.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="2401"/>
+							<Node id="3" score="0.26751125" recordCount="116.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								<Node id="7" score="0.13640676" recordCount="102.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+								</Node>
+								<Node id="8" score="1.1499279" recordCount="14.0">
+									<SimplePredicate field="model_year" operator="equal" value="81"/>
+								</Node>
+							</Node>
+							<Node id="4" score="1.2195543" recordCount="15.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="82"/>
+								<Node id="9" score="0.2637042" recordCount="3.0">
+									<SimplePredicate field="weight" operator="lessThan" value="1975"/>
+								</Node>
+								<Node id="10" score="1.4198501" recordCount="12.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="1975"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.18884364" recordCount="261.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="2401"/>
+							<Node id="5" score="-0.23569654" recordCount="248.0" defaultChild="12">
+								<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								<Node id="11" score="-0.28762245" recordCount="234.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+								</Node>
+								<Node id="12" score="0.59352237" recordCount="14.0">
+									<SimplePredicate field="model_year" operator="equal" value="81"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.6579573" recordCount="13.0" defaultChild="14">
+								<SimplePredicate field="model_year" operator="equal" value="80"/>
+								<Node id="13" score="0.98302203" recordCount="8.0">
+									<SimplePredicate field="origin" operator="notEqual" value="1"/>
+								</Node>
+								<Node id="14" score="0.060700703" recordCount="5.0">
+									<SimplePredicate field="origin" operator="equal" value="1"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="8">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0056746397" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.42984685" recordCount="75.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="2145"/>
+							<Node id="3" score="0.33984834" recordCount="71.0" defaultChild="8">
+								<SimplePredicate field="acceleration" operator="lessThan" value="21.5"/>
+								<Node id="7" score="0.43852395" recordCount="65.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="19.5"/>
+								</Node>
+								<Node id="8" score="-0.63907146" recordCount="6.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="19.5"/>
+								</Node>
+							</Node>
+							<Node id="4" score="1.6398563" recordCount="4.0" defaultChild="10">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="21.5"/>
+								<Node id="9" score="2.241888" recordCount="3.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="76"/>
+								</Node>
+								<Node id="10" score="-0.38413554" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="76"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.0957177" recordCount="317.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="2145"/>
+							<Node id="5" score="-0.03555626" recordCount="280.0" defaultChild="12">
+								<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								<Node id="11" score="-0.07639815" recordCount="262.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								</Node>
+								<Node id="12" score="0.53165287" recordCount="18.0">
+									<SimplePredicate field="model_year" operator="equal" value="80"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.5380769" recordCount="37.0" defaultChild="14">
+								<SimplePredicate field="model_year" operator="equal" value="73"/>
+								<Node id="13" score="0.16300422" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="10.0"/>
+								</Node>
+								<Node id="14" score="-0.5614305" recordCount="36.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="10.0"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="9">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="0.0052807853" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.044273566" recordCount="364.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+							<Node id="3" score="-0.09983053" recordCount="334.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								<Node id="7" score="-0.1614674" recordCount="307.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								</Node>
+								<Node id="8" score="0.58174044" recordCount="27.0">
+									<SimplePredicate field="model_year" operator="equal" value="80"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.55752826" recordCount="30.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="82"/>
+								<Node id="9" score="0.46137813" recordCount="29.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="250.0"/>
+								</Node>
+								<Node id="10" score="1.721016" recordCount="1.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="250.0"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.62880003" recordCount="28.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="81"/>
+							<Node id="5" score="0.8485348" recordCount="19.0" defaultChild="12">
+								<SimplePredicate field="displacement" operator="lessThan" value="146.0"/>
+								<Node id="11" score="0.94525576" recordCount="17.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="19.9"/>
+								</Node>
+								<Node id="12" score="-0.01463585" recordCount="2.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="19.9"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.12645046" recordCount="9.0" defaultChild="14">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="146.0"/>
+								<Node id="13" score="-0.2859198" recordCount="4.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="93"/>
+								</Node>
+								<Node id="14" score="0.44901726" recordCount="5.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="93"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="10">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0065180617" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.038537662" recordCount="363.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+							<Node id="3" score="0.41386905" recordCount="36.0" defaultChild="8">
+								<SimplePredicate field="horsepower" operator="lessThan" value="67"/>
+								<Node id="7" score="0.69994295" recordCount="24.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="96.0"/>
+								</Node>
+								<Node id="8" score="-0.16810913" recordCount="12.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="96.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.08945385" recordCount="327.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="67"/>
+								<Node id="9" score="-0.12974529" recordCount="299.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="10" score="0.3304388" recordCount="28.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.5529769" recordCount="29.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="79"/>
+							<Node id="5" score="0.981855" recordCount="12.0" defaultChild="12">
+								<SimplePredicate field="weight" operator="lessThan" value="2711"/>
+								<Node id="11" score="1.0646253" recordCount="11.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="16.1"/>
+								</Node>
+								<Node id="12" score="-0.0056942943" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="16.1"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.21251069" recordCount="17.0" defaultChild="14">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="2711"/>
+								<Node id="13" score="0.0941055" recordCount="14.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="18.3"/>
+								</Node>
+								<Node id="14" score="0.6034025" recordCount="3.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="18.3"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="11">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+					</MiningSchema>
+					<Node id="0" score="0.006462661" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.02858298" recordCount="364.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+							<Node id="3" score="-0.042163208" recordCount="361.0" defaultChild="8">
+								<SimplePredicate field="acceleration" operator="lessThan" value="23.7"/>
+								<Node id="7" score="-0.0806465" recordCount="333.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="8" score="0.40251207" recordCount="28.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+							<Node id="4" score="1.2075734" recordCount="3.0" defaultChild="10">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="23.7"/>
+								<Node id="9" score="1.4545652" recordCount="2.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="10" score="0.23329927" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.44733155" recordCount="28.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="81"/>
+							<Node id="5" score="0.667266" recordCount="15.0" defaultChild="12">
+								<SimplePredicate field="origin" operator="notEqual" value="1"/>
+								<Node id="11" score="0.38616422" recordCount="6.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="97.5"/>
+								</Node>
+								<Node id="12" score="0.7973107" recordCount="9.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="97.5"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.16402556" recordCount="13.0" defaultChild="14">
+								<SimplePredicate field="origin" operator="equal" value="1"/>
+								<Node id="13" score="0.30982527" recordCount="9.0">
+									<SimplePredicate field="cylinders" operator="notEqual" value="6"/>
+								</Node>
+								<Node id="14" score="-0.160379" recordCount="4.0">
+									<SimplePredicate field="cylinders" operator="equal" value="6"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="12">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0070755114" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.022669991" recordCount="365.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+							<Node id="3" score="-0.060132816" recordCount="329.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="78"/>
+								<Node id="7" score="-0.10062445" recordCount="299.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="8" score="0.33366144" recordCount="30.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.3120706" recordCount="36.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="78"/>
+								<Node id="9" score="1.1751766" recordCount="6.0">
+									<SimplePredicate field="weight" operator="lessThan" value="2074"/>
+								</Node>
+								<Node id="10" score="0.1071089" recordCount="30.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="2074"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.39563903" recordCount="27.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="80"/>
+							<Node id="5" score="-1.1808478" recordCount="1.0">
+								<SimplePredicate field="weight" operator="lessThan" value="1850"/>
+							</Node>
+							<Node id="6" score="0.49776253" recordCount="26.0" defaultChild="12">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="1850"/>
+								<Node id="11" score="0.73616207" recordCount="20.0">
+									<SimplePredicate field="origin" operator="notEqual" value="1"/>
+								</Node>
+								<Node id="12" score="-0.28854504" recordCount="6.0">
+									<SimplePredicate field="origin" operator="equal" value="1"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="13">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+					</MiningSchema>
+					<Node id="0" score="0.0055498155" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.0167723" recordCount="388.0" defaultChild="4">
+							<SimplePredicate field="cylinders" operator="notEqual" value="3"/>
+							<Node id="3" score="-0.035095297" recordCount="313.0" defaultChild="8">
+								<SimplePredicate field="origin" operator="notEqual" value="3"/>
+								<Node id="7" score="-0.071133465" recordCount="286.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="8" score="0.3355493" recordCount="27.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.23084669" recordCount="75.0" defaultChild="10">
+								<SimplePredicate field="origin" operator="equal" value="3"/>
+								<Node id="9" score="0.44872403" recordCount="24.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="15.1"/>
+								</Node>
+								<Node id="10" score="0.1216586" recordCount="51.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="15.1"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.8686694" recordCount="4.0" defaultChild="6">
+							<SimplePredicate field="cylinders" operator="equal" value="3"/>
+							<Node id="5" score="-0.9944046" recordCount="3.0">
+								<SimplePredicate field="model_year" operator="notEqual" value="77"/>
+							</Node>
+							<Node id="6" score="-0.1828643" recordCount="1.0">
+								<SimplePredicate field="model_year" operator="equal" value="77"/>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="14">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+					</MiningSchema>
+					<Node id="0" score="0.0036233482" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.023049202" recordCount="364.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+							<Node id="3" score="-0.033015966" recordCount="361.0" defaultChild="8">
+								<SimplePredicate field="acceleration" operator="lessThan" value="23.7"/>
+								<Node id="7" score="0.011969269" recordCount="295.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="18.0"/>
+								</Node>
+								<Node id="8" score="-0.23126392" recordCount="66.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="18.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.884705" recordCount="3.0" defaultChild="10">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="23.7"/>
+								<Node id="9" score="1.0708961" recordCount="2.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="10" score="0.16306573" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.33920464" recordCount="28.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="81"/>
+							<Node id="5" score="0.44827422" recordCount="19.0" defaultChild="12">
+								<SimplePredicate field="displacement" operator="lessThan" value="146.0"/>
+								<Node id="11" score="0.5077967" recordCount="17.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="19.9"/>
+								</Node>
+								<Node id="12" score="-0.058285527" recordCount="2.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="19.9"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.087145045" recordCount="9.0" defaultChild="14">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="146.0"/>
+								<Node id="13" score="-0.09838451" recordCount="7.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="231.0"/>
+								</Node>
+								<Node id="14" score="0.5528422" recordCount="2.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="231.0"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="15">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="0.0040009823" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.02923276" recordCount="364.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="72"/>
+							<Node id="3" score="0.06277966" recordCount="324.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								<Node id="7" score="0.07983968" recordCount="315.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="193"/>
+								</Node>
+								<Node id="8" score="-0.48259464" recordCount="9.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="193"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.23740077" recordCount="40.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="73"/>
+								<Node id="9" score="0.21830077" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="10.0"/>
+								</Node>
+								<Node id="10" score="-0.25425085" recordCount="39.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="10.0"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.31370935" recordCount="28.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="72"/>
+							<Node id="5" score="-0.3867245" recordCount="23.0" defaultChild="12">
+								<SimplePredicate field="origin" operator="notEqual" value="3"/>
+								<Node id="11" score="-0.5605688" recordCount="12.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="142"/>
+								</Node>
+								<Node id="12" score="-0.16616605" recordCount="11.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="142"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.030636026" recordCount="5.0" defaultChild="14">
+								<SimplePredicate field="origin" operator="equal" value="3"/>
+								<Node id="13" score="-0.32373238" recordCount="2.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="14.7"/>
+								</Node>
+								<Node id="14" score="0.28875333" recordCount="3.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="14.7"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="16">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0018844183" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.018987725" recordCount="375.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="4502"/>
+							<Node id="3" score="0.028015537" recordCount="371.0" defaultChild="8">
+								<SimplePredicate field="cylinders" operator="notEqual" value="3"/>
+								<Node id="7" score="0.006316757" recordCount="345.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+								</Node>
+								<Node id="8" score="0.3050438" recordCount="26.0">
+									<SimplePredicate field="model_year" operator="equal" value="80"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.65647906" recordCount="4.0" defaultChild="10">
+								<SimplePredicate field="cylinders" operator="equal" value="3"/>
+								<Node id="9" score="-0.7359959" recordCount="3.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="77"/>
+								</Node>
+								<Node id="10" score="-0.16920577" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="77"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.35548937" recordCount="17.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="4502"/>
+							<Node id="5" score="-0.43305674" recordCount="15.0" defaultChild="12">
+								<SimplePredicate field="model_year" operator="notEqual" value="75"/>
+								<Node id="11" score="-0.28484654" recordCount="10.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="13.6"/>
+								</Node>
+								<Node id="12" score="-0.63259935" recordCount="5.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="13.6"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.17669994" recordCount="2.0" defaultChild="14">
+								<SimplePredicate field="model_year" operator="equal" value="75"/>
+								<Node id="13" score="0.31452" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="11.6"/>
+								</Node>
+								<Node id="14" score="-0.049470093" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="11.6"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="17">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="3.676808E-4" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.006501812" recordCount="389.0" defaultChild="4">
+							<SimplePredicate field="acceleration" operator="lessThan" value="23.7"/>
+							<Node id="3" score="-0.029079488" recordCount="353.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="78"/>
+								<Node id="7" score="0.008258318" recordCount="301.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="18.5"/>
+								</Node>
+								<Node id="8" score="-0.24128586" recordCount="52.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="18.5"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.20968735" recordCount="36.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="78"/>
+								<Node id="9" score="0.87253284" recordCount="6.0">
+									<SimplePredicate field="weight" operator="lessThan" value="2074"/>
+								</Node>
+								<Node id="10" score="0.053248458" recordCount="30.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="2074"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.67005134" recordCount="3.0" defaultChild="6">
+							<SimplePredicate field="acceleration" operator="greaterOrEqual" value="23.7"/>
+							<Node id="5" score="0.80961347" recordCount="2.0">
+								<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+							</Node>
+							<Node id="6" score="0.12568246" recordCount="1.0">
+								<SimplePredicate field="model_year" operator="equal" value="79"/>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="18">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+					</MiningSchema>
+					<Node id="0" score="0.0015000795" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.016845869" recordCount="364.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="81"/>
+							<Node id="3" score="-0.037275054" recordCount="336.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="77"/>
+								<Node id="7" score="-0.061421707" recordCount="307.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								</Node>
+								<Node id="8" score="0.2118731" recordCount="29.0">
+									<SimplePredicate field="model_year" operator="equal" value="79"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.22113623" recordCount="28.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="77"/>
+								<Node id="9" score="0.3062535" recordCount="22.0">
+									<SimplePredicate field="origin" operator="notEqual" value="3"/>
+								</Node>
+								<Node id="10" score="-0.09012566" recordCount="6.0">
+									<SimplePredicate field="origin" operator="equal" value="3"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.23235425" recordCount="28.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="81"/>
+							<Node id="5" score="0.5040446" recordCount="5.0" defaultChild="12">
+								<SimplePredicate field="displacement" operator="lessThan" value="90.0"/>
+								<Node id="11" score="-0.085133746" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="16.2"/>
+								</Node>
+								<Node id="12" score="0.63890696" recordCount="4.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="16.2"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.15475026" recordCount="23.0" defaultChild="14">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="90.0"/>
+								<Node id="13" score="-0.2605045" recordCount="4.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="101.0"/>
+								</Node>
+								<Node id="14" score="0.25082642" recordCount="19.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="101.0"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="19">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.001745256" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.017160723" recordCount="362.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+							<Node id="3" score="0.45545256" recordCount="6.0" defaultChild="8">
+								<SimplePredicate field="horsepower" operator="lessThan" value="52"/>
+								<Node id="7" score="0.92102" recordCount="4.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="91.0"/>
+								</Node>
+								<Node id="8" score="-0.47231066" recordCount="2.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="91.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.02637958" recordCount="356.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="52"/>
+								<Node id="9" score="-0.01221433" recordCount="343.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="20.5"/>
+								</Node>
+								<Node id="10" score="-0.37255576" recordCount="13.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="20.5"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.22307186" recordCount="30.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="82"/>
+							<Node id="5" score="0.13855618" recordCount="29.0" defaultChild="12">
+								<SimplePredicate field="displacement" operator="lessThan" value="250.0"/>
+								<Node id="11" score="0.41637173" recordCount="15.0">
+									<SimplePredicate field="weight" operator="lessThan" value="2401"/>
+								</Node>
+								<Node id="12" score="-0.16701747" recordCount="14.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="2401"/>
+								</Node>
+							</Node>
+							<Node id="6" score="1.3792711" recordCount="1.0">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="250.0"/>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="20">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="0.0025138173" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.041491803" recordCount="276.0" defaultChild="4">
+							<SimplePredicate field="horsepower" operator="lessThan" value="112"/>
+							<Node id="3" score="0.02189509" recordCount="270.0" defaultChild="8">
+								<SimplePredicate field="displacement" operator="lessThan" value="260.0"/>
+								<Node id="7" score="0.15799269" recordCount="77.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="15.2"/>
+								</Node>
+								<Node id="8" score="-0.032937426" recordCount="193.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="15.2"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.7942372" recordCount="6.0" defaultChild="10">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="260.0"/>
+								<Node id="9" score="0.908979" recordCount="5.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="77"/>
+								</Node>
+								<Node id="10" score="0.052893165" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="77"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.089788884" recordCount="116.0" defaultChild="6">
+							<SimplePredicate field="horsepower" operator="greaterOrEqual" value="112"/>
+							<Node id="5" score="0.049092676" recordCount="67.0" defaultChild="12">
+								<SimplePredicate field="acceleration" operator="lessThan" value="13.4"/>
+								<Node id="11" score="0.23480313" recordCount="24.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="340.0"/>
+								</Node>
+								<Node id="12" score="-0.057540376" recordCount="43.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="340.0"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.276872" recordCount="49.0" defaultChild="14">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="13.4"/>
+								<Node id="13" score="-0.32134163" recordCount="45.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="75"/>
+								</Node>
+								<Node id="14" score="0.1876228" recordCount="4.0">
+									<SimplePredicate field="model_year" operator="equal" value="75"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="21">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="model_year"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0026226249" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.009517879" recordCount="388.0" defaultChild="4">
+							<SimplePredicate field="cylinders" operator="notEqual" value="3"/>
+							<Node id="3" score="0.24293141" recordCount="26.0" defaultChild="8">
+								<SimplePredicate field="displacement" operator="lessThan" value="89.0"/>
+								<Node id="7" score="0.07381181" recordCount="22.0">
+									<SimplePredicate field="weight" operator="lessThan" value="2070"/>
+								</Node>
+								<Node id="8" score="0.97229534" recordCount="4.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="2070"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.007869679" recordCount="362.0" defaultChild="10">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="89.0"/>
+								<Node id="9" score="0.4807356" recordCount="6.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="53"/>
+								</Node>
+								<Node id="10" score="-0.01742813" recordCount="356.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="53"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.5343527" recordCount="4.0" defaultChild="6">
+							<SimplePredicate field="cylinders" operator="equal" value="3"/>
+							<Node id="5" score="-0.59123516" recordCount="3.0">
+								<SimplePredicate field="model_year" operator="notEqual" value="77"/>
+							</Node>
+							<Node id="6" score="-0.1534115" recordCount="1.0">
+								<SimplePredicate field="model_year" operator="equal" value="77"/>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="22">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0024195635" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.30469838" recordCount="11.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="1834"/>
+							<Node id="3" score="0.37472317" recordCount="10.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="74"/>
+								<Node id="7" score="0.44396955" recordCount="9.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="18.7"/>
+								</Node>
+								<Node id="8" score="-0.15887032" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="18.7"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.23278715" recordCount="1.0">
+								<SimplePredicate field="model_year" operator="equal" value="74"/>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.0070824404" recordCount="381.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="1834"/>
+							<Node id="5" score="-0.7978336" recordCount="4.0" defaultChild="10">
+								<SimplePredicate field="weight" operator="lessThan" value="1850"/>
+								<Node id="9" score="-1.1007019" recordCount="3.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="74"/>
+								</Node>
+								<Node id="10" score="0.20681992" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="74"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.003395968" recordCount="377.0" defaultChild="12">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="1850"/>
+								<Node id="11" score="0.8116245" recordCount="4.0">
+									<SimplePredicate field="weight" operator="lessThan" value="1925"/>
+								</Node>
+								<Node id="12" score="-0.007418307" recordCount="373.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="1925"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="23">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+					</MiningSchema>
+					<Node id="0" score="0.0016651213" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.015600613" recordCount="366.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="74"/>
+							<Node id="3" score="0.030792031" recordCount="339.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="71"/>
+								<Node id="7" score="-0.41005757" recordCount="5.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="79.0"/>
+								</Node>
+								<Node id="8" score="0.03859593" recordCount="334.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="79.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.16942376" recordCount="27.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="71"/>
+								<Node id="9" score="-0.060873576" recordCount="22.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="18.1"/>
+								</Node>
+								<Node id="10" score="-0.55729556" recordCount="5.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="18.1"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.18781602" recordCount="26.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="74"/>
+							<Node id="5" score="-0.41697267" recordCount="9.0" defaultChild="12">
+								<SimplePredicate field="displacement" operator="lessThan" value="97.5"/>
+								<Node id="11" score="-0.77737075" recordCount="4.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="15.6"/>
+								</Node>
+								<Node id="12" score="-0.047145464" recordCount="5.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="15.6"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.050072562" recordCount="17.0" defaultChild="14">
+								<SimplePredicate field="displacement" operator="greaterOrEqual" value="97.5"/>
+								<Node id="13" score="0.05276027" recordCount="13.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="16.6"/>
+								</Node>
+								<Node id="14" score="-0.32798997" recordCount="4.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="16.6"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="24">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="-4.2931509E-4" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.013502681" recordCount="362.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="75"/>
+							<Node id="3" score="0.060321424" recordCount="236.0" defaultChild="8">
+								<SimplePredicate field="horsepower" operator="lessThan" value="107"/>
+								<Node id="7" score="0.046616785" recordCount="233.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="260.0"/>
+								</Node>
+								<Node id="8" score="0.8469627" recordCount="3.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="260.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.07397405" recordCount="126.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="107"/>
+								<Node id="9" score="-0.040394574" recordCount="117.0">
+									<SimplePredicate field="origin" operator="notEqual" value="2"/>
+								</Node>
+								<Node id="10" score="-0.46281448" recordCount="9.0">
+									<SimplePredicate field="origin" operator="equal" value="2"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.16355464" recordCount="30.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="75"/>
+							<Node id="5" score="-0.5705566" recordCount="8.0" defaultChild="12">
+								<SimplePredicate field="horsepower" operator="lessThan" value="84"/>
+								<Node id="11" score="-0.74856365" recordCount="6.0">
+									<SimplePredicate field="origin" operator="notEqual" value="3"/>
+								</Node>
+								<Node id="12" score="0.034978677" recordCount="2.0">
+									<SimplePredicate field="origin" operator="equal" value="3"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.002818058" recordCount="22.0" defaultChild="14">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="84"/>
+								<Node id="13" score="-0.15817687" recordCount="10.0">
+									<SimplePredicate field="weight" operator="lessThan" value="3190"/>
+								</Node>
+								<Node id="14" score="0.13882776" recordCount="12.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="3190"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="25">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+					</MiningSchema>
+					<Node id="0" score="-5.620811E-4" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.01609622" recordCount="356.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="78"/>
+							<Node id="3" score="-0.031212492" recordCount="328.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="77"/>
+								<Node id="7" score="-0.0037530924" recordCount="264.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="18.0"/>
+								</Node>
+								<Node id="8" score="-0.14268215" recordCount="64.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="18.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.15595031" recordCount="28.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="77"/>
+								<Node id="9" score="0.2214622" recordCount="22.0">
+									<SimplePredicate field="origin" operator="notEqual" value="3"/>
+								</Node>
+								<Node id="10" score="-0.08158166" recordCount="6.0">
+									<SimplePredicate field="origin" operator="equal" value="3"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.14933656" recordCount="36.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="78"/>
+							<Node id="5" score="0.060694594" recordCount="30.0" defaultChild="12">
+								<SimplePredicate field="acceleration" operator="lessThan" value="17.7"/>
+								<Node id="11" score="-0.2533899" recordCount="11.0">
+									<SimplePredicate field="origin" operator="notEqual" value="1"/>
+								</Node>
+								<Node id="12" score="0.24611054" recordCount="19.0">
+									<SimplePredicate field="origin" operator="equal" value="1"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.52056" recordCount="6.0" defaultChild="14">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="17.7"/>
+								<Node id="13" score="-0.19168396" recordCount="1.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="79.0"/>
+								</Node>
+								<Node id="14" score="0.6712147" recordCount="5.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="79.0"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="26">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="-3.788126E-5" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.012318176" recordCount="365.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="80"/>
+							<Node id="3" score="-0.026852984" recordCount="336.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="79"/>
+								<Node id="7" score="-0.043998137" recordCount="306.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="82"/>
+								</Node>
+								<Node id="8" score="0.14380558" recordCount="30.0">
+									<SimplePredicate field="model_year" operator="equal" value="82"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.15136676" recordCount="29.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="79"/>
+								<Node id="9" score="0.48139468" recordCount="9.0">
+									<SimplePredicate field="weight" operator="lessThan" value="2605"/>
+								</Node>
+								<Node id="10" score="-0.012997328" recordCount="20.0">
+									<SimplePredicate field="weight" operator="greaterOrEqual" value="2605"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.16048448" recordCount="27.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="80"/>
+							<Node id="5" score="0.7667997" recordCount="7.0" defaultChild="12">
+								<SimplePredicate field="acceleration" operator="lessThan" value="15.2"/>
+								<Node id="11" score="1.2333497" recordCount="4.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="93"/>
+								</Node>
+								<Node id="12" score="-0.008087826" recordCount="3.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="93"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.07813487" recordCount="20.0" defaultChild="14">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="15.2"/>
+								<Node id="13" score="-0.46785206" recordCount="9.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="17.6"/>
+								</Node>
+								<Node id="14" score="0.2531407" recordCount="11.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="17.6"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="27">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="0.0011786971" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.0097270915" recordCount="376.0" defaultChild="4">
+							<SimplePredicate field="weight" operator="lessThan" value="4615"/>
+							<Node id="3" score="0.014354766" recordCount="372.0" defaultChild="8">
+								<SimplePredicate field="cylinders" operator="notEqual" value="3"/>
+								<Node id="7" score="0.17215484" recordCount="26.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="89.0"/>
+								</Node>
+								<Node id="8" score="0.0020350062" recordCount="346.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="89.0"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.3374428" recordCount="4.0">
+								<SimplePredicate field="cylinders" operator="equal" value="3"/>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.18846387" recordCount="16.0" defaultChild="6">
+							<SimplePredicate field="weight" operator="greaterOrEqual" value="4615"/>
+							<Node id="5" score="-0.04544618" recordCount="9.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="lessThan" value="180"/>
+								<Node id="9" score="0.27005583" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="11.6"/>
+								</Node>
+								<Node id="10" score="-0.11050816" recordCount="8.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="11.6"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.343678" recordCount="7.0" defaultChild="12">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="180"/>
+								<Node id="11" score="-0.5015398" recordCount="4.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								</Node>
+								<Node id="12" score="-0.06043117" recordCount="3.0">
+									<SimplePredicate field="model_year" operator="equal" value="73"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="28">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="cylinders"/>
+						<MiningField name="acceleration"/>
+					</MiningSchema>
+					<Node id="0" score="3.9331568E-4" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="-0.0035225987" recordCount="389.0" defaultChild="4">
+							<SimplePredicate field="acceleration" operator="lessThan" value="23.7"/>
+							<Node id="3" score="0.0025607434" recordCount="384.0" defaultChild="6">
+								<SimplePredicate field="acceleration" operator="lessThan" value="21.9"/>
+								<Node id="5" score="-0.0032720638" recordCount="381.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="21.5"/>
+								</Node>
+								<Node id="6" score="0.55895364" recordCount="3.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="21.5"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.39328328" recordCount="5.0" defaultChild="8">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="21.9"/>
+								<Node id="7" score="0.2729356" recordCount="1.0">
+									<SimplePredicate field="cylinders" operator="notEqual" value="4"/>
+								</Node>
+								<Node id="8" score="-0.5811142" recordCount="4.0">
+									<SimplePredicate field="cylinders" operator="equal" value="4"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="0.38209665" recordCount="3.0">
+							<SimplePredicate field="acceleration" operator="greaterOrEqual" value="23.7"/>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="29">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="weight"/>
+					</MiningSchema>
+					<Node id="0" score="7.5615017E-4" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.011099902" recordCount="366.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="74"/>
+							<Node id="3" score="0.52236557" recordCount="2.0">
+								<SimplePredicate field="weight" operator="lessThan" value="1760"/>
+							</Node>
+							<Node id="4" score="0.006867308" recordCount="364.0" defaultChild="8">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="1760"/>
+								<Node id="7" score="0.01903506" recordCount="338.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="71"/>
+								</Node>
+								<Node id="8" score="-0.1461599" recordCount="26.0">
+									<SimplePredicate field="model_year" operator="equal" value="71"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.13987027" recordCount="26.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="74"/>
+							<Node id="5" score="-0.38446063" recordCount="7.0" defaultChild="10">
+								<SimplePredicate field="weight" operator="lessThan" value="2110"/>
+								<Node id="9" score="-0.91231596" recordCount="2.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="15.6"/>
+								</Node>
+								<Node id="10" score="-0.05645619" recordCount="5.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="15.6"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.03504061" recordCount="19.0" defaultChild="12">
+								<SimplePredicate field="weight" operator="greaterOrEqual" value="2110"/>
+								<Node id="11" score="0.029682541" recordCount="15.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="16.6"/>
+								</Node>
+								<Node id="12" score="-0.23514657" recordCount="4.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="16.6"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="30">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="origin"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="-6.5410415E-5" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.009808377" recordCount="364.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="72"/>
+							<Node id="3" score="0.02220317" recordCount="324.0" defaultChild="8">
+								<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								<Node id="7" score="0.08119187" recordCount="119.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="14.9"/>
+								</Node>
+								<Node id="8" score="-0.012266957" recordCount="205.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="14.9"/>
+								</Node>
+							</Node>
+							<Node id="4" score="-0.08868226" recordCount="40.0" defaultChild="10">
+								<SimplePredicate field="model_year" operator="equal" value="73"/>
+								<Node id="9" score="-0.33614743" recordCount="5.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="86"/>
+								</Node>
+								<Node id="10" score="-0.04497467" recordCount="35.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="86"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.12433669" recordCount="28.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="72"/>
+							<Node id="5" score="-0.18054323" recordCount="23.0" defaultChild="12">
+								<SimplePredicate field="origin" operator="notEqual" value="3"/>
+								<Node id="11" score="-0.3019905" recordCount="12.0">
+									<SimplePredicate field="horsepower" operator="lessThan" value="142"/>
+								</Node>
+								<Node id="12" score="-0.03393011" recordCount="11.0">
+									<SimplePredicate field="horsepower" operator="greaterOrEqual" value="142"/>
+								</Node>
+							</Node>
+							<Node id="6" score="0.121212296" recordCount="5.0" defaultChild="14">
+								<SimplePredicate field="origin" operator="equal" value="3"/>
+								<Node id="13" score="-0.029745713" recordCount="4.0">
+									<SimplePredicate field="acceleration" operator="lessThan" value="16.6"/>
+								</Node>
+								<Node id="14" score="0.4380012" recordCount="1.0">
+									<SimplePredicate field="acceleration" operator="greaterOrEqual" value="16.6"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+			<Segment id="31">
+				<True/>
+				<TreeModel functionName="regression" missingValueStrategy="defaultChild" splitCharacteristic="binarySplit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="model_year"/>
+						<MiningField name="acceleration"/>
+						<MiningField name="displacement"/>
+						<MiningField name="horsepower"/>
+					</MiningSchema>
+					<Node id="0" score="-2.289561E-4" recordCount="392.0" defaultChild="2">
+						<True/>
+						<Node id="1" score="0.0095825475" recordCount="363.0" defaultChild="4">
+							<SimplePredicate field="model_year" operator="notEqual" value="70"/>
+							<Node id="3" score="0.41734567" recordCount="4.0" defaultChild="8">
+								<SimplePredicate field="horsepower" operator="lessThan" value="49"/>
+								<Node id="7" score="0.55013096" recordCount="3.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="73"/>
+								</Node>
+								<Node id="8" score="-0.056897737" recordCount="1.0">
+									<SimplePredicate field="model_year" operator="equal" value="73"/>
+								</Node>
+							</Node>
+							<Node id="4" score="0.003892552" recordCount="359.0" defaultChild="10">
+								<SimplePredicate field="horsepower" operator="greaterOrEqual" value="49"/>
+								<Node id="9" score="0.0147080375" recordCount="329.0">
+									<SimplePredicate field="model_year" operator="notEqual" value="75"/>
+								</Node>
+								<Node id="10" score="-0.1113656" recordCount="30.0">
+									<SimplePredicate field="model_year" operator="equal" value="75"/>
+								</Node>
+							</Node>
+						</Node>
+						<Node id="2" score="-0.11926757" recordCount="29.0" defaultChild="6">
+							<SimplePredicate field="model_year" operator="equal" value="70"/>
+							<Node id="5" score="0.120990306" recordCount="15.0" defaultChild="12">
+								<SimplePredicate field="acceleration" operator="lessThan" value="12.6"/>
+								<Node id="11" score="0.27418977" recordCount="5.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="340.0"/>
+								</Node>
+								<Node id="12" score="0.026427843" recordCount="10.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="340.0"/>
+								</Node>
+							</Node>
+							<Node id="6" score="-0.36759147" recordCount="14.0" defaultChild="14">
+								<SimplePredicate field="acceleration" operator="greaterOrEqual" value="12.6"/>
+								<Node id="13" score="-0.19209932" recordCount="7.0">
+									<SimplePredicate field="displacement" operator="lessThan" value="199.0"/>
+								</Node>
+								<Node id="14" score="-0.49713466" recordCount="7.0">
+									<SimplePredicate field="displacement" operator="greaterOrEqual" value="199.0"/>
+								</Node>
+							</Node>
+						</Node>
+					</Node>
+				</TreeModel>
+			</Segment>
+		</Segmentation>
+	</MiningModel>
+</PMML>

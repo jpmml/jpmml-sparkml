@@ -1,16 +1,17 @@
 import java.io.File
 
-import org.apache.spark.ml.{Pipeline, PipelineStage}
+import org.apache.spark.ml.{Pipeline, PipelineModel, PipelineStage}
 import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, StringIndexerModel, VectorAssembler, VectorIndexer}
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.param.shared.HasOutputCol
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, lit, udf}
 import org.apache.spark.sql.types.{DataType, DoubleType, FloatType, StringType}
-import org.jpmml.sparkml.{DatasetUtil, PipelineModelUtil}
+import org.jpmml.sparkml.{DatasetUtil, PMMLBuilder, PipelineModelUtil}
 import org.jpmml.sparkml.feature.{CategoricalDomain, ContinuousDomain, Domain, InvalidCategoryTransformer}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.jdk.CollectionConverters._
 
 object CategoryEncoding extends Enumeration {
 
@@ -155,15 +156,33 @@ class SparkMLTest {
 		???
 	}
 
+	def store_pipeline_model(df: DataFrame, pipelineModel: PipelineModel, algorithm: String, dataset: String): Unit = {
+		store_zip(df, pipelineModel, algorithm, dataset)
+	}
+
+	def store_zip(df: DataFrame, pipelineModel: PipelineModel, algorithm: String, dataset: String): Unit = {
+		DatasetUtil.storeSchema(df, new File("schema/" + dataset + ".json"))
+
+		PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/" + (algorithm + dataset) + ".zip"))
+	}
+
+	def store_pmml(df: DataFrame, pipelineModel: PipelineModel, algorithm: String, dataset: String, options: Map[String, Any] = Map.empty): Unit = {
+		var pmmlBuilder = new PMMLBuilder(df.schema, pipelineModel)
+
+		if(options.nonEmpty){
+			pmmlBuilder = pmmlBuilder.putOptions(pipelineModel.stages.last, options.asJava)
+		}
+
+		pmmlBuilder.buildFile(new File("pmml/" + (algorithm + dataset) + ".pmml"))
+	}
+
 	def run_classification(df: DataFrame, label_col: String, cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, algorithm: String, dataset: String, numericType: DataType = DoubleType): Unit = {
 		val name = algorithm + dataset
-
-		DatasetUtil.storeSchema(df, new File("schema/" + dataset + ".json"))
 
 		val pipeline = build_classification_pipeline(label_col, cat_cols, cont_cols, cat_encoding)
 		val pipelineModel = pipeline.fit(df)
 
-		PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/" + name + ".zip"))
+		store_pipeline_model(df, pipelineModel, algorithm, dataset)
 
 		val indexerModel = pipelineModel.stages(0).asInstanceOf[StringIndexerModel]
 		val labels = indexerModel.labelsArray.head
@@ -207,12 +226,10 @@ class SparkMLTest {
 	def run_regression(df: DataFrame, label_col: String, cat_cols: Array[String], cont_cols: Array[String], cat_encoding: CategoryEncoding, algorithm: String, dataset: String, numericType: DataType = DoubleType): Unit = {
 		val name = algorithm + dataset
 
-		DatasetUtil.storeSchema(df, new File("schema/" + dataset + ".json"))
-
 		val pipeline = build_regression_pipeline(label_col, cat_cols, cont_cols, cat_encoding)
 		val pipelineModel = pipeline.fit(df)
 
-		PipelineModelUtil.storeZip(pipelineModel, new File("pipeline/" + name + ".zip"))
+		store_pipeline_model(df, pipelineModel, algorithm, dataset)
 
 		var predDf = pipelineModel.transform(df)
 			.selectExpr("prediction as " + label_col)
