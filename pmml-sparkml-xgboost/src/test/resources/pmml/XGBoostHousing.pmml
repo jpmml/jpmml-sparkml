@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
-		<Application name="JPMML-SparkML command-line application" version="3.3-SNAPSHOT"/>
-		<Timestamp>2026-08-22T18:58:37Z</Timestamp>
+		<Application name="JPMML-SparkML command-line application" version="3.4-SNAPSHOT"/>
+		<Timestamp>2026-08-22T20:23:57Z</Timestamp>
 	</Header>
 	<DataDictionary>
 		<DataField name="CHAS" optype="categorical" dataType="float">
