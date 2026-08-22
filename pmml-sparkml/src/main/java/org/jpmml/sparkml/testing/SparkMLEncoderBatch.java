@@ -42,6 +42,7 @@ import org.dmg.pmml.PMML;
 import org.jpmml.converter.testing.ModelEncoderBatch;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
+import org.jpmml.model.PMMLUtil;
 import org.jpmml.sparkml.ArchiveUtil;
 import org.jpmml.sparkml.DatasetUtil;
 import org.jpmml.sparkml.PMMLBuilder;
@@ -71,6 +72,17 @@ public class SparkMLEncoderBatch extends ModelEncoderBatch {
 
 	public String getSchemaJsonPath(){
 		return "/schema/" + getDataset() + ".json";
+	}
+
+	public String getPmmlPath(){
+		return "/pmml/" + (getAlgorithm() + getDataset()) + ".pmml";
+	}
+
+	public PMML loadPMML() throws Exception {
+
+		try(InputStream is = open(getPmmlPath())){
+			return PMMLUtil.unmarshal(is);
+		}
 	}
 
 	public Dataset<Row> getVerificationDataset(Dataset<Row> inputDataset){
