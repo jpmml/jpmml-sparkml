@@ -39,6 +39,8 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
 import org.jpmml.converter.NullSplitter;
+import org.jpmml.converter.Parameters;
+import org.jpmml.converter.tree.TreeModelParameters;
 import org.jpmml.model.JAXBSerializer;
 import org.jpmml.model.metro.MetroJAXBSerializer;
 import org.jpmml.sparkml.ArchiveUtil;
@@ -56,80 +58,69 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
 	@Parameter (
-		names = "--pipeline-input",
+		names = {"--pipeline-input"},
 		description = "Pipeline ML input ZIP file or directory",
 		required = true,
-		order = 1
+		order = Parameters.BLOCK_IO + 1
 	)
 	private File pipelineInput = null;
 
 	@Parameter (
-		names = "--schema-input",
+		names = {"--schema-input"},
 		description = "Schema JSON input file",
 		required = true,
-		order = 2
+		order = Parameters.BLOCK_IO + 2
 	)
 	private File schemaInput = null;
 
 	@Parameter (
-		names = "--pmml-output",
-		description = "PMML output file",
+		names = {Parameters.NAME_PMML_OUTPUT},
+		description = Parameters.DESCRIPTION_PMML_OUTPUT,
 		required = true,
-		order = 3
+		order = Parameters.BLOCK_IO + 3
 	)
 	private File output = null;
 
 	@Parameter (
-		names = "--field-names",
+		names = {"--field-names"},
 		description = "Mapping from column name to data field name(s)",
 		splitter = NullSplitter.class,
 		arity = 2,
-		order = 4
+		order = Parameters.BLOCK_SCHEMA + 1
 	)
 	private List<String> fieldNames = new ArrayList<>();
 
-	/**
-	 * @see HasPredictionModelOptions#OPTION_KEEP_PREDICTIONCOL
-	 */
 	@Parameter (
-		names = "--X-keep_predictionCol",
+		names = {Parameters.PREFIX_OPTION + HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL},
 		arity = 1,
 		hidden = true
 	)
 	private Boolean keepPredictionCol = Boolean.TRUE;
 
-	/**
-	 * @see HasTreeOptions#OPTION_COMPACT
-	 */
 	@Parameter (
-		names = "--X-compact",
+		names = {TreeModelParameters.NAME_COMPACT},
+		description = TreeModelParameters.DESCRIPTION_COMPACT,
 		arity = 1,
-		order = 5
+		order = Parameters.BLOCK_MODEL_OPTIONS + 1
 	)
 	private Boolean compact = Boolean.TRUE;
 
-	/**
-	 * @see HasTreeOptions#OPTION_ESTIMATE_FEATURE_IMPORTANCES
-	 */
 	@Parameter (
-		names = "--X-estimate_featureImportances",
+		names = {Parameters.PREFIX_OPTION + HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES},
 		arity = 1,
-		order = 6
+		order = Parameters.BLOCK_MODEL_OPTIONS + 2
 	)
 	private Boolean estimateFeatureImportances = Boolean.FALSE;
 
-	/**
-	 * @see HasRegressionTableOptions#OPTION_REPRESENTATION
-	 */
 	@Parameter (
-		names = "--X-representation",
-		order = 7
+		names = {Parameters.PREFIX_OPTION + HasRegressionTableOptions.OPTION_REPRESENTATION},
+		order = Parameters.BLOCK_MODEL_OPTIONS + 3
 	)
 	private String representation = null;
 
 	@Parameter (
-		names = "--help",
-		description = "Show the list of configuration options and exit",
+		names = {Parameters.NAME_HELP},
+		description = Parameters.DESCRIPTION_HELP,
 		help = true,
 		order = Integer.MAX_VALUE
 	)
