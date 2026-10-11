@@ -18,12 +18,15 @@
  */
 package org.jpmml.sparkml.testing;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.base.Equivalence;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
+import org.jpmml.converter.testing.OptionsUtil;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
@@ -41,6 +44,20 @@ public class RegressionTest extends SimpleSparkMLEncoderBatchTest implements Spa
 			@Override
 			public RegressionTest getArchiveBatchTest(){
 				return RegressionTest.this;
+			}
+
+			@Override
+			public List<Map<String, Object>> getOptionsMatrix(){
+				String algorithm = getAlgorithm();
+
+				if(Objects.equals(DECISION_TREE, algorithm) || Objects.equals(GBT, algorithm) || Objects.equals(RANDOM_FOREST, algorithm)){
+					Map<String, Object> options = new LinkedHashMap<>();
+					options.put(HasTreeOptions.OPTION_COMPACT, new Boolean[]{false, true});
+
+					return OptionsUtil.generateOptionsMatrix(options);
+				}
+
+				return super.getOptionsMatrix();
 			}
 
 			@Override

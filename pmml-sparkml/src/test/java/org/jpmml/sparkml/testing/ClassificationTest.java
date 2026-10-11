@@ -18,6 +18,8 @@
  */
 package org.jpmml.sparkml.testing;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -27,6 +29,7 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.general_regression.GeneralRegressionModel;
 import org.jpmml.converter.testing.Fields;
+import org.jpmml.converter.testing.OptionsUtil;
 import org.jpmml.evaluator.ResultField;
 import org.jpmml.evaluator.testing.PMMLEquivalence;
 import org.jpmml.sparkml.model.HasRegressionTableOptions;
@@ -44,6 +47,20 @@ public class ClassificationTest extends SimpleSparkMLEncoderBatchTest implements
 			@Override
 			public ClassificationTest getArchiveBatchTest(){
 				return ClassificationTest.this;
+			}
+
+			@Override
+			public List<Map<String, Object>> getOptionsMatrix(){
+				String algorithm = getAlgorithm();
+
+				if(Objects.equals(DECISION_TREE, algorithm) || Objects.equals(GBT, algorithm) || Objects.equals(RANDOM_FOREST, algorithm)){
+					Map<String, Object> options = new LinkedHashMap<>();
+					options.put(HasTreeOptions.OPTION_COMPACT, new Boolean[]{false, true});
+
+					return OptionsUtil.generateOptionsMatrix(options);
+				}
+
+				return super.getOptionsMatrix();
 			}
 
 			@Override
