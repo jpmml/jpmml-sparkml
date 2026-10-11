@@ -38,6 +38,7 @@ import org.jpmml.converter.CategoricalFeature;
 import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DerivedOutputField;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.ExpressionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.FieldNameUtil;
@@ -152,7 +153,7 @@ public class ClassificationModelConverter<T extends ClassificationModel<Vector, 
 		} else
 
 		{
-			throw new UnsupportedFeatureException("Expected a categorical or categorical-like continuous feature, got " + feature.typeString());
+			throw new UnsupportedFeatureException("Expected a categorical or categorical-like continuous feature, got " + ExceptionUtil.formatFeature(feature));
 		}
 	}
 }

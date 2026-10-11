@@ -81,7 +81,7 @@ public class ModelConverter<T extends Model<T> & HasPredictionCol> extends Trans
 			case ASSOCIATION_RULES:
 			case CLUSTERING:
 				if(label != null){
-					throw new UnsupportedLabelException("Expected no label, got " + label.typeString());
+					throw new UnsupportedLabelException("Expected no label, got " + ExceptionUtil.formatLabel(label));
 				}
 				break;
 			case CLASSIFICATION:

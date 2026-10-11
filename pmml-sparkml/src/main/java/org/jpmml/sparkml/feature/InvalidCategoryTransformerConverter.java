@@ -61,7 +61,7 @@ public class InvalidCategoryTransformerConverter extends MultiFeatureConverter<I
 			Feature feature = encoder.getOnlyFeature(inputCol);
 
 			if(!(feature instanceof DiscreteFeature)){
-				throw new UnsupportedFeatureException("Expected a categorical feature, got " + feature.typeString());
+				throw new UnsupportedFeatureException("Expected a categorical feature, got " + ExceptionUtil.formatFeature(feature));
 			}
 
 			DiscreteFeature discreteFeature = (DiscreteFeature)feature;

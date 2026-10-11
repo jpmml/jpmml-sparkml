@@ -50,6 +50,7 @@ import org.jpmml.converter.CategoricalLabel;
 import org.jpmml.converter.CategoryManager;
 import org.jpmml.converter.ContinuousFeature;
 import org.jpmml.converter.DiscreteFeature;
+import org.jpmml.converter.ExceptionUtil;
 import org.jpmml.converter.Feature;
 import org.jpmml.converter.ModelTransformer;
 import org.jpmml.converter.ModelUtil;
@@ -315,7 +316,7 @@ public class TreeModelUtil {
 				} else
 
 				{
-					throw new UnsupportedFeatureException("Expected a binary or categorical feature, got " + feature.typeString());
+					throw new UnsupportedFeatureException("Expected a binary or categorical feature, got " + ExceptionUtil.formatFeature(feature));
 				}
 			} else
 
