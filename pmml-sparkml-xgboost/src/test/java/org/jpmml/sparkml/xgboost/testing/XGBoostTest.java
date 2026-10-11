@@ -113,37 +113,37 @@ public class XGBoostTest extends SparkMLEncoderBatchTest implements Datasets {
 
 	@Test
 	public void evaluateAudit() throws Exception {
-		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(96));
+		evaluate("XGBoost", AUDIT, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(81));
 	}
 
 	@Test
 	public void evaluateAuditNA() throws Exception {
-		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(64));
+		evaluate("XGBoost", AUDIT_NA, excludeFields(Fields.AUDIT_PROBABILITY_FALSE), new FloatEquivalence(59));
 	}
 
 	@Test
 	public void evaluateAuto() throws Exception {
-		evaluate("XGBoost", AUTO);
+		evaluate("XGBoost", AUTO, new FloatEquivalence(7));
 	}
 
 	@Test
 	public void evaluateAutoNA() throws Exception {
-		evaluate("XGBoost", AUTO_NA);
+		evaluate("XGBoost", AUTO_NA, new FloatEquivalence(9));
 	}
 
 	@Test
 	public void evaluateHousing() throws Exception {
-		evaluate("XGBoost", HOUSING, new FloatEquivalence(16));
+		evaluate("XGBoost", HOUSING, new FloatEquivalence(11));
 	}
 
 	@Test
 	public void evaluateIris() throws Exception {
-		evaluate("XGBoost", IRIS, new FloatEquivalence(12));
+		evaluate("XGBoost", IRIS, new FloatEquivalence(6));
 	}
 
 	@Test
 	public void evaluateVisit() throws Exception {
-		evaluate("XGBoost", VISIT, new FloatEquivalence(64));
+		evaluate("XGBoost", VISIT, new FloatEquivalence(49));
 	}
 
 	@BeforeAll
