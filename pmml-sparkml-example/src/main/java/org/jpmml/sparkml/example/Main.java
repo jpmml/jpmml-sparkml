@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.beust.jcommander.DefaultUsageFormatter;
 import com.beust.jcommander.IUsageFormatter;
@@ -38,8 +39,10 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 import org.dmg.pmml.PMML;
+import org.jpmml.converter.HasSchemaOptions;
 import org.jpmml.converter.NullSplitter;
 import org.jpmml.converter.Parameters;
+import org.jpmml.converter.SchemaParameters;
 import org.jpmml.converter.tree.TreeModelParameters;
 import org.jpmml.model.JAXBSerializer;
 import org.jpmml.model.metro.MetroJAXBSerializer;
@@ -91,11 +94,19 @@ public class Main {
 	private List<String> fieldNames = new ArrayList<>();
 
 	@Parameter (
+		names = {SchemaParameters.NAME_INPUT_FLOAT},
+		description = SchemaParameters.DESCRIPTION_INPUT_FLOAT,
+		arity = 1,
+		order = Parameters.BLOCK_SCHEMA_OPTIONS + 1
+	)
+	private Boolean inputFloat = null;
+
+	@Parameter (
 		names = {Parameters.PREFIX_OPTION + HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL},
 		arity = 1,
 		hidden = true
 	)
-	private Boolean keepPredictionCol = Boolean.TRUE;
+	private Boolean keepPredictionCol = null;
 
 	@Parameter (
 		names = {TreeModelParameters.NAME_COMPACT},
@@ -103,18 +114,50 @@ public class Main {
 		arity = 1,
 		order = Parameters.BLOCK_MODEL_OPTIONS + 1
 	)
-	private Boolean compact = Boolean.TRUE;
+	private Boolean compact = null;
+
+	@Parameter (
+		names = {TreeModelParameters.NAME_FLAT},
+		description = TreeModelParameters.DESCRIPTION_FLAT,
+		arity = 1,
+		order = Parameters.BLOCK_MODEL_OPTIONS + 2
+	)
+	private Boolean flat = null;
+
+	@Parameter (
+		names = {TreeModelParameters.NAME_NODE_ID},
+		description = TreeModelParameters.DESCRIPTION_NODE_ID,
+		arity = 1,
+		order = Parameters.BLOCK_MODEL_OPTIONS + 3
+	)
+	private Boolean nodeId = null;
+
+	@Parameter (
+		names = {TreeModelParameters.NAME_NODE_RECORDCOUNT},
+		description = TreeModelParameters.DESCRIPTION_NODE_RECORDCOUNT,
+		arity = 1,
+		order = Parameters.BLOCK_MODEL_OPTIONS + 4
+	)
+	private Boolean nodeRecordCount = null;
+
+	@Parameter (
+		names = {TreeModelParameters.NAME_PRUNE},
+		description = TreeModelParameters.DESCRIPTION_PRUNE,
+		arity = 1,
+		order = Parameters.BLOCK_MODEL_OPTIONS + 5
+	)
+	private Boolean prune = null;
 
 	@Parameter (
 		names = {Parameters.PREFIX_OPTION + HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES},
 		arity = 1,
-		order = Parameters.BLOCK_MODEL_OPTIONS + 2
+		order = Parameters.BLOCK_MODEL_OPTIONS + 6
 	)
-	private Boolean estimateFeatureImportances = Boolean.FALSE;
+	private Boolean estimateFeatureImportances = null;
 
 	@Parameter (
 		names = {Parameters.PREFIX_OPTION + HasRegressionTableOptions.OPTION_REPRESENTATION},
-		order = Parameters.BLOCK_MODEL_OPTIONS + 3
+		order = Parameters.BLOCK_MODEL_OPTIONS + 7
 	)
 	private String representation = null;
 
@@ -229,10 +272,17 @@ public class Main {
 		PMMLBuilder pmmlBuilder = new PMMLBuilder(schema, pipelineModel);
 
 		Map<String, Object> options = new LinkedHashMap<>();
+		options.put(HasSchemaOptions.OPTION_INPUT_FLOAT, this.inputFloat);
 		options.put(HasPredictionModelOptions.OPTION_KEEP_PREDICTIONCOL, this.keepPredictionCol);
 		options.put(HasTreeOptions.OPTION_COMPACT, this.compact);
+		options.put(HasTreeOptions.OPTION_FLAT, this.flat);
+		options.put(HasTreeOptions.OPTION_NODE_ID, this.nodeId);
+		options.put(HasTreeOptions.OPTION_NODE_RECORDCOUNT, this.nodeRecordCount);
+		options.put(HasTreeOptions.OPTION_PRUNE, this.prune);
 		options.put(HasTreeOptions.OPTION_ESTIMATE_FEATURE_IMPORTANCES, this.estimateFeatureImportances);
 		options.put(HasRegressionTableOptions.OPTION_REPRESENTATION, this.representation);
+
+		options.values().removeIf(Objects::isNull);
 
 		pmmlBuilder.putOptions(options);
 

@@ -69,11 +69,14 @@ public class BoosterUtil {
 
 		Map<String, Object> options = new LinkedHashMap<>();
 		options.put(HasXGBoostOptions.OPTION_MISSING, converter.getOption(HasXGBoostOptions.OPTION_MISSING, missing));
-		options.put(HasXGBoostOptions.OPTION_COMPACT, converter.getOption(HasXGBoostOptions.OPTION_COMPACT, false));
+		options.put(HasXGBoostOptions.OPTION_NTREE_LIMIT, converter.getOption(HasXGBoostOptions.OPTION_NTREE_LIMIT, null));
 		options.put(HasXGBoostOptions.OPTION_INPUT_FLOAT, converter.getOption(HasXGBoostOptions.OPTION_INPUT_FLOAT, null));
 		options.put(HasXGBoostOptions.OPTION_NUMERIC, converter.getOption(HasXGBoostOptions.OPTION_NUMERIC, true));
+		options.put(HasXGBoostOptions.OPTION_COMPACT, converter.getOption(HasXGBoostOptions.OPTION_COMPACT, false));
+		options.put(HasXGBoostOptions.OPTION_FLAT, converter.getOption(HasXGBoostOptions.OPTION_FLAT, null));
+		options.put(HasXGBoostOptions.OPTION_NODE_ID, converter.getOption(HasXGBoostOptions.OPTION_NODE_ID, null));
+		options.put(HasXGBoostOptions.OPTION_NODE_RECORDCOUNT, converter.getOption(HasXGBoostOptions.OPTION_NODE_RECORDCOUNT, null));
 		options.put(HasXGBoostOptions.OPTION_PRUNE, converter.getOption(HasXGBoostOptions.OPTION_PRUNE, false));
-		options.put(HasXGBoostOptions.OPTION_NTREE_LIMIT, converter.getOption(HasXGBoostOptions.OPTION_NTREE_LIMIT, null));
 
 		Schema xgbSchema = learner.toXGBoostSchema(schema);
 

@@ -53,8 +53,12 @@ public class BoosterUtil {
 		}
 
 		Map<String, Object> options = new LinkedHashMap<>();
-		options.put(HasLightGBMOptions.OPTION_COMPACT, converter.getOption(HasLightGBMOptions.OPTION_COMPACT, Boolean.TRUE));
 		options.put(HasLightGBMOptions.OPTION_NUM_ITERATION, converter.getOption(HasLightGBMOptions.OPTION_NUM_ITERATION, bestIteration));
+		options.put(HasLightGBMOptions.OPTION_COMPACT, converter.getOption(HasLightGBMOptions.OPTION_COMPACT, Boolean.TRUE));
+		options.put(HasLightGBMOptions.OPTION_FLAT, converter.getOption(HasLightGBMOptions.OPTION_FLAT, null));
+		options.put(HasLightGBMOptions.OPTION_NODE_ID, converter.getOption(HasLightGBMOptions.OPTION_NODE_ID, null));
+		options.put(HasLightGBMOptions.OPTION_NODE_RECORDCOUNT, converter.getOption(HasLightGBMOptions.OPTION_NODE_RECORDCOUNT, null));
+		options.put(HasLightGBMOptions.OPTION_PRUNE, converter.getOption(HasLightGBMOptions.OPTION_PRUNE, null));
 
 		Schema lgbmSchema = gbdt.toLightGBMSchema(schema);
 
